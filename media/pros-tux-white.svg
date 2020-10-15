@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 15.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg
+	version="1.1"
+	id="Layer_1"
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	x="0px"
+	y="0px"
+	width="100px"
+	height="100px"
+	viewBox="0 0 100 100"
+	enable-background="new 0 0 100 100"
+	xml:space="preserve">
+	<g>
+		<polygon
+			fill-rule="evenodd"
+			clip-rule="evenodd"
+			fill="#ffffff"
+			points="79.025,41.379 94.225,54.536 50.113,92.98 50.113,92.957 50.027,93.032 6.107,54.751 21.328,41.485 50.141,83.744"
+		/>
+		<polygon
+			fill-rule="evenodd"
+			clip-rule="evenodd"
+			fill="#ffffff"
+			points="28.152,28.248 29.031,29.714 71.25,29.714 72.129,28.248"
+		/>
+		<polygon
+			fill-rule="evenodd"
+			clip-rule="evenodd"
+			fill="#ffffff"
+			points="38.119,56.539 33.137,42.027 18.916,34.111"
+		/>
+		<polygon
+			fill-rule="evenodd"
+			clip-rule="evenodd"
+			fill="#ffffff"
+			points="62.16,56.687 67.291,42.027 81.217,34.258"
+		/>
+		<path
+			fill-rule="evenodd"
+			clip-rule="evenodd"
+			fill="#ffffff"
+			d="M50.141,8.605
+			   L12.76,25.463
+			   h13.438
+			   l2.834,4.251
+			   H71.25
+			   l2.834-4.251
+			   H87.52
+			   L50.141,8.605
+			   z
+			   M53.072,18.866
+			   l-2.932,1.466
+			   l-2.932-1.466
+			   v-2.932
+			   l2.932-1.466
+			   l2.932,1.466
+			   V18.866
+			   z"
+		/>
+		<path
+			fill-rule="evenodd"
+			clip-rule="evenodd"
+			fill="#ffffff"
+			d="M80.496,34.111
+			   H19.783
+			   l0.121,0.148
+			   l18.51,2.783
+			   l-0.295,19.496
+			   l-2.37-2.769
+			   L49.408,70.59
+			   V52.289
+			   c0-0.294,0.293-0.587,0.586-0.587
+			   h0.293
+			   c0.293,0,0.586,0.293,0.586,0.587
+			   V70.59
+			   L62.24,56.592
+		       l-0.08,0.095
+			   l-0.293-19.644
+			   l18.398-2.648
+			   L80.496,34.111
+			   z
+			   M50.141,48.771
+			   c-0.648,0-1.174-0.524-1.174-1.173
+		       c0-0.647,0.525-1.173,1.174-1.173
+			   c0.646,0,1.172,0.525,1.172,1.173
+			   C51.313,48.246,50.787,48.771,50.141,48.771
+			   z
+			   M50.141,43.787
+		       c-0.648,0-1.174-0.525-1.174-1.174
+			   c0-0.647,0.525-1.173,1.174-1.173
+			   c0.646,0,1.172,0.525,1.172,1.173
+		       C51.313,43.262,50.787,43.787,50.141,43.787
+			   z
+			   M50.141,38.655
+			   c-0.648,0-1.174-0.524-1.174-1.172
+			   s0.525-1.173,1.174-1.173
+		       c0.646,0,1.172,0.525,1.172,1.173
+			   S50.787,38.655,50.141,38.655
+			   z"
+		/>
+	</g>
+</svg>
