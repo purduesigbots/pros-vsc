@@ -7,8 +7,63 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('pros.helloWorld', () => vscode.window.showInformationMessage('Hello World from pros!'));
 	//  vscode.commands.registerCommand('pros.upload', () => uploadProject);
+	vscode.commands.registerCommand('pros.welcome', () => {
+		// Create and show panel
+		const panel = vscode.window.createWebviewPanel(
+		  'welcome',
+		  'Welcome',
+		  vscode.ViewColumn.One,
+		  {}
+		);
+  
+		// And set its HTML content
+		panel.webview.html = getWebviewContent();
+	});
 
 	vscode.window.registerTreeDataProvider('prosTreeview', new TreeDataProvider());
+}
+
+function getWebviewContent() {
+	return `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+	  <meta charset="UTF-8">
+	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	  <title>Welcome</title>
+  </head>
+  <body>
+	  <img src="https://pros.cs.purdue.edu/_static/img/pros-tux.png" width="600" class="center"/>
+	  <h1 className="title">
+              Open Source C/C++ Development for VEX V5 and VEX Cortex
+      </h1>
+	  <section className="panel">
+	  <p>For help, please visit:</p>
+	  <ul>
+		<li>
+		  <a href='https://pros.cs.purdue.edu/v5/getting-started/new-users.html'>
+			This Page
+		  </a>
+		  for a guide to getting started with PROS for Atom.
+		</li>
+
+		<li>
+		  The
+		  <a href='https://pros.cs.purdue.edu/v5/tutorials/index.html'>
+			PROS tutorial page
+		  </a>
+		  to learn about using everything from sensors to motors to tasks
+		  and multithreading in PROS.
+		</li>
+
+		<li>
+		  The
+		  <a href='https://pros.cs.purdue.edu/v5/api/index.html'>
+			PROS API documentation
+		  </a>
+		</li>
+	  </ul>
+  </body>
+  </html>`;
 }
   
   export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
@@ -51,5 +106,5 @@ export function activate(context: vscode.ExtensionContext) {
 		this.children = children;
 	}
   }
-// this method is called when your extension is deactivated
-export function deactivate() {}
+
+  export function deactivate() {}

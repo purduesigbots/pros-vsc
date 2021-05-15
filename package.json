@@ -68,6 +68,10 @@
 			{
 				"command": "pros.upgrade",
 				"title": "Upgrade Project"
+			},
+			{
+				"command": "pros.welcome",
+				"title": "Welcome"
 			}
 		]
 	},
