@@ -6,13 +6,37 @@ import { getWebviewContent } from './views/welcome-view';
 export function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('pros.helloWorld', () => vscode.window.showInformationMessage('Hello World from pros!'));
-	// vscode.commands.registerCommand('pros.upload', () => uploadProject(undefined, vscode.workspace.workspaceFolders[0].uri.path));
-	vscode.commands.registerCommand('pros.upload', () => vscode.window.setStatusBarMessage('Uploading...', 5000));
 	const terminal = vscode.window.createTerminal('PROS Terminal');
+	// terminal.sendText("pros build-compile-commands");
+
+	vscode.commands.registerCommand('pros.upload&build', () => {
+		terminal.show();
+		terminal.sendText("pros mu");
+	});
+
+	vscode.commands.registerCommand('pros.upload', () => {
+		terminal.show();
+		terminal.sendText("pros upload");
+	});
+
+	vscode.commands.registerCommand('pros.build', () => {
+		terminal.show();
+		terminal.sendText("pros make");
+	});
+
+	vscode.commands.registerCommand('pros.clean', () => {
+		terminal.show();
+		terminal.sendText("pros make clean");
+	});
 
 	vscode.commands.registerCommand('pros.terminal', () => {
 		terminal.show();
 		terminal.sendText("pros terminal");
+	});
+
+	vscode.commands.registerCommand('pros.upgrade', () => {
+		terminal.show();
+		terminal.sendText("pros conduct upgrade");
 	});
 
 	vscode.commands.registerCommand('pros.welcome', () => {

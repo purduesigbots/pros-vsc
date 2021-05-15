@@ -10,8 +10,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onView:exampleView",
-		"onCommand:pros.helloWorld"
+		"workspaceContains:**/project.pros"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
