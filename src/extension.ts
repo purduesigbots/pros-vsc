@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
+import {promisify} from 'util';
 import * as path from 'path';
 import * as fs from 'fs';
 
 import { uploadProject, createNewProject } from '@purduesigbots/pros-cli-middleware';
 import { TreeDataProvider } from './views/tree-view';
 import { getWebviewContent } from './views/welcome-view';
+import { utils } from 'mocha';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -81,6 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 		// set kernel version
+		// TODO: fetch the kernel versions first
 		const kernelOptions: vscode.QuickPickOptions = {
 			placeHolder: "latest",
 			title: "Select the project version"
@@ -90,31 +93,54 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		// install default libraries
-		// await createNewProject({
-		// 	notify: () => {},
-		// 	log: () => {},
-		// 	prompt: () => {},
-		// 	finalize: (data) => {
-		// 		vscode.window.showInformationMessage(`${data}`);
-		// 	},
-		// 	input: () => {},
-		// }, uri, version, platform).then((code) => {
-		// 	vscode.window.showInformationMessage(`Here: ${code}`);
-		// }).catch((error) => {
-		// 	vscode.window.showInformationMessage(`Fail: ${error}`);
-		// });
+		// TODO: install libraries question?
+
+		// create project
 		console.log(projectName);
 		const projectPath = path.join(uri, projectName);
 		console.log(projectPath);
 		await fs.promises.mkdir(projectPath, {recursive: true});
-		child_process.exec(`pros c n ${projectPath} --machine-output`, (err, stdout, stderr) => {
-			console.log('stdout: ' + stdout);
-			console.log('stderr: ' + stderr);
-			if (err) {
-				console.log('error: ' + err);
-			}
+		vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification, 
+			title: "Downloading libraries", 
+			cancellable: false
+		}, async (progress, token) => {
+			const PREFIX = 'Uc&42BWAaQ';
+
+			return new Promise<void>(async resolve => { 
+				try {
+					const { stdout, stderr } = await promisify(child_process.exec)(`pros c n ${projectPath} --machine-output`, {encoding: 'utf8', maxBuffer: 1024 * 1024 * 5});
+
+					for (let e of stderr.split(/\r?\n/)) {
+						console.log(e);
+						vscode.window.showErrorMessage(e);
+						resolve();
+					}
+
+					vscode.window.showInformationMessage("Project created!");
+					resolve();
+				} catch (error) {
+					console.error(error.stdout);
+					for (let e of error.stdout.split(/\r?\n/)) {
+						if (!e.startsWith(PREFIX)) {
+							continue;
+						}
+
+						let jdata = JSON.parse(e.substr(PREFIX.length));
+						let [primary] = jdata.type.split('/');
+						if (primary === "log" && jdata.level === "ERROR") {
+							vscode.window.showErrorMessage(jdata.simpleMessage);
+							resolve();
+						}
+					}
+					resolve();
+				}
+				
+				// seems like actually parsing the data as it is coming in is problematic. Will stick with the generic rotating progress bar as a result
+			});
 		});
+
+		// TODO: Open the new workspace
 	});
 
 	vscode.commands.registerCommand('pros.welcome', () => {
