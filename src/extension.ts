@@ -8,6 +8,7 @@ import { uploadProject, createNewProject } from '@purduesigbots/pros-cli-middlew
 import { TreeDataProvider } from './views/tree-view';
 import { getWebviewContent } from './views/welcome-view';
 import { utils } from 'mocha';
+import { rejects } from 'assert';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -46,6 +47,8 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	vscode.commands.registerCommand('pros.new', async () => {
+		const PREFIX = 'Uc&42BWAaQ';
+
 		// directory selection dialog
 		const directoryOptions: vscode.OpenDialogOptions = {
 			canSelectMany: false,
@@ -67,8 +70,8 @@ export function activate(context: vscode.ExtensionContext) {
 			placeHolder: "v5",
 			title: "Select the target device"
 		};
-		const platform = await vscode.window.showQuickPick(["v5", "cortex"], targetOptions);
-		if (platform === undefined) {
+		const target = await vscode.window.showQuickPick(["v5", "cortex"], targetOptions);
+		if (target === undefined) {
 			return;
 		}
 
@@ -83,12 +86,27 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 		// set kernel version
-		// TODO: fetch the kernel versions first
+		const { stdout, stderr } = await promisify(child_process.exec)(`pros c ls-templates --target ${target} --machine-output`, {encoding: 'utf8', maxBuffer: 1024 * 1024 * 5});
+		console.log(stdout);
+		let versions: vscode.QuickPickItem[] = [{label: 'latest', description: 'Recommended'}];
+		for (let e of stdout.split(/\r?\n/)) {
+			if (e.startsWith(PREFIX)) {
+				let jdata = JSON.parse(e.substr(PREFIX.length));
+				if (jdata.type === "finalize") {
+					for (let ver of jdata.data) {
+						if (ver.name === "kernel") {
+							versions.push({label: ver.version});
+						}
+					}
+				}
+			}
+		}
+
 		const kernelOptions: vscode.QuickPickOptions = {
 			placeHolder: "latest",
 			title: "Select the project version"
 		};
-		const version = await vscode.window.showQuickPick(["latest", "3.1.3"], kernelOptions);
+		const version = await vscode.window.showQuickPick(versions, kernelOptions);
 		if (version === undefined) {
 			return;
 		}
@@ -96,51 +114,60 @@ export function activate(context: vscode.ExtensionContext) {
 		// TODO: install libraries question?
 
 		// create project
-		console.log(projectName);
 		const projectPath = path.join(uri, projectName);
-		console.log(projectPath);
+		
 		await fs.promises.mkdir(projectPath, {recursive: true});
-		vscode.window.withProgress({
-			location: vscode.ProgressLocation.Notification, 
-			title: "Downloading libraries", 
-			cancellable: false
-		}, async (progress, token) => {
-			const PREFIX = 'Uc&42BWAaQ';
 
-			return new Promise<void>(async resolve => { 
-				try {
-					const { stdout, stderr } = await promisify(child_process.exec)(`pros c n ${projectPath} --machine-output`, {encoding: 'utf8', maxBuffer: 1024 * 1024 * 5});
-
-					for (let e of stderr.split(/\r?\n/)) {
-						console.log(e);
-						vscode.window.showErrorMessage(e);
-						resolve();
-					}
-
-					vscode.window.showInformationMessage("Project created!");
-					resolve();
-				} catch (error) {
-					console.error(error.stdout);
-					for (let e of error.stdout.split(/\r?\n/)) {
-						if (!e.startsWith(PREFIX)) {
-							continue;
-						}
-
-						let jdata = JSON.parse(e.substr(PREFIX.length));
-						let [primary] = jdata.type.split('/');
-						if (primary === "log" && jdata.level === "ERROR") {
-							vscode.window.showErrorMessage(jdata.simpleMessage);
-							resolve();
-						}
-					}
-					resolve();
-				}
+		try {
+			await vscode.window.withProgress({
+				location: vscode.ProgressLocation.Notification, 
+				title: "Downloading libraries", 
+				cancellable: false
+			}, async (progress, token) => {
 				
-				// seems like actually parsing the data as it is coming in is problematic. Will stick with the generic rotating progress bar as a result
+
+				return new Promise<void>(async (resolve, reject) => { 
+					try {
+						const { stdout, stderr } = await promisify(child_process.exec)(`pros c n ${projectPath} ${target} ${version} --machine-output`, {encoding: 'utf8', maxBuffer: 1024 * 1024 * 5});
+
+						if (stderr) {
+							for (let e of stderr.split(/\r?\n/)) {
+								console.log(e);
+								vscode.window.showErrorMessage(e);
+							}
+							reject();
+						}
+
+						vscode.window.showInformationMessage("Project created!");
+						resolve();
+					} catch (error) {
+						console.error(error.stdout);
+						for (let e of error.stdout.split(/\r?\n/)) {
+							if (!e.startsWith(PREFIX)) {
+								continue;
+							}
+
+							let jdata = JSON.parse(e.substr(PREFIX.length));
+							let [primary] = jdata.type.split('/');
+							if (primary === "log" && jdata.level === "ERROR") {
+								vscode.window.showErrorMessage(jdata.simpleMessage);
+								reject();
+							}
+						}
+					}
+				});
 			});
-		});
+		} catch (err) {
+			console.log(err);
+			return;
+		}
 
 		// TODO: Open the new workspace
+		try {
+			await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(projectPath));
+		} catch (err) {
+			console.log(err);
+		}
 	});
 
 	vscode.commands.registerCommand('pros.welcome', () => {
