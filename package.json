@@ -46,7 +46,11 @@
 			},
 			{
 				"command": "pros.upload&build",
-				"title": "Upload & Build"
+				"title": "Upload & Build",
+				"icon": {
+					"light": "media/pros-tux-white.svg",
+					"dark": "media/pros-tux-white.svg"
+				}
 			},
 			{
 				"command": "pros.upload",
@@ -72,7 +76,28 @@
 				"command": "pros.welcome",
 				"title": "Welcome"
 			}
-		]
+		],
+		"menus": {
+			"editor/title": [
+				{
+					"when": "true",
+					"command": "pros.upload&build",
+					"group": "navigation@1"
+				}
+			],
+			"editor/context": [
+				{
+					"when": "true",
+					"command": "pros.upload&build"
+				}
+			],
+			"touchBar": [
+				{
+					"when": "true",
+					"command": "pros.upload&build"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
