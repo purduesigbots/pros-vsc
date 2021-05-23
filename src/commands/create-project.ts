@@ -4,8 +4,13 @@ import { promisify } from "util";
 import * as path from "path";
 import * as fs from "fs";
 
-import { PREFIX } from "./cli-parsing";
+import { parseErrorMessage, PREFIX } from "./cli-parsing";
 
+/**
+ * Query the user for the directory where the project will be created.
+ *
+ * @returns The path to the directory where the new project will go.
+ */
 const selectDirectory = async () => {
   const directoryOptions: vscode.OpenDialogOptions = {
     canSelectMany: false,
@@ -20,12 +25,16 @@ const selectDirectory = async () => {
       return uri ? uri[0].fsPath : undefined;
     });
   if (uri === undefined) {
-    // error msg
     throw new Error();
   }
   return uri;
 };
 
+/**
+ * Query the user for the target device for the project.
+ *
+ * @returns The selected target name
+ */
 const selectTarget = async () => {
   const targetOptions: vscode.QuickPickOptions = {
     placeHolder: "v5",
@@ -41,6 +50,11 @@ const selectTarget = async () => {
   return target;
 };
 
+/**
+ * Query the user for a name for the new project.
+ *
+ * @returns The project's name
+ */
 const selectProjectName = async () => {
   const projectNameOptions: vscode.InputBoxOptions = {
     prompt: "Project Name",
@@ -53,6 +67,12 @@ const selectProjectName = async () => {
   return projectName;
 };
 
+/**
+ * Query the user for the PROS kernel version to use.
+ *
+ * @param target The project's target device
+ * @returns A version string or "latest"
+ */
 const selectKernelVersion = async (target: string) => {
   const { stdout, stderr } = await promisify(child_process.exec)(
     `pros c ls-templates --target ${target} --machine-output`
@@ -84,7 +104,16 @@ const selectKernelVersion = async (target: string) => {
   return version.label;
 };
 
-const createProject = async (
+/**
+ * Calls the project creation CLI function.
+ *
+ * @param uri The path where the project directory will be created
+ * @param projectName The name of the new project
+ * @param target The target device for the new project
+ * @param version The kernel version for the new project
+ * @returns The path to the newly created project
+ */
+const runCreateProject = async (
   uri: string,
   projectName: string,
   target: string,
@@ -101,34 +130,20 @@ const createProject = async (
       cancellable: false,
     },
     async (progress, token) => {
-      return new Promise<void>(async (resolve, reject) => {
-        try {
-          const { stdout, stderr } = await promisify(child_process.exec)(
-            `pros c n ${projectPath} ${target} ${version} --machine-output`,
-            { encoding: "utf8", maxBuffer: 1024 * 1024 * 5 }
-          );
+      try {
+        const { stdout, stderr } = await promisify(child_process.exec)(
+          `pros c n ${projectPath} ${target} ${version} --machine-output`,
+          { encoding: "utf8", maxBuffer: 1024 * 1024 * 5 }
+        );
 
-          if (stderr) {
-            reject(new Error(stderr));
-          }
-
-          vscode.window.showInformationMessage("Project created!");
-          resolve();
-        } catch (error) {
-          console.error(error.stdout);
-          for (let e of error.stdout.split(/\r?\n/)) {
-            if (!e.startsWith(PREFIX)) {
-              continue;
-            }
-
-            let jdata = JSON.parse(e.substr(PREFIX.length));
-            let [primary] = jdata.type.split("/");
-            if (primary === "log" && jdata.level === "ERROR") {
-              reject(new Error(jdata.simpleMessage));
-            }
-          }
+        if (stderr) {
+          throw new Error(stderr);
         }
-      });
+
+        vscode.window.showInformationMessage("Project created!");
+      } catch (error) {
+        throw new Error(parseErrorMessage(error.stdout));
+      }
     }
   );
 
@@ -148,13 +163,17 @@ export const createNewProject = async () => {
   }
 
   try {
-    const projectPath = await createProject(uri, projectName, target, version);
+    const projectPath = await runCreateProject(
+      uri,
+      projectName,
+      target,
+      version
+    );
     await vscode.commands.executeCommand(
       "vscode.openFolder",
       vscode.Uri.file(projectPath)
     );
   } catch (err) {
-    // here
     await vscode.window.showErrorMessage(err.message);
   }
 };

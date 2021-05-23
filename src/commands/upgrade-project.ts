@@ -3,12 +3,17 @@ import * as child_process from "child_process";
 import { promisify } from "util";
 import { gt } from "semver";
 
-import { PREFIX } from "./cli-parsing";
+import { PREFIX, parseErrorMessage } from "./cli-parsing";
 
+/**
+ * Queries the PROS project data for the target device.
+ *
+ * @returns The project's target device and the associated library versions.
+ */
 const fetchTarget = async (): Promise<{
   target: string;
   curKernel: string;
-  curOkapi: string;
+  curOkapi: string | undefined;
 }> => {
   const { stdout, stderr } = await promisify(child_process.exec)(
     `pros c info-project --project ${vscode.workspace.workspaceFolders?.[0].uri.path} --machine-output`
@@ -32,9 +37,15 @@ const fetchTarget = async (): Promise<{
   return { target: "", curKernel: "", curOkapi: "" };
 };
 
-const fetchVersions = async (
+/**
+ * Queries the server for the latest available library versions.
+ *
+ * @param target The target device for this project
+ * @returns The kernel and okapi (if applicable) library versions
+ */
+const fetchServerVersions = async (
   target: string
-): Promise<{ newKernel: string; newOkapi: string }> => {
+): Promise<{ newKernel: string; newOkapi: string | undefined }> => {
   const { stdout, stderr } = await promisify(child_process.exec)(
     `pros c q --target ${target} --machine-output`
   );
@@ -60,24 +71,26 @@ const fetchVersions = async (
   return { newKernel, newOkapi };
 };
 
+/**
+ * Actually performs the upgrade to the latest library versions for the project.
+ */
 const runUpgrade = async () => {
   const { stdout, stderr } = await promisify(child_process.exec)(
     `pros c u --project ${vscode.workspace.workspaceFolders?.[0].uri.path} --machine-output`
   );
 
-  for (let e of stdout.split(/\r?\n/)) {
-    if (!e.startsWith(PREFIX)) {
-      continue;
-    }
-
-    let jdata = JSON.parse(e.substr(PREFIX.length));
-    let [primary] = jdata.type?.split("/");
-    if (primary === "log" && jdata.level === "ERROR") {
-      throw new Error(jdata.simpleMessage);
-    }
+  const errorMessage = parseErrorMessage(stdout);
+  if (errorMessage) {
+    throw new Error(errorMessage);
   }
 };
 
+/**
+ * Confirms with the user that the project should be updated to the specified library versions.
+ *
+ * @param kernel The new kernel version
+ * @param okapi The new Okapilib version
+ */
 const userApproval = async (
   kernel: string | undefined,
   okapi: string | undefined
@@ -103,7 +116,7 @@ const userApproval = async (
 export const upgradeProject = async () => {
   try {
     const { target, curKernel, curOkapi } = await fetchTarget();
-    const { newKernel, newOkapi } = await fetchVersions(target);
+    const { newKernel, newOkapi } = await fetchServerVersions(target);
     if (curKernel === newKernel && curOkapi === newOkapi) {
       await vscode.window.showInformationMessage("Project is up to date!");
       return;
