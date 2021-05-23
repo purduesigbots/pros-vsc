@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 import { TreeDataProvider } from "./views/tree-view";
 import { getWebviewContent } from "./views/welcome-view";
-import { createNewProject } from "./commands/create-project";
+import { createNewProject, upgradeProject } from "./commands";
 
 export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.helloWorld", () =>
@@ -36,11 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
     terminal.sendText("pros terminal");
   });
 
-  vscode.commands.registerCommand("pros.upgrade", () => {
-    terminal.show();
-    terminal.sendText("pros conduct upgrade");
-    // TODO: do this like creating the project
-  });
+  vscode.commands.registerCommand("pros.upgrade", upgradeProject);
 
   vscode.commands.registerCommand("pros.new", createNewProject);
 

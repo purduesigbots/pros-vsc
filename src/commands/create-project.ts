@@ -4,7 +4,7 @@ import { promisify } from "util";
 import * as path from "path";
 import * as fs from "fs";
 
-const PREFIX = "Uc&42BWAaQ";
+import { PREFIX } from "./cli-parsing";
 
 const selectDirectory = async () => {
   const directoryOptions: vscode.OpenDialogOptions = {
@@ -55,10 +55,8 @@ const selectProjectName = async () => {
 
 const selectKernelVersion = async (target: string) => {
   const { stdout, stderr } = await promisify(child_process.exec)(
-    `pros c ls-templates --target ${target} --machine-output`,
-    { encoding: "utf8", maxBuffer: 1024 * 1024 * 5 }
+    `pros c ls-templates --target ${target} --machine-output`
   );
-  console.log(stdout);
   let versions: vscode.QuickPickItem[] = [
     { label: "latest", description: "Recommended" },
   ];
