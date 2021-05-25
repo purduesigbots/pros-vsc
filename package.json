@@ -42,7 +42,7 @@
 		"commands": [
 			{
 				"command": "pros.helloWorld",
-				"title": "Hello World"
+				"title": "PROS: Hello World"
 			},
 			{
 				"command": "pros.upload&build",
@@ -54,27 +54,31 @@
 			},
 			{
 				"command": "pros.upload",
-				"title": "Upload"
+				"title": "PROS: Upload"
 			},
 			{
 				"command": "pros.build",
-				"title": "Build"
+				"title": "PROS: Build"
 			},
 			{
 				"command": "pros.clean",
-				"title": "Clean"
+				"title": "PROS: Clean"
 			},
 			{
 				"command": "pros.terminal",
-				"title": "Open Terminal"
+				"title": "PROS: Open Terminal"
 			},
 			{
 				"command": "pros.upgrade",
-				"title": "Upgrade Project"
+				"title": "PROS: Upgrade Project"
+			},
+			{
+				"command": "pros.new",
+				"title": "PROS: Create New PROS Project"
 			},
 			{
 				"command": "pros.welcome",
-				"title": "Welcome"
+				"title": "PROS: Welcome"
 			}
 		],
 		"menus": {
@@ -108,19 +112,21 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.56.0",
 		"@types/glob": "^7.1.3",
 		"@types/mocha": "^8.0.4",
 		"@types/node": "^12.11.7",
-		"eslint": "^7.19.0",
+		"@types/vscode": "^1.56.0",
 		"@typescript-eslint/eslint-plugin": "^4.14.1",
 		"@typescript-eslint/parser": "^4.14.1",
+		"eslint": "^7.19.0",
 		"glob": "^7.1.6",
 		"mocha": "^8.2.1",
 		"typescript": "^4.1.3",
 		"vscode-test": "^1.5.0"
 	},
 	"dependencies": {
-		"@purduesigbots/pros-cli-middleware": "^2.5.1"
+		"@purduesigbots/pros-cli-middleware": "file:../pros-cli-middleware",
+		"@types/semver": "^7.3.6",
+		"semver": "^7.3.5"
 	}
 }

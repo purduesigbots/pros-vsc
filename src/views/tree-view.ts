@@ -8,7 +8,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
 	constructor() {
 		this.data = [new TreeItem('Quick Actions', [new TreeItem('Upload & Build', undefined, 'pros.upload&build'), new TreeItem('Upload', undefined, 'pros.upload'), new TreeItem('Build', undefined, 'pros.build'), new TreeItem('Clean', undefined, 'pros.clean')]),
 		new TreeItem('Debug', [new TreeItem('Open Terminal', undefined, 'pros.terminal')]),
-		new TreeItem('Conductor', [new TreeItem('Upgrade Project', undefined, 'pros.upgrade')])];
+		new TreeItem('Conductor', [new TreeItem('Upgrade Project', undefined, 'pros.upgrade'), new TreeItem('Create Project', undefined, 'pros.new')])];
 	}
 
 	getTreeItem(element: TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
@@ -31,7 +31,7 @@ class TreeItem extends vscode.TreeItem {
 			label,
 			children === undefined ? vscode.TreeItemCollapsibleState.None :
 				vscode.TreeItemCollapsibleState.Expanded);
-		if (command != undefined) {
+		if (command !== undefined) {
 			this.command = {
 				title: label,
 				command
