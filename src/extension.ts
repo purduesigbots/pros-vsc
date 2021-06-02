@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { TreeDataProvider } from "./views/tree-view";
 import { getWebviewContent } from "./views/welcome-view";
 import { createNewProject, upgradeProject, upload } from "./commands";
+import { ProsProjectEditorProvider } from "./editor";
 
 export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.helloWorld", () =>
@@ -51,6 +52,8 @@ export function activate(context: vscode.ExtensionContext) {
     "prosTreeview",
     new TreeDataProvider()
   );
+
+  context.subscriptions.push(ProsProjectEditorProvider.register(context));
 }
 
 export function deactivate() {}
