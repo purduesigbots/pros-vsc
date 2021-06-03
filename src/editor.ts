@@ -21,14 +21,105 @@ export class ProsProjectEditorProvider
     webviewPanel: vscode.WebviewPanel,
     _token: vscode.CancellationToken
   ): Promise<void> {
+    webviewPanel.webview.options = {
+      enableScripts: true,
+    };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
-    webviewPanel.webview.postMessage({
-      type: "update",
-      text: document.getText(),
+
+    function updateWebview() {
+      webviewPanel.webview.postMessage({
+        type: "update",
+        text: document.getText(),
+      });
+    }
+
+    // Hook up event handlers so that we can synchronize the webview with the text document.
+    //
+    // The text document acts as our model, so we have to sync change in the document to our
+    // editor and sync changes in the editor back to the document.
+    //
+    // Remember that a single text document can also be shared between multiple custom
+    // editors (this happens for example when you split a custom editor)
+
+    const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(
+      (e) => {
+        if (e.document.uri.toString() === document.uri.toString()) {
+          updateWebview();
+        }
+      }
+    );
+
+    // Make sure we get rid of the listener when our editor is closed.
+    webviewPanel.onDidDispose(() => {
+      changeDocumentSubscription.dispose();
     });
+
+    // Receive message from the webview.
+    webviewPanel.webview.onDidReceiveMessage((e) => {
+      // switch (e.type) {
+      //   case "add":
+      //     this.addNewScratch(document);
+      //     return;
+      //   case "delete":
+      //     this.deleteScratch(document, e.id);
+      //     return;
+      // }
+    });
+
+    updateWebview();
   }
 
   private getHtmlForWebview(webview: vscode.Webview): string {
-    return "Hello!";
+    const styleResetUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this.context.extensionUri, "media", "reset.css")
+    );
+    const styleVSCodeUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this.context.extensionUri, "media", "vscode.css")
+    );
+
+    // const nonce = getNonce();
+
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <link href="${styleResetUri}" rel="stylesheet" />
+				<link href="${styleVSCodeUri}" rel="stylesheet" />
+      </head>
+      <body>
+        <div class="settings-group-title-label settings-row-inner-container settings-group-level-1 settings-group-first">
+          Commonly Used
+        </div>
+
+        <div class="setting-item-contents settings-row-inner-container">
+          <div class="setting-item-title">
+            <div class="setting-item-cat-label-container">
+              <span class="setting-item-category" title="files.autoSave">
+                Files: 
+              </span>
+              <span class="setting-item-label" title="files.autoSave">
+                Auto Save
+              </span>
+            </div>
+          </div>
+          <div class="setting-item-description">
+            <div class="setting-item-markdown">
+              <p>
+                Controls auto save of dirty editors. Read more about autosave <a href="#" data-href="https://code.visualstudio.com/docs/editor/codebasics#_save-auto-save" title="https://code.visualstudio.com/docs/editor/codebasics#_save-auto-save" tabindex="-1" data-focusable="true">here</a>.
+              </p>
+            </div>
+          </div>
+          <div class="setting-item-value">
+            <div class="setting-item-control select-container">
+              <select class="monaco-select-box monaco-select-box-dropdown-padding setting-control-focus-target" tabindex="-1" title="off" style="background-color: rgb(60, 60, 60); color: rgb(240, 240, 240); border-color: rgb(60, 60, 60);" data-focusable="true">
+                <option value="off">off</option>
+                <option value="afterDelay">afterDelay</option>
+                <option value="onFocusChange">onFocusChange</option>
+                <option value="onWindowChange">onWindowChange</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </html>`;
   }
 }
