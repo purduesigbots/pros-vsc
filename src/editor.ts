@@ -1,5 +1,16 @@
 import * as vscode from "vscode";
 
+// Used to whitelist scripts?
+export function getNonce() {
+  let text = "";
+  const possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < 32; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
+
 export class ProsProjectEditorProvider
   implements vscode.CustomTextEditorProvider
 {
@@ -70,6 +81,9 @@ export class ProsProjectEditorProvider
   }
 
   private getHtmlForWebview(webview: vscode.Webview): string {
+    const scriptUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this.context.extensionUri, "media", "projectPros.js")
+    );
     const styleResetUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.context.extensionUri, "media", "reset.css")
     );
@@ -77,7 +91,9 @@ export class ProsProjectEditorProvider
       vscode.Uri.joinPath(this.context.extensionUri, "media", "vscode.css")
     );
 
-    // const nonce = getNonce();
+    const nonce = getNonce();
+
+    // TODO: run after upload option?
 
     return `
       <!DOCTYPE html>
@@ -111,7 +127,7 @@ export class ProsProjectEditorProvider
           </div>
           <div class="setting-item-value">
             <div class="setting-item-control select-container">
-              <select class="monaco-select-box monaco-select-box-dropdown-padding setting-control-focus-target" tabindex="-1" title="off" style="background-color: rgb(60, 60, 60); color: rgb(240, 240, 240); border-color: rgb(60, 60, 60);" data-focusable="true">
+              <select id="slotSelection" class="monaco-select-box monaco-select-box-dropdown-padding setting-control-focus-target" tabindex="-1" title="off" style="background-color: rgb(60, 60, 60); color: rgb(240, 240, 240); border-color: rgb(60, 60, 60);" data-focusable="true">
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -147,12 +163,15 @@ export class ProsProjectEditorProvider
             <div class="setting-item-control">
               <div class="monaco-inputbox" style="background-color: rgb(60, 60, 60); color: rgb(204, 204, 204);">
                 <div class="ibwrapper">
-                  <input class="input setting-control-focus-target" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" tabindex="-1" data-focusable="true" style="background-color: inherit; color: rgb(204, 204, 204);">
+                  <input id="projectName" class="input setting-control-focus-target" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" tabindex="-1" data-focusable="true" style="background-color: inherit; color: rgb(204, 204, 204);">
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </html>`;
+
+        <script nonce="${nonce}" src="${scriptUri}"></script>
+      </body>
+    </html>`;
   }
 }
