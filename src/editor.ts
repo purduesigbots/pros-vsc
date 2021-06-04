@@ -88,35 +88,68 @@ export class ProsProjectEditorProvider
       </head>
       <body>
         <div class="settings-group-title-label settings-row-inner-container settings-group-level-1 settings-group-first">
-          Commonly Used
+          PROS Project Settings
         </div>
 
         <div class="setting-item-contents settings-row-inner-container">
           <div class="setting-item-title">
             <div class="setting-item-cat-label-container">
               <span class="setting-item-category" title="files.autoSave">
-                Files: 
+                Upload: 
               </span>
               <span class="setting-item-label" title="files.autoSave">
-                Auto Save
+                Program Slot
               </span>
             </div>
           </div>
           <div class="setting-item-description">
             <div class="setting-item-markdown">
               <p>
-                Controls auto save of dirty editors. Read more about autosave <a href="#" data-href="https://code.visualstudio.com/docs/editor/codebasics#_save-auto-save" title="https://code.visualstudio.com/docs/editor/codebasics#_save-auto-save" tabindex="-1" data-focusable="true">here</a>.
+                Set the Program Slot number that this project will be uploaded into on the V5 brain.
               </p>
             </div>
           </div>
           <div class="setting-item-value">
             <div class="setting-item-control select-container">
               <select class="monaco-select-box monaco-select-box-dropdown-padding setting-control-focus-target" tabindex="-1" title="off" style="background-color: rgb(60, 60, 60); color: rgb(240, 240, 240); border-color: rgb(60, 60, 60);" data-focusable="true">
-                <option value="off">off</option>
-                <option value="afterDelay">afterDelay</option>
-                <option value="onFocusChange">onFocusChange</option>
-                <option value="onWindowChange">onWindowChange</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
               </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-item-contents settings-row-inner-container">
+          <div class="setting-item-title">
+            <div class="setting-item-cat-label-container">
+              <span class="setting-item-category" title="files.autoSave">
+                Upload: 
+              </span>
+              <span class="setting-item-label" title="files.autoSave">
+                Project Name
+              </span>
+            </div>
+          </div>
+          <div class="setting-item-description">
+            <div class="setting-item-markdown">
+              <p>
+                This shows as the program's name on the brain when uploaded.
+              </p>
+            </div>
+          </div>
+          <div class="setting-item-value">
+            <div class="setting-item-control">
+              <div class="monaco-inputbox" style="background-color: rgb(60, 60, 60); color: rgb(204, 204, 204);">
+                <div class="ibwrapper">
+                  <input class="input setting-control-focus-target" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" tabindex="-1" data-focusable="true" style="background-color: inherit; color: rgb(204, 204, 204);">
+                </div>
+              </div>
             </div>
           </div>
         </div>

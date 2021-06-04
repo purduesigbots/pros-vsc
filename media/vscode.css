@@ -192,3 +192,30 @@ textarea::placeholder {
   position: relative;
   outline-offset: -1px;
 }
+
+.input {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  line-height: inherit;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  resize: none;
+  color: inherit;
+  padding: 4px;
+  text-overflow: ellipsis;
+}
+
+.monaco-inputbox {
+  position: relative;
+  display: block;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: inherit;
+}
+
+.input:focus {
+  outline-color: #007fd4;
+}
