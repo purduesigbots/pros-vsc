@@ -67,14 +67,14 @@ export class ProsProjectEditorProvider
 
     // Receive message from the webview.
     webviewPanel.webview.onDidReceiveMessage((e) => {
-      // switch (e.type) {
-      //   case "add":
-      //     this.addNewScratch(document);
-      //     return;
-      //   case "delete":
-      //     this.deleteScratch(document, e.id);
-      //     return;
-      // }
+      switch (e.type) {
+        case "setSlot":
+          this.setSlot(document, e);
+          return;
+        case "setName":
+          this.setName(document, e);
+          return;
+      }
     });
 
     updateWebview();
@@ -94,6 +94,7 @@ export class ProsProjectEditorProvider
     const nonce = getNonce();
 
     // TODO: run after upload option?
+    // TODO: just need to get the editor writing to the document now
 
     return `
       <!DOCTYPE html>
@@ -171,7 +172,59 @@ export class ProsProjectEditorProvider
         </div>
 
         <script nonce="${nonce}" src="${scriptUri}"></script>
+
       </body>
     </html>`;
+  }
+
+  private setSlot(document: vscode.TextDocument, e: any) {
+    const json = this.getDocumentAsJson(document);
+
+    json["py/state"]["upload_options"]["slot"] = e["slot"];
+
+    return this.updateTextDocument(document, json);
+  }
+
+  private setName(document: vscode.TextDocument, e: any) {
+    const json = this.getDocumentAsJson(document);
+
+    json["py/state"]["project_name"] = e["projectName"];
+
+    return this.updateTextDocument(document, json);
+  }
+
+  /**
+   * Try to get a current document as json text.
+   */
+  private getDocumentAsJson(document: vscode.TextDocument): any {
+    const text = document.getText();
+    if (text.trim().length === 0) {
+      return {};
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error(
+        "Could not get document as json. Content is not valid json"
+      );
+    }
+  }
+
+  /**
+   * Write out the json to a given document.
+   */
+  private updateTextDocument(document: vscode.TextDocument, json: any) {
+    const edit = new vscode.WorkspaceEdit();
+
+    // Just replace the entire document every time for this example extension.
+    // A more complete extension should compute minimal edits instead.
+    edit.replace(
+      document.uri,
+      new vscode.Range(0, 0, document.lineCount, 0),
+      JSON.stringify(json, null, 2)
+    );
+
+    return vscode.workspace.applyEdit(edit);
   }
 }

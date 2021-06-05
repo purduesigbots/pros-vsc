@@ -22,6 +22,16 @@
     document.getElementById("projectName")
   );
 
+  slotSelection.addEventListener("change", (e) => {
+    const selector = /** @type {HTMLInputElement} */ (e.target);
+    vscode.postMessage({ type: "setSlot", slot: selector.value });
+  });
+
+  projectName.addEventListener("change", (e) => {
+    const selector = /** @type {HTMLInputElement} */ (e.target);
+    vscode.postMessage({ type: "setName", projectName: selector.value });
+  });
+
   function updateContent(/** @type {string} */ text) {
     let json;
     try {
