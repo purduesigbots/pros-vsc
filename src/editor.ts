@@ -122,7 +122,7 @@ export class ProsProjectEditorProvider
           <div class="setting-item-description">
             <div class="setting-item-markdown">
               <p>
-                Set the Program Slot number that this project will be uploaded into on the V5 brain.
+                Set the Program Slot number that this project will be uploaded into by default on the V5 brain.
               </p>
             </div>
           </div>
