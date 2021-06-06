@@ -129,14 +129,7 @@ export class ProsProjectEditorProvider
           <div class="setting-item-value">
             <div class="setting-item-control select-container">
               <select id="slotSelection" class="monaco-select-box monaco-select-box-dropdown-padding setting-control-focus-target" tabindex="-1" title="off" style="background-color: rgb(60, 60, 60); color: rgb(240, 240, 240); border-color: rgb(60, 60, 60);" data-focusable="true">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
+                ${[1, 2, 3, 4, 5, 6, 7, 8].forEach(i => `<option value="${i}">${i}</option>`)}
               </select>
             </div>
           </div>
