@@ -2,19 +2,16 @@ import * as vscode from "vscode";
 
 import { TreeDataProvider } from "./views/tree-view";
 import { getWebviewContent } from "./views/welcome-view";
-import { clean, build, createNewProject, upgradeProject, upload } from "./commands";
+import { buildUpload, clean, build, createNewProject, upgradeProject, upload } from "./commands";
 
 export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.helloWorld", () =>
     vscode.window.showInformationMessage("Hello World from pros!")
   );
   const terminal = vscode.window.createTerminal("PROS Terminal");
-  // terminal.sendText("pros build-compile-commands");
+  terminal.sendText("pros build-compile-commands");
 
-  vscode.commands.registerCommand("pros.upload&build", () => {
-    terminal.show();
-    terminal.sendText("pros mu");
-  });
+  vscode.commands.registerCommand("pros.upload&build", buildUpload);
 
   vscode.commands.registerCommand("pros.upload", upload);
 
@@ -47,4 +44,4 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 
-export function deactivate() {}
+export function deactivate() { }

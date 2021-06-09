@@ -9,17 +9,17 @@ import { parseErrorMessage } from "./cli-parsing";
  *
  * @param slot The slot number to place the executable in
  */
-const runBuild = async () => {
+const runBuildUpload = async () => {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: "Building Project",
+      title: "Building and Uploading Project",
       cancellable: false,
     },
     async (progress, token) => {
       try {
         const { stdout, stderr } = await promisify(child_process.exec)(
-          `pros build-compile-commands --project ${vscode.workspace.workspaceFolders?.[0].uri.path} --machine-output`
+          `pros mu --project ${vscode.workspace.workspaceFolders?.[0].uri.path} --machine-output`
         );
 
         await vscode.window.showInformationMessage("Project Built!");
@@ -30,9 +30,9 @@ const runBuild = async () => {
   );
 };
 
-export const build = async () => {
+export const buildUpload = async () => {
   try {
-    await runBuild();
+    await runBuildUpload();
   } catch (err) {
     await vscode.window.showErrorMessage(err.message);
   }
