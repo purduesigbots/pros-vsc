@@ -16,6 +16,7 @@ steps:
 
 - script: |
     mkdir -p artifacts
+    npm install
     vsce package -o artifacts
   displayName: 'Build Package'
 
