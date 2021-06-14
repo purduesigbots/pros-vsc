@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 import { TreeDataProvider } from "./views/tree-view";
 import { getWebviewContent } from "./views/welcome-view";
-import { createNewProject, upgradeProject, upload } from "./commands";
+import { buildUpload, clean, build, createNewProject, upgradeProject, upload } from "./commands";
 import { ProsProjectEditorProvider } from "./editor";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -10,24 +10,15 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage("Hello World from pros!")
   );
   const terminal = vscode.window.createTerminal("PROS Terminal");
-  // terminal.sendText("pros build-compile-commands");
+  terminal.sendText("pros build-compile-commands");
 
-  vscode.commands.registerCommand("pros.upload&build", () => {
-    terminal.show();
-    terminal.sendText("pros mu");
-  });
+  vscode.commands.registerCommand("pros.upload&build", buildUpload);
 
   vscode.commands.registerCommand("pros.upload", upload);
 
-  vscode.commands.registerCommand("pros.build", () => {
-    terminal.show();
-    terminal.sendText("pros make");
-  });
+  vscode.commands.registerCommand("pros.build", build);
 
-  vscode.commands.registerCommand("pros.clean", () => {
-    terminal.show();
-    terminal.sendText("pros make clean");
-  });
+  vscode.commands.registerCommand("pros.clean", clean);
 
   vscode.commands.registerCommand("pros.terminal", () => {
     terminal.show();
@@ -56,4 +47,4 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(ProsProjectEditorProvider.register(context));
 }
 
-export function deactivate() {}
+export function deactivate() { }
