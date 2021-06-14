@@ -1,6 +1,8 @@
 {
   "name": "pros",
   "displayName": "pros",
+  "publisher": "SIGBOTS",
+  "repository": "https://github.com/purduesigbots/pros-vsc/",
   "description": "",
   "version": "0.0.1",
   "engines": {
