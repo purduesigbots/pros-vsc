@@ -1,132 +1,143 @@
 {
-	"name": "pros",
-	"displayName": "pros",
-	"description": "",
-	"version": "0.0.1",
-	"engines": {
-		"vscode": "^1.56.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"workspaceContains:**/project.pros"
-	],
-	"main": "./out/extension.js",
-	"contributes": {
-		"viewsContainers": {
-			"activitybar": [
-				{
-					"id": "pros-view-container",
-					"title": "PROS",
-					"icon": "media/pros-tux-white.svg"
-				}
-			]
-		},
-		"views": {
-			"pros-view-container": [
-				{
-					"id": "prosTreeview",
-					"name": "PROS",
-					"icon": "media/pros-tux-white.svg",
-					"contextualTitle": "PROS"
-				}
-			],
-			"explorer": [
-				{
-					"id": "exampleView",
-					"name": "PROS"
-				}
-			]
-		},
-		"commands": [
-			{
-				"command": "pros.helloWorld",
-				"title": "PROS: Hello World"
-			},
-			{
-				"command": "pros.upload&build",
-				"title": "Upload & Build",
-				"icon": {
-					"light": "media/pros-tux-white.svg",
-					"dark": "media/pros-tux-white.svg"
-				}
-			},
-			{
-				"command": "pros.upload",
-				"title": "PROS: Upload"
-			},
-			{
-				"command": "pros.build",
-				"title": "PROS: Build"
-			},
-			{
-				"command": "pros.clean",
-				"title": "PROS: Clean"
-			},
-			{
-				"command": "pros.terminal",
-				"title": "PROS: Open Terminal"
-			},
-			{
-				"command": "pros.upgrade",
-				"title": "PROS: Upgrade Project"
-			},
-			{
-				"command": "pros.new",
-				"title": "PROS: Create New PROS Project"
-			},
-			{
-				"command": "pros.welcome",
-				"title": "PROS: Welcome"
-			}
-		],
-		"menus": {
-			"editor/title": [
-				{
-					"when": "true",
-					"command": "pros.upload&build",
-					"group": "navigation@1"
-				}
-			],
-			"editor/context": [
-				{
-					"when": "true",
-					"command": "pros.upload&build"
-				}
-			],
-			"touchBar": [
-				{
-					"when": "true",
-					"command": "pros.upload&build"
-				}
-			]
-		}
-	},
-	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "npm run compile && npm run lint",
-		"lint": "eslint src --ext ts",
-		"test": "node ./out/test/runTest.js"
-	},
-	"devDependencies": {
-		"@types/glob": "^7.1.3",
-		"@types/mocha": "^8.0.4",
-		"@types/node": "^12.11.7",
-		"@types/vscode": "^1.56.0",
-		"@typescript-eslint/eslint-plugin": "^4.14.1",
-		"@typescript-eslint/parser": "^4.14.1",
-		"eslint": "^7.19.0",
-		"glob": "^7.1.6",
-		"mocha": "^8.2.1",
-		"typescript": "^4.1.3",
-		"vscode-test": "^1.5.0"
-	},
-	"dependencies": {
-		"@purduesigbots/pros-cli-middleware": "file:../pros-cli-middleware",
-		"@types/semver": "^7.3.6",
-		"semver": "^7.3.5"
-	}
+  "name": "pros",
+  "displayName": "pros",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.56.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/project.pros"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "pros-view-container",
+          "title": "PROS",
+          "icon": "media/pros-tux-white.svg"
+        }
+      ]
+    },
+    "views": {
+      "pros-view-container": [
+        {
+          "id": "prosTreeview",
+          "name": "PROS",
+          "icon": "media/pros-tux-white.svg",
+          "contextualTitle": "PROS"
+        }
+      ],
+      "explorer": [
+        {
+          "id": "exampleView",
+          "name": "PROS"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "pros.helloWorld",
+        "title": "PROS: Hello World"
+      },
+      {
+        "command": "pros.upload&build",
+        "title": "Upload & Build",
+        "icon": {
+          "light": "media/pros-tux-white.svg",
+          "dark": "media/pros-tux-white.svg"
+        }
+      },
+      {
+        "command": "pros.upload",
+        "title": "PROS: Upload"
+      },
+      {
+        "command": "pros.build",
+        "title": "PROS: Build"
+      },
+      {
+        "command": "pros.clean",
+        "title": "PROS: Clean"
+      },
+      {
+        "command": "pros.terminal",
+        "title": "PROS: Open Terminal"
+      },
+      {
+        "command": "pros.upgrade",
+        "title": "PROS: Upgrade Project"
+      },
+      {
+        "command": "pros.new",
+        "title": "PROS: Create New PROS Project"
+      },
+      {
+        "command": "pros.welcome",
+        "title": "PROS: Welcome"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "true",
+          "command": "pros.upload&build",
+          "group": "navigation@1"
+        }
+      ],
+      "editor/context": [
+        {
+          "when": "true",
+          "command": "pros.upload&build"
+        }
+      ],
+      "touchBar": [
+        {
+          "when": "true",
+          "command": "pros.upload&build"
+        }
+      ]
+    },
+    "customEditors": [
+      {
+        "viewType": "pros.projectEditor",
+        "displayName": "PROS Project",
+        "selector": [
+          {
+            "filenamePattern": "*.pros"
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.3",
+    "@types/mocha": "^8.0.4",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.56.0",
+    "@typescript-eslint/eslint-plugin": "^4.14.1",
+    "@typescript-eslint/parser": "^4.14.1",
+    "eslint": "^7.19.0",
+    "glob": "^7.1.6",
+    "mocha": "^8.2.1",
+    "typescript": "^4.1.3",
+    "vscode-test": "^1.5.0"
+  },
+  "dependencies": {
+    "@purduesigbots/pros-cli-middleware": "file:../pros-cli-middleware",
+    "@types/semver": "^7.3.6",
+    "semver": "^7.3.5"
+  }
 }
