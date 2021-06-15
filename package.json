@@ -1,9 +1,26 @@
 {
   "name": "pros",
-  "displayName": "pros",
-  "publisher": "SIGBOTS",
-  "repository": "https://github.com/purduesigbots/pros-vsc/",
-  "description": "",
+  "displayName": "PROS",
+  "publisher": "sigbots",
+  "description": "PROS Extension that allows for C/C++ Development for VEX V5 and VEX Cortex",
+  "author": {
+    "name": "Purdue ACM SIGBOTS"
+  },
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "bugs": {
+    "url": "https://github.com/purduesigbots/pros-vsc/issues",
+    "email": "pros_development@cs.purdue.edu"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/purduesigbots/pros-vsc.git"
+  },
+  "homepage": "http://pros.cs.purdue.edu",
+  "icon": "media/pros-tux-white.png",
+  "galleryBanner": {
+    "color": "#D6B872",
+    "theme": "dark"
+  },
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.56.0"
