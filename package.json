@@ -21,7 +21,7 @@
         {
           "id": "pros-view-container",
           "title": "PROS",
-          "icon": "media/pros-tux-white.svg"
+          "icon": "media/pros-tux-white.png"
         }
       ]
     },
@@ -30,7 +30,7 @@
         {
           "id": "prosTreeview",
           "name": "PROS",
-          "icon": "media/pros-tux-white.svg",
+          "icon": "media/pros-tux-white.png",
           "contextualTitle": "PROS"
         }
       ],
@@ -50,8 +50,8 @@
         "command": "pros.upload&build",
         "title": "Upload & Build",
         "icon": {
-          "light": "media/pros-tux-white.svg",
-          "dark": "media/pros-tux-white.svg"
+          "light": "media/pros-tux-white.png",
+          "dark": "media/pros-tux-white.png"
         }
       },
       {
