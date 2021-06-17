@@ -43,7 +43,10 @@ export function activate(context: vscode.ExtensionContext) {
     terminal.sendText("pros terminal");
   });
 
-  vscode.commands.registerCommand("pros.upgrade", upgradeProject);
+  vscode.commands.registerCommand("pros.upgrade", () => {
+    analytics.sendAction("upgrade");
+    upgradeProject();
+  });
 
   vscode.commands.registerCommand("pros.new", () => {
     analytics.sendAction("projectCreated");
