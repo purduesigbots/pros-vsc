@@ -114,7 +114,22 @@
           }
         ]
       }
-    ]
+    ],
+    "configuration": {
+      "title": "PROS",
+      "properties": {
+        "pros.useGoogleAnalytics": {
+          "type": "boolean",
+          "default": true,
+          "description": "Send anonymous usage statistics."
+        },
+        "pros.showWelcomeOnStartup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show welcome page on startup."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
