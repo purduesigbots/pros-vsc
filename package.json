@@ -119,6 +119,7 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
+    "deploy": "vsce publish --yarn",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
@@ -135,6 +136,7 @@
     "glob": "^7.1.6",
     "mocha": "^8.2.1",
     "typescript": "^4.1.3",
+    "vsce": "^1.93.0",
     "vscode-test": "^1.5.0"
   },
   "dependencies": {
