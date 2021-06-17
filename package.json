@@ -81,6 +81,10 @@
       {
         "command": "pros.welcome",
         "title": "PROS: Welcome"
+      },
+      {
+        "command": "pros.testGA",
+        "title": "PROS: test"
       }
     ],
     "menus": {
@@ -157,6 +161,8 @@
   "dependencies": {
     "@purduesigbots/pros-cli-middleware": "^2.5.2",
     "@types/semver": "^7.3.6",
-    "semver": "^7.3.5"
+    "@types/universal-analytics": "^0.4.4",
+    "semver": "^7.3.5",
+    "universal-analytics": "^0.4.23"
   }
 }

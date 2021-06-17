@@ -2,21 +2,36 @@ import * as vscode from "vscode";
 
 import { TreeDataProvider } from "./views/tree-view";
 import { getWebviewContent } from "./views/welcome-view";
-import { buildUpload, clean, build, createNewProject, upgradeProject, upload } from "./commands";
+import {
+  buildUpload,
+  clean,
+  build,
+  createNewProject,
+  upgradeProject,
+  upload,
+} from "./commands";
 import { ProsProjectEditorProvider } from "./editor";
+import { Analytics } from "./ga";
+
+let analytics: Analytics;
 
 export function activate(context: vscode.ExtensionContext) {
-  vscode.commands.registerCommand("pros.helloWorld", () =>
-    vscode.window.showInformationMessage("Hello World from pros!")
-  );
+  analytics = new Analytics(context);
+
   const terminal = vscode.window.createTerminal("PROS Terminal");
   terminal.sendText("pros build-compile-commands");
 
-  vscode.commands.registerCommand("pros.upload&build", buildUpload);
+  vscode.commands.registerCommand("pros.upload&build", () => {
+    analytics.sendAction("build");
+    buildUpload();
+  });
 
   vscode.commands.registerCommand("pros.upload", upload);
 
-  vscode.commands.registerCommand("pros.build", build);
+  vscode.commands.registerCommand("pros.build", () => {
+    analytics.sendAction("build");
+    build();
+  });
 
   vscode.commands.registerCommand("pros.clean", clean);
 
@@ -27,9 +42,13 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.commands.registerCommand("pros.upgrade", upgradeProject);
 
-  vscode.commands.registerCommand("pros.new", createNewProject);
+  vscode.commands.registerCommand("pros.new", () => {
+    analytics.sendAction("projectCreated");
+    createNewProject();
+  });
 
   vscode.commands.registerCommand("pros.welcome", () => {
+    analytics.sendPageview("welcome");
     const panel = vscode.window.createWebviewPanel(
       "welcome",
       "Welcome",
@@ -47,4 +66,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(ProsProjectEditorProvider.register(context));
 }
 
-export function deactivate() { }
+export function deactivate() {
+  analytics.endSession();
+}
