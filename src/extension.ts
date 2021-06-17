@@ -22,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
   terminal.sendText("pros build-compile-commands");
 
   vscode.commands.registerCommand("pros.upload&build", () => {
-    analytics.sendAction("build");
+    analytics.sendAction("upload&build");
     buildUpload();
   });
 
