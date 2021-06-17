@@ -81,10 +81,6 @@
       {
         "command": "pros.welcome",
         "title": "PROS: Welcome"
-      },
-      {
-        "command": "pros.testGA",
-        "title": "PROS: test"
       }
     ],
     "menus": {
