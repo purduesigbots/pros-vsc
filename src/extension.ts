@@ -26,7 +26,10 @@ export function activate(context: vscode.ExtensionContext) {
     buildUpload();
   });
 
-  vscode.commands.registerCommand("pros.upload", upload);
+  vscode.commands.registerCommand("pros.upload", () => {
+    analytics.sendAction("upload");
+    upload();
+  });
 
   vscode.commands.registerCommand("pros.build", () => {
     analytics.sendAction("build");
