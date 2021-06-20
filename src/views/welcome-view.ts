@@ -1,42 +1,32 @@
-export function getWebviewContent() {
-    return `<!DOCTYPE html>
-  <html lang="en">
-  <head>
-	  <meta charset="UTF-8">
-	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	  <title>Welcome</title>
-  </head>
-  <body>
-	  <img src="https://pros.cs.purdue.edu/_static/img/pros-tux.png" width="600" class="center"/>
-	  <h1 className="title">
-              Open Source C/C++ Development for VEX V5 and VEX Cortex
-      </h1>
-	  <section className="panel">
-	  <p>For help, please visit:</p>
-	  <ul>
-		<li>
-		  <a href='https://pros.cs.purdue.edu/v5/getting-started/new-users.html'>
-			This Page
-		  </a>
-		  for a guide to getting started with PROS for Atom.
-		</li>
+import * as vscode from "vscode";
 
-		<li>
-		  The
-		  <a href='https://pros.cs.purdue.edu/v5/tutorials/index.html'>
-			PROS tutorial page
-		  </a>
-		  to learn about using everything from sensors to motors to tasks
-		  and multithreading in PROS.
-		</li>
-
-		<li>
-		  The
-		  <a href='https://pros.cs.purdue.edu/v5/api/index.html'>
-			PROS API documentation
-		  </a>
-		</li>
-	  </ul>
-  </body>
-  </html>`;
+export function getWebviewContent(styleUri: vscode.Uri) {
+	return `
+	<!DOCTYPE html>
+	<html lang="en">
+	   <head>
+		  <link href="${styleUri}" rel="stylesheet" />
+		  <title>Welcome</title>
+	   </head>
+	   <body>
+		  <div class="container">
+			 <header>
+			 <a class="header__link" title="Learn more about PROS" href="https://pros.cs.purdue.edu/">
+				 <div class="header__logo">
+					 <img class="image__logo" src="https://pros.cs.purdue.edu/_static/img/pros-tux.png" />
+				 </div>
+			 </a>
+			 <p class="header__blurb">
+			 	 <a class="bold" title="Open PROS on GitHub" href="https://github.com/purduesigbots/pros">Open Source</a>
+				 C/C++ Development for <b>VEX V5</b> and <b>VEX Cortex</b>. PROS is a lightweight and 
+				 fast alternative open source operating system for VEX EDR Microcontrollers. It features multitasking, 
+				 low-level control, and Wiring compatible functions to harness the full power of the Cortex. 
+				 PROS is built with developers in mind and with a focus on providing an environment for 
+				 industry-applicable experience.
+			 </p>
+		     </header>
+		  </div>
+	   </body>
+	</html>
+	`;
 }

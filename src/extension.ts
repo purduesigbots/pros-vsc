@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as path from 'path';
 
 import { TreeDataProvider } from "./views/tree-view";
 import { getWebviewContent } from "./views/welcome-view";
@@ -20,6 +21,10 @@ export function activate(context: vscode.ExtensionContext) {
 
   const terminal = vscode.window.createTerminal("PROS Terminal");
   terminal.sendText("pros build-compile-commands");
+
+  if (vscode.workspace.getConfiguration("pros").get<boolean>("showWelcomeOnStartup")) {
+    vscode.commands.executeCommand("pros.welcome");
+  }
 
   vscode.commands.registerCommand("pros.upload&build", () => {
     analytics.sendAction("upload&build");
@@ -59,9 +64,18 @@ export function activate(context: vscode.ExtensionContext) {
       "welcome",
       "Welcome",
       vscode.ViewColumn.One,
-      {}
+      {
+        enableScripts: true
+      }
     );
-    panel.webview.html = getWebviewContent();
+
+    const onDiskPath = vscode.Uri.file(
+      path.join(context.extensionPath, 'media', 'welcome.css')
+    );
+
+    const cssPath = panel.webview.asWebviewUri(onDiskPath);
+
+    panel.webview.html = getWebviewContent(cssPath);
   });
 
   vscode.window.registerTreeDataProvider(
