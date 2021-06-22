@@ -105,6 +105,32 @@
           "when": "true",
           "command": "pros.upload&build"
         }
+      ],
+      "commandPalette": [
+        {
+          "when": "pros.isPROSProject",
+          "command": "pros.upload&build"
+        },
+        {
+          "when": "pros.isPROSProject",
+          "command": "pros.upload"
+        },
+        {
+          "when": "pros.isPROSProject",
+          "command": "pros.build"
+        },
+        {
+          "when": "pros.isPROSProject",
+          "command": "pros.clean"
+        },
+        {
+          "when": "pros.isPROSProject",
+          "command": "pros.terminal"
+        },
+        {
+          "when": "pros.isPROSProject",
+          "command": "pros.upgrade"
+        }
       ]
     },
     "customEditors": [

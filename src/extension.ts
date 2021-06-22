@@ -18,6 +18,10 @@ let analytics: Analytics;
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
+  workspaceContainsProjectPros().then((value) => {
+      vscode.commands.executeCommand("setContext", "pros.isPROSProject", value);
+  });
+
   const terminal = vscode.window.createTerminal("PROS Terminal");
   terminal.sendText("pros build-compile-commands");
 
@@ -74,4 +78,26 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {
   analytics.endSession();
+}
+
+async function workspaceContainsProjectPros(): Promise<boolean> {
+  const filename = "project.pros";
+
+  if (vscode.workspace.workspaceFolders === undefined || vscode.workspace.workspaceFolders === null) {
+    return false;
+  }
+
+  let exists = true;
+  try {
+    // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
+    // of if the workspace is using a physical file system or not.
+    const workspaceUri = vscode.workspace.workspaceFolders[0].uri;
+    const uriString = `${workspaceUri.scheme}:${workspaceUri.path}/${filename}`;
+    const uri = vscode.Uri.parse(uriString);
+    await vscode.workspace.fs.stat(uri);
+  } catch (e) {
+    console.error(e);
+    exists = false;
+  }
+  return exists;
 }
