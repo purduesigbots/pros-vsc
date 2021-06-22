@@ -52,12 +52,6 @@
           "icon": "media/pros-tux-white.png",
           "contextualTitle": "PROS"
         }
-      ],
-      "explorer": [
-        {
-          "id": "exampleView",
-          "name": "PROS"
-        }
       ]
     },
     "commands": [
