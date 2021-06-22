@@ -1,9 +1,26 @@
 {
   "name": "pros",
-  "displayName": "pros",
-  "publisher": "SIGBOTS",
-  "repository": "https://github.com/purduesigbots/pros-vsc/",
-  "description": "",
+  "displayName": "PROS",
+  "publisher": "sigbots",
+  "description": "PROS Extension that allows for C/C++ Development for VEX V5 and VEX Cortex",
+  "author": {
+    "name": "Purdue ACM SIGBOTS"
+  },
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "bugs": {
+    "url": "https://github.com/purduesigbots/pros-vsc/issues",
+    "email": "pros_development@cs.purdue.edu"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/purduesigbots/pros-vsc.git"
+  },
+  "homepage": "http://pros.cs.purdue.edu",
+  "icon": "media/pros-tux-white.png",
+  "galleryBanner": {
+    "color": "#D6B872",
+    "theme": "dark"
+  },
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.56.0"
@@ -24,7 +41,7 @@
         {
           "id": "pros-view-container",
           "title": "PROS",
-          "icon": "media/pros-tux-white.svg"
+          "icon": "media/pros-tux-white.png"
         }
       ]
     },
@@ -33,7 +50,7 @@
         {
           "id": "prosTreeview",
           "name": "PROS",
-          "icon": "media/pros-tux-white.svg",
+          "icon": "media/pros-tux-white.png",
           "contextualTitle": "PROS"
         }
       ],
@@ -53,8 +70,8 @@
         "command": "pros.upload&build",
         "title": "Upload & Build",
         "icon": {
-          "light": "media/pros-tux-white.svg",
-          "dark": "media/pros-tux-white.svg"
+          "light": "media/pros-tux-white.png",
+          "dark": "media/pros-tux-white.png"
         }
       },
       {

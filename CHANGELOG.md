@@ -1,9 +1,14 @@
-# Change Log
+# PROS Editor Change Log
 
-All notable changes to the "pros" extension will be documented in this file.
+Below are our release notes with their release dates corresponding to each version.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## [Released]
 
 ## [Unreleased]
 
-- Initial release
+## [0.0.1] - 2021-09-20 - Beta Version
+### Added
+- Welcome page set up.
+- Added tree view action menu.
+- Set up CI.
+- Initial theming, artwork, and other basic functionality.
