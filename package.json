@@ -12,7 +12,10 @@
     "Other"
   ],
   "activationEvents": [
-    "workspaceContains:**/project.pros"
+    "workspaceContains:**/project.pros",
+    "onCommand:pros.new",
+    "onCommand:pros.helloWorld",
+    "onCommand:pros.welcome"
   ],
   "main": "./out/extension.js",
   "contributes": {
