@@ -31,7 +31,6 @@
   "activationEvents": [
     "workspaceContains:**/project.pros",
     "onCommand:pros.new",
-    "onCommand:pros.helloWorld",
     "onCommand:pros.welcome"
   ],
   "main": "./out/extension.js",
@@ -62,10 +61,6 @@
       ]
     },
     "commands": [
-      {
-        "command": "pros.helloWorld",
-        "title": "PROS: Hello World"
-      },
       {
         "command": "pros.upload&build",
         "title": "Upload & Build",
