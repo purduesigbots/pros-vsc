@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import * as path from 'path';
+import * as path from "path";
 
 import { TreeDataProvider } from "./views/tree-view";
 import { getWebviewContent } from "./views/welcome-view";
@@ -22,7 +22,11 @@ export function activate(context: vscode.ExtensionContext) {
   const terminal = vscode.window.createTerminal("PROS Terminal");
   terminal.sendText("pros build-compile-commands");
 
-  if (vscode.workspace.getConfiguration("pros").get<boolean>("showWelcomeOnStartup")) {
+  if (
+    vscode.workspace
+      .getConfiguration("pros")
+      .get<boolean>("showWelcomeOnStartup")
+  ) {
     vscode.commands.executeCommand("pros.welcome");
   }
 
@@ -65,17 +69,35 @@ export function activate(context: vscode.ExtensionContext) {
       "Welcome",
       vscode.ViewColumn.One,
       {
-        enableScripts: true
+        enableScripts: true,
       }
     );
 
     const onDiskPath = vscode.Uri.file(
-      path.join(context.extensionPath, 'media', 'welcome.css')
+      path.join(context.extensionPath, "media", "welcome.css")
     );
 
     const cssPath = panel.webview.asWebviewUri(onDiskPath);
+    const imgIconPath = panel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(context.extensionPath, "media", "prosicon.png"))
+    );
+    const imgActionPath = panel.webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(context.extensionPath, "media", "prosquickaction.png")
+      )
+    );
+    const imgProjectProsPath = panel.webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(context.extensionPath, "media", "projectpros.png")
+      )
+    );
 
-    panel.webview.html = getWebviewContent(cssPath);
+    panel.webview.html = getWebviewContent(
+      cssPath,
+      imgIconPath,
+      imgActionPath,
+      imgProjectProsPath
+    );
   });
 
   vscode.window.registerTreeDataProvider(

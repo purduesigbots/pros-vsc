@@ -1,55 +1,117 @@
-.container {
-	display: grid;
-	grid-template-areas: 'header header' 'hero hero' 'content sidebar';
-	grid-template-columns: repeat(1, 1fr min-content);
-	margin: 1em auto;
-	grid-gap: 1em 3em;
-	max-width: 1200px;
-	min-width: 450px;
+a {
+  text-decoration: none;
+}
 
-	@media all and (max-width: 768px) {
-		grid-gap: 1em 0;
-	}
+hr {
+  color: #aaa;
+  width: 95%;
 }
 
 header {
-	grid-area: header;
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));
-	grid-gap: 1em 3em;
-	align-items: center;
-	justify-items: center;
-	margin: 0 3em;
+  grid-area: header;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));
+  grid-gap: 1em 3em;
+  align-items: center;
+  justify-items: center;
+  margin: 1em 3em;
+  max-width: 1200px;
 }
 
 .header__blurb {
-	color: var(--color-foreground--75);
-	flex: 2 1 55%;
-	font-size: 1.5rem;
-	font-weight: 200;
-	margin: 0;
-	min-width: 345px;
+  color: var(--color-foreground--75);
+  flex: 2 1 55%;
+  font-size: 1.25rem;
+  font-weight: 200;
+  margin: 0;
+  min-width: 345px;
 
-	@media all and (max-width: 880px) {
-		margin: 0 2em;
-	}
+  @media all and (max-width: 880px) {
+    margin: 0 2em;
+  }
+}
+
+.bold {
+  font-weight: 600;
 }
 
 .header__link {
-	color: var(--color-foreground);
-	outline: none;
+  color: var(--color-foreground);
+  outline: none;
+}
 
-	&:hover,
-	&:active,
-	&:focus {
-		color: var(--color-foreground);
-		outline: none;
-	}
+.header__link:hover,
+.header__link:active,
+.header__link:focus {
+  color: var(--color-foreground);
+  outline: none;
 }
 
 .header__logo {
-	display: flex;
-	flex-wrap: nowrap;
-    width: 80%;
-    height: auto;
+  display: flex;
+  flex-wrap: nowrap;
+  width: 80%;
+  height: auto;
+}
+
+.body__container {
+  margin: 1rem auto;
+}
+
+.body__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1rem;
+  padding: 1rem;
+  border: 1px solid #aaa;
+  border-radius: 0.5rem;
+}
+
+.body__intro {
+  font-size: 3rem;
+}
+
+.body__new_versions {
+  font-size: 1.5rem;
+}
+
+.body__blurb {
+  padding: 1rem 0;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.body__settings {
+  padding: 1rem 0;
+  font-size: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.body__features {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.body__features_header {
+  font-size: 1.5rem;
+}
+
+.body__features_img {
+  /* TODO: make this a grid probably */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.body__features_img_item {
+  padding: 1rem;
+}
+
+.body__help {
+  padding: 1rem 0;
+  font-size: 1rem;
 }

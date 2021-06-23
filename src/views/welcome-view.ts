@@ -1,7 +1,12 @@
 import * as vscode from "vscode";
 
-export function getWebviewContent(styleUri: vscode.Uri) {
-	return `
+export function getWebviewContent(
+  styleUri: vscode.Uri,
+  imgIconPath: vscode.Uri,
+  imgActionPath: vscode.Uri,
+  imgProjectProsPath: vscode.Uri
+) {
+  return `
 	<!DOCTYPE html>
 	<html lang="en">
 	   <head>
@@ -9,7 +14,6 @@ export function getWebviewContent(styleUri: vscode.Uri) {
 		  <title>Welcome</title>
 	   </head>
 	   <body>
-		  <div class="container">
 			 <header>
 			 <a class="header__link" title="Learn more about PROS" href="https://pros.cs.purdue.edu/">
 				 <div class="header__logo">
@@ -25,6 +29,46 @@ export function getWebviewContent(styleUri: vscode.Uri) {
 				 industry-applicable experience.
 			 </p>
 		     </header>
+				<div class="body__container">
+					<div class="body__content">
+						<div class="body__intro">
+							Welcome To <b>PROS</b>
+						</div>
+						<div class="body__new_versions">
+							See what's new in <a>CLI (version)</a> and <a>Kernel (version)</a>
+						</div>
+						<div class="body__blurb">
+							Primary maintenance of PROS is done by students at Purdue University through Purdue ACM SIGBots. Inspiration for this project came from several computer science and engineering students itching to write code for VEX U's extended autonomous period. We created PROS to leverage this opportunity. 	
+						</div>
+						<hr>
+						<div class="body__settings">Settings (todo)</div>
+						<hr>
+						<div class="body__features">
+							<div class="body__features_header">Features</div>
+							<div class="body__features_img">
+								<div class="body__features_img_item">TreeView</div>
+								<div class="body__features_img_item"><img src="${imgIconPath}" /></div>
+							</div>
+							<div class="body__features_img">
+								<div class="body__features_img_item"><img src="${imgActionPath}" /></div>
+								<div class="body__features_img_item">Quick Action</div>
+							</div>
+							<div class="body__features_img">
+								<div class="body__features_img_item">project.pros Editor</div>
+								<div class="body__features_img_item"><img src="${imgProjectProsPath}" /></div>
+							</div>
+						</div>
+						<hr>
+						<div class="body__help">
+							For help, please visit:
+							<ul>
+								<li><a>This page</a> for a guide to getting started with PROS for VSCode</li>
+								<li>The <a>PROS tutorial page</a> to learn about using everything from sensors to motors to tasks and multithreading in PROS.</li>
+								<li>The <a>PROS API documentation</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
 		  </div>
 	   </body>
 	</html>
