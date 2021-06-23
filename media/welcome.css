@@ -3,7 +3,9 @@ a {
 }
 
 hr {
-  color: #aaa;
+  background-color: #888;
+  border: none;
+  height: 1px;
   width: 95%;
 }
 
@@ -14,14 +16,14 @@ header {
   grid-gap: 1em 3em;
   align-items: center;
   justify-items: center;
-  margin: 1em 3em;
+  margin: 2rem 3em;
   max-width: 1200px;
 }
 
 .header__blurb {
   color: var(--color-foreground--75);
   flex: 2 1 55%;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 200;
   margin: 0;
   min-width: 345px;
@@ -84,27 +86,75 @@ header {
 
 .body__settings {
   padding: 1rem 0;
-  font-size: 1.5rem;
+  font-size: 2rem;
+  font-weight: 500;
   display: flex;
   flex-direction: column;
 }
 
 .body__features {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  row-gap: 0.5rem;
+  column-gap: 3rem;
+  grid-auto-rows: minmax(100px, auto);
+  margin: 0 auto 2rem auto;
+  font-size: 1rem;
 }
 
 .body__features_header {
-  font-size: 1.5rem;
+  font-size: 2rem;
+  font-weight: 500;
+  grid-column: 1 / 3;
+  grid-row: 1;
+  align-self: center;
+  justify-self: center;
 }
 
-.body__features_img {
-  /* TODO: make this a grid probably */
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin: 0 auto;
+.body__features_img_one {
+  grid-row: 2;
+}
+
+.body__features_img_left_one {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: end;
+  align-self: center;
+}
+
+.body__features_img_right_one {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: start;
+  align-self: center;
+}
+
+.body__features_img_left_two {
+  grid-column: 1;
+  grid-row: 3;
+  justify-self: end;
+  align-self: center;
+}
+
+.body__features_img_right_two {
+  grid-column: 2;
+  grid-row: 3;
+  justify-self: start;
+  align-self: center;
+}
+
+.body__features_img_left_three {
+  grid-column: 1;
+  grid-row: 4;
+  justify-self: end;
+  align-self: center;
+}
+
+.body__features_img_right_three {
+  grid-column: 2;
+  grid-row: 4;
+  justify-self: start;
+  align-self: center;
 }
 
 .body__features_img_item {

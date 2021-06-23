@@ -78,6 +78,11 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     const cssPath = panel.webview.asWebviewUri(onDiskPath);
+    const imgHeaderPath = panel.webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(context.extensionPath, "media", "pros-horiz-white.png")
+      )
+    );
     const imgIconPath = panel.webview.asWebviewUri(
       vscode.Uri.file(path.join(context.extensionPath, "media", "prosicon.png"))
     );
@@ -94,6 +99,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     panel.webview.html = getWebviewContent(
       cssPath,
+      imgHeaderPath,
       imgIconPath,
       imgActionPath,
       imgProjectProsPath

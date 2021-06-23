@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 
 export function getWebviewContent(
   styleUri: vscode.Uri,
+  imgHeaderPath: vscode.Uri,
   imgIconPath: vscode.Uri,
   imgActionPath: vscode.Uri,
   imgProjectProsPath: vscode.Uri
@@ -17,7 +18,7 @@ export function getWebviewContent(
 			 <header>
 			 <a class="header__link" title="Learn more about PROS" href="https://pros.cs.purdue.edu/">
 				 <div class="header__logo">
-					 <img class="image__logo" src="https://pros.cs.purdue.edu/_static/img/pros-tux.png" />
+					 <img class="image__logo" src="${imgHeaderPath}" />
 				 </div>
 			 </a>
 			 <p class="header__blurb">
@@ -45,18 +46,12 @@ export function getWebviewContent(
 						<hr>
 						<div class="body__features">
 							<div class="body__features_header">Features</div>
-							<div class="body__features_img">
-								<div class="body__features_img_item">TreeView</div>
-								<div class="body__features_img_item"><img src="${imgIconPath}" /></div>
-							</div>
-							<div class="body__features_img">
-								<div class="body__features_img_item"><img src="${imgActionPath}" /></div>
-								<div class="body__features_img_item">Quick Action</div>
-							</div>
-							<div class="body__features_img">
-								<div class="body__features_img_item">project.pros Editor</div>
-								<div class="body__features_img_item"><img src="${imgProjectProsPath}" /></div>
-							</div>
+							<div class="body__features_img_left_one">Access all of the PROS commands you will need from the VSCode sidebar. Click on the PROS Icon on the sidebar for a list of common actions like Building, Uploading, Debugging, and Upgrading your project.</div>
+							<div class="body__features_img_right_one"><img src="${imgIconPath}" /></div>
+							<div class="body__features_img_left_two"><img src="${imgActionPath}" /></div>
+							<div class="body__features_img_right_two">Quickly iterate with the PROS Quick Action button. This PROS Icon on the top right of the editor will build and upload your code.</div>
+							<div class="body__features_img_left_three">Modify your project's settings easily with the project.pros custom editor. Opening the "project.pros" file at the root of your project will open this custom settings editor.</div>
+							<div class="body__features_img_right_three"><img src="${imgProjectProsPath}" /></div>
 						</div>
 						<hr>
 						<div class="body__help">
