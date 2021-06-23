@@ -12,50 +12,50 @@ import { getNonce } from "./nonce";
  * @returns The kernel library versions
  */
 export const fetchKernelVersion = async (): Promise<string> => {
-  const { stdout, stderr } = await promisify(child_process.exec)(
-    `pros c q --target v5 --machine-output`
-  );
+	const { stdout, stderr } = await promisify(child_process.exec)(
+		`pros c q --target v5 --machine-output`
+	);
 
-  let newKernel = "0.0.0";
+	let newKernel = "0.0.0";
 
-  for (let e of stdout.split(/\r?\n/)) {
-    if (e.startsWith(PREFIX)) {
-      let jdata = JSON.parse(e.substr(PREFIX.length));
-      if (jdata.type === "finalize") {
-        for (let ver of jdata.data) {
-          if (ver.name === "kernel" && gt(ver.version, newKernel)) {
-            newKernel = ver.version;
-          }
-        }
-      }
-    }
-  }
+	for (let e of stdout.split(/\r?\n/)) {
+		if (e.startsWith(PREFIX)) {
+			let jdata = JSON.parse(e.substr(PREFIX.length));
+			if (jdata.type === "finalize") {
+				for (let ver of jdata.data) {
+					if (ver.name === "kernel" && gt(ver.version, newKernel)) {
+						newKernel = ver.version;
+					}
+				}
+			}
+		}
+	}
 
-  return newKernel;
+	return newKernel;
 };
 
 export const fetchCliVersion = async (): Promise<string> => {
-  const response = await axios.get(
-    "https://purduesigbots.github.io/pros-mainline/stable/UpgradeManifestV1.json"
-  );
-  return `${response.data.version.major}.${response.data.version.minor}.${response.data.version.patch}`;
+	const response = await axios.get(
+		"https://purduesigbots.github.io/pros-mainline/stable/UpgradeManifestV1.json"
+	);
+	return `${response.data.version.major}.${response.data.version.minor}.${response.data.version.patch}`;
 };
 
 export function getWebviewContent(
-  styleUri: vscode.Uri,
-  scriptUri: vscode.Uri,
-  imgHeaderPath: vscode.Uri,
-  imgIconPath: vscode.Uri,
-  imgActionPath: vscode.Uri,
-  imgProjectProsPath: vscode.Uri,
-  newKernel: string,
-  newCli: string,
-  useGoogleAnalytics: boolean,
-  showWelcomeOnStartup: boolean
+	styleUri: vscode.Uri,
+	scriptUri: vscode.Uri,
+	imgHeaderPath: vscode.Uri,
+	imgIconPath: vscode.Uri,
+	imgActionPath: vscode.Uri,
+	imgProjectProsPath: vscode.Uri,
+	newKernel: string,
+	newCli: string,
+	useGoogleAnalytics: boolean,
+	showWelcomeOnStartup: boolean
 ) {
-  const nonce = getNonce();
+	const nonce = getNonce();
 
-  return `
+	return `
 	<!DOCTYPE html>
 	<html lang="en">
 	   <head>
@@ -103,15 +103,13 @@ export function getWebviewContent(
 						<div class="body__settings">
 							<div class="body__settings_header">Settings</div>
 							<div class="body__settings_checkbox">
-								<div><input type="checkbox" ${
-                  useGoogleAnalytics ? "checked" : ""
-                } id="useGoogleAnalytics"/></div>
+								<div><input type="checkbox" ${useGoogleAnalytics ? "checked" : ""
+		} id="useGoogleAnalytics"/></div>
 								<div><label>Send anonymous usage statistics</label></div>
 							</div>
 							<div class="body__settings_checkbox">
-								<div><input type="checkbox" ${
-                  showWelcomeOnStartup ? "checked" : ""
-                } id="showWelcomeOnStartup" /></div>
+								<div><input type="checkbox" ${showWelcomeOnStartup ? "checked" : ""
+		} id="showWelcomeOnStartup" /></div>
 								<div><label>Show Welcome Guide when opening VSCode</label></div>
 							</div>
 						</div>
@@ -119,9 +117,9 @@ export function getWebviewContent(
 						<div class="body__help">
 							For help, please visit:
 							<ul>
-								<li><a>This page</a> for a guide to getting started with PROS for VSCode</li>
-								<li>The <a>PROS tutorial page</a> to learn about using everything from sensors to motors to tasks and multithreading in PROS.</li>
-								<li>The <a>PROS API documentation</a></li>
+								<li><a href="https://pros.cs.purdue.edu/v5/editor/index.html">This page</a> for a guide to getting started with PROS for VSCode</li>
+								<li>The <a href="https://pros.cs.purdue.edu/v5/tutorials/index.html">PROS tutorial page</a>to learn about using everything from sensors to motors to tasks and multithreading in PROS.</li>
+								<li>The <a  href="https://pros.cs.purdue.edu/v5/api/index.html">PROS API documentation</a></li>
 							</ul>
 						</div>
 					</div>

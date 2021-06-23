@@ -77,6 +77,10 @@ export function activate(context: vscode.ExtensionContext) {
       }
     );
 
+    panel.iconPath = vscode.Uri.file(
+      path.join(context.extensionPath, "media", "pros-color-icon.png")
+    );
+
     const onDiskPath = vscode.Uri.file(
       path.join(context.extensionPath, "media", "welcome.css")
     );
@@ -88,16 +92,16 @@ export function activate(context: vscode.ExtensionContext) {
       )
     );
     const imgIconPath = panel.webview.asWebviewUri(
-      vscode.Uri.file(path.join(context.extensionPath, "media", "prosicon.png"))
+      vscode.Uri.file(path.join(context.extensionPath, "media", "tree-view.png"))
     );
     const imgActionPath = panel.webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(context.extensionPath, "media", "prosquickaction.png")
+        path.join(context.extensionPath, "media", "quick-action.png")
       )
     );
     const imgProjectProsPath = panel.webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(context.extensionPath, "media", "projectpros.png")
+        path.join(context.extensionPath, "media", "project-view.png")
       )
     );
     const jsPath = panel.webview.asWebviewUri(

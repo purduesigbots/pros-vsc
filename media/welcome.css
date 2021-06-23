@@ -68,13 +68,12 @@ header {
   align-items: center;
   margin: 1rem;
   padding: 1rem;
-  border: 1px solid #aaa;
-  border-radius: 0.5rem;
+  border-radius: 0.7rem;
   background-color: var(--vscode-sideBar-background);
 }
 
 .body__intro {
-  font-weight: 500;
+  font-weight: 200;
   font-size: 3rem;
   margin: 1.5rem auto;
 }
@@ -87,6 +86,7 @@ header {
 .body__blurb {
   padding: 1rem 0;
   font-size: 1rem;
+  font-weight: 200;
   text-align: center;
 }
 
@@ -99,8 +99,8 @@ header {
 }
 
 .body__settings_header {
-  font-size: 2rem;
-  font-weight: 500;
+  font-size: 2.5rem;
+  font-weight: 200;
   margin: 0rem auto 1rem auto;
 }
 
@@ -127,6 +127,7 @@ header {
 }
 
 .body__settings_checkbox {
+  font-weight: 200;
   margin: 0.5rem auto;
   display: flex;
   flex-direction: row;
@@ -146,8 +147,8 @@ header {
 }
 
 .body__features_header {
-  font-size: 2rem;
-  font-weight: 500;
+  font-size: 2.5rem;
+  font-weight: 200;
   grid-column: 1 / 3;
   grid-row: 1;
   align-self: center;
@@ -161,6 +162,7 @@ header {
 .body__features_img_left_one {
   grid-column: 1;
   grid-row: 2;
+  font-weight: 200;
   justify-self: end;
   align-self: center;
 }
@@ -182,6 +184,7 @@ header {
 .body__features_img_right_two {
   grid-column: 2;
   grid-row: 3;
+  font-weight: 200;
   justify-self: start;
   align-self: center;
 }
@@ -189,6 +192,7 @@ header {
 .body__features_img_left_three {
   grid-column: 1;
   grid-row: 4;
+  font-weight: 200;
   justify-self: end;
   align-self: center;
 }
@@ -207,4 +211,5 @@ header {
 .body__help {
   padding: 1rem 0;
   font-size: 1rem;
+  font-weight: 200;
 }
