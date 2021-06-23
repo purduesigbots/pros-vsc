@@ -1,3 +1,7 @@
+* {
+  font-weight: 300;
+}
+
 a {
   text-decoration: none;
 }
@@ -24,8 +28,6 @@ header {
   color: var(--color-foreground--75);
   flex: 2 1 55%;
   font-size: 1rem;
-  font-weight: 200;
-  margin: 0;
   min-width: 345px;
 
   @media all and (max-width: 880px) {
@@ -34,7 +36,7 @@ header {
 }
 
 .bold {
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .header__link {
@@ -72,6 +74,7 @@ header {
 }
 
 .body__intro {
+  font-weight: 500;
   font-size: 3rem;
   margin: 1.5rem auto;
 }

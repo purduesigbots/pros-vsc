@@ -70,7 +70,7 @@ export function getWebviewContent(
 				 </div>
 			 </a>
 			 <p class="header__blurb">
-			 	 <a class="bold" title="Open PROS on GitHub" href="https://github.com/purduesigbots/pros">Open Source</a>
+			 	 <a title="Open PROS on GitHub" href="https://github.com/purduesigbots/pros">Open Source</a>
 				 C/C++ Development for <b>VEX V5</b> and <b>VEX Cortex</b>. PROS is a lightweight and 
 				 fast alternative open source operating system for VEX EDR Microcontrollers. It features multitasking, 
 				 low-level control, and Wiring compatible functions to harness the full power of the Cortex. 
@@ -81,7 +81,7 @@ export function getWebviewContent(
 				<div class="body__container">
 					<div class="body__content">
 						<div class="body__intro">
-							Welcome To <b>PROS</b>
+							Welcome To <span class="bold">PROS</span>
 						</div>
 						<div class="body__new_versions">
 							See what's new in <a href="https://pros.cs.purdue.edu/v5/releases/cli${newCli}.html">CLI ${newCli}</a> and <a href="https://pros.cs.purdue.edu/v5/releases/kernel${newKernel}.html">Kernel ${newKernel}</a>
