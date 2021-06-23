@@ -15,7 +15,7 @@ import {
   upgradeProject,
   upload,
 } from "./commands";
-import { ProsProjectEditorProvider } from "./editor";
+import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
 
 let analytics: Analytics;
@@ -100,19 +100,41 @@ export function activate(context: vscode.ExtensionContext) {
         path.join(context.extensionPath, "media", "projectpros.png")
       )
     );
+    const jsPath = panel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(context.extensionPath, "media", "welcome.js"))
+    );
 
     const newKernel = await fetchKernelVersion();
     const newCli = await fetchCliVersion();
 
+    const useGoogleAnalytics =
+      vscode.workspace
+        .getConfiguration("pros")
+        .get<boolean>("useGoogleAnalytics") ?? false;
+    const showWelcomeOnStartup =
+      vscode.workspace
+        .getConfiguration("pros")
+        .get<boolean>("showWelcomeOnStartup") ?? false;
+
     panel.webview.html = getWebviewContent(
       cssPath,
+      jsPath,
       imgHeaderPath,
       imgIconPath,
       imgActionPath,
       imgProjectProsPath,
       newKernel,
-      newCli
+      newCli,
+      useGoogleAnalytics,
+      showWelcomeOnStartup
     );
+
+    panel.webview.onDidReceiveMessage(async (message) => {
+      vscode.window.showErrorMessage(message.text);
+      await vscode.workspace
+        .getConfiguration("pros")
+        .update(message.commmand, message.value, true);
+    });
   });
 
   vscode.window.registerTreeDataProvider(

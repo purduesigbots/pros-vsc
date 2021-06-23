@@ -5,7 +5,7 @@ import { gt } from "semver";
 import axios from "axios";
 
 import { PREFIX } from "../commands/cli-parsing";
-
+import { getNonce } from "./nonce";
 /**
  * Queries the server for the latest available library version.
  *
@@ -43,13 +43,18 @@ export const fetchCliVersion = async (): Promise<string> => {
 
 export function getWebviewContent(
   styleUri: vscode.Uri,
+  scriptUri: vscode.Uri,
   imgHeaderPath: vscode.Uri,
   imgIconPath: vscode.Uri,
   imgActionPath: vscode.Uri,
   imgProjectProsPath: vscode.Uri,
   newKernel: string,
-  newCli: string
+  newCli: string,
+  useGoogleAnalytics: boolean,
+  showWelcomeOnStartup: boolean
 ) {
+  const nonce = getNonce();
+
   return `
 	<!DOCTYPE html>
 	<html lang="en">
@@ -85,8 +90,6 @@ export function getWebviewContent(
 							Primary maintenance of PROS is done by students at Purdue University through Purdue ACM SIGBots. Inspiration for this project came from several computer science and engineering students itching to write code for VEX U's extended autonomous period. We created PROS to leverage this opportunity. 	
 						</div>
 						<hr>
-						<div class="body__settings">Settings (todo)</div>
-						<hr>
 						<div class="body__features">
 							<div class="body__features_header">Features</div>
 							<div class="body__features_img_left_one">Access all of the PROS commands you will need from the VSCode sidebar. Click on the PROS Icon on the sidebar for a list of common actions like Building, Uploading, Debugging, and Upgrading your project.</div>
@@ -95,6 +98,18 @@ export function getWebviewContent(
 							<div class="body__features_img_right_two">Quickly iterate with the PROS Quick Action button. This PROS Icon on the top right of the editor will build and upload your code.</div>
 							<div class="body__features_img_left_three">Modify your project's settings easily with the project.pros custom editor. Opening the "project.pros" file at the root of your project will open this custom settings editor.</div>
 							<div class="body__features_img_right_three"><img src="${imgProjectProsPath}" /></div>
+						</div>
+						<hr>
+						<div class="body__settings">
+							<div class="body__settings_header">Settings</div>
+							<div class="body__settings_checkbox">
+								<div><input type="checkbox" ${useGoogleAnalytics ? "checked" : ""} /></div>
+								<div><label>Send anonymous usage statistics</label></div>
+							</div>
+							<div class="body__settings_checkbox">
+								<div><input type="checkbox" ${showWelcomeOnStartup ? "checked" : ""} /></div>
+								<div><label>Show Welcome Guide when opening VSCode</label></div>
+							</div>
 						</div>
 						<hr>
 						<div class="body__help">
@@ -108,6 +123,8 @@ export function getWebviewContent(
 					</div>
 				</div>
 		  </div>
+
+			<script nonce="${nonce}" src="${scriptUri}"></script>
 	   </body>
 	</html>
 	`;
