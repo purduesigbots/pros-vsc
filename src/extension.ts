@@ -130,10 +130,9 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     panel.webview.onDidReceiveMessage(async (message) => {
-      vscode.window.showErrorMessage(message.text);
       await vscode.workspace
         .getConfiguration("pros")
-        .update(message.commmand, message.value, true);
+        .update(message.command, message.value, true);
     });
   });
 

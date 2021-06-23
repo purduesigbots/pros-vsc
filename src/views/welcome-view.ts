@@ -103,11 +103,15 @@ export function getWebviewContent(
 						<div class="body__settings">
 							<div class="body__settings_header">Settings</div>
 							<div class="body__settings_checkbox">
-								<div><input type="checkbox" ${useGoogleAnalytics ? "checked" : ""} /></div>
+								<div><input type="checkbox" ${
+                  useGoogleAnalytics ? "checked" : ""
+                } id="useGoogleAnalytics"/></div>
 								<div><label>Send anonymous usage statistics</label></div>
 							</div>
 							<div class="body__settings_checkbox">
-								<div><input type="checkbox" ${showWelcomeOnStartup ? "checked" : ""} /></div>
+								<div><input type="checkbox" ${
+                  showWelcomeOnStartup ? "checked" : ""
+                } id="showWelcomeOnStartup" /></div>
 								<div><label>Show Welcome Guide when opening VSCode</label></div>
 							</div>
 						</div>
