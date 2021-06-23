@@ -1,11 +1,54 @@
 import * as vscode from "vscode";
+import * as child_process from "child_process";
+import { promisify } from "util";
+import { gt } from "semver";
+import axios from "axios";
+
+import { PREFIX } from "../commands/cli-parsing";
+
+/**
+ * Queries the server for the latest available library version.
+ *
+ * @returns The kernel library versions
+ */
+export const fetchKernelVersion = async (): Promise<string> => {
+  const { stdout, stderr } = await promisify(child_process.exec)(
+    `pros c q --target v5 --machine-output`
+  );
+
+  let newKernel = "0.0.0";
+
+  for (let e of stdout.split(/\r?\n/)) {
+    if (e.startsWith(PREFIX)) {
+      let jdata = JSON.parse(e.substr(PREFIX.length));
+      if (jdata.type === "finalize") {
+        for (let ver of jdata.data) {
+          if (ver.name === "kernel" && gt(ver.version, newKernel)) {
+            newKernel = ver.version;
+          }
+        }
+      }
+    }
+  }
+
+  return newKernel;
+};
+
+export const fetchCliVersion = async (): Promise<string> => {
+  const response = await axios.get(
+    "https://purduesigbots.github.io/pros-mainline/stable/UpgradeManifestV1.json"
+  );
+  return `${response.data.version.major}.${response.data.version.minor}.${response.data.version.patch}`;
+};
 
 export function getWebviewContent(
   styleUri: vscode.Uri,
   imgHeaderPath: vscode.Uri,
   imgIconPath: vscode.Uri,
   imgActionPath: vscode.Uri,
-  imgProjectProsPath: vscode.Uri
+  imgProjectProsPath: vscode.Uri,
+  newKernel: string,
+  newCli: string
 ) {
   return `
 	<!DOCTYPE html>
@@ -36,7 +79,7 @@ export function getWebviewContent(
 							Welcome To <b>PROS</b>
 						</div>
 						<div class="body__new_versions">
-							See what's new in <a>CLI (version)</a> and <a>Kernel (version)</a>
+							See what's new in <a href="https://pros.cs.purdue.edu/v5/releases/cli${newCli}.html">CLI ${newCli}</a> and <a href="https://pros.cs.purdue.edu/v5/releases/kernel${newKernel}.html">Kernel ${newKernel}</a>
 						</div>
 						<div class="body__blurb">
 							Primary maintenance of PROS is done by students at Purdue University through Purdue ACM SIGBots. Inspiration for this project came from several computer science and engineering students itching to write code for VEX U's extended autonomous period. We created PROS to leverage this opportunity. 	

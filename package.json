@@ -158,6 +158,7 @@
     "@purduesigbots/pros-cli-middleware": "^2.5.2",
     "@types/semver": "^7.3.6",
     "@types/universal-analytics": "^0.4.4",
+    "axios": "^0.21.1",
     "semver": "^7.3.5",
     "universal-analytics": "^0.4.23"
   }

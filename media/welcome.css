@@ -68,14 +68,17 @@ header {
   padding: 1rem;
   border: 1px solid #aaa;
   border-radius: 0.5rem;
+  background-color: var(--vscode-sideBar-background);
 }
 
 .body__intro {
   font-size: 3rem;
+  margin: 1.5rem auto;
 }
 
 .body__new_versions {
   font-size: 1.5rem;
+  margin: 0.5rem auto;
 }
 
 .body__blurb {

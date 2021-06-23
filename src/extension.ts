@@ -2,7 +2,11 @@ import * as vscode from "vscode";
 import * as path from "path";
 
 import { TreeDataProvider } from "./views/tree-view";
-import { getWebviewContent } from "./views/welcome-view";
+import {
+  getWebviewContent,
+  fetchKernelVersion,
+  fetchCliVersion,
+} from "./views/welcome-view";
 import {
   buildUpload,
   clean,
@@ -62,7 +66,7 @@ export function activate(context: vscode.ExtensionContext) {
     createNewProject();
   });
 
-  vscode.commands.registerCommand("pros.welcome", () => {
+  vscode.commands.registerCommand("pros.welcome", async () => {
     analytics.sendPageview("welcome");
     const panel = vscode.window.createWebviewPanel(
       "welcome",
@@ -97,12 +101,17 @@ export function activate(context: vscode.ExtensionContext) {
       )
     );
 
+    const newKernel = await fetchKernelVersion();
+    const newCli = await fetchCliVersion();
+
     panel.webview.html = getWebviewContent(
       cssPath,
       imgHeaderPath,
       imgIconPath,
       imgActionPath,
-      imgProjectProsPath
+      imgProjectProsPath,
+      newKernel,
+      newCli
     );
   });
 
