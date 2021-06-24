@@ -22,7 +22,7 @@ const runUpload = async () => {
           `pros u --project ${vscode.workspace.workspaceFolders?.[0].uri.path} --machine-output`
         );
 
-        await vscode.window.showInformationMessage("Project Uploaded!");
+        vscode.window.showInformationMessage("Project Uploaded!");
       } catch (error) {
         throw new Error(parseErrorMessage(error.stdout));
       }
