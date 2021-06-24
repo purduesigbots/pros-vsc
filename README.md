@@ -10,8 +10,25 @@
 
 # Features
 ## Actions Tree View
-<img width="348" alt="Screen Shot 2021-06-23 at 8 38 41 AM (1)" src="https://user-images.githubusercontent.com/22580992/123098369-11948780-d3ff-11eb-8b04-7fe439143fcd.png">
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/22580992/123257423-22590200-d4c0-11eb-9fda-ce33148d46b6.png">
+</p>
+
+Access all of the PROS commands you will need from the VSCode sidebar. Click on the PROS Icon on the sidebar for a list of common actions like Building, Uploading, Debugging, and Upgrading your project.
 
 ## Quick Action Button
-<img width="348" alt="Screen Shot 2021-06-23 at 8 43 37 AM" src="https://user-images.githubusercontent.com/22580992/123098502-3426a080-d3ff-11eb-99b1-3c5d285d3ce4.png">
 
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/22580992/123257395-18370380-d4c0-11eb-8cb7-1f902fff0f01.png">
+</p>
+
+Quickly iterate with the PROS Quick Action button. This PROS Icon on the top right of the editor will build and upload your code.
+
+## PROS Editor
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/22580992/123257366-10775f00-d4c0-11eb-9977-3ffb598ed756.png">
+</p>
+
+Modify your project's settings easily with the project.pros custom editor. Opening the "project.pros" file at the root of your project will open this custom settings editor.
