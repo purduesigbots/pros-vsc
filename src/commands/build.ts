@@ -22,7 +22,7 @@ const runBuild = async () => {
           `pros build-compile-commands --project ${vscode.workspace.workspaceFolders?.[0].uri.path} --machine-output`
         );
 
-        await vscode.window.showInformationMessage("Project Built!");
+        vscode.window.showInformationMessage("Project Built!");
       } catch (error) {
         throw new Error(parseErrorMessage(error.stdout));
       }

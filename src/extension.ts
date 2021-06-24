@@ -24,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
   workspaceContainsProjectPros().then((value) => {
-      vscode.commands.executeCommand("setContext", "pros.isPROSProject", value);
+    vscode.commands.executeCommand("setContext", "pros.isPROSProject", value);
   });
 
   const terminal = vscode.window.createTerminal("PROS Terminal");
@@ -38,19 +38,20 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand("pros.welcome");
   }
 
-  vscode.commands.registerCommand("pros.upload&build", () => {
+  vscode.commands.registerCommand("pros.upload&build", async () => {
     analytics.sendAction("upload&build");
-    buildUpload();
+    await vscode.commands.executeCommand("pros.build");
+    await vscode.commands.executeCommand("pros.upload");
   });
 
-  vscode.commands.registerCommand("pros.upload", () => {
+  vscode.commands.registerCommand("pros.upload", async () => {
     analytics.sendAction("upload");
-    upload();
+    await upload();
   });
 
-  vscode.commands.registerCommand("pros.build", () => {
+  vscode.commands.registerCommand("pros.build", async () => {
     analytics.sendAction("build");
-    build();
+    await build();
   });
 
   vscode.commands.registerCommand("pros.clean", clean);
@@ -96,7 +97,9 @@ export function activate(context: vscode.ExtensionContext) {
       )
     );
     const imgIconPath = panel.webview.asWebviewUri(
-      vscode.Uri.file(path.join(context.extensionPath, "media", "tree-view.png"))
+      vscode.Uri.file(
+        path.join(context.extensionPath, "media", "tree-view.png")
+      )
     );
     const imgActionPath = panel.webview.asWebviewUri(
       vscode.Uri.file(
@@ -159,7 +162,10 @@ export function deactivate() {
 async function workspaceContainsProjectPros(): Promise<boolean> {
   const filename = "project.pros";
 
-  if (vscode.workspace.workspaceFolders === undefined || vscode.workspace.workspaceFolders === null) {
+  if (
+    vscode.workspace.workspaceFolders === undefined ||
+    vscode.workspace.workspaceFolders === null
+  ) {
     return false;
   }
 
