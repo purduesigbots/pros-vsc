@@ -166,7 +166,7 @@ export class ProsProjectEditorProvider
   private setSlot(document: vscode.TextDocument, e: any) {
     const json = this.getDocumentAsJson(document);
 
-    json["py/state"]["upload_options"]["slot"] = e["slot"];
+    json["py/state"]["upload_options"]["slot"] = parseInt(e["slot"]);
 
     return this.updateTextDocument(document, json);
   }
