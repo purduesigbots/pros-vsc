@@ -1,4 +1,6 @@
 [![Build Status](https://dev.azure.com/purdue-acm-sigbots/VSCode%20Extension/_apis/build/status/purduesigbots.pros-vsc?branchName=develop)](https://dev.azure.com/purdue-acm-sigbots/VSCode%20Extension/_build/latest?definitionId=12&branchName=develop)
+[![](https://vsmarketplacebadge.apphb.com/version-short/sigbots.pros.svg)](https://marketplace.visualstudio.com/items?itemName=sigbots.pros)
+
 
 <p align="center">
   <br />

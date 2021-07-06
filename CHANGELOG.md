@@ -2,11 +2,11 @@
 
 Below are our release notes with their release dates corresponding to each version.
 
-## [Released]
+## [0.1.1] - 2021-07-06 - Beta Version
+### Added
+- Fix Upload Slot Bug
 
-## [Unreleased]
-
-## [0.0.1] - 2021-09-20 - Beta Version
+## [0.0.1] - 2021-06-20 - Beta Version
 ### Added
 - Welcome page set up.
 - Added tree view action menu.
