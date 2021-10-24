@@ -17,10 +17,13 @@ import {
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
+import { install } from "./install";
 
 let analytics: Analytics;
 
 export function activate(context: vscode.ExtensionContext) {
+  install(context);
+
   analytics = new Analytics(context);
 
   workspaceContainsProjectPros().then((value) => {

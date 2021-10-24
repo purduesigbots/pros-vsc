@@ -194,7 +194,9 @@
     "@types/semver": "^7.3.6",
     "@types/universal-analytics": "^0.4.4",
     "axios": "^0.21.1",
+    "node-fetch": " 2.0.0",
     "semver": "^7.3.5",
-    "universal-analytics": "^0.4.23"
+    "universal-analytics": "^0.4.23",
+    "unzipper": "^0.10.11"
   }
 }
