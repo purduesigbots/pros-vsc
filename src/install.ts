@@ -24,41 +24,28 @@ export async function install(context: vscode.ExtensionContext) {
         );
         if (labelResponse.label === "Install it now!") {
             vscode.window.showInformationMessage("Install it now!");
-            const storagePath = context.globalStorageUri.fsPath;
-            const dirs = await createDirs(storagePath);
+            const dirs = await createDirs(context.globalStorageUri.fsPath);
             var response = null;
             if (process.platform === "win32") {
-                response = await fetch("https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-macos.zip");
+                // Need some appropriate zip for windows, just installing msi for now
+                // await download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros-windows-msi-3.2.2.0.msi", "pros-cli-windows.zip");
+                await download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.zip", "pros-toolchain-windows.zip");
             } else if (process.platform === "darwin") {
-                response = await fetch("https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-macos.zip");
+                await download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-macos.zip", "pros-cli-macos.zip");
+                await download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2", "pros-toolchain-macos.tar.bz2", true);
+
             } else if (process.platform === "linux") {
-                response = await fetch("https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-lin-64bit.zip");
+                await download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-lin-64bit.zip", "pros-cli-linux.zip");
+                await download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2", "pros-toolchain-linux.tar.bz2", true);
             }
 
-            if (!response.ok) {
-                throw new Error(`Failed to download $url`);
-            } else if (response.body) {
-                const size = Number(response.headers.get('content-length'));
-                let read = 0;
-                response.body.on('data', (chunk: Buffer) => {
-                    read += chunk.length;
-                    // progress(read / size);
-                });
-                const out = fs.createWriteStream(storagePath + '/download/pros_cli-3.2.2-macos.zip');
-                await promisify(stream.pipeline)(response.body, out).catch(e => {
-                    // Clean up the partial file if the download failed.
-                    fs.unlink(storagePath + '/download/pros_cli-3.2.2-macos.zip', (_) => null); // Don't wait, and ignore error.
-                    throw e;
-                });
-            }
-
-            const archive = await unzipper.Open.file(storagePath + '/download/pros_cli-3.2.2-macos.zip');
-            await archive.extract({ path: storagePath + '/install/pros_cli-3.2.2-macos.zip' });
             vscode.window.showInformationMessage("Install Complete");
-
         } else {
             vscode.window.showInformationMessage("Install it later!");
         }
+    } else {
+        // User already has the CLI installed
+        vscode.window.showInformationMessage("PROS CLI is already Installed!");
     }
 }
 
@@ -70,4 +57,33 @@ async function createDirs(storagePath: string) {
     }
     vscode.window.showInformationMessage(`Folders created`);
     return { install: install, download: download };
+}
+
+async function download(context: vscode.ExtensionContext, downloadURL: string, storagePath: string, bz2: boolean = false) {
+    const response = await fetch(downloadURL);
+    if (!response.ok) {
+        throw new Error(`Failed to download $url`);
+    } else if (response.body) {
+        const size = Number(response.headers.get('content-length'));
+        let read = 0;
+        response.body.on('data', (chunk: Buffer) => {
+            read += chunk.length;
+            // progress(read / size);
+        });
+        const globalPath = context.globalStorageUri.fsPath;
+        const out = fs.createWriteStream(globalPath + '/download/' + storagePath);
+        await promisify(stream.pipeline)(response.body, out).catch(e => {
+            // Clean up the partial file if the download failed.
+            fs.unlink(globalPath + '/download/' + storagePath, (_) => null); // Don't wait, and ignore error.
+            throw e;
+        });
+        if (bz2) {
+            // First decompress bz2 file then extract tar 
+            
+        } else {
+            const archive = await unzipper.Open.file(globalPath + '/download/' + storagePath);
+            await archive.extract({ path: globalPath + '/install/' });
+        }
+
+    }
 }
