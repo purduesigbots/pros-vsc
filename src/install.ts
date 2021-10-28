@@ -6,9 +6,10 @@ import * as stream from 'stream';
 import fetch from "node-fetch";
 import * as unzipper from 'unzipper';
 import { getVersion } from '@purduesigbots/pros-cli-middleware';
+import { window, ProgressLocation} from 'vscode';
+
 
 export async function install(context: vscode.ExtensionContext) {
-    vscode.window.showInformationMessage("Beginning One-Click Install...");
 
     var cliVersion = null;
     // cliVersion = await getVersion();
@@ -23,7 +24,6 @@ export async function install(context: vscode.ExtensionContext) {
             }
         );
         if (labelResponse.label === "Install it now!") {
-            vscode.window.showInformationMessage("Install it now!");
             const dirs = await createDirs(context.globalStorageUri.fsPath);
             var response = null;
             if (process.platform === "win32") {
@@ -33,12 +33,10 @@ export async function install(context: vscode.ExtensionContext) {
             } else if (process.platform === "darwin") {
                 await download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-macos.zip", "pros-cli-macos.zip");
                 await download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2", "pros-toolchain-macos.tar.bz2", true);
-
             } else if (process.platform === "linux") {
                 await download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-lin-64bit.zip", "pros-cli-linux.zip");
                 await download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2", "pros-toolchain-linux.tar.bz2", true);
             }
-
             vscode.window.showInformationMessage("Install Complete");
         } else {
             vscode.window.showInformationMessage("Install it later!");
@@ -55,35 +53,47 @@ async function createDirs(storagePath: string) {
     for (const dir of [install, download]) {
         await fs.promises.mkdir(dir, { 'recursive': true });
     }
-    vscode.window.showInformationMessage(`Folders created`);
     return { install: install, download: download };
 }
 
 async function download(context: vscode.ExtensionContext, downloadURL: string, storagePath: string, bz2: boolean = false) {
-    const response = await fetch(downloadURL);
-    if (!response.ok) {
-        throw new Error(`Failed to download $url`);
-    } else if (response.body) {
-        const size = Number(response.headers.get('content-length'));
-        let read = 0;
-        response.body.on('data', (chunk: Buffer) => {
-            read += chunk.length;
-            // progress(read / size);
+    window.withProgress({
+        location: ProgressLocation.Notification,
+        title: "Installing: " + storagePath,
+        cancellable: true
+    }, async (progress, token) => {
+        token.onCancellationRequested(() => {
+            console.log("User canceled the long running operation");
         });
-        const globalPath = context.globalStorageUri.fsPath;
-        const out = fs.createWriteStream(globalPath + '/download/' + storagePath);
-        await promisify(stream.pipeline)(response.body, out).catch(e => {
-            // Clean up the partial file if the download failed.
-            fs.unlink(globalPath + '/download/' + storagePath, (_) => null); // Don't wait, and ignore error.
-            throw e;
-        });
-        if (bz2) {
-            // First decompress bz2 file then extract tar 
-            
-        } else {
-            const archive = await unzipper.Open.file(globalPath + '/download/' + storagePath);
-            await archive.extract({ path: globalPath + '/install/' });
-        }
+        const response = await fetch(downloadURL);
+        progress.report({ increment: 0 });
+        if (!response.ok) {
+            throw new Error(`Failed to download $url`);
+        } else if (response.body) {
+            const size = Number(response.headers.get('content-length'));
+            let read = 0;
+            response.body.on('data', (chunk: Buffer) => {
+                read += chunk.length;
+                progress.report({ increment: read / size });
+            });
+            const globalPath = context.globalStorageUri.fsPath;
+            const out = fs.createWriteStream(globalPath + '/download/' + storagePath);
+            await promisify(stream.pipeline)(response.body, out).catch(e => {
+                // Clean up the partial file if the download failed.
+                fs.unlink(globalPath + '/download/' + storagePath, (_) => null); // Don't wait, and ignore error.
+                throw e;
+            });
+            if (bz2) {
+                // Decompress bz2 file then extract tar 
+            } else {
+                const archive = await unzipper.Open.file(globalPath + '/download/' + storagePath);
+                await archive.extract({ path: globalPath + '/install/' });
+            }
 
-    }
+        }
+    });
+
+
+
+
 }
