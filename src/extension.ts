@@ -22,8 +22,6 @@ import { install } from "./install";
 let analytics: Analytics;
 
 export function activate(context: vscode.ExtensionContext) {
-  install(context);
-
   analytics = new Analytics(context);
 
   workspaceContainsProjectPros().then((value) => {
@@ -154,6 +152,8 @@ export function activate(context: vscode.ExtensionContext) {
     "prosTreeview",
     new TreeDataProvider()
   );
+
+  install(context);
 
   context.subscriptions.push(ProsProjectEditorProvider.register(context));
 }
