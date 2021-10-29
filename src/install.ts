@@ -6,7 +6,8 @@ import * as stream from 'stream';
 import fetch from "node-fetch";
 import * as unzipper from 'unzipper';
 import { getVersion } from '@purduesigbots/pros-cli-middleware';
-import { window, ProgressLocation} from 'vscode';
+import { window, ProgressLocation } from 'vscode';
+var Bunzip = require('seek-bzip');
 
 
 export async function install(context: vscode.ExtensionContext) {
@@ -70,12 +71,13 @@ async function download(context: vscode.ExtensionContext, downloadURL: string, s
         if (!response.ok) {
             throw new Error(`Failed to download $url`);
         } else if (response.body) {
-            const size = Number(response.headers.get('content-length'));
-            let read = 0;
-            response.body.on('data', (chunk: Buffer) => {
-                read += chunk.length;
-                progress.report({ increment: read / size });
-            });
+            // const size = Number(response.headers.get('content-length'));
+            // let read = 0;
+            // response.body.on('data', (chunk: Buffer) => {
+            //     read += chunk.length;
+            //     progress.report({ increment: read / size });
+            // });
+            progress.report({ increment: 20 });
             const globalPath = context.globalStorageUri.fsPath;
             const out = fs.createWriteStream(globalPath + '/download/' + storagePath);
             await promisify(stream.pipeline)(response.body, out).catch(e => {
@@ -84,12 +86,18 @@ async function download(context: vscode.ExtensionContext, downloadURL: string, s
                 throw e;
             });
             if (bz2) {
-                // Decompress bz2 file then extract tar 
+                vscode.window.showInformationMessage("Extracting bz2: " + storagePath);
+                var compressedData = fs.readFileSync(globalPath + '/download/' + storagePath);
+                var data = Bunzip.decode(compressedData);
+                storagePath = storagePath.replace(".bz2", "");
+                fs.writeFileSync(globalPath + '/download/' + storagePath, data);
+                // Extract from tar now
+
             } else {
                 const archive = await unzipper.Open.file(globalPath + '/download/' + storagePath);
                 await archive.extract({ path: globalPath + '/install/' });
             }
-
+            progress.report({ increment: 50 });
         }
     });
 
