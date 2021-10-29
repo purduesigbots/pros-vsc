@@ -30,15 +30,14 @@ export async function install(context: vscode.ExtensionContext) {
             if (process.platform === "win32") {
                 // Need some appropriate zip for windows, just installing msi for now
                 // await download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros-windows-msi-3.2.2.0.msi", "pros-cli-windows.zip");
-                await download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.zip", "pros-toolchain-windows.zip");
+                download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.zip", "pros-toolchain-windows.zip");
             } else if (process.platform === "darwin") {
-                await download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-macos.zip", "pros-cli-macos.zip");
-                await download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2", "pros-toolchain-macos.tar.bz2", true);
+                download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-macos.zip", "pros-cli-macos.zip");
+                download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2", "pros-toolchain-macos.tar.bz2", true);
             } else if (process.platform === "linux") {
-                await download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-lin-64bit.zip", "pros-cli-linux.zip");
-                await download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2", "pros-toolchain-linux.tar.bz2", true);
+                download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-lin-64bit.zip", "pros-cli-linux.zip");
+                download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2", "pros-toolchain-linux.tar.bz2", true);
             }
-            vscode.window.showInformationMessage("Install Complete");
         } else {
             vscode.window.showInformationMessage("Install it later!");
         }
@@ -57,7 +56,7 @@ async function createDirs(storagePath: string) {
     return { install: install, download: download };
 }
 
-async function download(context: vscode.ExtensionContext, downloadURL: string, storagePath: string, bz2: boolean = false) {
+function download(context: vscode.ExtensionContext, downloadURL: string, storagePath: string, bz2: boolean = false) {
     window.withProgress({
         location: ProgressLocation.Notification,
         title: "Installing: " + storagePath,
@@ -71,13 +70,12 @@ async function download(context: vscode.ExtensionContext, downloadURL: string, s
         if (!response.ok) {
             throw new Error(`Failed to download $url`);
         } else if (response.body) {
-            // const size = Number(response.headers.get('content-length'));
-            // let read = 0;
-            // response.body.on('data', (chunk: Buffer) => {
-            //     read += chunk.length;
-            //     progress.report({ increment: read / size });
-            // });
-            progress.report({ increment: 20 });
+            const size = Number(response.headers.get('content-length'));
+            let read = 0;
+            response.body.on('data', (chunk: Buffer) => {
+                read += chunk.length;
+                progress.report({ increment: read / size });
+            });
             const globalPath = context.globalStorageUri.fsPath;
             const out = fs.createWriteStream(globalPath + '/download/' + storagePath);
             await promisify(stream.pipeline)(response.body, out).catch(e => {
@@ -97,7 +95,6 @@ async function download(context: vscode.ExtensionContext, downloadURL: string, s
                 const archive = await unzipper.Open.file(globalPath + '/download/' + storagePath);
                 await archive.extract({ path: globalPath + '/install/' });
             }
-            progress.report({ increment: 50 });
         }
     });
 
