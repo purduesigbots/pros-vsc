@@ -8,6 +8,7 @@ import * as unzipper from 'unzipper';
 import { getVersion } from '@purduesigbots/pros-cli-middleware';
 import { window, ProgressLocation } from 'vscode';
 var Bunzip = require('seek-bzip');
+var tar = require('tar-fs');
 
 
 export async function install(context: vscode.ExtensionContext) {
@@ -90,7 +91,7 @@ function download(context: vscode.ExtensionContext, downloadURL: string, storage
                 storagePath = storagePath.replace(".bz2", "");
                 fs.writeFileSync(globalPath + '/download/' + storagePath, data);
                 // Extract from tar now
-
+                fs.createReadStream(globalPath + '/download/' + storagePath).pipe(tar.extract(globalPath + '/install/'));
             } else {
                 const archive = await unzipper.Open.file(globalPath + '/download/' + storagePath);
                 await archive.extract({ path: globalPath + '/install/' });
