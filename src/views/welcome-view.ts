@@ -6,6 +6,8 @@ import axios from "axios";
 
 import { PREFIX } from "../commands/cli-parsing";
 import { getNonce } from "./nonce";
+import { install } from "../install";
+
 /**
  * Queries the server for the latest available library version.
  *
@@ -51,9 +53,11 @@ export function getWebviewContent(
 	newKernel: string,
 	newCli: string,
 	useGoogleAnalytics: boolean,
-	showWelcomeOnStartup: boolean
+	showWelcomeOnStartup: boolean,
+	context: vscode.ExtensionContext
 ) {
 	const nonce = getNonce();
+	install(context);
 
 	return `
 	<!DOCTYPE html>

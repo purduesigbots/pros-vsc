@@ -138,7 +138,8 @@ export function activate(context: vscode.ExtensionContext) {
       newKernel,
       newCli,
       useGoogleAnalytics,
-      showWelcomeOnStartup
+      showWelcomeOnStartup,
+      context
     );
 
     panel.webview.onDidReceiveMessage(async (message) => {
@@ -152,8 +153,6 @@ export function activate(context: vscode.ExtensionContext) {
     "prosTreeview",
     new TreeDataProvider()
   );
-
-  install(context);
 
   context.subscriptions.push(ProsProjectEditorProvider.register(context));
 }
