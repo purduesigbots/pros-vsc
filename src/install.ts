@@ -9,10 +9,12 @@ import { getVersion } from '@purduesigbots/pros-cli-middleware';
 import { window, ProgressLocation } from 'vscode';
 var Bunzip = require('seek-bzip');
 var tar = require('tar-fs');
+export var prosPath: string;
 
 
 export async function install(context: vscode.ExtensionContext) {
 
+    const globalPath = context.globalStorageUri.fsPath;
     var cliVersion = null;
     // cliVersion = await getVersion();
 
@@ -35,6 +37,9 @@ export async function install(context: vscode.ExtensionContext) {
             } else if (process.platform === "darwin") {
                 download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-macos.zip", "pros-cli-macos.zip");
                 download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2", "pros-toolchain-macos.tar.bz2", true);
+                process.env.PROS_TOOLCHAIN = globalPath + "/install/gcc-arm-none-eabi-10.3-2021.10/bin";
+                vscode.window.showInformationMessage(process.env.PROS_TOOLCHAIN);
+                prosPath = globalPath + "/install/pros-cli-3.2.2-macos/pros";
             } else if (process.platform === "linux") {
                 download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-lin-64bit.zip", "pros-cli-linux.zip");
                 download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2", "pros-toolchain-linux.tar.bz2", true);
