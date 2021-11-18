@@ -16,7 +16,7 @@ const fetchTarget = async (): Promise<{
   curOkapi: string | undefined;
 }> => {
   const { stdout, stderr } = await promisify(child_process.exec)(
-    `pros c info-project --project ${vscode.workspace.workspaceFolders?.[0].uri.path} --machine-output`
+    `pros c info-project --project ${vscode.workspace.workspaceFolders?.[0].uri.fsPath} --machine-output`
   );
 
   for (let e of stdout.split(/\r?\n/)) {
@@ -76,7 +76,7 @@ const fetchServerVersions = async (
  */
 const runUpgrade = async () => {
   const { stdout, stderr } = await promisify(child_process.exec)(
-    `pros c u --project ${vscode.workspace.workspaceFolders?.[0].uri.path} --machine-output`
+    `pros c u --project ${vscode.workspace.workspaceFolders?.[0].uri.fsPath} --machine-output`
   );
 
   const errorMessage = parseErrorMessage(stdout);
