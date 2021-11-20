@@ -31,17 +31,16 @@ export async function install(context: vscode.ExtensionContext) {
             const dirs = await createDirs(context.globalStorageUri.fsPath);
             var response = null;
             if (process.platform === "win32") {
-                // Need some appropriate zip for windows, just installing msi for now
-                // await download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros-windows-msi-3.2.2.0.msi", "pros-cli-windows.zip");
+                download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.3/pros_cli-3.2.3-win-64bit.zip", "pros-cli-windows.zip");
                 download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.zip", "pros-toolchain-windows.zip");
             } else if (process.platform === "darwin") {
-                download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-macos.zip", "pros-cli-macos.zip");
+                download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.3/pros_cli-3.2.3-macos-64bit.zip", "pros-cli-macos.zip");
                 download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2", "pros-toolchain-macos.tar.bz2", true);
                 process.env.PROS_TOOLCHAIN = globalPath + "/install/gcc-arm-none-eabi-10.3-2021.10/bin";
                 vscode.window.showInformationMessage(process.env.PROS_TOOLCHAIN);
                 prosPath = globalPath + "/install/pros-cli-3.2.2-macos/pros";
             } else if (process.platform === "linux") {
-                download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.2/pros_cli-3.2.2-lin-64bit.zip", "pros-cli-linux.zip");
+                download(context, "https://github.com/purduesigbots/pros-cli/releases/download/3.2.3/pros_cli-3.2.3-lin-64bit.zip", "pros-cli-linux.zip");
                 download(context, "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2", "pros-toolchain-linux.tar.bz2", true);
             }
         } else {
