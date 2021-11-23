@@ -23,6 +23,7 @@ let analytics: Analytics;
 
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
+  install(context);
 
   workspaceContainsProjectPros().then((value) => {
     vscode.commands.executeCommand("setContext", "pros.isPROSProject", value);
