@@ -17,7 +17,6 @@ export var prosPath: string;
 export async function install(context: vscode.ExtensionContext) {
 
     const globalPath = context.globalStorageUri.fsPath;
-    await window.showInformationMessage("Popup to pause install script to fix bug. REMOVE BEFORE RELEASE");
     var cliVersion = null;
     // cliVersion = await getVersion();
 
@@ -55,6 +54,13 @@ export async function install(context: vscode.ExtensionContext) {
     } else {
         // User already has the CLI installed
         vscode.window.showInformationMessage("PROS CLI is already Installed!");
+        if (
+            vscode.workspace
+              .getConfiguration("pros")
+              .get<boolean>("showWelcomeOnStartup")
+          ) {
+            vscode.commands.executeCommand("pros.welcome");
+          }
     }
 }
 

@@ -32,14 +32,6 @@ export function activate(context: vscode.ExtensionContext) {
   const terminal = vscode.window.createTerminal("PROS Terminal");
   terminal.sendText("pros build-compile-commands");
 
-  if (
-    vscode.workspace
-      .getConfiguration("pros")
-      .get<boolean>("showWelcomeOnStartup")
-  ) {
-    vscode.commands.executeCommand("pros.welcome");
-  }
-
   vscode.commands.registerCommand("pros.upload&build", async () => {
     analytics.sendAction("upload&build");
     await vscode.commands.executeCommand("pros.build");
