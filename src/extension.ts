@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
   ) {
     vscode.commands.executeCommand("pros.welcome");
   }
-
+  
   vscode.commands.registerCommand("pros.upload&build", async () => {
     analytics.sendAction("upload&build");
     await vscode.commands.executeCommand("pros.build");
