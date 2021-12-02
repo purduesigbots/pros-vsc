@@ -54,13 +54,6 @@ export async function install(context: vscode.ExtensionContext) {
     } else {
         // User already has the CLI installed
         vscode.window.showInformationMessage("PROS CLI is already Installed!");
-        if (
-            vscode.workspace
-              .getConfiguration("pros")
-              .get<boolean>("showWelcomeOnStartup")
-          ) {
-            vscode.commands.executeCommand("pros.welcome");
-          }
     }
 }
 
