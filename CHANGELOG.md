@@ -2,6 +2,10 @@
 
 Below are our release notes with their release dates corresponding to each version.
 
+## [0.1.2] - 2021-11-18 - Beta Version
+### Added
+- Fix Path Bug
+
 ## [0.1.1] - 2021-07-06 - Beta Version
 ### Added
 - Fix Upload Slot Bug
