@@ -6,6 +6,7 @@ import {
   getWebviewContent,
   fetchKernelVersion,
   fetchCliVersion,
+  fetchKernelVersionNonCLIDependent,
 } from "./views/welcome-view";
 import {
   buildUpload,
@@ -116,7 +117,7 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.Uri.file(path.join(context.extensionPath, "media", "welcome.js"))
     );
 
-    const newKernel = await fetchKernelVersion();
+    const newKernel = await fetchKernelVersionNonCLIDependent();
     const newCli = await fetchCliVersion();
 
     const useGoogleAnalytics =

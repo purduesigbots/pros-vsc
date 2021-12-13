@@ -27,7 +27,7 @@ const runBuild = async () => {
         const { stdout, stderr } = await promisify(child_process.exec)(
           CLI_EXEC_PATH + ` build-compile-commands --project ${vscode.workspace.workspaceFolders?.[0].uri.fsPath} --machine-output`
         );
-
+        vscode.window.showInformationMessage("Project Built!");
       } catch (error) {
         throw new Error(parseErrorMessage(error.stdout));
       }

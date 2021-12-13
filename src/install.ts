@@ -5,7 +5,7 @@ import { promisify } from "util";
 import * as stream from 'stream';
 //import fetch from 'node-fetch';
 //import * as unzipper from 'unzipper';
-var fetch = require('node-fetch')
+var fetch = require('node-fetch');
 var unzipper = require('unzipper');
 import { getVersion } from '@purduesigbots/pros-cli-middleware';
 import { window, ProgressLocation } from 'vscode';
