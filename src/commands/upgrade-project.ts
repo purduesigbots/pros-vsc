@@ -4,20 +4,21 @@ import { promisify } from "util";
 import { gt } from "semver";
 
 import { PREFIX, parseErrorMessage } from "./cli-parsing";
-import {TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP} from "../install"
+import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../install"
 import * as path from 'path';
 /**
  * Queries the PROS project data for the target device.
  *
  * @returns The project's target device and the associated library versions.
  */
-const setVariables = async() => { 
-  if(!(TOOLCHAIN == "LOCAL")) {
+const setVariables = async () => {
+  if (!(TOOLCHAIN == "LOCAL")) {
     process.env.PROS_TOOLCHAIN = TOOLCHAIN;
   }
   console.log(CLI_EXEC_PATH);
   console.log(process.env.PROS_TOOLCHAIN);
-  process.env.PATH += PATH_SEP+CLI_EXEC_PATH;
+  process.env.PATH += PATH_SEP + CLI_EXEC_PATH;
+  process.env.LC_ALL = "en_US.utf-8";
 }
 
 const fetchTarget = async (): Promise<{
@@ -25,7 +26,7 @@ const fetchTarget = async (): Promise<{
   curKernel: string;
   curOkapi: string | undefined;
 }> => {
-  var command = `"${path.join(CLI_EXEC_PATH,"pros")}" c info-project --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
+  var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c info-project --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
   console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
     command/*, {timeout : 15000}*/
@@ -59,7 +60,7 @@ const fetchTarget = async (): Promise<{
 const fetchServerVersions = async (
   target: string
 ): Promise<{ newKernel: string; newOkapi: string | undefined }> => {
-  var command = `"${path.join(CLI_EXEC_PATH,"pros")}" c q --target ${target} --machine-output`
+  var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c q --target ${target} --machine-output`
   console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
     command/*, {timeout : 15000}*/
@@ -91,7 +92,7 @@ const fetchServerVersions = async (
  * Actually performs the upgrade to the latest library versions for the project.
  */
 const runUpgrade = async () => {
-  var command = `"${path.join(CLI_EXEC_PATH,"pros")}" c u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
+  var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
   console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
     command/*, {timeout : 15000}*/

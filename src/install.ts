@@ -3,6 +3,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { promisify } from "util";
 import * as stream from 'stream';
+import * as child_process from "child_process";
+import * as os from 'os';
 var fetch = require('node-fetch');
 var unzipper = require('unzipper');
 import { window, ProgressLocation } from 'vscode';
@@ -34,11 +36,16 @@ export async function install(context: vscode.ExtensionContext) {
         system = "macos";
         download_cli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-macos-64bit.zip`;
         download_toolchain = "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2";
+        os.cpus().forEach(function (cpu) {
+            if (cpu.model.includes("Apple M1")) {
+                download_cli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-macos-arm64bit.zip`;
+            }
+        });
     }
 
     // Set the installed file names
     var cli_name = `pros-cli-${system}.zip`;
-    var toolchain_name = `pros-toolchain-${system==="windows" ? `${system}.zip` : `${system}.tar.bz2`}`;
+    var toolchain_name = `pros-toolchain-${system === "windows" ? `${system}.zip` : `${system}.tar.bz2`}`;
     if (cliVersion === null) {
         // Ask user to install CLI if it is not installed.
         const labelResponse = await vscode.window.showQuickPick(
@@ -77,7 +84,7 @@ function paths(globalPath: string, system: string) {
         TOOLCHAIN = "LOCAL"
     } else {
         // Set toolchain environmental variable file location
-        TOOLCHAIN = path.join(globalPath, "install", `pros-toolchain-${system==="windows" ? path.join("windows","usr") : system}`);
+        TOOLCHAIN = path.join(globalPath, "install", `pros-toolchain-${system === "windows" ? path.join("windows", "usr") : system}`);
         // Set CLI environmental variable file location
         CLI_EXEC_PATH = path.join(globalPath, "install", `pros-cli-${system}`);
     }
@@ -145,27 +152,38 @@ function download(context: vscode.ExtensionContext, downloadURL: string, storage
                 storagePath = storagePath.replace(".bz2", "");
                 fs.writeFileSync(globalPath + '/download/' + storagePath, data);
                 // Extract from tar now
-                fs.createReadStream(globalPath + '/download/' + storagePath).pipe(tar.extract(globalPath + '/install/'));
+                fs.createReadStream(globalPath + '/download/' + storagePath).pipe(tar.extract(globalPath + '/install/'))
+                    .on('finish', function () {
+                        console.log("Extracted");
+                        fs.readdir(globalPath + '/install/', (err, files) => {
+                            files.forEach(file => {
+                                if (!file.includes("pros-cli-")) {
+                                    storagePath = storagePath.replace(".tar", "");
+                                    fs.renameSync(globalPath + '/install/' + file, globalPath + '/install/' + storagePath);
+                                }
+                            });
+                        });
+                    });
                 vscode.window.showInformationMessage("Finished extracting bz2: " + storagePath);
-                // fs.readdir(globalPath + '/install/', (err, files) => {
-                //     console.log(err);
-                //     console.log(files);
-                //     files.forEach(file => {
-                //         if (!file.includes("pros-cli-")) {
-                //             fs.rename(path.join(globalPath, 'install', file), path.join(globalPath, 'install', "pros-toolchain-" + system), (err) => {
-                //                 console.log(err);
-                //             });
-                //         }
-                //     });
-                // });
-
             } else {
                 vscode.window.showInformationMessage("Extracting: " + storagePath);
                 fs.createReadStream(globalPath + '/download/' + storagePath).pipe(unzipper.Extract({ path: globalPath + '/install/' + storagePath.replace(".zip", "") }));
                 vscode.window.showInformationMessage("Finished extracting: " + storagePath);
             }
         }
-    paths(globalPath,system);
+
+        // try {
+        //     var command = `chmod -R +x "${path.join(globalPath, "install", storagePath)}"`;
+        //     console.log(command);
+        //     const { stdout, stderr } = await promisify(child_process.exec)(
+        //         command, { timeout: 60000 }
+        //     );
+        //     console.log(stdout);
+        // } catch (error) {
+        //     console.log(error.stdout);
+        // }
+
+        paths(globalPath, system);
     });
     paths(globalPath, system);
 }
