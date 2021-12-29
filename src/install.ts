@@ -19,31 +19,28 @@ export async function install(context: vscode.ExtensionContext) {
     var version = await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest');
     console.log("Current CLI Version: " + version);
 
-    var download_cli = "N";
-    var cli_name = "N";
-    var download_toolchain = "N";
-    var toolchain_name = "N";
-    var system = "windows";
+    // Get system type, path string separator, CLI download url, and toolchain download url.
+    // Default variables are based on linux.
+    var download_cli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-lin-64bit.zip`;
+    var download_toolchain = "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2";
+    var system = "linux";
+    PATH_SEP = ":";
     if (process.platform === "win32") {
         system = "windows";
         PATH_SEP = ";";
-        download_cli = "https://github.com/purduesigbots/pros-cli/releases/download/" + version + "/pros_cli-" + version + "-win-64bit.zip";
-        download_toolchain = "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.zip";
+        download_cli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-win-64bit.zip`;
+        download_toolchain = "https://artprodcus3.artifacts.visualstudio.com/A268c8aad-3bb0-47d2-9a57-cf06a843d2e8/3a3f509b-ad80-4d2a-8bba-174ad5fd1dde/_apis/artifact/cGlwZWxpbmVhcnRpZmFjdDovL3B1cmR1ZS1hY20tc2lnYm90cy9wcm9qZWN0SWQvM2EzZjUwOWItYWQ4MC00ZDJhLThiYmEtMTc0YWQ1ZmQxZGRlL2J1aWxkSWQvMjg4Ni9hcnRpZmFjdE5hbWUvdG9vbGNoYWluLTY0Yml00/content?format=file&subPath=%2Fpros-toolchain-w64-3.0.1-standalone.zip";
     } else if (process.platform === "darwin") {
         system = "macos";
-        PATH_SEP = ":";
-        download_cli = "https://github.com/purduesigbots/pros-cli/releases/download/" + version + "/pros_cli-" + version + "-macos-64bit.zip";
+        download_cli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-macos-64bit.zip`;
         download_toolchain = "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2";
-    } else if (process.platform === "linux") {
-        system = "linux";
-        PATH_SEP = ":";
-        download_cli = "https://github.com/purduesigbots/pros-cli/releases/download/" + version + "/pros_cli-" + version + "-lin-64bit.zip";
-        download_toolchain = "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2";
     }
 
-    cli_name = "pros-cli-" + system + ".zip";
-    toolchain_name = "pros-toolchain-" + system + (system === "windows" ? ".zip" : ".tar.bz2");
+    // Set the installed file names
+    var cli_name = `pros-cli-${system}.zip`;
+    var toolchain_name = `pros-toolchain-${system==="windows" ? `${system}.zip` : `${system}.tar.bz2`}`;
     if (cliVersion === null) {
+        // Ask user to install CLI if it is not installed.
         const labelResponse = await vscode.window.showQuickPick(
             [{ label: "Install it now!", description: "recommended" }, { label: "No I am good" }],
             {
@@ -53,6 +50,7 @@ export async function install(context: vscode.ExtensionContext) {
             }
         );
         if (labelResponse!.label === "Install it now!") {
+            // Install CLI if user chooses to.
             const dirs = await createDirs(context.globalStorageUri.fsPath);
             var response = null;
             download(context, download_cli, cli_name, system);
@@ -64,26 +62,26 @@ export async function install(context: vscode.ExtensionContext) {
         // User already has the CLI installed
         vscode.window.showInformationMessage("PROS CLI is already Installed!");
     }
+    // Set path variables to toolchain and CLI
     paths(globalPath, system);
 }
 
-async function paths(globalPath: string, system: string) {
-    var one_clicked = fs.existsSync(path.join(globalPath, "install", "pros-cli-" + system));
+function paths(globalPath: string, system: string) {
+    console.log(path.join(globalPath, "install", `pros-cli-${system}`));
+    // Check if user has CLI installed through one-click or other means.
+    var one_clicked = fs.existsSync(path.join(globalPath, "install", `pros-cli-${system}`));
 
     if (!one_clicked) {
+        // Use system defaults if user does not have one-click CLI
         CLI_EXEC_PATH = "pros";
         TOOLCHAIN = "LOCAL"
     } else {
-
-        //CLI_EXEC_PATH gets quotes but TOOLCHAIN doesn't because reasons.....
-        TOOLCHAIN = path.join(globalPath, "install", "pros-toolchain-" + system, "usr");
-        //Do we put a .exe extension onto the exec path if the user is on windows? right now no.
-        CLI_EXEC_PATH = "\"" + path.join(globalPath, "install", "pros-cli-" + system) + "\"";
-        //console.log(TOOLCHAIN);
-        //console.log(CLI_EXEC_PATH);
+        // Set toolchain environmental variable file location
+        TOOLCHAIN = path.join(globalPath, "install", `pros-toolchain-${system==="windows" ? path.join("windows","usr") : system}`);
+        // Set CLI environmental variable file location
+        CLI_EXEC_PATH = path.join(globalPath, "install", `pros-cli-${system}`);
     }
 
-    //SHELL = (system=="windows" ? path.join(TOOLCHAIN,"bin","sh.exe") : "None");
 }
 /*
 
@@ -167,6 +165,7 @@ function download(context: vscode.ExtensionContext, downloadURL: string, storage
                 vscode.window.showInformationMessage("Finished extracting: " + storagePath);
             }
         }
+    paths(globalPath,system);
     });
     paths(globalPath, system);
 }

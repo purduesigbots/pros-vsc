@@ -4,20 +4,33 @@ import { promisify } from "util";
 import { gt } from "semver";
 
 import { PREFIX, parseErrorMessage } from "./cli-parsing";
-
+import {TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP} from "../install"
+import * as path from 'path';
 /**
  * Queries the PROS project data for the target device.
  *
  * @returns The project's target device and the associated library versions.
  */
+const setVariables = async() => { 
+  if(!(TOOLCHAIN == "LOCAL")) {
+    process.env.PROS_TOOLCHAIN = TOOLCHAIN;
+  }
+  console.log(CLI_EXEC_PATH);
+  console.log(process.env.PROS_TOOLCHAIN);
+  process.env.PATH += PATH_SEP+CLI_EXEC_PATH;
+}
+
 const fetchTarget = async (): Promise<{
   target: string;
   curKernel: string;
   curOkapi: string | undefined;
 }> => {
+  var command = `"${path.join(CLI_EXEC_PATH,"pros")}" c info-project --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
+  console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
-    `pros c info-project --project ${vscode.workspace.workspaceFolders?.[0].uri.fsPath} --machine-output`
+    command/*, {timeout : 15000}*/
   );
+  console.log(stdout);
 
   for (let e of stdout.split(/\r?\n/)) {
     if (e.startsWith(PREFIX)) {
@@ -46,9 +59,12 @@ const fetchTarget = async (): Promise<{
 const fetchServerVersions = async (
   target: string
 ): Promise<{ newKernel: string; newOkapi: string | undefined }> => {
+  var command = `"${path.join(CLI_EXEC_PATH,"pros")}" c q --target ${target} --machine-output`
+  console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
-    `pros c q --target ${target} --machine-output`
+    command/*, {timeout : 15000}*/
   );
+  console.log(stdout);
 
   let newKernel = "0.0.0";
   let newOkapi = "0.0.0";
@@ -75,9 +91,12 @@ const fetchServerVersions = async (
  * Actually performs the upgrade to the latest library versions for the project.
  */
 const runUpgrade = async () => {
+  var command = `"${path.join(CLI_EXEC_PATH,"pros")}" c u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
+  console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
-    `pros c u --project ${vscode.workspace.workspaceFolders?.[0].uri.fsPath} --machine-output`
+    command/*, {timeout : 15000}*/
   );
+  console.log(stdout);
 
   const errorMessage = parseErrorMessage(stdout);
   if (errorMessage) {
@@ -115,6 +134,7 @@ const userApproval = async (
 
 export const upgradeProject = async () => {
   try {
+    await setVariables();
     const { target, curKernel, curOkapi } = await fetchTarget();
     const { newKernel, newOkapi } = await fetchServerVersions(target);
     if (curKernel === newKernel && curOkapi === newOkapi) {
