@@ -4,7 +4,7 @@ import { promisify } from "util";
 import { gt } from "semver";
 
 import { PREFIX, parseErrorMessage } from "./cli-parsing";
-import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../install"
+import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install"
 import * as path from 'path';
 /**
  * Queries the PROS project data for the target device.

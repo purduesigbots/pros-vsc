@@ -6,7 +6,7 @@ import axios from "axios";
 
 import { PREFIX } from "../commands/cli-parsing";
 import { getNonce } from "./nonce";
-import { install } from "../install";
+import { install } from "../one-click/install";
 
 var fetch = require('node-fetch');
 /**

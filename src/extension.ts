@@ -18,7 +18,7 @@ import {
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
-import { install } from "./install";
+import { install } from "./one-click/install";
 
 let analytics: Analytics;
 

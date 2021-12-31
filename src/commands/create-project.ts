@@ -5,7 +5,7 @@ import * as path from "path";
 import * as fs from "fs";
 
 import { parseErrorMessage, PREFIX } from "./cli-parsing";
-import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../install"
+import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install"
 /**
  * Query the user for the directory where the project will be created.
  *

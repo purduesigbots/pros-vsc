@@ -4,7 +4,7 @@ import { promisify } from "util";
 
 import { parseErrorMessage } from "./cli-parsing";
 
-import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../install"
+import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install"
 import * as path from 'path';
 /**
  * Call the PROS build CLI command.
