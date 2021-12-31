@@ -9,7 +9,7 @@ import { promisify } from "util";
 import * as stream from 'stream';
 import * as child_process from "child_process";
 import { paths } from './install';
-
+import * as path from 'path';
 export function download(context: vscode.ExtensionContext, downloadURL: string, storagePath: string, system: string) {
     const globalPath = context.globalStorageUri.fsPath;
     var bz2 = false;
@@ -53,7 +53,26 @@ export function download(context: vscode.ExtensionContext, downloadURL: string, 
                         console.log("Extracted");
                         fs.readdir(globalPath + '/install/', (err, files) => {
                             files.forEach(file => {
-                                if (!file.includes("pros-cli-")) {
+                                if (file.includes("pros-cli-linux")) {
+                                    //chmod the files that linux needs chmodded
+                                    fs.chmodSync(path.join(globalPath,"install",file,"pros"),0o751);
+                                    console.log(`Chmod ${path.join(globalPath,"install",file,"pros")}`);
+                                    fs.chmodSync(path.join(globalPath,"install",file,"intercept-c++"),0o751);
+                                    fs.chmodSync(path.join(globalPath,"install",file,"intercept-cc"),0o751);
+                                } else if (file.includes("pros-cli-macos")) {
+                                    //chmod the files that mac needs chmodded
+                                    fs.readdir(globalPath + '/install/pros-cli-macos/lib/', (err, lib_files) => {
+                                        lib_files.forEach(exec => {
+                                            if(exec.endsWith(".so")) {
+                                                fs.chmodSync(path.join(globalPath,"install","pros-cli-macos","lib"),0o751);
+                                            }
+                                        });
+                                    });
+
+                                    fs.chmodSync(path.join(globalPath,"install",file,"pros"),0o751);
+                                    fs.chmodSync(path.join(globalPath,"install",file,"intercept-c++"),0o751);
+                                    fs.chmodSync(path.join(globalPath,"install",file,"intercept-cc"),0o751);
+                                } else if (!file.includes("pros-cli-")) {
                                     storagePath = storagePath.replace(".tar", "");
                                     fs.renameSync(globalPath + '/install/' + file, globalPath + '/install/' + storagePath);
                                 }
