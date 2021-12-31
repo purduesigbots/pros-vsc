@@ -56,6 +56,12 @@ export async function install(context: vscode.ExtensionContext) {
             var response = null;
             download(context, download_cli, cli_name, system);
             download(context, download_toolchain, toolchain_name, system);
+            // delete the "/install" directory
+            // try {
+            //     fs.rmdirSync(path.join(globalPath, 'download'), { recursive: true });
+            // } catch (error) {
+            //     console.log(error.stdout);
+            // }
         } else {
             vscode.window.showInformationMessage("Install it later!");
         }
