@@ -55,13 +55,8 @@ export async function install(context: vscode.ExtensionContext) {
             const dirs = await createDirs(context.globalStorageUri.fsPath);
             var response = null;
             download(context, download_cli, cli_name, system);
-            download(context, download_toolchain, toolchain_name, system);
-            // delete the "/install" directory
-            // try {
-            //     fs.rmdirSync(path.join(globalPath, 'download'), { recursive: true });
-            // } catch (error) {
-            //     console.log(error.stdout);
-            // }
+            download(context, download_toolchain, toolchain_name, system)
+            // await fs.promises.rmdir(dirs.download, { 'recursive': true });
         } else {
             vscode.window.showInformationMessage("Install it later!");
         }
