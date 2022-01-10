@@ -145,7 +145,7 @@ const runCreateProject = async (
         var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c n "${projectPath}" ${target} ${version} --machine-output`
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
-          command/*, {timeout : 15000}*/
+          command, { encoding: "utf8", maxBuffer: 1024 * 1024 * 5 }
         );
         console.log(stdout);
         if (stderr) {

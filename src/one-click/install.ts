@@ -52,11 +52,19 @@ export async function install(context: vscode.ExtensionContext) {
         );
         if (labelResponse!.label === "Install it now!") {
             // Install CLI if user chooses to.
+
+            //delete the directory
+            
+            //const returned = await fs.promises.rmdir(context.globalStorageUri.fsPath, { recursive: true });
+
+            //add install and download directories
             const dirs = await createDirs(context.globalStorageUri.fsPath);
             var response = null;
             download(context, download_cli, cli_name, system);
-            download(context, download_toolchain, toolchain_name, system)
-            // await fs.promises.rmdir(dirs.download, { 'recursive': true });
+            download(context, download_toolchain, toolchain_name, system);
+            //delete the download directory
+
+            //const clean = await fs.promises.rmdir(dirs.download, { recursive: true });
         } else {
             vscode.window.showInformationMessage("Install it later!");
         }
