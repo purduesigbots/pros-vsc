@@ -90,6 +90,10 @@
       {
         "command": "pros.welcome",
         "title": "PROS: Welcome"
+      },
+      {
+        "command": "pros.install",
+        "title": "PROS: Install PROS"
       }
     ],
     "menus": {
@@ -136,6 +140,10 @@
         {
           "when": "pros.isPROSProject",
           "command": "pros.upgrade"
+        },
+        {
+          "when": "pros.isPROSProject",
+          "command": "pros.install"
         }
       ]
     },
