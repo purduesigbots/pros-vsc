@@ -122,12 +122,13 @@ export function download(context: vscode.ExtensionContext, downloadURL: string, 
                                 if (err) throw err;
                             });
                         }
+                        vscode.window.showInformationMessage("Finished extracting: " + storagePath);
                     });
-                //vscode.window.showInformationMessage("Finished extracting: " + storagePath);
-            }
+                }
         }
-        vscode.window.showInformationMessage("Finished extracting: " + storagePath);
+        //vscode.window.showInformationMessage("Finished extracting: " + storagePath);
         paths(globalPath, system);
     });
     paths(globalPath, system);
+    return true;
 }

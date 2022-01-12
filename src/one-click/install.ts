@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as path from 'path';
 import * as os from 'os';
 import { download } from './download';
+import { promisify } from 'util';
 import * as fs from 'fs';
 var fetch = require('node-fetch');
 
@@ -9,6 +10,43 @@ var fetch = require('node-fetch');
 export var TOOLCHAIN: string;
 export var CLI_EXEC_PATH: string;
 export var PATH_SEP: string;
+/*
+
+Code that maybe works to wait for both toolchain and cli to be installed???
+a and b arguments are arrays in the format:
+{download_url, download_name, system_type}
+
+async function download_cli_and_toolchain(context:vscode.ExtensionContext,a:string[],b:string[]) {
+download(context,a[0],a[1],a[2]);
+await promisify(download)(context,b[0],b[1],b[2]);
+return true;
+}
+*/
+
+async function remove_dir_async(directory : string, begin : boolean) {
+    // get all files in directory
+    if(begin) {
+        vscode.window.showInformationMessage("Clearing directory");
+    }
+    const files = await fs.promises.readdir(directory);
+    if(files.length > 0) {
+        // iterate through found files and directory
+        for(const file of files) {
+            if((await fs.promises.lstat(path.join(directory,file))).isDirectory()) {
+                // if the file is found to be a directory,
+                // recursively call this function to remove subdirectory
+                await remove_dir_async(path.join(directory,file),false);
+            } else {
+                //delete the file
+                await fs.promises.unlink(path.join(directory,file));
+            }
+        }
+    }
+    // delete the directory now that it is empty.
+    await fs.promises.rmdir(directory, {recursive:true,maxRetries:20});
+    return true;
+}
+
 export async function install(context: vscode.ExtensionContext) {
     const globalPath = context.globalStorageUri.fsPath;
     var cliVersion = null;
@@ -55,16 +93,25 @@ export async function install(context: vscode.ExtensionContext) {
 
             //delete the directory
             
-            //const returned = await fs.promises.rmdir(context.globalStorageUri.fsPath, { recursive: true });
-
+            await remove_dir_async(context.globalStorageUri.fsPath,true);
+            console.log("reached end of clean");
             //add install and download directories
             const dirs = await createDirs(context.globalStorageUri.fsPath);
-            var response = null;
-            download(context, download_cli, cli_name, system);
-            download(context, download_toolchain, toolchain_name, system);
-            //delete the download directory
+            
+            /*
+            Code to potentially wait for the cli and toolchain to be downloaded.
 
-            //const clean = await fs.promises.rmdir(dirs.download, { recursive: true });
+            const cli_info = [download_cli,cli_name,system];
+            const toolchain_info = [download_toolchain,toolchain_name,system];
+            await download_cli_and_toolchain(context,cli_info,toolchain_info);
+            */
+
+            download(context,download_cli,cli_name,system);
+            download(context,download_toolchain,toolchain_name,system);
+
+            // Delete the download subdirectory once everything is installed
+
+            //await remove_dir_async(dirs.download,false);
         } else {
             vscode.window.showInformationMessage("Install it later!");
         }
