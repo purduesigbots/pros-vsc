@@ -11,13 +11,14 @@ import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install"
  *
  * @returns The path to the directory where the new project will go.
  */
-const setVariables = async () => {
+ const setVariables = async () => {
+  // Set PROS_TOOLCHAIN if one-click installed
   if (!(TOOLCHAIN == "LOCAL")) {
     process.env.PROS_TOOLCHAIN = TOOLCHAIN;
   }
-  console.log(CLI_EXEC_PATH);
-  console.log(process.env.PROS_TOOLCHAIN);
+  // Set pros executable path
   process.env.PATH += PATH_SEP + CLI_EXEC_PATH;
+  // Set language variable
   process.env.LC_ALL = "en_US.utf-8";
 }
 const selectDirectory = async () => {
@@ -83,6 +84,7 @@ const selectProjectName = async () => {
  * @returns A version string or "latest"
  */
 const selectKernelVersion = async (target: string) => {
+  // Command to run to fetch all kernel versions
   var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c ls-templates --target ${target} --machine-output`
   console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
@@ -91,6 +93,7 @@ const selectKernelVersion = async (target: string) => {
   let versions: vscode.QuickPickItem[] = [
     { label: "latest", description: "Recommended" },
   ];
+  // List all kernel versions as dropdown for users to select desired version.
   for (let e of stdout.split(/\r?\n/)) {
     if (e.startsWith(PREFIX)) {
       let jdata = JSON.parse(e.substr(PREFIX.length));
@@ -142,12 +145,13 @@ const runCreateProject = async (
     },
     async (progress, token) => {
       try {
+        // Command to run to make a new project with
+        // user specified name, version, and location
         var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c n "${projectPath}" ${target} ${version} --machine-output`
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
           command, { encoding: "utf8", maxBuffer: 1024 * 1024 * 5 }
         );
-        console.log(stdout);
         if (stderr) {
           throw new Error(stderr);
         }

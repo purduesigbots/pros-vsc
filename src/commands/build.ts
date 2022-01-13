@@ -10,12 +10,13 @@ import * as path from 'path';
  * @param slot The slot number to place the executable in
  */
 const setVariables = async () => {
+  // Set PROS_TOOLCHAIN if one-click installed
   if (!(TOOLCHAIN == "LOCAL")) {
     process.env.PROS_TOOLCHAIN = TOOLCHAIN;
   }
-  console.log(CLI_EXEC_PATH);
-  console.log(process.env.PROS_TOOLCHAIN);
+  // Set pros executable path
   process.env.PATH += PATH_SEP + CLI_EXEC_PATH;
+  // Set language variable
   process.env.LC_ALL = "en_US.utf-8";
 }
 
@@ -28,16 +29,15 @@ const runBuild = async () => {
     },
     async (progress, token) => {
       try {
-        var command = `"${path.join(CLI_EXEC_PATH, "pros")}" build-compile-commands --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}"`
+        // Command to run to build project
+        var command = `"${path.join(CLI_EXEC_PATH, "pros")}" build-compile-commands --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
           command, { timeout: 60000 }
         );
-        console.log(stdout);
         vscode.window.showInformationMessage("Project Built!");
       } catch (error) {
         vscode.window.showErrorMessage("Build Failed!");
-        console.log(error.stdout);
         throw new Error(parseErrorMessage(error.stdout));
       }
     }

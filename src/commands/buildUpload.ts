@@ -12,12 +12,13 @@ import * as path from 'path';
  * @param slot The slot number to place the executable in
  */
 const setVariables = async () => {
+  // Set PROS_TOOLCHAIN if one-click installed
   if (!(TOOLCHAIN == "LOCAL")) {
     process.env.PROS_TOOLCHAIN = TOOLCHAIN;
   }
-  console.log(CLI_EXEC_PATH);
-  console.log(process.env.PROS_TOOLCHAIN);
+  // Set pros executable path
   process.env.PATH += PATH_SEP + CLI_EXEC_PATH;
+  // Set language variable
   process.env.LC_ALL = "en_US.utf-8";
 }
 
@@ -30,12 +31,12 @@ const runBuildUpload = async () => {
     },
     async (progress, token) => {
       try {
+        // Command to run to build and upload project
         var command = `"${path.join(CLI_EXEC_PATH, "pros")}" mu --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
           command/*, {timeout : 15000}*/
         );
-        console.log(stdout);
         await vscode.window.showInformationMessage("Project Built!");
       } catch (error) {
         throw new Error(parseErrorMessage(error.stdout));

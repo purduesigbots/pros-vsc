@@ -12,6 +12,7 @@ import { paths } from './install';
 import * as path from 'path';
 export function download(context: vscode.ExtensionContext, downloadURL: string, storagePath: string, system: string) {
     const globalPath = context.globalStorageUri.fsPath;
+    // Check if file type is .tar.bz or .zip
     var bz2 = false;
     if (downloadURL.includes(".bz2")) {
         bz2 = true;
@@ -24,6 +25,7 @@ export function download(context: vscode.ExtensionContext, downloadURL: string, 
         token.onCancellationRequested(() => {
             console.log("User canceled the long running operation");
         });
+        // Fetch the file to download
         const response = await fetch(downloadURL);
         progress.report({ increment: 0 });
         if (!response.ok) {
@@ -35,6 +37,7 @@ export function download(context: vscode.ExtensionContext, downloadURL: string, 
                 read += chunk.length;
                 progress.report({ increment: read / size });
             });
+            // Write file contents to "sigbots.pros/download/filename.tar.bz2"
             const out = fs.createWriteStream(globalPath + '/download/' + storagePath);
             await promisify(stream.pipeline)(response.body, out).catch(e => {
                 // Clean up the partial file if the download failed.
@@ -43,13 +46,24 @@ export function download(context: vscode.ExtensionContext, downloadURL: string, 
             });
             if (bz2) {
                 vscode.window.showInformationMessage("Extracting bz2: " + storagePath);
+                // Read the contents of the bz2 file
                 var compressedData = fs.readFileSync(globalPath + '/download/' + storagePath);
+                // Decrypt the bz2 file contents.
                 var data = bunzip.decode(compressedData);
                 storagePath = storagePath.replace(".bz2", "");
                 fs.writeFileSync(globalPath + '/download/' + storagePath, data);
-                // Extract from tar now
+                // Write contents of the decrypted bz2 into "sigbots.pros/download/filename.tar"
                 fs.createReadStream(globalPath + '/download/' + storagePath).pipe(tar.extract(globalPath + '/install/'))
                     .on('finish', function () {
+                        /*
+                        The linux and mac toolchain are both .tar.bz2 files,
+                        the cli and toolchain are downloaded together,
+                        and the cli is smaller in size meaning it should finish extracting first.
+                        Therefore, we should be able to chmod the downloaded cli files
+                        Once the toolchain extraction completes.
+                        We also need to rename the extracted toolchain from "gcc-arm-none-eabi-version_number"
+                        to "pros-toolchain-system"
+                        */
                         console.log("Extracted");
                         fs.readdir(globalPath + '/install/', (err, files) => {
                             files.forEach(file => {
@@ -73,6 +87,7 @@ export function download(context: vscode.ExtensionContext, downloadURL: string, 
                                     fs.chmodSync(path.join(globalPath, "install", file, "intercept-c++"), 0o751);
                                     fs.chmodSync(path.join(globalPath, "install", file, "intercept-cc"), 0o751);
                                 } else if (!file.includes("pros-cli-")) {
+                                    // Rename the extracted toolchain to the proper name
                                     storagePath = storagePath.replace(".tar", "");
                                     fs.renameSync(globalPath + '/install/' + file, globalPath + '/install/' + storagePath);
                                 }
@@ -98,7 +113,7 @@ export function download(context: vscode.ExtensionContext, downloadURL: string, 
                                             folders.forEach(folder => {
                                                 if (!folder.includes("arm-none")) {
                                                     fs.readdir(path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir, folder), (errorsub, subfiles) => {
-                                                        console.log(`Copying ${folder} folder`);
+                                                        // console.log(`Copying ${folder} folder`);
                                                         // extract each file in subfolder
                                                         subfiles.forEach(subfile => {
                                                             var original_path = path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir, folder, subfile);

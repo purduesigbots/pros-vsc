@@ -11,12 +11,13 @@ import * as path from 'path';
  * @param slot The slot number to place the executable in
  */
 const setVariables = async () => {
+  // Set PROS_TOOLCHAIN if one-click installed
   if (!(TOOLCHAIN == "LOCAL")) {
     process.env.PROS_TOOLCHAIN = TOOLCHAIN;
   }
-  console.log(CLI_EXEC_PATH);
-  console.log(process.env.PROS_TOOLCHAIN);
+  // Set pros executable path
   process.env.PATH += PATH_SEP + CLI_EXEC_PATH;
+  // Set language variable
   process.env.LC_ALL = "en_US.utf-8";
 }
 
@@ -29,6 +30,7 @@ const runUpload = async () => {
     },
     async (progress, token) => {
       try {
+        // Command to run to upload project to brain
         var command = `"${path.join(CLI_EXEC_PATH, "pros")}" u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
@@ -37,6 +39,7 @@ const runUpload = async () => {
 
         vscode.window.showInformationMessage("Project Uploaded!");
       } catch (error) {
+        // Parse and display error message if one occured
         throw new Error(parseErrorMessage(error.stdout));
       }
     }
@@ -45,7 +48,9 @@ const runUpload = async () => {
 
 export const upload = async () => {
   try {
+    // Set environmental variables
     await setVariables();
+    // Run upload command
     await runUpload();
   } catch (err) {
     await vscode.window.showErrorMessage(err.message);

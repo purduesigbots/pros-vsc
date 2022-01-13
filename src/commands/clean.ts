@@ -10,13 +10,14 @@ import * as path from 'path';
  *
  * @param slot The slot number to place the executable in
  */
-const setVariables = async () => {
+ const setVariables = async () => {
+  // Set PROS_TOOLCHAIN if one-click installed
   if (!(TOOLCHAIN == "LOCAL")) {
     process.env.PROS_TOOLCHAIN = TOOLCHAIN;
   }
-  console.log(CLI_EXEC_PATH);
-  console.log(process.env.PROS_TOOLCHAIN);
+  // Set pros executable path
   process.env.PATH += PATH_SEP + CLI_EXEC_PATH;
+  // Set language variable
   process.env.LC_ALL = "en_US.utf-8";
 }
 
@@ -29,16 +30,14 @@ const runClean = async () => {
     },
     async (progress, token) => {
       try {
+        // Command to run to clean project
         var command = `"${path.join(CLI_EXEC_PATH, "pros")}" make clean --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
           command, { timeout: 30000 }
         );
-        console.log(stdout);
-        //console.log(stderr);
         vscode.window.showInformationMessage("Project Cleaned!");
       } catch (error) {
-        //console.log(error);
         throw new Error(parseErrorMessage(error.stdout));
       }
     }

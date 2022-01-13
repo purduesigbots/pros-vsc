@@ -59,12 +59,15 @@ export async function install(context: vscode.ExtensionContext) {
     var download_toolchain = "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2";
     var system = "linux";
     PATH_SEP = ":";
+
     if (process.platform === "win32") {
+        // Set system, path seperator, and downloads to windows version 
         system = "windows";
         PATH_SEP = ";";
         download_cli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-win-64bit.zip`;
         download_toolchain = "https://artprodcus3.artifacts.visualstudio.com/A268c8aad-3bb0-47d2-9a57-cf06a843d2e8/3a3f509b-ad80-4d2a-8bba-174ad5fd1dde/_apis/artifact/cGlwZWxpbmVhcnRpZmFjdDovL3B1cmR1ZS1hY20tc2lnYm90cy9wcm9qZWN0SWQvM2EzZjUwOWItYWQ4MC00ZDJhLThiYmEtMTc0YWQ1ZmQxZGRlL2J1aWxkSWQvMjg4Ni9hcnRpZmFjdE5hbWUvdG9vbGNoYWluLTY0Yml00/content?format=file&subPath=%2Fpros-toolchain-w64-3.0.1-standalone.zip";
     } else if (process.platform === "darwin") {
+        // Set system, path seperator, and downloads to windows version 
         system = "macos";
         download_cli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-macos-64bit.zip`;
         download_toolchain = "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2";
@@ -94,7 +97,7 @@ export async function install(context: vscode.ExtensionContext) {
             //delete the directory
             
             await remove_dir_async(context.globalStorageUri.fsPath,true);
-            console.log("reached end of clean");
+            
             //add install and download directories
             const dirs = await createDirs(context.globalStorageUri.fsPath);
             
@@ -124,7 +127,7 @@ export async function install(context: vscode.ExtensionContext) {
 }
 
 export function paths(globalPath: string, system: string) {
-    console.log(path.join(globalPath, "install", `pros-cli-${system}`));
+    // (path.join(globalPath, "install", `pros-cli-${system}`));
     // Check if user has CLI installed through one-click or other means.
     var one_clicked = fs.existsSync(path.join(globalPath, "install", `pros-cli-${system}`));
 
@@ -145,21 +148,25 @@ Code Implemented from clangd source code
 
 */
 async function getCliVersion(url: string) {
+    // Fetch the url
     const response = await fetch(url);
     if (!response.ok) {
         console.log(response.url, response.status, response.statusText);
         throw new Error(`Can't fetch release: ${response.statusText}`);
     }
+    // Get the version number from the returned json
     var v_string = (await response.json()).tag_name;
     return v_string;
 }
 
 async function createDirs(storagePath: string) {
+    // Create the download and install subdirectories
     const install = path.join(storagePath, 'install');
     const download = path.join(storagePath, 'download');
     for (const dir of [install, download]) {
         await fs.promises.mkdir(dir, { 'recursive': true });
     }
+    // Return the two created directories
     return { install: install, download: download };
 }
 
