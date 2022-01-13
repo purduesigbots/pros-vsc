@@ -13,7 +13,7 @@ import * as path from 'path';
  */
 const setVariables = async () => {
   // Set PROS_TOOLCHAIN if one-click installed
-  if (!(TOOLCHAIN == "LOCAL")) {
+  if (!(TOOLCHAIN === "LOCAL")) {
     process.env.PROS_TOOLCHAIN = TOOLCHAIN;
   }
   // Set pros executable path

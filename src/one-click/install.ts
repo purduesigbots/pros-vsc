@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as path from 'path';
 import * as os from 'os';
 import { download } from './download';
-import { promisify } from 'util';
+import { getCliVersion, getInstallPromptTitle } from "./installed";
 import * as fs from 'fs';
 var fetch = require('node-fetch');
 
@@ -49,7 +49,6 @@ async function remove_dir_async(directory : string, begin : boolean) {
 
 export async function install(context: vscode.ExtensionContext) {
     const globalPath = context.globalStorageUri.fsPath;
-    var cliVersion = null;
     var version = await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest');
     console.log("Current CLI Version: " + version);
 
@@ -80,15 +79,20 @@ export async function install(context: vscode.ExtensionContext) {
 
     // Set the installed file names
     var cli_name = `pros-cli-${system}.zip`;
+    // Title of prompt depending on user's installed CLI
+    var title = await getInstallPromptTitle(path.join(globalPath,"install",`pros-cli-${system}`,"pros"));
+    // Name of toolchain download depending on system
     var toolchain_name = `pros-toolchain-${system === "windows" ? `${system}.zip` : `${system}.tar.bz2`}`;
+    // Does the user's CLI have an update or does the user need to install/update
+    const cliVersion = (title.includes("up to date") ? "UTD" : null);
     if (cliVersion === null) {
         // Ask user to install CLI if it is not installed.
         const labelResponse = await vscode.window.showQuickPick(
-            [{ label: "Install it now!", description: "recommended" }, { label: "No I am good" }],
+            [{ label: "Install it now!", description: "recommended" }, { label: "No I am good." }],
             {
                 placeHolder: "Install it now!",
                 canPickMany: false,
-                title: "You do not have the PROS CLI installed",
+                title: title,
             }
         );
         if (labelResponse!.label === "Install it now!") {
@@ -120,7 +124,7 @@ export async function install(context: vscode.ExtensionContext) {
         }
     } else {
         // User already has the CLI installed
-        vscode.window.showInformationMessage("PROS CLI is already Installed!");
+        vscode.window.showInformationMessage(title);
     }
     // Set path variables to toolchain and CLI
     paths(globalPath, system);
@@ -130,7 +134,6 @@ export function paths(globalPath: string, system: string) {
     // (path.join(globalPath, "install", `pros-cli-${system}`));
     // Check if user has CLI installed through one-click or other means.
     var one_clicked = fs.existsSync(path.join(globalPath, "install", `pros-cli-${system}`));
-
     if (!one_clicked) {
         // Use system defaults if user does not have one-click CLI
         CLI_EXEC_PATH = "pros";
@@ -147,17 +150,7 @@ export function paths(globalPath: string, system: string) {
 Code Implemented from clangd source code
 
 */
-async function getCliVersion(url: string) {
-    // Fetch the url
-    const response = await fetch(url);
-    if (!response.ok) {
-        console.log(response.url, response.status, response.statusText);
-        throw new Error(`Can't fetch release: ${response.statusText}`);
-    }
-    // Get the version number from the returned json
-    var v_string = (await response.json()).tag_name;
-    return v_string;
-}
+
 
 async function createDirs(storagePath: string) {
     // Create the download and install subdirectories
