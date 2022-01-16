@@ -31,7 +31,9 @@
   "activationEvents": [
     "workspaceContains:**/project.pros",
     "onCommand:pros.new",
-    "onCommand:pros.welcome"
+    "onCommand:pros.welcome",
+    "onCommand:pros.upload&build",
+    "onView:prosTreeview"
   ],
   "main": "./out/extension.js",
   "contributes": {

@@ -35,7 +35,7 @@ const runBuildUpload = async () => {
         var command = `"${path.join(CLI_EXEC_PATH, "pros")}" mu --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
-          command/*, {timeout : 15000}*/
+          command
         );
         await vscode.window.showInformationMessage("Project Built!");
       } catch (error) {

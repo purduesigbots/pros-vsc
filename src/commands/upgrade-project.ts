@@ -31,7 +31,7 @@ const fetchTarget = async (): Promise<{
   var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c info-project --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
   // console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
-    command/*, {timeout : 15000}*/
+    command
   );
 
   // Get okapi and kernel version of current project
@@ -99,7 +99,7 @@ const runUpgrade = async () => {
   var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
   console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
-    command/*, {timeout : 15000}*/
+    command
   );
 
   const errorMessage = parseErrorMessage(stdout);
