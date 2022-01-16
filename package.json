@@ -170,6 +170,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show welcome page on startup."
+        },
+        "pros.showInstallOnStartup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prompt for PROS CLI install on startup."
         }
       }
     }

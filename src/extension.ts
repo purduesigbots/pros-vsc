@@ -157,7 +157,13 @@ export function activate(context: vscode.ExtensionContext) {
     new TreeDataProvider()
   );
 
-  install(context);
+  if (
+    vscode.workspace
+      .getConfiguration("pros")
+      .get<boolean>("showInstallOnStartup")
+  ) {
+    install(context);
+  }
 
   context.subscriptions.push(ProsProjectEditorProvider.register(context));
 }

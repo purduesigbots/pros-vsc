@@ -121,12 +121,21 @@ export async function install(context: vscode.ExtensionContext) {
 
             //await removeDirAsync(dirs.download,false);
             // vscode.window.showInformationMessage("PROS is now Installed!");
+            vscode.workspace
+                .getConfiguration("pros")
+                .update("showInstallOnStartup", false);
         } else {
             vscode.window.showInformationMessage("Install it later!");
+            vscode.workspace
+                .getConfiguration("pros")
+                .update("showInstallOnStartup", false);
         }
     } else {
         // User already has the CLI installed
         vscode.window.showInformationMessage(title);
+        vscode.workspace
+            .getConfiguration("pros")
+            .update("showInstallOnStartup", false);
     }
     // Set path variables to toolchain and CLI
     paths(globalPath, system);
