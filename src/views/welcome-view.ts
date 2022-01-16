@@ -72,7 +72,7 @@ export function getWebviewContent(
 	context: vscode.ExtensionContext
 ) {
 	const nonce = getNonce();
-	install(context);
+	// install(context);
 
 	return `
 	<!DOCTYPE html>

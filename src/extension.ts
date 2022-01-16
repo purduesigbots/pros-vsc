@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
   ) {
     vscode.commands.executeCommand("pros.welcome");
   }
-  vscode.commands.registerCommand("pros.install",async () => {
+  vscode.commands.registerCommand("pros.install", async () => {
     await install(context);
   });
   vscode.commands.registerCommand("pros.upload&build", async () => {
@@ -156,6 +156,8 @@ export function activate(context: vscode.ExtensionContext) {
     "prosTreeview",
     new TreeDataProvider()
   );
+
+  install(context);
 
   context.subscriptions.push(ProsProjectEditorProvider.register(context));
 }
