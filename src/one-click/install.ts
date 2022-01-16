@@ -120,7 +120,7 @@ export async function install(context: vscode.ExtensionContext) {
             // Delete the download subdirectory once everything is installed
 
             //await removeDirAsync(dirs.download,false);
-            vscode.window.showInformationMessage("PROS is now Installed!");
+            // vscode.window.showInformationMessage("PROS is now Installed!");
         } else {
             vscode.window.showInformationMessage("Install it later!");
         }
