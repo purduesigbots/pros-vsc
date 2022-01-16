@@ -101,7 +101,7 @@ export async function install(context: vscode.ExtensionContext) {
 
             //delete the directory
 
-            // await removeDirAsync(context.globalStorageUri.fsPath, true);
+            await removeDirAsync(context.globalStorageUri.fsPath, true);
 
             //add install and download directories
             const dirs = await createDirs(context.globalStorageUri.fsPath);
@@ -120,6 +120,7 @@ export async function install(context: vscode.ExtensionContext) {
             // Delete the download subdirectory once everything is installed
 
             //await removeDirAsync(dirs.download,false);
+            vscode.window.showInformationMessage("PROS is now Installed!");
         } else {
             vscode.window.showInformationMessage("Install it later!");
         }
