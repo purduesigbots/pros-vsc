@@ -87,7 +87,7 @@ export async function install(context: vscode.ExtensionContext) {
     const cliVersion = (title.includes("up to date") ? "UTD" : null);
     if (cliVersion === null) {
         // Ask user to install CLI if it is not installed.
-        const labelResponse = await vscode.window.showInformationMessage(title, "Install it now!", "No I am good.");
+        const labelResponse = await vscode.window.showInformationMessage(title, "Install it now!", "No Thanks.");
         // const labelResponse = await vscode.window.showQuickPick(
         //     [{ label: "Install it now!", description: "recommended" }, { label: "No I am good." }],
         //     {

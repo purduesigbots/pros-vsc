@@ -36,7 +36,7 @@ export async function getInstallPromptTitle(oneClickPath: string) {
                 `pros --version`
             );
             if (!stdout.includes(recent)) {
-                title = "Outdaded PROS detected but not installed with VSCode. Would you like to install update with VSCode? (Recommended).";
+                title = "An outdated version of PROS was detected on your system, not installed through VS Code. Would you like to install the update with VS Code?"
             } else {
                 title = "PROS detected but not installed with VSCode. Would you like to install using VSCode? (Recommended).";
             }
