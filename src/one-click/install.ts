@@ -100,9 +100,12 @@ export async function install(context: vscode.ExtensionContext) {
             // Install CLI if user chooses to.
 
             //delete the directory
-
-            await removeDirAsync(context.globalStorageUri.fsPath, true);
-
+            
+            try {
+                await removeDirAsync(context.globalStorageUri.fsPath, true);
+            } catch(err) {
+                console.log(err);
+            }
             //add install and download directories
             const dirs = await createDirs(context.globalStorageUri.fsPath);
 
