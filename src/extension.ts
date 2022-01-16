@@ -6,6 +6,7 @@ import {
   getWebviewContent,
   fetchKernelVersion,
   fetchCliVersion,
+  fetchKernelVersionNonCLIDependent,
 } from "./views/welcome-view";
 import {
   buildUpload,
@@ -17,6 +18,7 @@ import {
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
+import { install } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 
 let analytics: Analytics;
@@ -38,7 +40,9 @@ export function activate(context: vscode.ExtensionContext) {
   ) {
     vscode.commands.executeCommand("pros.welcome");
   }
-
+  vscode.commands.registerCommand("pros.install", async () => {
+    await install(context);
+  });
   vscode.commands.registerCommand("pros.upload&build", async () => {
     analytics.sendAction("upload&build");
     await vscode.commands.executeCommand("pros.build");
@@ -116,7 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.Uri.file(path.join(context.extensionPath, "media", "welcome.js"))
     );
 
-    const newKernel = await fetchKernelVersion();
+    const newKernel = await fetchKernelVersionNonCLIDependent();
     const newCli = await fetchCliVersion();
 
     const useGoogleAnalytics =
@@ -138,7 +142,8 @@ export function activate(context: vscode.ExtensionContext) {
       newKernel,
       newCli,
       useGoogleAnalytics,
-      showWelcomeOnStartup
+      showWelcomeOnStartup,
+      context
     );
 
     panel.webview.onDidReceiveMessage(async (message) => {
@@ -153,6 +158,14 @@ export function activate(context: vscode.ExtensionContext) {
     new TreeDataProvider()
   );
 
+  if (
+    vscode.workspace
+      .getConfiguration("pros")
+      .get<boolean>("showInstallOnStartup")
+  ) {
+    install(context);
+  }
+  
   // heuristic to add new files to the compilation database without requiring a full build
   vscode.workspace.onDidCreateFiles(async (event) => {
     // terminate early if there's no pros project or workspace folder open

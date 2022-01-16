@@ -6,12 +6,16 @@ import axios from "axios";
 
 import { PREFIX } from "../commands/cli-parsing";
 import { getNonce } from "./nonce";
+import { install } from "../one-click/install";
+
+var fetch = require('node-fetch');
 /**
  * Queries the server for the latest available library version.
  *
  * @returns The kernel library versions
  */
 export const fetchKernelVersion = async (): Promise<string> => {
+	try {
 	const { stdout, stderr } = await promisify(child_process.exec)(
 		`pros c q --target v5 --machine-output`
 	);
@@ -32,8 +36,21 @@ export const fetchKernelVersion = async (): Promise<string> => {
 	}
 
 	return newKernel;
+} catch(error) {
+	return "0.0.0";
+}
 };
 
+
+export const fetchKernelVersionNonCLIDependent = async (): Promise<string> => {
+    const response = await fetch("https://api.github.com/repos/purduesigbots/pros/releases/latest");
+    if (!response.ok) {
+      console.log(response.url, response.status, response.statusText);
+      throw new Error(`Can't fetch kernel release: ${response.statusText}`);
+    }
+    var v = (await response.json()).tag_name;
+    return v;
+};
 export const fetchCliVersion = async (): Promise<string> => {
 	const response = await axios.get(
 		"https://purduesigbots.github.io/pros-mainline/stable/UpgradeManifestV1.json"
@@ -51,9 +68,11 @@ export function getWebviewContent(
 	newKernel: string,
 	newCli: string,
 	useGoogleAnalytics: boolean,
-	showWelcomeOnStartup: boolean
+	showWelcomeOnStartup: boolean,
+	context: vscode.ExtensionContext
 ) {
 	const nonce = getNonce();
+	// install(context);
 
 	return `
 	<!DOCTYPE html>
