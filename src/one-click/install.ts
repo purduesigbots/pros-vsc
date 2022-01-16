@@ -23,27 +23,27 @@ return true;
 }
 */
 
-async function remove_dir_async(directory : string, begin : boolean) {
+async function remove_dir_async(directory: string, begin: boolean) {
     // get all files in directory
-    if(begin) {
+    if (begin) {
         vscode.window.showInformationMessage("Clearing directory");
     }
     const files = await fs.promises.readdir(directory);
-    if(files.length > 0) {
+    if (files.length > 0) {
         // iterate through found files and directory
-        for(const file of files) {
-            if((await fs.promises.lstat(path.join(directory,file))).isDirectory()) {
+        for (const file of files) {
+            if ((await fs.promises.lstat(path.join(directory, file))).isDirectory()) {
                 // if the file is found to be a directory,
                 // recursively call this function to remove subdirectory
-                await remove_dir_async(path.join(directory,file),false);
+                await remove_dir_async(path.join(directory, file), false);
             } else {
                 //delete the file
-                await fs.promises.unlink(path.join(directory,file));
+                await fs.promises.unlink(path.join(directory, file));
             }
         }
     }
     // delete the directory now that it is empty.
-    await fs.promises.rmdir(directory, {recursive:true,maxRetries:20});
+    await fs.promises.rmdir(directory, { recursive: true, maxRetries: 20 });
     return true;
 }
 
@@ -80,31 +80,32 @@ export async function install(context: vscode.ExtensionContext) {
     // Set the installed file names
     var cli_name = `pros-cli-${system}.zip`;
     // Title of prompt depending on user's installed CLI
-    var title = await getInstallPromptTitle(path.join(globalPath,"install",`pros-cli-${system}`,"pros"));
+    var title = await getInstallPromptTitle(path.join(globalPath, "install", `pros-cli-${system}`, "pros"));
     // Name of toolchain download depending on system
     var toolchain_name = `pros-toolchain-${system === "windows" ? `${system}.zip` : `${system}.tar.bz2`}`;
     // Does the user's CLI have an update or does the user need to install/update
     const cliVersion = (title.includes("up to date") ? "UTD" : null);
     if (cliVersion === null) {
         // Ask user to install CLI if it is not installed.
-        const labelResponse = await vscode.window.showQuickPick(
-            [{ label: "Install it now!", description: "recommended" }, { label: "No I am good." }],
-            {
-                placeHolder: "Install it now!",
-                canPickMany: false,
-                title: title,
-            }
-        );
-        if (labelResponse!.label === "Install it now!") {
+        const labelResponse = await vscode.window.showInformationMessage(title, "Install it now!", "No I am good.");
+        // const labelResponse = await vscode.window.showQuickPick(
+        //     [{ label: "Install it now!", description: "recommended" }, { label: "No I am good." }],
+        //     {
+        //         placeHolder: "Install it now!",
+        //         canPickMany: false,
+        //         title: title,
+        //     }
+        // );
+        if (labelResponse === "Install it now!") {
             // Install CLI if user chooses to.
 
             //delete the directory
-            
-            await remove_dir_async(context.globalStorageUri.fsPath,true);
-            
+
+            await remove_dir_async(context.globalStorageUri.fsPath, true);
+
             //add install and download directories
             const dirs = await createDirs(context.globalStorageUri.fsPath);
-            
+
             /*
             Code to potentially wait for the cli and toolchain to be downloaded.
 
@@ -113,8 +114,8 @@ export async function install(context: vscode.ExtensionContext) {
             await download_cli_and_toolchain(context,cli_info,toolchain_info);
             */
 
-            download(context,download_cli,cli_name,system);
-            download(context,download_toolchain,toolchain_name,system);
+            download(context, download_cli, cli_name, system);
+            download(context, download_toolchain, toolchain_name, system);
 
             // Delete the download subdirectory once everything is installed
 
