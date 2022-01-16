@@ -10,28 +10,28 @@ export async function getCliVersion(url: string) {
         throw new Error(`Can't fetch release: ${response.statusText}`);
     }
     // Get the version number from the returned json
-    var v_string = (await response.json()).tag_name;
-    return v_string;
+    var vString = (await response.json()).tag_name;
+    return vString;
 }
 
-export async function getInstallPromptTitle(one_click_path: string) {
+export async function getInstallPromptTitle(oneClickPath: string) {
     var title = "You do not have the PROS CLI installed. Install it now? (Recommended).";
     const recent = await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest');
-    const split = "version "
-    try { 
+    const split = "version ";
+    try {
         const { stdout, stderr } = await promisify(child_process.exec)(
-            `${one_click_path} --version`
+            `${oneClickPath} --version`
         );
-        
+
         if (!stdout.includes(recent)) {
             console.log(stdout);
             console.log(recent);
-            title = "There is an update available! Would you like to update now?"
+            title = "There is an update available! Would you like to update now?";
         } else {
-            title = "PROS is up to date!"
+            title = "PROS is up to date!";
         }
-    } catch(e) {
-        try { 
+    } catch (e) {
+        try {
             const { stdout, stderr } = await promisify(child_process.exec)(
                 `pros --version`
             );
@@ -40,7 +40,7 @@ export async function getInstallPromptTitle(one_click_path: string) {
             } else {
                 title = "PROS detected but not installed with VSCode. Would you like to install using VSCode? (Recommended).";
             }
-        } catch(er) {
+        } catch (er) {
             console.log(er);
         }
     }

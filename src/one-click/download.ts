@@ -75,8 +75,8 @@ export function download(context: vscode.ExtensionContext, downloadURL: string, 
                                     fs.chmodSync(path.join(globalPath, "install", file, "intercept-cc"), 0o751);
                                 } else if (file.includes("pros-cli-macos")) {
                                     //chmod the files that mac needs chmodded
-                                    fs.readdir(globalPath + '/install/pros-cli-macos/lib/', (err, lib_files) => {
-                                        lib_files.forEach(exec => {
+                                    fs.readdir(globalPath + '/install/pros-cli-macos/lib/', (err, libFiles) => {
+                                        libFiles.forEach(exec => {
                                             if (exec.endsWith(".so")) {
                                                 fs.chmodSync(path.join(globalPath, "install", "pros-cli-macos", "lib"), 0o751);
                                             }
@@ -116,30 +116,36 @@ export function download(context: vscode.ExtensionContext, downloadURL: string, 
                                                         // console.log(`Copying ${folder} folder`);
                                                         // extract each file in subfolder
                                                         subfiles.forEach(subfile => {
-                                                            var original_path = path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir, folder, subfile);
-                                                            var new_path = path.join(globalPath, "install", "pros-toolchain-windows", "usr", folder, subfile);
-                                                            fs.renameSync(original_path, new_path);
+                                                            var originalPath = path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir, folder, subfile);
+                                                            var newPath = path.join(globalPath, "install", "pros-toolchain-windows", "usr", folder, subfile);
+                                                            fs.renameSync(originalPath, newPath);
                                                         });
-                                                        if (errorsub) throw errorsub;
+                                                        if (errorsub) {
+                                                            throw errorsub;
+                                                        }
                                                     });
                                                 } else {
                                                     console.log("Copying arm-none-eabi folder");
-                                                    var original_path = path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir, folder);
-                                                    var new_path = path.join(globalPath, "install", "pros-toolchain-windows", "usr", folder);
-                                                    fs.renameSync(original_path, new_path);
+                                                    var originalPath = path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir, folder);
+                                                    var newPath = path.join(globalPath, "install", "pros-toolchain-windows", "usr", folder);
+                                                    fs.renameSync(originalPath, newPath);
                                                 }
                                             });
-                                            if (error) throw error;
+                                            if (error) {
+                                                throw error;
+                                            }
                                         });
                                         fs.rmdirSync(dir, { recursive: true });
                                     }
                                 });
-                                if (err) throw err;
+                                if (err) {
+                                    throw err;
+                                }
                             });
                         }
                         vscode.window.showInformationMessage("Finished extracting: " + storagePath);
                     });
-                }
+            }
         }
         //vscode.window.showInformationMessage("Finished extracting: " + storagePath);
         paths(globalPath, system);
