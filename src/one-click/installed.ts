@@ -19,10 +19,10 @@ export async function getInstallPromptTitle(oneClickPath: string) {
     const recent = await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest');
     const split = "version ";
     try {
+        process.env.LC_ALL = "en_US.utf-8";
         const { stdout, stderr } = await promisify(child_process.exec)(
-            `${oneClickPath} --version`
+            `"${oneClickPath}" --version`
         );
-
         if (!stdout.includes(recent)) {
             console.log(stdout);
             console.log(recent);
