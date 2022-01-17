@@ -18,7 +18,7 @@ import {
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
-import { install } from "./one-click/install";
+import { install, paths } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 
 let analytics: Analytics;
@@ -45,8 +45,9 @@ export function activate(context: vscode.ExtensionContext) {
   });
   vscode.commands.registerCommand("pros.upload&build", async () => {
     analytics.sendAction("upload&build");
-    await vscode.commands.executeCommand("pros.build");
-    await vscode.commands.executeCommand("pros.upload");
+    await buildUpload();
+    // await vscode.commands.executeCommand("pros.build");
+    // await vscode.commands.executeCommand("pros.upload");
   });
 
   vscode.commands.registerCommand("pros.upload", async () => {
@@ -165,17 +166,29 @@ export function activate(context: vscode.ExtensionContext) {
   ) {
     install(context);
   }
-  
+
+  const globalPath = context.globalStorageUri.fsPath;
+  var system = "linux";
+  if (process.platform === "win32") {
+    system = "windows";
+    paths(globalPath, system);
+  } else if (process.platform === "darwin") {
+    system = "macos";
+    paths(globalPath, system);
+  } else {
+    paths(globalPath, system);
+  }
+
   // heuristic to add new files to the compilation database without requiring a full build
   vscode.workspace.onDidCreateFiles(async (event) => {
     // terminate early if there's no pros project or workspace folder open
     if (!await workspaceContainsProjectPros() || !vscode.workspace.workspaceFolders) {
       return;
     }
-    
+
     const workspaceRootUri = vscode.workspace.workspaceFolders[0].uri;
     const compilationDbUri = vscode.Uri.joinPath(workspaceRootUri, 'compile_commands.json');
-    
+
     // first check if the cdb exists. if not, attempt to build the project to generate it
     try {
       await vscode.workspace.fs.stat(compilationDbUri);
@@ -192,7 +205,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     // now we know there is a cdb present, we can load it
-    const compilationDbData: [{arguments: string[], directory: string, file: string}] = JSON.parse(
+    const compilationDbData: [{ arguments: string[], directory: string, file: string }] = JSON.parse(
       new TextDecoder().decode(
         await vscode.workspace.fs.readFile(compilationDbUri)
       )
