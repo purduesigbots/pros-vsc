@@ -99,7 +99,7 @@ const runUpgrade = async () => {
   var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
   console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
-    command
+    command, { encoding: "utf8", maxBuffer: 1024 * 1024 * 50 }
   );
 
   const errorMessage = parseErrorMessage(stdout);
