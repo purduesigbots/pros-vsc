@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
-
+import * as os from 'os';
 import { TreeDataProvider } from "./views/tree-view";
 import {
   getWebviewContent,
@@ -20,13 +20,37 @@ import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
 import { install, paths } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
-
 let analytics: Analytics;
-export const terminal = vscode.window.createTerminal("PROS Terminal");
+
+export var terminal : vscode.Terminal;
+
+export function makeTerminal() {
+  for(let term of vscode.window.terminals) {
+    if(term.name==="PROS Terminal") {
+      term.dispose();
+    }
+  }
+  terminal =  vscode.window.createTerminal({name:"PROS Terminal", env: process.env});
+}
+
+
 export const output = vscode.window.createOutputChannel("PROS Output");
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
+  const globalPath = context.globalStorageUri.fsPath;
+  
+  // Figure out operating system
+  var system = "linux";
+  if (process.platform === "win32") {
+    system = "windows";
+  } else if (process.platform === "darwin") {
+    system = "macos";
+  }
+
+  // Setup paths and terminal
+  paths(globalPath,system,context);
   output.show();
+
   workspaceContainsProjectPros().then((value) => {
     vscode.commands.executeCommand("setContext", "pros.isPROSProject", value);
   });
@@ -167,17 +191,6 @@ export function activate(context: vscode.ExtensionContext) {
     install(context);
   }
 
-  const globalPath = context.globalStorageUri.fsPath;
-  var system = "linux";
-  if (process.platform === "win32") {
-    system = "windows";
-    paths(globalPath, system);
-  } else if (process.platform === "darwin") {
-    system = "macos";
-    paths(globalPath, system);
-  } else {
-    paths(globalPath, system);
-  }
 
   // heuristic to add new files to the compilation database without requiring a full build
   vscode.workspace.onDidCreateFiles(async (event) => {

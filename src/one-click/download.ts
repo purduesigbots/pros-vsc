@@ -148,8 +148,8 @@ export function download(context: vscode.ExtensionContext, downloadURL: string, 
             }
         }
         //vscode.window.showInformationMessage("Finished extracting: " + storagePath);
-        paths(globalPath, system);
+        paths(globalPath, system, context);
     });
-    paths(globalPath, system);
+    paths(globalPath, system, context);
     return true;
 }
