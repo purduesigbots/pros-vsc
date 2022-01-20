@@ -30,14 +30,13 @@ const runBuild = async () => {
     async (progress, token) => {
       try {
         // Command to run to build project
-        var command = `"${path.join(CLI_EXEC_PATH, "pros")}" build-compile-commands --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
+        var command = `"${path.join(CLI_EXEC_PATH, "pros")}" make --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
           command, { timeout: 60000 }
         );
         vscode.window.showInformationMessage("Project Built!");
       } catch (error) {
-        vscode.window.showErrorMessage("Build Failed!");
         throw new Error(parseErrorMessage(error.stdout));
       }
     }

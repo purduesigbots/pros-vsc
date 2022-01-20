@@ -1,5 +1,6 @@
 export const PREFIX = "Uc&42BWAaQ";
-
+import { output } from '../extension';
+const ansiRegex = require('ansi-regex');
 /**
  * Finds the logging message that contains the error message.
  *
@@ -7,7 +8,8 @@ export const PREFIX = "Uc&42BWAaQ";
  * @returns A user-friendly message to display
  */
 export const parseErrorMessage = (stdout: any) => {
-  for (let e of stdout.split(/\r?\n/)) {
+  const errorSplit = stdout.split(/\r?\n/);
+  for (let e of errorSplit) {
     if (!e.startsWith(PREFIX)) {
       continue;
     }
@@ -15,6 +17,18 @@ export const parseErrorMessage = (stdout: any) => {
     let jdata = JSON.parse(e.substr(PREFIX.length));
     if (jdata.type.startsWith("log") && jdata.level === "ERROR") {
       return jdata.simpleMessage;
+    }
+    else if (jdata.type.startsWith("notify") && String(jdata.text).includes("ERROR")) {
+      var errors = false;
+      for (let err of errorSplit) {
+        if(err.substr(PREFIX.length).startsWith("{\"text")) {
+          e = JSON.parse(err.substr(PREFIX.length)).text
+          output.appendLine(e.replace(ansiRegex(),''));
+          errors = true;
+        } else if(errors) {
+          return "Build Failed! See PROS output for details!"
+        }
+      }
     }
   }
 };

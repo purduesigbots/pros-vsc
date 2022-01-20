@@ -22,16 +22,16 @@ import { install, paths } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 
 let analytics: Analytics;
-
+export const terminal = vscode.window.createTerminal("PROS Terminal");
+export const output = vscode.window.createOutputChannel("PROS Output");
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
-
+  output.show();
   workspaceContainsProjectPros().then((value) => {
     vscode.commands.executeCommand("setContext", "pros.isPROSProject", value);
   });
 
-  const terminal = vscode.window.createTerminal("PROS Terminal");
-  terminal.sendText("pros build-compile-commands");
+  //terminal.sendText("pros build-compile-commands");
 
   if (
     vscode.workspace
