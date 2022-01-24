@@ -49,6 +49,22 @@ async function removeDirAsync(directory: string, begin: boolean) {
     return true;
 }
 
+export async function uninstall(context: vscode.ExtensionContext) {
+    const globalPath = context.globalStorageUri.fsPath;
+    const title = "Are you sure you want to uninstall PROS?"
+    const labelResponse = await vscode.window.showInformationMessage(title, "Uninstall Now!", "No Thanks.");
+    if(labelResponse==="Uninstall Now!") {
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "Uninstalling PROS",
+            cancellable: false
+        }, async (progress, token) => {
+            await removeDirAsync(globalPath,false);
+        });
+        vscode.window.showInformationMessage("PROS Uninstalled!");
+    }
+}
+
 export async function install(context: vscode.ExtensionContext) {
     const globalPath = context.globalStorageUri.fsPath;
     var version = await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest');

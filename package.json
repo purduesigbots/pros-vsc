@@ -58,8 +58,8 @@
     },
     "commands": [
       {
-        "command": "pros.upload&build",
-        "title": "Upload & Build",
+        "command": "pros.build&upload",
+        "title": "Build & Upload",
         "icon": {
           "light": "media/pros-tux-white.png",
           "dark": "media/pros-tux-white.png"
@@ -78,8 +78,12 @@
         "title": "PROS: Clean"
       },
       {
+        "command": "pros.serialterminal",
+        "title": "PROS: Open Serial Terminal"
+      },
+      {
         "command": "pros.terminal",
-        "title": "PROS: Open Terminal"
+        "title": "PROS: Integrated Terminal"
       },
       {
         "command": "pros.upgrade",
@@ -96,6 +100,10 @@
       {
         "command": "pros.install",
         "title": "PROS: Install PROS"
+      },
+      {
+        "command": "pros.uninstall",
+        "title": "PROS: Uninstall PROS"
       }
     ],
     "menus": {

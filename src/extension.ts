@@ -18,7 +18,7 @@ import {
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
-import { install, paths } from "./one-click/install";
+import { install, paths, uninstall } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 import { existsSync } from "fs";
 let analytics: Analytics;
@@ -74,10 +74,15 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand("pros.welcome");
   }
   vscode.commands.registerCommand("pros.install", async () => {
+    analytics.sendAction("install");
     await install(context);
   });
-  vscode.commands.registerCommand("pros.upload&build", async () => {
-    analytics.sendAction("upload&build");
+  vscode.commands.registerCommand("pros.uninstall",async () => {
+    analytics.sendAction("uninstall");
+    await uninstall(context);
+  });
+  vscode.commands.registerCommand("pros.build&upload", async () => {
+    analytics.sendAction("build&upload");
     await buildUpload();
     // await vscode.commands.executeCommand("pros.build");
     // await vscode.commands.executeCommand("pros.upload");
@@ -96,12 +101,22 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.clean", clean);
 
   vscode.commands.registerCommand("pros.terminal", () => {
+    analytics.sendAction("terminal");
+    try {
+      makeTerminal();
+      terminal.show();
+    } catch(err: any) {
+      vscode.window.showErrorMessage(err.message);
+    }
+  });
+  vscode.commands.registerCommand("pros.serialterminal", () => {
+    analytics.sendAction("serialterminal");
     try {
       makeTerminal();
       terminal.sendText("pros terminal");
       terminal.show();
       vscode.window.showInformationMessage("PROS Terminal started!");
-    } catch (err) {
+    } catch (err: any) {
       vscode.window.showErrorMessage(err.message);
     }
   });
