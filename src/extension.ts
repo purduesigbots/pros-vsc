@@ -101,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.clean", clean);
 
   vscode.commands.registerCommand("pros.terminal", () => {
-    analytics.sendAction("terminal");
+    analytics.sendAction("serialterminal");
     try {
       makeTerminal();
       terminal.sendText("pros terminal");
@@ -112,7 +112,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
   vscode.commands.registerCommand("pros.showterminal", () => {
-    analytics.sendAction("serialterminal");
+    analytics.sendAction("showterminal");
     try {
       makeTerminal();
       terminal.show();
