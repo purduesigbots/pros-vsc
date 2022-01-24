@@ -79,7 +79,7 @@
       },
       {
         "command": "pros.terminal",
-        "title": "PROS: Open Serial Terminal"
+        "title": "PROS: Brain Terminal"
       },
       {
         "command": "pros.showterminal",

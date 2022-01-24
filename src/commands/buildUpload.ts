@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as child_process from "child_process";
 import { promisify } from "util";
 
-import { parseErrorMessage } from "./cli-parsing";
+import { parseMakeOutput } from "./cli-parsing";
 
 import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install"
 import * as path from 'path';
@@ -39,7 +39,7 @@ const runBuildUpload = async () => {
         );
         await vscode.window.showInformationMessage("Project Built!");
       } catch (error) {
-        throw new Error(parseErrorMessage(error.stdout));
+        throw new Error(parseMakeOutput(error.stdout));
       }
     }
   );
