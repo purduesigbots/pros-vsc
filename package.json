@@ -32,7 +32,7 @@
     "workspaceContains:**/project.pros",
     "onCommand:pros.new",
     "onCommand:pros.welcome",
-    "onCommand:pros.upload&build",
+    "onCommand:pros.build&upload",
     "onView:prosTreeview"
   ],
   "main": "./out/extension.js",
@@ -78,11 +78,11 @@
         "title": "PROS: Clean"
       },
       {
-        "command": "pros.serialterminal",
+        "command": "pros.terminal",
         "title": "PROS: Open Serial Terminal"
       },
       {
-        "command": "pros.terminal",
+        "command": "pros.showterminal",
         "title": "PROS: Integrated Terminal"
       },
       {
@@ -110,26 +110,26 @@
       "editor/title": [
         {
           "when": "true",
-          "command": "pros.upload&build",
+          "command": "pros.build&upload",
           "group": "navigation@1"
         }
       ],
       "editor/context": [
         {
           "when": "true",
-          "command": "pros.upload&build"
+          "command": "pros.build&upload"
         }
       ],
       "touchBar": [
         {
           "when": "true",
-          "command": "pros.upload&build"
+          "command": "pros.build&upload"
         }
       ],
       "commandPalette": [
         {
           "when": "pros.isPROSProject",
-          "command": "pros.upload&build"
+          "command": "pros.build&upload"
         },
         {
           "when": "pros.isPROSProject",

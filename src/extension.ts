@@ -104,16 +104,17 @@ export function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("terminal");
     try {
       makeTerminal();
+      terminal.sendText("pros terminal");
       terminal.show();
+
     } catch(err: any) {
       vscode.window.showErrorMessage(err.message);
     }
   });
-  vscode.commands.registerCommand("pros.serialterminal", () => {
+  vscode.commands.registerCommand("pros.showterminal", () => {
     analytics.sendAction("serialterminal");
     try {
       makeTerminal();
-      terminal.sendText("pros terminal");
       terminal.show();
       vscode.window.showInformationMessage("PROS Terminal started!");
     } catch (err: any) {
