@@ -20,17 +20,26 @@ import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
 import { install, paths } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
+import { existsSync } from "fs";
 let analytics: Analytics;
 
 export var terminal : vscode.Terminal;
 
 export function makeTerminal() {
+  var tc = null;
   for(let term of vscode.window.terminals) {
     if(term.name==="PROS Terminal") {
-      term.dispose();
+      if(tc) {
+        term.dispose();
+      }
+      tc = term
     }
   }
-  terminal =  vscode.window.createTerminal({name:"PROS Terminal", env: process.env});
+  if(!tc) {
+    terminal =  vscode.window.createTerminal({name:"PROS Terminal", env: process.env});
+  } else {
+    terminal = tc;
+  }
 }
 
 
@@ -88,6 +97,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.commands.registerCommand("pros.terminal", () => {
     try {
+      makeTerminal();
       terminal.sendText("pros terminal");
       terminal.show();
       vscode.window.showInformationMessage("PROS Terminal started!");
