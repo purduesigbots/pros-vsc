@@ -160,10 +160,10 @@ export function paths(globalPath: string, system: string, context : vscode.Exten
         CLI_EXEC_PATH = path.join(globalPath, "install", `pros-cli-${system}`);
         
         // Prepend CLI to path
-        process.env['Path'] = CLI_EXEC_PATH+PATH_SEP+process.env['Path'];
+        process.env['PATH'] = CLI_EXEC_PATH+PATH_SEP+process.env['PATH'];
         // Having `PROS_TOOLCHAIN` set to TOOLCHAIN breaks everything, so idk. Empty string works don't question it
-        process.env['PROS_TOOLCHAIN'] = "";
-
+        process.env['PROS_TOOLCHAIN'] = TOOLCHAIN
+        process.env.LC_ALL = "en_US.utf-8";
         // Remake terminal with updated environment variables
         makeTerminal();
     }

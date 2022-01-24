@@ -49,7 +49,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Setup paths and terminal
   paths(globalPath,system,context);
-  output.show();
+  //output.show();
 
   workspaceContainsProjectPros().then((value) => {
     vscode.commands.executeCommand("setContext", "pros.isPROSProject", value);
@@ -87,8 +87,13 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.clean", clean);
 
   vscode.commands.registerCommand("pros.terminal", () => {
-    terminal.show();
-    terminal.sendText("pros terminal");
+    try {
+      terminal.sendText("pros terminal");
+      terminal.show();
+      vscode.window.showInformationMessage("PROS Terminal started!");
+    } catch (err) {
+      vscode.window.showErrorMessage(err.message);
+    }
   });
 
   vscode.commands.registerCommand("pros.upgrade", () => {
