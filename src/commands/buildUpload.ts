@@ -3,7 +3,7 @@ import * as child_process from "child_process";
 import { promisify } from "util";
 
 import { parseMakeOutput } from "./cli-parsing";
-
+import { output } from "../extension";
 import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install"
 import * as path from 'path';
 /**
@@ -39,7 +39,10 @@ const runBuildUpload = async () => {
         );
         await vscode.window.showInformationMessage("Project Built!");
       } catch (error) {
-        throw new Error(parseMakeOutput(error.stdout));
+        const rtn = await vscode.window.showErrorMessage(parseMakeOutput(error.stdout),"View Output!","No Thanks!");
+        if (rtn==="View Output!") {
+          output.show();
+        }
       }
     }
   );
