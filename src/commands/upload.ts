@@ -4,7 +4,6 @@ import { promisify } from "util";
 
 import { parseErrorMessage } from "./cli-parsing";
 import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install"
-import * as path from 'path';
 /**
  * Call the PROS upload CLI command.
  *
@@ -31,7 +30,7 @@ const runUpload = async () => {
     async (progress, token) => {
       try {
         // Command to run to upload project to brain
-        var command = `"${path.join(CLI_EXEC_PATH, "pros")}" u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
+        var command = `pros u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
           command
@@ -49,7 +48,6 @@ const runUpload = async () => {
 export const upload = async () => {
   try {
     // Set environmental variables
-    await setVariables();
     // Run upload command
     await runUpload();
   } catch (err) {

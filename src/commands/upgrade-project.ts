@@ -4,23 +4,11 @@ import { promisify } from "util";
 import { gt } from "semver";
 
 import { PREFIX, parseErrorMessage } from "./cli-parsing";
-import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install"
-import * as path from 'path';
 /**
  * Queries the PROS project data for the target device.
  *
  * @returns The project's target device and the associated library versions.
  */
- const setVariables = async () => {
-  // Set PROS_TOOLCHAIN if one-click installed
-  if (!(TOOLCHAIN === "LOCAL")) {
-    process.env.PROS_TOOLCHAIN = TOOLCHAIN;
-  }
-  // Set pros executable path
-  process.env.PATH += PATH_SEP + CLI_EXEC_PATH;
-  // Set language variable
-  process.env.LC_ALL = "en_US.utf-8";
-}
 
 const fetchTarget = async (): Promise<{
   target: string;
@@ -28,7 +16,7 @@ const fetchTarget = async (): Promise<{
   curOkapi: string | undefined;
 }> => {
   // Command to run to fetch the current project that needs to be updated
-  var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c info-project --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
+  var command = `pros c info-project --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`
   // console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
     command
@@ -63,7 +51,7 @@ const fetchServerVersions = async (
   target: string
 ): Promise<{ newKernel: string; newOkapi: string | undefined }> => {
   // Command to run to fetch latest okapi and kernel versions
-  var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c q --target ${target} --machine-output`
+  var command = `pros c q --target ${target} --machine-output ${process.env["VSCODE FLAGS"]}`
   // console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
     command/*, {timeout : 15000}*/
@@ -96,7 +84,7 @@ const fetchServerVersions = async (
  */
 const runUpgrade = async () => {
   // Command to run to upgrade project to a newer version
-  var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output`
+  var command = `pros c u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`
   console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
     command, { encoding: "utf8", maxBuffer: 1024 * 1024 * 50 }
@@ -140,7 +128,6 @@ const userApproval = async (
 
 export const upgradeProject = async () => {
   try {
-    await setVariables();
     const { target, curKernel, curOkapi } = await fetchTarget();
     const { newKernel, newOkapi } = await fetchServerVersions(target);
     if (curKernel === newKernel && curOkapi === newOkapi) {

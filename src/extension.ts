@@ -20,12 +20,12 @@ import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
 import { install, paths, uninstall } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
-import { existsSync } from "fs";
 let analytics: Analytics;
 
 export var terminal : vscode.Terminal;
 
 export function makeTerminal() {
+  
   var tc = null;
   for(let term of vscode.window.terminals) {
     if(term.name==="PROS Terminal") {

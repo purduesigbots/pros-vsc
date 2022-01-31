@@ -27,10 +27,9 @@ export const parseMakeOutput = (stdout: any) => {
           e = JSON.parse(err.substr(PREFIX.length)).text
           output.appendLine(e.replace(ansiRegex(),''));
           errors = true;
-        } else if(errors) {
-          return "Build Failed! See PROS output for details!"
         }
       }
+      return "Build Failed! See PROS output for details!"
     }
   }
 }

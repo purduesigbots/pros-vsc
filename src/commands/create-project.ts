@@ -5,22 +5,11 @@ import * as path from "path";
 import * as fs from "fs";
 
 import { parseErrorMessage, PREFIX } from "./cli-parsing";
-import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install"
 /**
  * Query the user for the directory where the project will be created.
  *
  * @returns The path to the directory where the new project will go.
  */
- const setVariables = async () => {
-  // Set PROS_TOOLCHAIN if one-click installed
-  if (!(TOOLCHAIN === "LOCAL")) {
-    process.env.PROS_TOOLCHAIN = TOOLCHAIN;
-  }
-  // Set pros executable path
-  process.env.PATH += PATH_SEP + CLI_EXEC_PATH;
-  // Set language variable
-  process.env.LC_ALL = "en_US.utf-8";
-}
 const selectDirectory = async () => {
   const directoryOptions: vscode.OpenDialogOptions = {
     canSelectMany: false,
@@ -85,7 +74,7 @@ const selectProjectName = async () => {
  */
 const selectKernelVersion = async (target: string) => {
   // Command to run to fetch all kernel versions
-  var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c ls-templates --target ${target} --machine-output`
+  var command = `pros c ls-templates --target ${target} --machine-output ${process.env["VSCODE FLAGS"]}`
   console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
     command/*, {timeout : 15000}*/
@@ -147,10 +136,10 @@ const runCreateProject = async (
       try {
         // Command to run to make a new project with
         // user specified name, version, and location
-        var command = `"${path.join(CLI_EXEC_PATH, "pros")}" c n "${projectPath}" ${target} ${version} --machine-output`
+        var command = `pros c n "${projectPath}" ${target} ${version} --machine-output ${process.env["VSCODE FLAGS"]}`
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
-          command, { encoding: "utf8", maxBuffer: 1024 * 1024 * 500, timeout: 30000 }
+          command, { encoding: "utf8", maxBuffer: 1024 * 1024 * 50, timeout: 30000 }
           // Not sure what the maxBuffer should be, but 1024*1024*5 was too small sometimes
         );
         if (stderr) {
@@ -171,7 +160,6 @@ const runCreateProject = async (
 export const createNewProject = async () => {
   let uri: string, target: string, projectName: string, version: string;
   try {
-    await setVariables();
     uri = await selectDirectory();
     target = await selectTarget();
     projectName = await selectProjectName();

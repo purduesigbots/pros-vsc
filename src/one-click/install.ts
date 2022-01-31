@@ -2,9 +2,8 @@ import * as vscode from "vscode";
 import * as path from 'path';
 import * as os from 'os';
 import { download } from './download';
-import { getCliVersion, getInstallPromptTitle } from "./installed";
+import { getCurrentVersion, getCliVersion, getInstallPromptTitle } from "./installed";
 import { makeTerminal } from '../extension'
-
 import * as fs from 'fs';
 var fetch = require('node-fetch');
 
@@ -159,15 +158,17 @@ export async function install(context: vscode.ExtensionContext) {
     paths(globalPath, system, context);
 }
 
-export function paths(globalPath: string, system: string, context : vscode.ExtensionContext) {
+
+export async function paths(globalPath: string, system: string, context : vscode.ExtensionContext) {
     // (path.join(globalPath, "install", `pros-cli-${system}`));
     // Check if user has CLI installed through one-click or other means.
-    var oneClicked = fs.existsSync(path.join(globalPath, "install", `pros-cli-${system}`));
+    let [version, oneClicked] = await getCurrentVersion(path.join(globalPath, "install", `pros-cli-${system}`, "pros"));
     PATH_SEP = system==="windows" ? ";" : ":";
-    
+    process.env["VSCODE FLAGS"] = (version>324?"--no-sentry --no-analytics":"");
+    console.log("paths")
     if (!oneClicked) {
         // Use system defaults if user does not have one-click CLI
-        CLI_EXEC_PATH = "pros";
+        CLI_EXEC_PATH = "";
         TOOLCHAIN = "LOCAL";
     } else {
         // Set toolchain environmental variable file location
