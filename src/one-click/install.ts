@@ -164,7 +164,7 @@ export async function paths(globalPath: string, system: string, context : vscode
     // Check if user has CLI installed through one-click or other means.
     let [version, oneClicked] = await getCurrentVersion(path.join(globalPath, "install", `pros-cli-${system}`, "pros"));
     PATH_SEP = system==="windows" ? ";" : ":";
-    process.env["VSCODE FLAGS"] = (version>324?"--no-sentry --no-analytics":"");
+    process.env["VSCODE FLAGS"] = (version>=324?"--no-sentry --no-analytics":"");
     console.log("paths")
     if (!oneClicked) {
         // Use system defaults if user does not have one-click CLI
