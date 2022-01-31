@@ -28,9 +28,13 @@ const runBuildUpload = async () => {
         );
         await vscode.window.showInformationMessage("Project Built!");
       } catch (error) {
-        const rtn = await vscode.window.showErrorMessage(parseMakeOutput(error.stdout),"View Output!","No Thanks!");
-        if (rtn==="View Output!") {
-          output.show();
+        if(!error.stdout.includes("No v5 ports")) {
+          const rtn = await vscode.window.showErrorMessage(parseMakeOutput(error.stdout),"View Output!","No Thanks!");
+          if (rtn==="View Output!") {
+            output.show();
+          }
+        } else {
+          vscode.window.showErrorMessage(parseMakeOutput(error.stdout))
         }
       }
     }
