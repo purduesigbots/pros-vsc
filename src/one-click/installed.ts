@@ -20,7 +20,7 @@ export async function getCurrentVersion(oneClickPath: string) {
     var versionint = -1;
     try {
         const { stdout, stderr } = await promisify(child_process.exec)(
-        `${oneClickPath} --version`
+        `"${oneClickPath}" --version`
         );
         versionint = +(stdout.replace("pros, version ","").replace(/\./gi,""));
         oc = true;
@@ -49,7 +49,7 @@ export async function getInstallPromptTitle(oneClickPath: string) {
     } else {
         if(version >= recent) {
             title = "PROS detected but not installed with VSCode. Would you like to install using VSCode? (Recommended).";
-        } else {
+        } else if(version < recent) {
             title = "An outdated version of PROS was detected on your system, not installed through VS Code. Would you like to install the update with VS Code?";
         }
     }
