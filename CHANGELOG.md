@@ -2,6 +2,10 @@
 
 Below are our release notes with their release dates corresponding to each version.
 
+## [0.2.1] - 2022-01-16 - Beta Version
+### Added
+- Fix a wide variety of bugs related to the new one-click feature.
+
 ## [0.2.0] - 2022-01-16 - Beta Version
 ### Added
 - This release bring one of the largest changes to PROS in a while, this new version of the VSCode Extensions allows users to install the PROS CLI and Toolchain all inside of VSCode it self, all by clicking just one button.
