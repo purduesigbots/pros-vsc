@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
-
+import * as os from 'os';
 import { TreeDataProvider } from "./views/tree-view";
 import {
   getWebviewContent,
@@ -18,20 +18,53 @@ import {
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
-import { install, paths } from "./one-click/install";
+import { install, paths, uninstall } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
-
 let analytics: Analytics;
 
+export var terminal : vscode.Terminal;
+
+export function makeTerminal() {
+  
+  var tc = null;
+  for(let term of vscode.window.terminals) {
+    if(term.name==="PROS Terminal") {
+      if(tc) {
+        term.dispose();
+      }
+      tc = term
+    }
+  }
+  if(!tc) {
+    terminal =  vscode.window.createTerminal({name:"PROS Terminal", env: process.env});
+  } else {
+    terminal = tc;
+  }
+}
+
+
+export const output = vscode.window.createOutputChannel("PROS Output");
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
+  const globalPath = context.globalStorageUri.fsPath;
+  
+  // Figure out operating system
+  var system = "linux";
+  if (process.platform === "win32") {
+    system = "windows";
+  } else if (process.platform === "darwin") {
+    system = "macos";
+  }
+
+  // Setup paths and terminal
+  paths(globalPath,system,context);
+  //output.show();
 
   workspaceContainsProjectPros().then((value) => {
     vscode.commands.executeCommand("setContext", "pros.isPROSProject", value);
   });
 
-  const terminal = vscode.window.createTerminal("PROS Terminal");
-  terminal.sendText("pros build-compile-commands");
+  //terminal.sendText("pros build-compile-commands");
 
   if (
     vscode.workspace
@@ -41,10 +74,15 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand("pros.welcome");
   }
   vscode.commands.registerCommand("pros.install", async () => {
+    analytics.sendAction("install");
     await install(context);
   });
-  vscode.commands.registerCommand("pros.upload&build", async () => {
-    analytics.sendAction("upload&build");
+  vscode.commands.registerCommand("pros.uninstall",async () => {
+    analytics.sendAction("uninstall");
+    await uninstall(context);
+  });
+  vscode.commands.registerCommand("pros.build&upload", async () => {
+    analytics.sendAction("build&upload");
     await buildUpload();
     // await vscode.commands.executeCommand("pros.build");
     // await vscode.commands.executeCommand("pros.upload");
@@ -63,8 +101,25 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.clean", clean);
 
   vscode.commands.registerCommand("pros.terminal", () => {
-    terminal.show();
-    terminal.sendText("pros terminal");
+    analytics.sendAction("serialterminal");
+    try {
+      makeTerminal();
+      terminal.sendText("pros terminal");
+      terminal.show();
+
+    } catch(err: any) {
+      vscode.window.showErrorMessage(err.message);
+    }
+  });
+  vscode.commands.registerCommand("pros.showterminal", () => {
+    analytics.sendAction("showterminal");
+    try {
+      makeTerminal();
+      terminal.show();
+      vscode.window.showInformationMessage("PROS Terminal started!");
+    } catch (err: any) {
+      vscode.window.showErrorMessage(err.message);
+    }
   });
 
   vscode.commands.registerCommand("pros.upgrade", () => {
@@ -167,17 +222,6 @@ export function activate(context: vscode.ExtensionContext) {
     install(context);
   }
 
-  const globalPath = context.globalStorageUri.fsPath;
-  var system = "linux";
-  if (process.platform === "win32") {
-    system = "windows";
-    paths(globalPath, system);
-  } else if (process.platform === "darwin") {
-    system = "macos";
-    paths(globalPath, system);
-  } else {
-    paths(globalPath, system);
-  }
 
   // heuristic to add new files to the compilation database without requiring a full build
   vscode.workspace.onDidCreateFiles(async (event) => {

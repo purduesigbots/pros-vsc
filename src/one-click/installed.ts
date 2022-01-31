@@ -14,34 +14,43 @@ export async function getCliVersion(url: string) {
     return vString;
 }
 
-export async function getInstallPromptTitle(oneClickPath: string) {
-    var title = "You do not have the PROS CLI installed. Install it now? (Recommended).";
-    const recent = await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest');
-    const split = "version ";
+export async function getCurrentVersion(oneClickPath: string) {
+    console.log("getCurrentVersion");
+    var oc = false;
+    var versionint = -1;
     try {
-        process.env.LC_ALL = "en_US.utf-8";
         const { stdout, stderr } = await promisify(child_process.exec)(
-            `"${oneClickPath}" --version`
+        `"${oneClickPath}" --version`
         );
-        if (!stdout.includes(recent)) {
-            console.log(stdout);
-            console.log(recent);
-            title = "There is an update available! Would you like to update now?";
-        } else {
-            title = "PROS is up to date!";
-        }
-    } catch (e) {
+        versionint = +(stdout.replace("pros, version ","").replace(/\./gi,""));
+        oc = true;
+    } catch {
         try {
             const { stdout, stderr } = await promisify(child_process.exec)(
                 `pros --version`
             );
-            if (!stdout.includes(recent)) {
-                title = "An outdated version of PROS was detected on your system, not installed through VS Code. Would you like to install the update with VS Code?"
-            } else {
-                title = "PROS detected but not installed with VSCode. Would you like to install using VSCode? (Recommended).";
-            }
-        } catch (er) {
-            console.log(er);
+            versionint = +(stdout.replace("pros, version ","").replace(/\./gi,""));
+        } catch{}
+    }
+    return [versionint, oc]
+}
+
+export async function getInstallPromptTitle(oneClickPath: string) {
+    var title = "You do not have the PROS CLI installed. Install it now? (Recommended).";
+    const recent = +(await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest')).replace(/\./gi,"");
+    const [version, oneClicked] = await getCurrentVersion(oneClickPath);
+
+    if(oneClicked) {
+        if(version >= recent) {
+            title = "PROS is up to date!";
+        } else {
+            title = "There is an update available! Would you like to update now?";
+        }
+    } else {
+        if(version >= recent) {
+            title = "PROS detected but not installed with VSCode. Would you like to install using VSCode? (Recommended).";
+        } else if(version < recent) {
+            title = "An outdated version of PROS was detected on your system, not installed through VS Code. Would you like to install the update with VS Code?";
         }
     }
     return title;
