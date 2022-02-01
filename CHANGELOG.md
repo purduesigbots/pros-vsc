@@ -2,6 +2,10 @@
 
 Below are our release notes with their release dates corresponding to each version.
 
+## [0.2.2] - 2022-01-16 - Beta Version
+### Added
+- Fixed an activation issue with the last release
+
 ## [0.2.1] - 2022-01-16 - Beta Version
 ### Added
 - Fix a wide variety of bugs related to the new one-click feature.
