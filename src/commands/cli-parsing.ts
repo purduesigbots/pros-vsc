@@ -1,6 +1,5 @@
 export const PREFIX = "Uc&42BWAaQ";
 import { output } from '../extension';
-const ansiRegex = require('ansi-regex');
 /**
  * Finds the logging message that contains the error message.
  *
@@ -25,7 +24,10 @@ export const parseMakeOutput = (stdout: any) => {
       for (let err of errorSplit) {
         if(err.substr(PREFIX.length).startsWith("{\"text")) {
           e = JSON.parse(err.substr(PREFIX.length)).text
-          output.appendLine(e.replace(ansiRegex(),''));
+          output.appendLine(e.replace([
+            '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
+            '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))'
+          ].join('|'),''));
           errors = true;
         }
       }

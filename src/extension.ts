@@ -32,7 +32,7 @@ export function makeTerminal() {
       if(tc) {
         term.dispose();
       }
-      tc = term
+      tc = term;
     }
   }
   if(!tc) {

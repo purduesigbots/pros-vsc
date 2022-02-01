@@ -15,7 +15,6 @@ export async function getCliVersion(url: string) {
 }
 
 export async function getCurrentVersion(oneClickPath: string) {
-    console.log("getCurrentVersion");
     var oc = false;
     var versionint = -1;
     try {
@@ -30,9 +29,11 @@ export async function getCurrentVersion(oneClickPath: string) {
                 `pros --version`
             );
             versionint = +(stdout.replace("pros, version ","").replace(/\./gi,""));
-        } catch{}
+        } catch(err) {
+            console.log(err);
+        }
     }
-    return [versionint, oc]
+    return [versionint, oc];
 }
 
 export async function getInstallPromptTitle(oneClickPath: string) {
