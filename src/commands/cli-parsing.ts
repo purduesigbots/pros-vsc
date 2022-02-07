@@ -24,10 +24,11 @@ export const parseMakeOutput = (stdout: any) => {
       for (let err of errorSplit) {
         if(err.substr(PREFIX.length).startsWith("{\"text")) {
           e = JSON.parse(err.substr(PREFIX.length)).text
-          const regex = ['[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
-          '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))'].join('|')
+          const regex = new RegExp(
+            '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))',
+          'g');
           output.appendLine(e.replace(
-            new RegExp(regex,'g'),
+            regex,
             ''
           ));
           errors = true;
