@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as fs from 'fs';
 import { getNonce } from "./nonce";
 import { version, getCurrentVersion } from "../one-click/installed";
+var currentIcon = "pros";
 export class ProsProjectEditorProvider
   implements vscode.CustomTextEditorProvider
 {
@@ -85,7 +86,6 @@ export class ProsProjectEditorProvider
       vscode.Uri.joinPath(this.context.extensionUri, "media", "vscode.css")
     );
     const icons = fs.readdirSync(vscode.Uri.joinPath(this.context.extensionUri, "media", "icons").fsPath);
-    console.log(icons);
     var usable_icons = [];
     for(var i of icons) {
       i=i.replace(".png","");
@@ -93,10 +93,8 @@ export class ProsProjectEditorProvider
         usable_icons.unshift(i);
       } else if(version >=323) {
         usable_icons.push(i);
-        console.log(vscode.Uri.joinPath(this.context.extensionUri, "media", "icons", `${i}.png`).fsPath);
       }
     }
-    console.log(usable_icons);
     const nonce = getNonce();
 
     // TODO: run after upload option?
@@ -150,38 +148,6 @@ export class ProsProjectEditorProvider
                 Upload: 
               </span>
               <span class="setting-item-label" title="files.autoSave">
-                Program Slot
-              </span>
-            </div>
-          </div>
-          <div class="setting-item-description">
-            <div class="setting-item-markdown">
-              <p>
-                Set the Program Slot number that this project will be uploaded into by default on the V5 brain.
-              </p>
-            </div>
-          </div>
-          <div class="setting-item-value">
-            <div class="setting-item-control select-container">
-              <select id="iconSelection" class="monaco-select-box monaco-select-box-dropdown-padding setting-control-focus-target" tabindex="-1" title="off" style="background-color: rgb(60, 60, 60); color: rgb(240, 240, 240); border-color: rgb(60, 60, 60);" data-focusable="true">
-              ${usable_icons.map(
-                  (i) => `<option value="${i}" thumbnail="https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icon/${i}.png">${i}</option><p>hi</p>`
-              )}
-              </select>
-              <img src="https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/project-view.png"/>
-              <img src="file:///../media/icons/pros.png"/>
-              <img src="https://www.vexforum.com/uploads/default/original/3X/a/7/a7b5fc109df85264bd109dc84aaeea59d502f84e.png"/>
-            </div>
-          </div>
-        </div>
-
-        <div class="setting-item-contents settings-row-inner-container">
-          <div class="setting-item-title">
-            <div class="setting-item-cat-label-container">
-              <span class="setting-item-category" title="files.autoSave">
-                Upload: 
-              </span>
-              <span class="setting-item-label" title="files.autoSave">
                 Program Icon
               </span>
             </div>
@@ -189,7 +155,7 @@ export class ProsProjectEditorProvider
           <div class="setting-item-description">
             <div class="setting-item-markdown">
               <p>
-                Set the Program Icon do be displayed on the V5 Brain.
+                Set the Program Slot number that this project will be uploaded into by default on the V5 brain.
               </p>
             </div>
           </div>
@@ -203,6 +169,37 @@ export class ProsProjectEditorProvider
             </div>
           </div>
         </div>
+
+        <div class="setting-item-contents settings-row-inner-container">
+          <div class="setting-item-title">
+            <div class="setting-item-cat-label-container">
+              <span class="setting-item-category" title="files.autoSave">
+                Upload: 
+              </span>
+              <span class="setting-item-label" title="files.autoSave">
+                Program Slot
+              </span>
+            </div>
+          </div>
+          <div class="setting-item-description">
+            <div class="setting-item-markdown">
+              <p>
+                Set the Program Icon do be displayed on the V5 Brain.
+              </p>
+            </div>
+          </div>
+          <div class="setting-item-value">
+            <div class="setting-item-control select-container">
+              <select id="iconSelection" class="monaco-select-box monaco-select-box-dropdown-padding setting-control-focus-target" tabindex="-1" title="off" style="background-color: rgb(60, 60, 60); color: rgb(240, 240, 240); border-color: rgb(60, 60, 60);" data-focusable="true">
+              ${usable_icons.map(
+                  (i) => `<option value="${i}" thumbnail="https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${i}.png">${i}</option><p>hi</p>`
+              )}
+              </select>
+              <img id="iconPreview"/>
+            </div>
+          </div>
+        </div>
+
         <script nonce="${nonce}" src="${scriptUri}"></script>
 
       </body>
@@ -227,7 +224,7 @@ export class ProsProjectEditorProvider
 
   private setIcon(document: vscode.TextDocument, e: any) {
     const json = this.getDocumentAsJson(document);
-    
+    currentIcon = e["icon"];
     if(version >= 323) {
       json["py/state"]["icon"] = e["icon"];
     }

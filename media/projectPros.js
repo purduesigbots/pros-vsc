@@ -14,9 +14,14 @@
   document.body.appendChild(errorContainer);
   errorContainer.className = "error";
   errorContainer.style.display = "none";
-
   const slotSelection = /** @type {HTMLInputElement} */ (
     document.getElementById("slotSelection")
+  );
+  const iconSelection = /** @type {HTMLInputElement} */ (
+    document.getElementById("iconSelection")
+  );
+  const iconPreview = /** @type {HTMLInputElement} */ (
+    document.getElementById("iconPreview")
   );
   const projectName = /** @type {HTMLInputElement} */ (
     document.getElementById("projectName")
@@ -25,11 +30,17 @@
   slotSelection.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
     vscode.postMessage({ type: "setSlot", slot: selector.value });
-  });
+    });
 
   projectName.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
     vscode.postMessage({ type: "setName", projectName: selector.value });
+  });
+
+  iconSelection.addEventListener("change", (e) => {
+    const selector = /** @type {HTMLInputElement} */ (e.target);
+    vscode.postMessage({ type: "setIcon", icon: selector.value });
+    iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${selector.value}.png`;
   });
 
   function updateContent(/** @type {string} */ text) {
@@ -49,6 +60,10 @@
     if (json["py/state"]["upload_options"]?.slot) {
       slotSelection.value = json["py/state"]["upload_options"]["slot"];
     }
+    if (json["py/state"]["upload_options"]?.icon) {
+      iconSelection.value = json["py/state"]["upload_options"]["icon"];
+    }
+    //iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${json["py/state"]["upload_options"]["icon"]}.png`;
   }
 
   // Handle messages sent from the extension to the webview
