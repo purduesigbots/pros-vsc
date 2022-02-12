@@ -150,7 +150,6 @@ export async function install(context: vscode.ExtensionContext) {
                 .getConfiguration("pros")
                 .update("showInstallOnStartup", false);
         } else {
-            vscode.window.showInformationMessage("Install it later!");
             vscode.workspace
                 .getConfiguration("pros")
                 .update("showInstallOnStartup", false);
@@ -175,6 +174,7 @@ export async function updateCLI(context: vscode.ExtensionContext) {
     }
     if(title.includes("not")) {
         install(context);
+        return;
     }
     const labelResponse = await vscode.window.showInformationMessage(title, "Update Now!", "No Thanks.");
     if(labelResponse?.toLowerCase().includes("no thanks")) {
