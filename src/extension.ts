@@ -18,11 +18,13 @@ import {
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
-import { install, paths, uninstall } from "./one-click/install";
+import { install, paths, uninstall, updateCLI } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 let analytics: Analytics;
 
 export var terminal : vscode.Terminal;
+export var system : string;
+export const output = vscode.window.createOutputChannel("PROS Output");
 
 export function makeTerminal() {
   
@@ -43,13 +45,12 @@ export function makeTerminal() {
 }
 
 
-export const output = vscode.window.createOutputChannel("PROS Output");
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
   const globalPath = context.globalStorageUri.fsPath;
   
   // Figure out operating system
-  var system = "linux";
+  system = "linux";
   if (process.platform === "win32") {
     system = "windows";
   } else if (process.platform === "darwin") {
@@ -93,6 +94,10 @@ export function activate(context: vscode.ExtensionContext) {
     await upload();
   });
 
+  vscode.commands.registerCommand("pros.updatecli", async() => {
+    analytics.sendAction("updatecli");
+    await updateCLI(context);
+  });
   vscode.commands.registerCommand("pros.build", async () => {
     analytics.sendAction("build");
     await build();
