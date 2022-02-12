@@ -173,6 +173,9 @@ export async function updateCLI(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(title);
         return;
     }
+    if(title.includes("not")) {
+        install(context);
+    }
     const labelResponse = await vscode.window.showInformationMessage(title, "Update Now!", "No Thanks.");
     if(labelResponse?.toLowerCase().includes("no thanks")) {
         return;
