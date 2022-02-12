@@ -148,7 +148,7 @@ export class ProsProjectEditorProvider
                 Upload: 
               </span>
               <span class="setting-item-label" title="files.autoSave">
-                Program Icon
+                Program Slot
               </span>
             </div>
           </div>
@@ -177,7 +177,7 @@ export class ProsProjectEditorProvider
                 Upload: 
               </span>
               <span class="setting-item-label" title="files.autoSave">
-                Program Slot
+                Program Icon
               </span>
             </div>
           </div>
@@ -192,12 +192,12 @@ export class ProsProjectEditorProvider
             <div class="setting-item-control select-container">
               <select id="iconSelection" class="monaco-select-box monaco-select-box-dropdown-padding setting-control-focus-target" tabindex="-1" title="off" style="background-color: rgb(60, 60, 60); color: rgb(240, 240, 240); border-color: rgb(60, 60, 60);" data-focusable="true">
               ${usable_icons.map(
-                  (i) => `<option value="${i}" thumbnail="https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${i}.png">${i}</option><p>hi</p>`
+                  (i) => `<option value="${i}" thumbnail="https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${i}.png">${i}</option>`
               )}
               </select>
-              <img id="iconPreview"/>
             </div>
           </div>
+          <img id="iconPreview" style="width: 8100x; height: 100px;"/>
         </div>
 
         <script nonce="${nonce}" src="${scriptUri}"></script>
@@ -226,7 +226,7 @@ export class ProsProjectEditorProvider
     const json = this.getDocumentAsJson(document);
     currentIcon = e["icon"];
     if(version >= 323) {
-      json["py/state"]["icon"] = e["icon"];
+      json["py/state"]["upload_options"]["icon"] = e["icon"];
     }
 
     return this.updateTextDocument(document, json);

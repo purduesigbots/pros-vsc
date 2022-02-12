@@ -40,7 +40,7 @@
   iconSelection.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
     vscode.postMessage({ type: "setIcon", icon: selector.value });
-    iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${selector.value}.png`;
+    iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${selector.value}crop.png`;
   });
 
   function updateContent(/** @type {string} */ text) {
@@ -62,9 +62,10 @@
     }
     if (json["py/state"]["upload_options"]?.icon) {
       iconSelection.value = json["py/state"]["upload_options"]["icon"];
+      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${json["py/state"]["upload_options"]["icon"]}crop.png`;
+      console.log(iconSelection.value);
     }
-    //iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${json["py/state"]["upload_options"]["icon"]}.png`;
-  }
+    }
 
   // Handle messages sent from the extension to the webview
   window.addEventListener("message", (event) => {
