@@ -91,7 +91,7 @@ export class ProsProjectEditorProvider
       i=i.replace(".png","");
       if(i == "pros") {
         usable_icons.unshift(i);
-      } else if(version >=323) {
+      } else if(version >=323 && !i.includes("crop")) {
         usable_icons.push(i);
       }
     }
@@ -197,7 +197,7 @@ export class ProsProjectEditorProvider
               </select>
             </div>
           </div>
-          <img id="iconPreview" style="width: 8100x; height: 100px;"/>
+          <img id="iconPreview" style="width: 150px; height: 150px; object-fit: contain;"/>
         </div>
 
         <script nonce="${nonce}" src="${scriptUri}"></script>
