@@ -226,12 +226,12 @@ export class ProsProjectEditorProvider
             <div class="setting-item-control select-container">
               <select id="iconSelection" class="monaco-select-box monaco-select-box-dropdown-padding setting-control-focus-target" tabindex="-1" title="off" style="background-color: rgb(60, 60, 60); color: rgb(240, 240, 240); border-color: rgb(60, 60, 60);" data-focusable="true">
               ${usable_icons.map(
-                  (i) => `<option value="${i}">${i.charAt(0).toUpperCase() + i.slice(1)}</option>`
+                  (i) => `<option value="${i}">${i=="pros" ? i.toUpperCase() : i.charAt(0).toUpperCase() + i.slice(1)}</option>`
               )}
               </select>
             </div>
           </div>
-          <img id="iconPreview" style="width: 100px; height: 100px; object-fit: contain;"/>
+          <img id="iconPreview" style="width: 87px; height: 87px; object-fit: contain;"/>
         </div>
 
         <div class="setting-item-contents settings-row-inner-container">
