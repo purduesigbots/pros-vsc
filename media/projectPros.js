@@ -14,33 +14,63 @@
   document.body.appendChild(errorContainer);
   errorContainer.className = "error";
   errorContainer.style.display = "none";
+
   const slotSelection = /** @type {HTMLInputElement} */ (
     document.getElementById("slotSelection")
   );
+
   const iconSelection = /** @type {HTMLInputElement} */ (
     document.getElementById("iconSelection")
   );
   const iconPreview = /** @type {HTMLInputElement} */ (
     document.getElementById("iconPreview")
   );
+
   const projectName = /** @type {HTMLInputElement} */ (
     document.getElementById("projectName")
   );
+  const description = /** @type {HTMLInputElement} */ (
+    document.getElementById("projectDesc")
+  );
 
+  const runafter = /** @type {HTMLInputElement} */ (
+    document.getElementById("runafter")
+  );
+  
   slotSelection.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
     vscode.postMessage({ type: "setSlot", slot: selector.value });
     });
 
-  projectName.addEventListener("change", (e) => {
+  var prevname;
+  projectName.addEventListener("keyup", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
+    if(prevname==selector.value) {
+      return;
+    }
+    prevname = selector.value;
     vscode.postMessage({ type: "setName", projectName: selector.value });
+  });
+  var prevdesc;
+
+  description.addEventListener("keyup", (e) => {
+    const selector = /** @type {HTMLInputElement} */ (e.target);
+    if(prevdesc==selector.value) {
+      return;
+    }
+    prevdesc = selector.value;
+    vscode.postMessage({ type: "setDesc", description: selector.value });
   });
 
   iconSelection.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
     vscode.postMessage({ type: "setIcon", icon: selector.value });
-    iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${selector.value}crop.png`;
+    iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${selector.value}.png`;
+  });
+
+  runafter.addEventListener("change", (e) => {
+    const selector = /** @type {HTMLInputElement} */ (e.target);
+    vscode.postMessage({ type: "setAfter", runafter: selector.value });
   });
 
   function updateContent(/** @type {string} */ text) {
@@ -56,14 +86,38 @@
     errorContainer.style.display = "none";
 
     // Render the current settings
-    projectName.value = json["py/state"]["project_name"];
+
+    // Current Project Name
+    projectName.value = json["py/state"]["project_name"] ? json["py/state"]["project_name"] : "Pros Project";
+    
+    // Current Project Description
+    if (json["py/state"]["upload_options"]?.description) {
+      description.value = json["py/state"]["upload_options"]["description"];
+    } else {
+      description.value = "My PROS Project";
+    }
+
+    // Current Project Slot
     if (json["py/state"]["upload_options"]?.slot) {
       slotSelection.value = json["py/state"]["upload_options"]["slot"];
     }
+
+    // Current Project Icon
     if (json["py/state"]["upload_options"]?.icon) {
       iconSelection.value = json["py/state"]["upload_options"]["icon"];
-      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${json["py/state"]["upload_options"]["icon"]}crop.png`;
+      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${json["py/state"]["upload_options"]["icon"]}.png`;
       console.log(iconSelection.value);
+    } else {
+      iconSelection.value = "pros";
+      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/pros.png`;
+      console.log(iconSelection.value);
+    }
+
+    // Current run-after option
+    if(json["py/state"]["upload_options"]?.after) {
+      runafter.value = json["py/state"]["upload_options"]["after"];
+    } else {
+      runafter.value = "screen";
     }
     }
 
