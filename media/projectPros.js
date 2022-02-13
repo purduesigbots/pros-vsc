@@ -43,23 +43,33 @@
     });
 
   var prevname;
+  var nametimer;
   projectName.addEventListener("keyup", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
     if(prevname==selector.value) {
       return;
     }
     prevname = selector.value;
-    vscode.postMessage({ type: "setName", projectName: selector.value });
-  });
-  var prevdesc;
 
+    clearTimeout(nametimer);
+    nametimer = setTimeout(function() {
+      vscode.postMessage({ type: "setName", projectName: selector.value });
+    },!selector.value ? 3000 : 500);
+
+  });
+
+  var prevdesc;
+  var desctimer;
   description.addEventListener("keyup", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
     if(prevdesc==selector.value) {
       return;
     }
     prevdesc = selector.value;
-    vscode.postMessage({ type: "setDesc", description: selector.value });
+    clearTimeout(desctimer);
+    desctimer = setTimeout(function() {
+      vscode.postMessage({ type: "setDesc", description: selector.value });
+    },!selector.value ? 3000 : 500);
   });
 
   iconSelection.addEventListener("change", (e) => {
