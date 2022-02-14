@@ -33,7 +33,7 @@ const runUpload = async () => {
         var command = `pros u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
-          command
+          command, {encoding: "utf8", maxBuffer: 1024 * 1024 * 50 }
         );
 
         vscode.window.showInformationMessage("Project Uploaded!");
