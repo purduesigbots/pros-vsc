@@ -75,7 +75,11 @@
   iconSelection.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
     vscode.postMessage({ type: "setIcon", icon: selector.value });
-    iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${selector.value}.png`;
+    iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/icons/${selector.value}.png`;
+    iconPreview.onerror = function (event) {
+      iconPreview.onerror = null;
+      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${selector.value}.png`
+    };
   });
 
   runafter.addEventListener("change", (e) => {
@@ -115,12 +119,18 @@
     // Current Project Icon
     if (json["py/state"]["upload_options"]?.icon) {
       iconSelection.value = json["py/state"]["upload_options"]["icon"];
-      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${json["py/state"]["upload_options"]["icon"]}.png`;
-      console.log(iconSelection.value);
+      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/icons/${iconSelection.value}.png`;
+      iconPreview.onerror = function (event) {
+        iconPreview.onerror = null;
+        iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${iconSelection.value}.png`
+      };
     } else {
       iconSelection.value = "pros";
-      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/pros.png`;
-      console.log(iconSelection.value);
+      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/icons/pros.png`;
+      iconPreview.onerror = function (event) {
+        iconPreview.onerror = null;
+        iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${iconSelection.value}.png`
+      };
     }
 
     // Current run-after option

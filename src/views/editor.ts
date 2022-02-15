@@ -67,7 +67,6 @@ export class ProsProjectEditorProvider
           this.setName(document, e);
           return;
         case "setDesc":
-          console.log("HHH");
           this.setDesc(document, e);
           return;
         case "setIcon":
