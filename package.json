@@ -104,6 +104,10 @@
       {
         "command": "pros.uninstall",
         "title": "PROS: Uninstall PROS"
+      },
+      {
+        "command": "pros.updatecli",
+        "title": "PROS: Update PROS CLI"
       }
     ],
     "menus": {

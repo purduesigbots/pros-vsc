@@ -3,14 +3,19 @@ import * as path from 'path';
 import * as os from 'os';
 import { download } from './download';
 import { getCurrentVersion, getCliVersion, getInstallPromptTitle } from "./installed";
-import { makeTerminal } from '../extension'
+import { makeTerminal, system } from '../extension'
 import * as fs from 'fs';
+import { promisify } from "util";
+import internal = require("stream");
+import { downloadDirToExecutablePath } from "vscode-test/out/util";
+import { ProsProjectEditorProvider } from "../views/editor";
 var fetch = require('node-fetch');
 
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
 export var CLI_EXEC_PATH: string;
 export var PATH_SEP: string;
+
 /*
 
 Code that maybe works to wait for both toolchain and cli to be installed???
@@ -64,25 +69,16 @@ export async function uninstall(context: vscode.ExtensionContext) {
     }
 }
 
-export async function install(context: vscode.ExtensionContext) {
-    const globalPath = context.globalStorageUri.fsPath;
-    var version = await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest');
-    console.log("Current CLI Version: " + version);
-
-    // Get system type, path string separator, CLI download url, and toolchain download url.
-    // Default variables are based on linux.
+async function getUrls(version : number) {
     var downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-lin-64bit.zip`;
     var downloadToolchain = "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2";
-    var system = "linux";
 
-    if (process.platform === "win32") {
+    if (system === "windows") {
         // Set system, path seperator, and downloads to windows version 
-        system = "windows";
         downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-win-64bit.zip`;
         downloadToolchain = "https://artprodcus3.artifacts.visualstudio.com/A268c8aad-3bb0-47d2-9a57-cf06a843d2e8/3a3f509b-ad80-4d2a-8bba-174ad5fd1dde/_apis/artifact/cGlwZWxpbmVhcnRpZmFjdDovL3B1cmR1ZS1hY20tc2lnYm90cy9wcm9qZWN0SWQvM2EzZjUwOWItYWQ4MC00ZDJhLThiYmEtMTc0YWQ1ZmQxZGRlL2J1aWxkSWQvMjg4Ni9hcnRpZmFjdE5hbWUvdG9vbGNoYWluLTY0Yml00/content?format=file&subPath=%2Fpros-toolchain-w64-3.0.1-standalone.zip";
-    } else if (process.platform === "darwin") {
+    } else if (system === "macos") {
         // Set system, path seperator, and downloads to windows version 
-        system = "macos";
         downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-macos-64bit.zip`;
         downloadToolchain = "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2";
         os.cpus().some(cpu => {
@@ -91,6 +87,18 @@ export async function install(context: vscode.ExtensionContext) {
             }
         });
     }
+
+    return [downloadCli, downloadToolchain];
+}
+
+export async function install(context: vscode.ExtensionContext) {
+    const globalPath = context.globalStorageUri.fsPath;
+    var version = await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest');
+    console.log("Current CLI Version: " + version);
+
+    // Get system type, path string separator, CLI download url, and toolchain download url.
+    // Default variables are based on linux.
+    let [downloadCli, downloadToolchain] = await getUrls(version);
     // Set the installed file names
     var cliName = `pros-cli-${system}.zip`;
     // Title of prompt depending on user's installed CLI
@@ -142,7 +150,6 @@ export async function install(context: vscode.ExtensionContext) {
                 .getConfiguration("pros")
                 .update("showInstallOnStartup", false);
         } else {
-            vscode.window.showInformationMessage("Install it later!");
             vscode.workspace
                 .getConfiguration("pros")
                 .update("showInstallOnStartup", false);
@@ -158,6 +165,35 @@ export async function install(context: vscode.ExtensionContext) {
     paths(globalPath, system, context);
 }
 
+export async function updateCLI(context: vscode.ExtensionContext) {
+    const globalPath = context.globalStorageUri.fsPath;
+    var title = await getInstallPromptTitle(path.join(globalPath, "install", `pros-cli-${system}`, "pros"));
+    if(title.includes("up to date")) {
+        vscode.window.showInformationMessage(title);
+        return;
+    }
+    if(title.includes("not")) {
+        install(context);
+        return;
+    }
+    const labelResponse = await vscode.window.showInformationMessage(title, "Update Now!", "No Thanks.");
+    if(labelResponse?.toLowerCase().includes("no thanks")) {
+        return;
+    }            
+    try {
+        await removeDirAsync(path.join(globalPath,"install",`pros-cli-${system}`),true);
+    } catch(err) {
+        //console.log(err);
+    }
+    var version = await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest');
+    let [downloadCli, downloadToolchain] = await getUrls(version);
+    // Set the installed file names
+    var cliName = `pros-cli-${system}.zip`;
+    // Title of prompt depending on user's installed CLI
+    download(context, downloadCli, cliName, system);
+    //await paths(globalPath, system ,context);
+    
+}
 
 export async function paths(globalPath: string, system: string, context : vscode.ExtensionContext) {
     // (path.join(globalPath, "install", `pros-cli-${system}`));

@@ -7,7 +7,6 @@ var tar = require('tar-fs');
 import * as fs from 'fs';
 import { promisify } from "util";
 import * as stream from 'stream';
-import * as child_process from "child_process";
 import { paths } from './install';
 import * as path from 'path';
 export function download(context: vscode.ExtensionContext, downloadURL: string, storagePath: string, system: string) {
