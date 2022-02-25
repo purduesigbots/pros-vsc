@@ -65,6 +65,17 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand("setContext", "pros.isPROSProject", value);
   });
 
+  if (
+    vscode.workspace
+      .getConfiguration("pros")
+  ) {
+    try {
+      makeTerminal();
+      terminal.sendText("pros build-compile-commands");
+    } catch {
+
+    }
+  }
   //terminal.sendText("pros build-compile-commands");
 
   if (
