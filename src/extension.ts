@@ -18,7 +18,7 @@ import {
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
-import { install, paths, uninstall, updateCLI } from "./one-click/install";
+import { install, paths, uninstall, installCLI } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 let analytics: Analytics;
 
@@ -96,7 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.commands.registerCommand("pros.updatecli", async() => {
     analytics.sendAction("updatecli");
-    await updateCLI(context);
+    await installCLI(context);
   });
   vscode.commands.registerCommand("pros.build", async () => {
     analytics.sendAction("build");

@@ -124,7 +124,7 @@ export async function install(context: vscode.ExtensionContext) {
             //delete the directory
             
             try {
-                await removeDirAsync(context.globalStorageUri.fsPath, true);
+                await removeDirAsync(context.globalStorageUri.fsPath, false);
             } catch(err) {
                 console.log(err);
             }
@@ -139,9 +139,9 @@ export async function install(context: vscode.ExtensionContext) {
             await downloadCli_and_toolchain(context,cli_info,toolchain_info);
             */
 
-            download(context, downloadCli, cliName, system);
+            installCLI(context, true);
+            //download(context, downloadCli, cliName, system);
             download(context, downloadToolchain, toolchainName, system);
-
             // Delete the download subdirectory once everything is installed
 
             //await removeDirAsync(dirs.download,false);
@@ -165,23 +165,29 @@ export async function install(context: vscode.ExtensionContext) {
     paths(globalPath, system, context);
 }
 
-export async function updateCLI(context: vscode.ExtensionContext) {
+export async function installCLI(context: vscode.ExtensionContext, force=false) {
+
     const globalPath = context.globalStorageUri.fsPath;
-    var title = await getInstallPromptTitle(path.join(globalPath, "install", `pros-cli-${system}`, "pros"));
-    if(title.includes("up to date")) {
-        vscode.window.showInformationMessage(title);
-        return;
+
+    if(!force) {
+        var title = await getInstallPromptTitle(path.join(globalPath, "install", `pros-cli-${system}`, "pros"));
+        if(title.includes("up to date")) {
+            vscode.window.showInformationMessage(title);
+            return;
+        }
+        if(title.includes("not")) {
+            install(context);
+            return;
+        }
+        const labelResponse = await vscode.window.showInformationMessage(title, "Update Now!", "No Thanks.")
+        
+        if(labelResponse?.toLowerCase().includes("no thanks")) {
+            return;
+        }    
+    
     }
-    if(title.includes("not")) {
-        install(context);
-        return;
-    }
-    const labelResponse = await vscode.window.showInformationMessage(title, "Update Now!", "No Thanks.");
-    if(labelResponse?.toLowerCase().includes("no thanks")) {
-        return;
-    }            
     try {
-        await removeDirAsync(path.join(globalPath,"install",`pros-cli-${system}`),true);
+        await removeDirAsync(path.join(globalPath,"install",`pros-cli-${system}`),false);
     } catch(err) {
         //console.log(err);
     }
