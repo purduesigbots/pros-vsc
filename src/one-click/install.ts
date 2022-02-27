@@ -3,18 +3,23 @@ import * as path from 'path';
 import * as os from 'os';
 import { download } from './download';
 import { getCurrentVersion, getCliVersion, getInstallPromptTitle } from "./installed";
-import { makeTerminal, system } from '../extension'
 import * as fs from 'fs';
-import { promisify } from "util";
 import internal = require("stream");
-import { downloadDirToExecutablePath } from "vscode-test/out/util";
-import { ProsProjectEditorProvider } from "../views/editor";
-var fetch = require('node-fetch');
 
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
 export var CLI_EXEC_PATH: string;
 export var PATH_SEP: string;
+
+const getOperatingSystem = () => {
+    if (process.platform === "win32") {
+        return "windows";
+    } 
+    if (process.platform === "darwin") {
+        return "macos";
+    }
+    return "linux";
+};
 
 /*
 
@@ -55,7 +60,7 @@ async function removeDirAsync(directory: string, begin: boolean) {
 
 export async function uninstall(context: vscode.ExtensionContext) {
     const globalPath = context.globalStorageUri.fsPath;
-    const title = "Are you sure you want to uninstall PROS?"
+    const title = "Are you sure you want to uninstall PROS?";
     const labelResponse = await vscode.window.showInformationMessage(title, "Uninstall Now!", "No Thanks.");
     if(labelResponse==="Uninstall Now!") {
         await vscode.window.withProgress({
@@ -73,11 +78,11 @@ async function getUrls(version : number) {
     var downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-lin-64bit.zip`;
     var downloadToolchain = "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2";
 
-    if (system === "windows") {
+    if (getOperatingSystem() === "windows") {
         // Set system, path seperator, and downloads to windows version 
         downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-win-64bit.zip`;
         downloadToolchain = "https://artprodcus3.artifacts.visualstudio.com/A268c8aad-3bb0-47d2-9a57-cf06a843d2e8/3a3f509b-ad80-4d2a-8bba-174ad5fd1dde/_apis/artifact/cGlwZWxpbmVhcnRpZmFjdDovL3B1cmR1ZS1hY20tc2lnYm90cy9wcm9qZWN0SWQvM2EzZjUwOWItYWQ4MC00ZDJhLThiYmEtMTc0YWQ1ZmQxZGRlL2J1aWxkSWQvMjg4Ni9hcnRpZmFjdE5hbWUvdG9vbGNoYWluLTY0Yml00/content?format=file&subPath=%2Fpros-toolchain-w64-3.0.1-standalone.zip";
-    } else if (system === "macos") {
+    } else if (getOperatingSystem() === "macos") {
         // Set system, path seperator, and downloads to windows version 
         downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-macos-64bit.zip`;
         downloadToolchain = "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2";
@@ -93,8 +98,9 @@ async function getUrls(version : number) {
 
 export async function install(context: vscode.ExtensionContext) {
     const globalPath = context.globalStorageUri.fsPath;
+    const system = getOperatingSystem();
     var version = await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest');
-    console.log("Current CLI Version: " + version);
+    console.log("Latest Available CLI Version: " + version);
 
     // Get system type, path string separator, CLI download url, and toolchain download url.
     // Default variables are based on linux.
@@ -161,12 +167,12 @@ export async function install(context: vscode.ExtensionContext) {
             .getConfiguration("pros")
             .update("showInstallOnStartup", false);
     }
-    // Set path variables to toolchain and CLI
-    paths(globalPath, system, context);
 }
 
 export async function updateCLI(context: vscode.ExtensionContext) {
     const globalPath = context.globalStorageUri.fsPath;
+    const system = getOperatingSystem();
+    
     var title = await getInstallPromptTitle(path.join(globalPath, "install", `pros-cli-${system}`, "pros"));
     if(title.includes("up to date")) {
         vscode.window.showInformationMessage(title);
@@ -195,31 +201,33 @@ export async function updateCLI(context: vscode.ExtensionContext) {
     
 }
 
-export async function paths(globalPath: string, system: string, context : vscode.ExtensionContext) {
-    // (path.join(globalPath, "install", `pros-cli-${system}`));
+export async function configurePaths(context : vscode.ExtensionContext) {
+    const globalPath = context.globalStorageUri.fsPath;
+    const system = getOperatingSystem();
+
+    const cliExecPath = path.join(globalPath, "install", `pros-cli-${system}`);
     // Check if user has CLI installed through one-click or other means.
-    let [version, oneClicked] = await getCurrentVersion(path.join(globalPath, "install", `pros-cli-${system}`, "pros"));
-    PATH_SEP = (system==="windows" ? ";" : ":");
+    let [version, isOneClickInstall] = await getCurrentVersion(path.join(cliExecPath, "pros"));
     process.env["VSCODE FLAGS"] = (version>=324?"--no-sentry --no-analytics":"");
-    console.log(version);
-    if (!oneClicked) {
+
+    if (!isOneClickInstall) {
         // Use system defaults if user does not have one-click CLI
         CLI_EXEC_PATH = "";
         TOOLCHAIN = "LOCAL";
-    } else {
-        // Set toolchain environmental variable file location
-        TOOLCHAIN = path.join(globalPath, "install", `pros-toolchain-${system === "windows" ? path.join("windows", "usr") : system}`);
-        // Set CLI environmental variable file location
-        CLI_EXEC_PATH = path.join(globalPath, "install", `pros-cli-${system}`);
-        
-        // Prepend CLI to path
-        process.env['PATH'] = CLI_EXEC_PATH+PATH_SEP+process.env['PATH'];
-        // Having `PROS_TOOLCHAIN` set to TOOLCHAIN breaks everything, so idk. Empty string works don't question it
-        process.env['PROS_TOOLCHAIN'] = TOOLCHAIN;
-        process.env.LC_ALL = "en_US.utf-8";
-        // Remake terminal with updated environment variables
-        makeTerminal();
+        return;
     }
+
+    PATH_SEP = (system==="windows" ? ";" : ":");
+    // Set toolchain environmental variable file location
+    TOOLCHAIN = path.join(globalPath, "install", `pros-toolchain-${system === "windows" ? path.join("windows", "usr") : system}`);
+    // Set CLI environmental variable file location
+    CLI_EXEC_PATH = cliExecPath;
+    
+    // Prepend CLI to path
+    process.env['PATH'] = cliExecPath + PATH_SEP + process.env['PATH'];
+    // Having `PROS_TOOLCHAIN` set to TOOLCHAIN breaks everything, so idk. Empty string works don't question it
+    process.env['PROS_TOOLCHAIN'] = TOOLCHAIN;
+    process.env.LC_ALL = "en_US.utf-8";
 }
 
 /*
