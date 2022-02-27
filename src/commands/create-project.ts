@@ -136,7 +136,7 @@ const runCreateProject = async (
       try {
         // Command to run to make a new project with
         // user specified name, version, and location
-        var command = `pros c n "${projectPath}" ${target} ${version} --machine-output ${process.env["VSCODE FLAGS"]}`;
+        var command = `pros c n "${projectPath}" ${target} ${version} --machine-output --build-cache ${process.env["VSCODE FLAGS"]}`;
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
           command, { encoding: "utf8", maxBuffer: 1024 * 1024 * 50, timeout: 30000 }
@@ -147,7 +147,7 @@ const runCreateProject = async (
         }
 
         vscode.window.showInformationMessage("Project created!");
-      } catch (error) {
+      } catch (error: any) {
         console.log(error.stdout);
         throw new Error(parseErrorMessage(error.stdout));
       }
@@ -180,7 +180,7 @@ export const createNewProject = async () => {
       "vscode.openFolder",
       vscode.Uri.file(projectPath)
     );
-  } catch (err) {
+  } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
 };
