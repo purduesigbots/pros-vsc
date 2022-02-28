@@ -7,7 +7,6 @@ var tar = require('tar-fs');
 import * as fs from 'fs';
 import { promisify } from "util";
 import * as stream from 'stream';
-import { paths } from './install';
 import * as path from 'path';
 export function download(context: vscode.ExtensionContext, downloadURL: string, storagePath: string, system: string) {
     const globalPath = context.globalStorageUri.fsPath;
@@ -147,8 +146,6 @@ export function download(context: vscode.ExtensionContext, downloadURL: string, 
             }
         }
         //vscode.window.showInformationMessage("Finished extracting: " + storagePath);
-        paths(globalPath, system, context);
     });
-    paths(globalPath, system, context);
     return true;
 }
