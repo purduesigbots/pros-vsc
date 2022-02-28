@@ -1,15 +1,10 @@
 import * as vscode from "vscode";
 import * as path from 'path';
 import * as os from 'os';
-import { download } from './download';
+import { downloadextract } from './download';
 import { getCurrentVersion, getCliVersion, getInstallPromptTitle } from "./installed";
 import { makeTerminal, system } from '../extension'
 import * as fs from 'fs';
-import { promisify } from "util";
-import internal = require("stream");
-import { downloadDirToExecutablePath } from "vscode-test/out/util";
-import { ProsProjectEditorProvider } from "../views/editor";
-var fetch = require('node-fetch');
 
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
@@ -23,7 +18,7 @@ a and b arguments are arrays in the format:
 {download_url, download_name, system_type}
 
 async function downloadCli_and_toolchain(context:vscode.ExtensionContext,a:string[],b:string[]) {
-download(context,a[0],a[1],a[2]);
+install(context,a[0],a[1],a[2]);
 await promisify(download)(context,b[0],b[1],b[2]);
 return true;
 }
@@ -140,8 +135,8 @@ export async function install(context: vscode.ExtensionContext) {
             */
 
             installCLI(context, true);
-            //download(context, downloadCli, cliName, system);
-            download(context, downloadToolchain, toolchainName, system);
+            //install(context, downloadCli, cliName, system);
+            downloadextract(context, downloadToolchain, toolchainName, system);
             // Delete the download subdirectory once everything is installed
 
             //await removeDirAsync(dirs.download,false);
@@ -196,7 +191,7 @@ export async function installCLI(context: vscode.ExtensionContext, force=false) 
     // Set the installed file names
     var cliName = `pros-cli-${system}.zip`;
     // Title of prompt depending on user's installed CLI
-    download(context, downloadCli, cliName, system);
+    downloadextract(context, downloadCli, cliName, system);
     //await paths(globalPath, system ,context);
     
 }
