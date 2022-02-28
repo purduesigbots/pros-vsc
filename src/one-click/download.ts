@@ -103,28 +103,28 @@ export async function extract(globalPath: string, downloadURL: string, storagePa
                 console.log("Extracting GCC ARM contents to main folder");
                 // extract contents of gcc-arm-none-eabi-version folder
                 const files = await fs.promises.readdir(path.join(globalPath, "install", "pros-toolchain-windows", "usr"));
-                    for(const dir in files) {
-                        if (dir.includes("gcc-arm-none")) {
-                            // iterate through each folder in gcc-arm-none-eabi-version
-                            const folders = await fs.promises.readdir(path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir));
-                                for(const folder in folders) {
-                                    if (!folder.includes("arm-none")) {
-                                        const subfiles = await fs.promises.readdir(path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir, folder));
-                                        // extract everything back 1 level into their respective folder
-                                        for(const subfile in subfiles) {
-                                            console.log("third read dir for");
-                                            var originalPath = path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir, folder, subfile);
-                                            var newPath = path.join(globalPath, "install", "pros-toolchain-windows", "usr", folder, subfile);
-                                            await fs.promises.rename(originalPath, newPath);
-                                        }
-                                    } else {
-                                        // move arm-none folder contents into a new directory under usr
-                                        console.log("Copying arm-none-eabi folder");
-                                        var originalPath = path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir, folder);
-                                        var newPath = path.join(globalPath, "install", "pros-toolchain-windows", "usr", folder);
+                for(const dir in files) {
+                    if (dir.includes("gcc-arm-none")) {
+                        // iterate through each folder in gcc-arm-none-eabi-version
+                        const folders = await fs.promises.readdir(path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir));
+                            for(const folder in folders) {
+                                if (!folder.includes("arm-none")) {
+                                    const subfiles = await fs.promises.readdir(path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir, folder));
+                                    // extract everything back 1 level into their respective folder
+                                    for(const subfile in subfiles) {
+                                        console.log("third read dir for");
+                                        var originalPath = path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir, folder, subfile);
+                                        var newPath = path.join(globalPath, "install", "pros-toolchain-windows", "usr", folder, subfile);
                                         await fs.promises.rename(originalPath, newPath);
                                     }
+                                } else {
+                                    // move arm-none folder contents into a new directory under usr
+                                    console.log("Copying arm-none-eabi folder");
+                                    var originalPath = path.join(globalPath, "install", "pros-toolchain-windows", "usr", dir, folder);
+                                    var newPath = path.join(globalPath, "install", "pros-toolchain-windows", "usr", folder);
+                                    await fs.promises.rename(originalPath, newPath);
                                 }
+                            }
                             await fs.promises.rmdir(dir, { recursive: true });
                         }
                     }
