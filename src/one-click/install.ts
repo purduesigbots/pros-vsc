@@ -171,7 +171,7 @@ export async function install(context: vscode.ExtensionContext) {
     }
 }
 
-export async function installCLI(context: vscode.ExtensionContext, force=false) {
+export async function updateCLI(context: vscode.ExtensionContext, force=false) {
 
     const globalPath = context.globalStorageUri.fsPath;
     const system = getOperatingSystem();

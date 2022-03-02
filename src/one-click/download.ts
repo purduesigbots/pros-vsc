@@ -7,7 +7,7 @@ var tar = require('tar-fs');
 import * as fs from 'fs';
 import { promisify } from "util";
 import * as stream from 'stream';
-import { paths, PATH_SEP } from './install';
+import { configurePaths, PATH_SEP } from './install';
 import * as path from 'path';
 
 //const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -49,6 +49,18 @@ async function download(globalPath: string, downloadURL: string, storagePath: st
 
 
 export async function extract(globalPath: string, downloadURL: string, storagePath: string, system: string, bz2: boolean) {
+    
+    // Issues with extracter and 2 empty folders, so we are gonna make the empty folders ourselves
+    if (system === "windows" && storagePath.includes("toolchain")) {
+        try {
+            await fs.promises.mkdir(path.join(globalPath, 'install', storagePath, 'usr', 'gcc-arm-none-eabi-10.3-2021.10', 'arm-none-eabi', 'include', 'bits'));
+            await fs.promises.mkdir(path.join(globalPath, 'install', storagePath, 'usr', 'gcc-arm-none-eabi-10.3-2021.10', 'arm-none-eabi', 'include', 'rpc'));
+            await fs.promises.mkdir(path.join(globalPath, 'install', storagePath, 'tmp'));
+        } catch(e) {
+            console.log(e);
+        }
+    }
+
     await window.withProgress({
         location: ProgressLocation.Notification,
         title: "Installing: " + (storagePath.includes("cli") ? "PROS CLI" : "PROS Toolchain"),
@@ -99,7 +111,7 @@ export async function extract(globalPath: string, downloadURL: string, storagePa
                 fs.unlink(path.join(globalPath, 'install', storagePath), (_) => null); // Don't wait, and ignore error.
                 throw e;
             });
-
+            console.log("Start file moving");
             if (storagePath.includes('pros-toolchain-windows')) {
                 // create tmp folder
                 // extract contents of gcc-arm-none-eabi-version folder
@@ -133,7 +145,7 @@ export async function extract(globalPath: string, downloadURL: string, storagePa
             }
         }
     });
-
+    console.log("finished extraction");
     return true;   
 }
 
@@ -153,7 +165,7 @@ export async function cleanup(context: vscode.ExtensionContext, system: string) 
     }, async (progress, token) => {
         const globalPath = context.globalStorageUri.fsPath;
         await chmod(globalPath, system);
-        await paths(globalPath, system, context);
+        await configurePaths(context);
         // Ensure that toolchain and cli are working
     });
 }
