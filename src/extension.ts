@@ -18,54 +18,45 @@ import {
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
-import { install, paths, uninstall, installCLI } from "./one-click/install";
+import { install, configurePaths, uninstall, updateCLI } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 let analytics: Analytics;
 
-export var terminal : vscode.Terminal;
 export var system : string;
 export const output = vscode.window.createOutputChannel("PROS Output");
 
-export function makeTerminal() {
-  
-  var tc = null;
-  for(let term of vscode.window.terminals) {
-    if(term.name==="PROS Terminal") {
-      if(tc) {
-        term.dispose();
-      }
-      tc = term;
-    }
+/// Get a reference to the "PROS Terminal" VSCode terminal used for running 
+/// commands.
+export const getProsTerminal = async (context: vscode.ExtensionContext): Promise<vscode.Terminal> => {
+  const prosTerminals = vscode.window.terminals.filter(t => t.name === "PROS Terminal");
+  if (prosTerminals.length > 1) {
+    // Clean up duplicate terminals
+    prosTerminals.slice(1).forEach(t => t.dispose());
   }
-  if(!tc) {
-    terminal =  vscode.window.createTerminal({name:"PROS Terminal", env: process.env});
-  } else {
-    terminal = tc;
-  }
-}
 
+  // Create a new PROS Terminal if one doesn't exist
+  if (prosTerminals.length) {
+    return prosTerminals[0];
+  }
+
+  if (!process.env["PATH"]?.includes("pros-cli")) {
+    await configurePaths(context);
+  }
+
+  return vscode.window.createTerminal({name:"PROS Terminal", env: process.env});
+};
 
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
-  const globalPath = context.globalStorageUri.fsPath;
   
-  // Figure out operating system
-  system = "linux";
-  if (process.platform === "win32") {
-    system = "windows";
-  } else if (process.platform === "darwin") {
-    system = "macos";
-  }
-
-  // Setup paths and terminal
-  paths(globalPath,system,context);
-  //output.show();
-
-  workspaceContainsProjectPros().then((value) => {
-    vscode.commands.executeCommand("setContext", "pros.isPROSProject", value);
+  workspaceContainsProjectPros().then((isProsProject) => {
+    vscode.commands.executeCommand("setContext", "pros.isPROSProject", isProsProject);
+    if (isProsProject) {
+      getProsTerminal(context).then((terminal) => {
+        terminal.sendText("pros build-compile-commands");
+      });
+    }
   });
-
-  //terminal.sendText("pros build-compile-commands");
 
   if (
     vscode.workspace
@@ -85,8 +76,6 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.build&upload", async () => {
     analytics.sendAction("build&upload");
     await buildUpload();
-    // await vscode.commands.executeCommand("pros.build");
-    // await vscode.commands.executeCommand("pros.upload");
   });
 
   vscode.commands.registerCommand("pros.upload", async () => {
@@ -105,21 +94,20 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.commands.registerCommand("pros.clean", clean);
 
-  vscode.commands.registerCommand("pros.terminal", () => {
+  vscode.commands.registerCommand("pros.terminal", async () => {
     analytics.sendAction("serialterminal");
     try {
-      makeTerminal();
+      const terminal = await getProsTerminal(context);
       terminal.sendText("pros terminal");
       terminal.show();
-
     } catch(err: any) {
       vscode.window.showErrorMessage(err.message);
     }
   });
-  vscode.commands.registerCommand("pros.showterminal", () => {
+  vscode.commands.registerCommand("pros.showterminal", async () => {
     analytics.sendAction("showterminal");
     try {
-      makeTerminal();
+      const terminal = await getProsTerminal(context);
       terminal.show();
       vscode.window.showInformationMessage("PROS Terminal started!");
     } catch (err: any) {
