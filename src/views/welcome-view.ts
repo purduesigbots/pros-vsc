@@ -137,8 +137,8 @@ export function getWebviewContent(
 							For help, please visit:
 							<ul>
 								<li><a href="https://pros.cs.purdue.edu/v5/editor/index.html">This page</a> for a guide to getting started with PROS for VSCode</li>
-								<li>The <a href="https://pros.cs.purdue.edu/v5/tutorials/index.html">PROS tutorial page</a>to learn about using everything from sensors to motors to tasks and multithreading in PROS.</li>
-								<li>The <a  href="https://pros.cs.purdue.edu/v5/api/index.html">PROS API documentation</a></li>
+								<li>The <a href="https://pros.cs.purdue.edu/v5/tutorials/index.html">PROS tutorial page</a> to learn about using everything from sensors to motors to tasks and multithreading in PROS.</li>
+								<li>The <a href="https://pros.cs.purdue.edu/v5/api/index.html">PROS API documentation</a></li>
 							</ul>
 						</div>
 					</div>

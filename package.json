@@ -21,7 +21,7 @@
     "color": "#D6B872",
     "theme": "dark"
   },
-  "version": "0.2.2",
+  "version": "0.3.0",
   "engines": {
     "vscode": "^1.56.0"
   },
@@ -104,6 +104,10 @@
       {
         "command": "pros.uninstall",
         "title": "PROS: Uninstall PROS"
+      },
+      {
+        "command": "pros.updatecli",
+        "title": "PROS: Update PROS CLI"
       }
     ],
     "menus": {

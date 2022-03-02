@@ -2,6 +2,11 @@
 
 Below are our release notes with their release dates corresponding to each version.
 
+## [0.3.0] - 2022-01-16 - Beta Version
+### Added
+- Added One-Click button to update CLI only 
+- Fixed various One-Click and compilation issues
+
 ## [0.2.2] - 2022-01-16 - Beta Version
 ### Added
 - Fixed an activation issue with the last release
