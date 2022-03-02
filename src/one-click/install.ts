@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from 'path';
 import * as os from 'os';
-import { downloadextract } from './download';
+import { cleanup, downloadextract } from './download';
 import { getCurrentVersion, getCliVersion, getInstallPromptTitle } from "./installed";
 import { makeTerminal, system } from '../extension'
 import * as fs from 'fs';
@@ -133,10 +133,12 @@ export async function install(context: vscode.ExtensionContext) {
             const toolchain_info = [downloadToolchain,toolchainName,system];
             await downloadCli_and_toolchain(context,cli_info,toolchain_info);
             */
+            const promises = [
+                downloadextract(context, downloadCli, cliName, system),
+                downloadextract(context, downloadToolchain, toolchainName, system)
+            ];
+            const [a, b] = await Promise.all(promises);
 
-            installCLI(context, true);
-            //install(context, downloadCli, cliName, system);
-            downloadextract(context, downloadToolchain, toolchainName, system);
             // Delete the download subdirectory once everything is installed
 
             //await removeDirAsync(dirs.download,false);
@@ -171,7 +173,8 @@ export async function installCLI(context: vscode.ExtensionContext, force=false) 
             return;
         }
         if(title.includes("not")) {
-            install(context);
+            await install(context);
+            //await cleanup(context, system);
             return;
         }
         const labelResponse = await vscode.window.showInformationMessage(title, "Update Now!", "No Thanks.")
@@ -191,7 +194,8 @@ export async function installCLI(context: vscode.ExtensionContext, force=false) 
     // Set the installed file names
     var cliName = `pros-cli-${system}.zip`;
     // Title of prompt depending on user's installed CLI
-    downloadextract(context, downloadCli, cliName, system);
+    await downloadextract(context, downloadCli, cliName, system);
+    await cleanup(context, system);
     //await paths(globalPath, system ,context);
     
 }

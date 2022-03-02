@@ -41,7 +41,6 @@
       errorContainer.style.display = "";
       return;
     }
-    console.log(json);
     errorContainer.style.display = "none";
 
     // Render the current settings
