@@ -172,15 +172,19 @@ export async function cleanup(context: vscode.ExtensionContext, system: string) 
 
 export async function chmod(globalPath : string, system : string) {
     if (system === "windows") {
-        return
+        return;
     }
     
-    const files = await fs.promises.readdir(path.join(globalPath,'install'))
+    const files = await fs.promises.readdir(path.join(globalPath,'install'));
     for(const file of files) {
         if (file.includes("pros-cli-macos")) {
-            //chmod the files the so files on mac
+            //chmod the files the .so files on mac
             await fs.promises.chmod(path.join(globalPath,'install','pros-cli-macos','lib','*.so'), 0o751);
             /*
+
+            This is the old code that just spammed chmod on the lib folder. If the code
+            above doesn't work then revert to this
+
                 fs.readdir(globalPath + '/install/pros-cli-macos/lib/', (err, libFiles) => {
                 libFiles.forEach(exec => {
                     if (exec.endsWith(".so")) {
@@ -192,8 +196,9 @@ export async function chmod(globalPath : string, system : string) {
         }
 
         // Chmod the executables (pros and intercepts)
-        await fs.promises.chmod(path.join(globalPath, "install", file, "pros"), 0o751);
-        await fs.promises.chmod(path.join(globalPath, "install", file, "intercept-c++"), 0o751);
-        await fs.promises.chmod(path.join(globalPath, "install", file, "intercept-cc"), 0o751);
     }
+    
+    await fs.promises.chmod(path.join(globalPath, "install", `pros-cli-${system}`, "pros"), 0o751);
+    await fs.promises.chmod(path.join(globalPath, "install", `pros-cli-${system}`, "intercept-c++"), 0o751);
+    await fs.promises.chmod(path.join(globalPath, "install", `pros-cli-${system}`, "intercept-cc"), 0o751);
 }
