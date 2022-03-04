@@ -4,7 +4,6 @@ import * as os from 'os';
 import { cleanup, downloadextract } from './download';
 import { getCurrentVersion, getCliVersion, getInstallPromptTitle } from "./installed";
 import * as fs from 'fs';
-import internal = require("stream");
 
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
@@ -149,7 +148,7 @@ export async function install(context: vscode.ExtensionContext) {
                 downloadextract(context, downloadToolchain, toolchainName, system)
             ];
             const [a, b] = await Promise.all(promises);
-
+            await cleanup(context, system);
             // Delete the download subdirectory once everything is installed
 
             //await removeDirAsync(dirs.download,false);

@@ -20,8 +20,10 @@ async function download(globalPath: string, downloadURL: string, storagePath: st
         title: "Downloading: " + (storagePath.includes("cli") ? "PROS CLI" : "PROS Toolchain"),
         cancellable: true
     }, async (progress, token) => {
+        var out : fs.WriteStream;
         token.onCancellationRequested(() => {
             console.log("User canceled the long running operation");
+            out!.destroy();
         });
         // Fetch the file to download
         const response = await fetch(downloadURL);
@@ -36,7 +38,7 @@ async function download(globalPath: string, downloadURL: string, storagePath: st
                 progress.report({ increment: read / size });
             });
             // Write file contents to "sigbots.pros/download/filename.tar.bz2"
-            const out = fs.createWriteStream(path.join(globalPath, 'download', storagePath));
+            out = fs.createWriteStream(path.join(globalPath, 'download', storagePath));
             await promisify(stream.pipeline)(response.body, out).catch(e => {
                 // Clean up the partial file if the download failed.
                 fs.unlink(path.join(globalPath, 'download', storagePath), (_) => null); // Don't wait, and ignore error.
@@ -67,11 +69,14 @@ export async function extract(globalPath: string, downloadURL: string, storagePa
         cancellable: true
     }, async (progress, token) => {
         //progress.report({ increment: 0 });
-        
+        var read : fs.ReadStream;
+        var extract : fs.WriteStream;
         token.onCancellationRequested((token) => {
             console.log("User canceled the long running operation");
+            read!.destroy()
+            extract!.destroy();
         });
-        
+
         if (bz2) {
             // Read the contents of the bz2 file
             var compressedData = await fs.promises.readFile(path.join(globalPath, 'download', storagePath));
@@ -80,8 +85,9 @@ export async function extract(globalPath: string, downloadURL: string, storagePa
             storagePath = storagePath.replace(".bz2", "");
             await fs.promises.writeFile(path.join(globalPath, 'download', storagePath), data);
             // Write contents of the decrypted bz2 into "sigbots.pros/download/filename.tar"
-            const read = fs.createReadStream(path.join(globalPath, 'download', storagePath));
-            await promisify(stream.pipeline)(read, tar.extract(path.join(globalPath, 'install', storagePath))).catch(e => {
+            read = fs.createReadStream(path.join(globalPath, 'download', storagePath));
+            extract = tar.extract(path.join(globalPath, 'install', storagePath));
+            await promisify(stream.pipeline)(read, extract).catch(e => {
                 console.log("Error occured on extraction");
                 console.log(e);
                 fs.unlink(path.join(globalPath, 'install', storagePath), (_) => null); // Don't wait, and ignore error.
@@ -168,6 +174,7 @@ export async function cleanup(context: vscode.ExtensionContext, system: string) 
         await configurePaths(context);
         // Ensure that toolchain and cli are working
     });
+    window.showInformationMessage("Installation Finalized!");
 }
 
 export async function chmod(globalPath : string, system : string) {
