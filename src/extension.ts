@@ -44,9 +44,13 @@ export const getProsTerminal = async (
   }
 
   // Create a new PROS Terminal if one doesn't exist
-  if (prosTerminals.length && process.env["PATH"]?.includes("pros-cli")) {
-    // Only keep the existing terminal if it has the correct path
-    return prosTerminals[0];
+  if (prosTerminals.length) {
+    const options: Readonly<vscode.TerminalOptions> =
+      prosTerminals[0].creationOptions;
+    if (options?.env?.PATH?.includes("pros-cli")) {
+      // Only keep the existing terminal if it has the correct path
+      return prosTerminals[0];
+    }
   }
 
   await configurePaths(context);
