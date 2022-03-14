@@ -140,23 +140,40 @@ export async function extract(
         read = fs.createReadStream(
           path.join(globalPath, "download", storagePath)
         );
+        storagePath = storagePath.replace(".tar","");
         extract = tar.extract(path.join(globalPath, "install", storagePath));
+        
         await promisify(stream.pipeline)(read, extract).catch((e) => {
           console.log("Error occured on extraction");
           console.log(e);
           fs.unlink(path.join(globalPath, "install", storagePath), (_) => null); // Don't wait, and ignore error.
           throw e;
         });
+        
         const files = await fs.promises.readdir(
           path.join(globalPath, "install")
         );
+
         for (const file of files) {
-          if (!file.includes("pros-")) {
-            storagePath = storagePath.replace(".tar", "");
-            await fs.promises.rename(
-              path.join(globalPath, "download", file),
-              path.join(globalPath, "install", storagePath)
+          console.log(file);
+          if (file.includes("toolchain")) {
+            const interfiles = await fs.promises.readdir(
+              path.join(globalPath, "install", file)
             );
+            for (const intfile of interfiles) {
+              if (intfile.includes("gcc-arm-none-eabi")) {
+                const to_bring_out = await fs.promises.readdir(
+                  path.join(globalPath, "install", file, intfile)
+                );
+                for(const f of to_bring_out) {
+                  await fs.promises.rename(
+                    path.join(globalPath, "install", file, intfile, f),
+                    path.join(globalPath, "install", file, f)
+                  )
+                }
+              }
+            }
+            console.log(path.join(globalPath, "install", storagePath));
           }
         }
         //vscode.window.showInformationMessage("Finished extracting bz2: " + storagePath);
