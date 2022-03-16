@@ -1,13 +1,15 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as os from "os";
-import { cleanup, downloadextract } from "./download";
+import { downloadextract, chmod} from "./download";
 import {
   getCurrentVersion,
   getCliVersion,
   getInstallPromptTitle,
 } from "./installed";
 import * as fs from "fs";
+import { promisify } from "util";
+import * as child_process from "child_process";
 
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
@@ -37,7 +39,7 @@ return true;
 }
 */
 
-async function removeDirAsync(directory: string, begin: boolean) {
+export async function removeDirAsync(directory: string, begin: boolean) {
   // get all files in directory
   if (begin) {
     vscode.window.showInformationMessage("Clearing directory");
@@ -244,6 +246,63 @@ export async function updateCLI(
   //await paths(globalPath, system ,context);
 }
 
+
+/*
+
+Code Implemented from clangd source code
+
+*/
+
+async function createDirs(storagePath: string) {
+  // Create the download and install subdirectories
+  const install = path.join(storagePath, "install");
+  const download = path.join(storagePath, "download");
+  for (const dir of [install, download]) {
+    await fs.promises.mkdir(dir, { recursive: true });
+  }
+  // Return the two created directories
+  return { install: install, download: download };
+}
+
+
+export async function cleanup(
+  context: vscode.ExtensionContext,
+  system: string
+) {
+  const globalPath = context.globalStorageUri.fsPath;
+  await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: "Finalizing Installation",
+      cancellable: true,
+    },
+    async (progress, token) => {
+      try {
+        await chmod(globalPath, system);
+        await configurePaths(context);
+
+        await removeDirAsync(path.join(globalPath, "download"), false);
+      } catch(err) {
+        console.log(err);
+      }
+    }
+  );
+  
+  // Ensure that toolchain and cli are working
+  const cli_success = await verify_cli();
+  const toolchain_success = await verify_toolchain();
+  
+  console.log(cli_success);
+  console.log(toolchain_success);
+  if(cli_success && toolchain_success) {
+    vscode.window.showInformationMessage("Installation Successful!");
+  } else {
+    vscode.window.showErrorMessage(`${cli_success ? "" : "CLI"} ${!cli_success && !toolchain_success ? "" : "and"} ${toolchain_success ? "" : "Toolchain"} Installation Failed!`);
+    vscode.window.showInformationMessage(`Please try installing again! If this problem persists, consider trying an alternative install method: https://pros.cs.purdue.edu/v5/getting-started/${system}.html`);
+  }
+
+}
+
 export async function configurePaths(context: vscode.ExtensionContext) {
   const globalPath = context.globalStorageUri.fsPath;
   const system = getOperatingSystem();
@@ -283,19 +342,41 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   process.env.LC_ALL = "en_US.utf-8";
 }
 
-/*
 
-Code Implemented from clangd source code
-
-*/
-
-async function createDirs(storagePath: string) {
-  // Create the download and install subdirectories
-  const install = path.join(storagePath, "install");
-  const download = path.join(storagePath, "download");
-  for (const dir of [install, download]) {
-    await fs.promises.mkdir(dir, { recursive: true });
+async function verify_cli() {
+  var command = `pros c ls-templates --machine-output ${process.env["VSCODE FLAGS"]}`
+  console.log(command);
+  const { stdout, stderr } = await promisify(child_process.exec)(
+    command, { timeout: 30000 }
+  );
+  console.log("CLI response : ");
+  //console.log(stdout);
+  if(stderr) {
+    console.log(stderr);
   }
-  // Return the two created directories
-  return { install: install, download: download };
+  //console.log(stdout.includes(`'kernel', 'version': '3.5.4'`))
+  return stdout.includes(`'kernel', 'version': '3.5.4'`);
+}
+
+async function verify_toolchain() {
+  const toolchain_path = process.env["PROS_TOOLCHAIN"];
+  if (!toolchain_path) {
+    return false;
+  }
+
+  var gppPath = path.join(toolchain_path, "bin", "arm-none-eabi-g++");
+  var command = `"${gppPath}" --version`
+
+  console.log(command);
+  
+  //return false;
+  const { stdout, stderr } = await promisify(child_process.exec)(
+    command, { timeout: 5000 }
+  );
+  console.log("Toolchain resposne : ");
+  if(stderr) {
+    console.log(stderr);
+  }
+  console.log(stdout);
+  return stdout.startsWith(`arm-none-eabi-g++ (GNU Arm Embedded Toolchain`);
 }

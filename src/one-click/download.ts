@@ -5,10 +5,9 @@ var unzipper = require("unzipper");
 var bunzip = require("seek-bzip");
 var tar = require("tar-fs");
 import * as fs from "fs";
-import { promisify } from "util";
 import * as stream from "stream";
-import { configurePaths, PATH_SEP } from "./install";
 import * as path from "path";
+import { promisify } from "util";
 
 //const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -299,26 +298,6 @@ export async function downloadextract(
   await extract(globalPath, downloadURL, storagePath, system, bz2);
   window.showInformationMessage(`Finished Installing ${storagePath}`);
   return true;
-}
-
-export async function cleanup(
-  context: vscode.ExtensionContext,
-  system: string
-) {
-  const globalPath = context.globalStorageUri.fsPath;
-  await window.withProgress(
-    {
-      location: ProgressLocation.Notification,
-      title: "Finalizing Installation",
-      cancellable: true,
-    },
-    async (progress, token) => {
-      await chmod(globalPath, system);
-      await configurePaths(context);
-      // Ensure that toolchain and cli are working
-    }
-  );
-  window.showInformationMessage("Installation Finalized!");
 }
 
 export async function chmod(globalPath: string, system: string) {
