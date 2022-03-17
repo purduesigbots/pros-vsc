@@ -280,8 +280,11 @@ export async function cleanup(
       try {
         await chmod(globalPath, system);
         await configurePaths(context);
-
-        await removeDirAsync(path.join(globalPath, "download"), false);
+        /*
+         * The line commented below is causing a hang. 
+         * Probably something with the readStream in the extraction function...
+         */
+        // await removeDirAsync(path.join(globalPath, "download"), false);
       } catch(err) {
         console.log(err);
       }
@@ -291,7 +294,6 @@ export async function cleanup(
   // Ensure that toolchain and cli are working
   const cli_success = await verify_cli();
   const toolchain_success = await verify_toolchain();
-  
   console.log(cli_success);
   console.log(toolchain_success);
   if(cli_success && toolchain_success) {

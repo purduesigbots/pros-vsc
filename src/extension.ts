@@ -66,6 +66,8 @@ export const getProsTerminal = async (
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
+  configurePaths(context);
+
   workspaceContainsProjectPros().then((isProsProject) => {
     vscode.commands.executeCommand(
       "setContext",

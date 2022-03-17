@@ -71,32 +71,9 @@ export async function extract(
   bz2: boolean
 ) {
   // Issues with extracter and 2 empty folders, so we are gonna make the empty folders ourselves
+  /*
   if (system === "windows" && storagePath.includes("toolchain")) {
     try {
-      await fs.promises.mkdir(
-        path.join(
-          globalPath,
-          "install",
-          storagePath,
-          "usr",
-          "gcc-arm-none-eabi-10.3-2021.10",
-          "arm-none-eabi",
-          "include",
-          "bits"
-        )
-      );
-      await fs.promises.mkdir(
-        path.join(
-          globalPath,
-          "install",
-          storagePath,
-          "usr",
-          "gcc-arm-none-eabi-10.3-2021.10",
-          "arm-none-eabi",
-          "include",
-          "rpc"
-        )
-      );
       await fs.promises.mkdir(
         path.join(globalPath, "install", storagePath, "tmp")
       );
@@ -104,7 +81,7 @@ export async function extract(
       console.log(e);
     }
   }
-
+*/
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -177,35 +154,65 @@ export async function extract(
         }
         //vscode.window.showInformationMessage("Finished extracting bz2: " + storagePath);
       } else {
-        //await fs.createReadStream(globalPath + '/download/' + storagePath).pipe(unzipper.Extract({ path: globalPath + '/install/' + storagePath.replace(".zip", "") }));
-
+        console.log("start extraction");
+        let readPath = path.join(globalPath, "download", storagePath);
+        storagePath = storagePath.replace(".zip","");
+        let writePath = path.join(globalPath, "install", storagePath);
+        await fs.createReadStream(readPath).pipe(unzipper.Extract({ path: writePath})).promise();
+        /*
         // Create read stream of the zipped file
-        const read = fs.createReadStream(
-          path.join(globalPath, "download", storagePath)
-        );
-        read.on("entry", (entry) => {
-          console.log(entry);
+
+        const toolchain_warnings = storagePath.includes('toolchain');
+        vscode.window.showInformationMessage(`Enabled toolchain warnings: ${toolchain_warnings}`);
+
+        let readPath = path.join(globalPath, "download", storagePath);
+        storagePath = storagePath.replace(".zip", "");
+        let writePath = path.join(globalPath, "install", storagePath);
+        let read = fs.createReadStream(readPath);
+        let write = unzipper.Extract({path: writePath});
+
+        /*
+          Cleanup writestream if something goes wrong with readstream
+        *==/
+        read.on("error", err => {
+          if(write) write!.destroy();
+          vscode.window.showInformationMessage(`Error encountered : ${err}`);
+          fs.unlink(writePath, (_) => null);
+        }).on("close", () => {
+          write!.destroy();
+        });
+
+        write.on("error", err => {
+          console.log(`error happend with unzipper : ${err}`);
         });
         storagePath = storagePath.replace(".zip", "");
+        vscode.window.showInformationMessage(`starting extraction`);
         // await a promise of extracting the zip file
         await promisify(stream.pipeline)(
           read,
-          unzipper.Extract({
-            path: path.join(globalPath, "install", storagePath),
-          })
+          write
         ).catch((e) => {
           console.log("Error occured on extraction");
           console.log(e);
+          vscode.window.showErrorMessage(`Error extracting toolchain : ${e}`);
           fs.unlink(path.join(globalPath, "install", storagePath), (_) => null); // Don't wait, and ignore error.
           throw e;
         });
+        /*
+        .finally(() => {
+          read!.destroy();
+          write!.destroy();
+        });
+        */
         console.log("Start file moving");
         if (storagePath.includes("pros-toolchain-windows")) {
           // create tmp folder
           // extract contents of gcc-arm-none-eabi-version folder
+          console.log("began reading usr");
           const files = await fs.promises.readdir(
             path.join(globalPath, "install", "pros-toolchain-windows", "usr")
           );
+          console.log("done reading usr");
           for (const dir of files) {
             if (dir.includes("gcc-arm-none")) {
               // iterate through each folder in gcc-arm-none-eabi-version
