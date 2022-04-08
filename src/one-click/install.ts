@@ -170,8 +170,8 @@ export async function install(context: vscode.ExtensionContext) {
             await downloadCli_and_toolchain(context,cli_info,toolchain_info);
             */
       const promises = [
-        downloadextract(context, downloadCli, cliName, system),
-        downloadextract(context, downloadToolchain, toolchainName, system),
+        downloadextract(context, downloadCli, cliName),
+        downloadextract(context, downloadToolchain, toolchainName),
       ];
       await Promise.all(promises);
       await cleanup(context, system);
@@ -241,7 +241,7 @@ export async function updateCLI(
   // Set the installed file names
   var cliName = `pros-cli-${system}.zip`;
   // Title of prompt depending on user's installed CLI
-  await downloadextract(context, downloadCli, cliName, system);
+  await downloadextract(context, downloadCli, cliName);
   await cleanup(context, system);
   //await paths(globalPath, system ,context);
 }
@@ -267,13 +267,13 @@ async function createDirs(storagePath: string) {
 
 export async function cleanup(
   context: vscode.ExtensionContext,
-  system: string
+  system: string = getOperatingSystem()
 ) {
   const globalPath = context.globalStorageUri.fsPath;
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: "Finalizing Installation",
+      title: "Verifying Installation",
       cancellable: true,
     },
     async (progress, token) => {
@@ -297,7 +297,7 @@ export async function cleanup(
   console.log(cli_success);
   console.log(toolchain_success);
   if(cli_success && toolchain_success) {
-    vscode.window.showInformationMessage("Installation Successful!");
+    vscode.window.showInformationMessage("CLI and Toolchain are working!");
   } else {
     vscode.window.showErrorMessage(`${cli_success ? "" : "CLI"} ${!cli_success && !toolchain_success ? "" : "and"} ${toolchain_success ? "" : "Toolchain"} Installation Failed!`);
     vscode.window.showInformationMessage(`Please try installing again! If this problem persists, consider trying an alternative install method: https://pros.cs.purdue.edu/v5/getting-started/${system}.html`);

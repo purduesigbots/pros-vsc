@@ -14,8 +14,7 @@ import { promisify } from "util";
 async function download(
   globalPath: string,
   downloadURL: string,
-  storagePath: string,
-  system: string
+  storagePath: string
 ) {
   // Check if file type is .tar.bz or .zip
   const bz2 = downloadURL.includes(".bz2");
@@ -36,15 +35,17 @@ async function download(
       // Fetch the file to download
       const response = await fetch(downloadURL);
       progress.report({ increment: 0 });
+
       if (!response.ok) {
         throw new Error(`Failed to download $url`);
       } else if (response.body) {
-        const size = Number(response.headers.get("content-length"));
-        let read = 0;
+
+        const total_size = Number(response.headers.get("content-length"));
+
         response.body.on("data", (chunk: Buffer) => {
-          read += chunk.length;
-          progress.report({ increment: read / size });
+          progress.report({ increment: chunk.length * 100 / total_size });
         });
+
         // Write file contents to "sigbots.pros/download/filename.tar.bz2"
         out = fs.createWriteStream(
           path.join(globalPath, "download", storagePath)
@@ -65,23 +66,9 @@ async function download(
 
 export async function extract(
   globalPath: string,
-  downloadURL: string,
   storagePath: string,
-  system: string,
   bz2: boolean
 ) {
-  // Issues with extracter and 2 empty folders, so we are gonna make the empty folders ourselves
-  /*
-  if (system === "windows" && storagePath.includes("toolchain")) {
-    try {
-      await fs.promises.mkdir(
-        path.join(globalPath, "install", storagePath, "tmp")
-      );
-    } catch (e) {
-      console.log(e);
-    }
-  }
-*/
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -152,68 +139,31 @@ export async function extract(
             console.log(path.join(globalPath, "install", storagePath));
           }
         }
-        //vscode.window.showInformationMessage("Finished extracting bz2: " + storagePath);
-      } else {
+        
+      } // if bz2
+      else {
         console.log("start extraction");
         let readPath = path.join(globalPath, "download", storagePath);
         storagePath = storagePath.replace(".zip","");
         let writePath = path.join(globalPath, "install", storagePath);
+
+        // Extract the contents of the zip file
         await fs.createReadStream(readPath).pipe(unzipper.Extract({ path: writePath})).promise();
-        /*
-        // Create read stream of the zipped file
-
-        const toolchain_warnings = storagePath.includes('toolchain');
-        vscode.window.showInformationMessage(`Enabled toolchain warnings: ${toolchain_warnings}`);
-
-        let readPath = path.join(globalPath, "download", storagePath);
-        storagePath = storagePath.replace(".zip", "");
-        let writePath = path.join(globalPath, "install", storagePath);
-        let read = fs.createReadStream(readPath);
-        let write = unzipper.Extract({path: writePath});
-
-        /*
-          Cleanup writestream if something goes wrong with readstream
-        *==/
-        read.on("error", err => {
-          if(write) write!.destroy();
-          vscode.window.showInformationMessage(`Error encountered : ${err}`);
-          fs.unlink(writePath, (_) => null);
-        }).on("close", () => {
-          write!.destroy();
-        });
-
-        write.on("error", err => {
-          console.log(`error happend with unzipper : ${err}`);
-        });
-        storagePath = storagePath.replace(".zip", "");
-        vscode.window.showInformationMessage(`starting extraction`);
-        // await a promise of extracting the zip file
-        await promisify(stream.pipeline)(
-          read,
-          write
-        ).catch((e) => {
-          console.log("Error occured on extraction");
-          console.log(e);
-          vscode.window.showErrorMessage(`Error extracting toolchain : ${e}`);
-          fs.unlink(path.join(globalPath, "install", storagePath), (_) => null); // Don't wait, and ignore error.
-          throw e;
-        });
-        /*
-        .finally(() => {
-          read!.destroy();
-          write!.destroy();
-        });
-        */
         console.log("Start file moving");
         if (storagePath.includes("pros-toolchain-windows")) {
+          
           // create tmp folder
+          console.log("Create tmp folder");
+          await fs.promises.mkdir(
+            path.join(globalPath, "install", "pros-toolchain-windows", "tmp")
+            );
+          
           // extract contents of gcc-arm-none-eabi-version folder
           console.log("began reading usr");
           const files = await fs.promises.readdir(
             path.join(globalPath, "install", "pros-toolchain-windows", "usr")
           );
-          console.log("done reading usr");
-          for (const dir of files) {
+          for await (const dir of files) {
             if (dir.includes("gcc-arm-none")) {
               // iterate through each folder in gcc-arm-none-eabi-version
               const folders = await fs.promises.readdir(
@@ -225,7 +175,7 @@ export async function extract(
                   dir
                 )
               );
-              for (const folder of folders) {
+              for await (const folder of folders) {
                 if (!folder.includes("arm-none")) {
                   const subfiles = await fs.promises.readdir(
                     path.join(
@@ -239,7 +189,8 @@ export async function extract(
                   );
 
                   // extract everything back 1 level into their respective folder
-                  for (const subfile of subfiles) {
+                  for await (const subfile of subfiles) {
+                    // The original file path
                     var originalPath = path.join(
                       globalPath,
                       "install",
@@ -249,6 +200,7 @@ export async function extract(
                       folder,
                       subfile
                     );
+                    // Path to move the file to
                     var newPath = path.join(
                       globalPath,
                       "install",
@@ -257,6 +209,7 @@ export async function extract(
                       folder,
                       subfile
                     );
+                    // Move the file
                     await fs.promises.rename(originalPath, newPath);
                   }
                 } else {
@@ -269,6 +222,7 @@ export async function extract(
                     dir,
                     folder
                   );
+
                   var newPath = path.join(
                     globalPath,
                     "install",
@@ -277,32 +231,31 @@ export async function extract(
                     folder
                   );
                   await fs.promises.rename(originalPath, newPath);
-                }
-              }
-              await fs.promises.rmdir(dir, { recursive: true });
-            }
-          }
+                } // file in subfolder
+              } // folder in gcc-arm-none-eabiversion
+              //await fs.promises.rmdir(dir, { recursive: true });
+            } // if subfolder is gcc-arm-none-eabiversion
 
-          await fs.promises.mkdir(
-            path.join(globalPath, "install", "pros-toolchain-windows", "tmp")
-          );
-        }
-      }
+
+          } // for usr folder's subdirectories
+        } // windows toolchain
+
+      } // not bz2
     }
   );
-  console.log("finished extraction");
+  console.log("finished extraction for " + storagePath);
   return true;
 }
 
 export async function downloadextract(
   context: vscode.ExtensionContext,
   downloadURL: string,
-  storagePath: string,
-  system: string
+  storagePath: string
 ) {
   const globalPath = context.globalStorageUri.fsPath;
-  const bz2 = await download(globalPath, downloadURL, storagePath, system);
-  await extract(globalPath, downloadURL, storagePath, system, bz2);
+  const bz2 = await download(globalPath, downloadURL, storagePath);
+  await extract(globalPath, storagePath,  bz2);
+  console.log(`Finished Installing ${storagePath}`);
   window.showInformationMessage(`Finished Installing ${storagePath}`);
   return true;
 }

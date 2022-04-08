@@ -23,6 +23,7 @@ import {
   configurePaths,
   uninstall,
   updateCLI,
+  cleanup
 } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 let analytics: Analytics;
@@ -96,6 +97,14 @@ export function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("uninstall");
     await uninstall(context);
   });
+  vscode.commands.registerCommand("pros.updatecli", async () => {
+    analytics.sendAction("updatecli");
+    await updateCLI(context);
+  });
+  vscode.commands.registerCommand("pros.verify", async () => {
+    analytics.sendAction("verify");
+    await cleanup(context);
+  });
   vscode.commands.registerCommand("pros.build&upload", async () => {
     analytics.sendAction("build&upload");
     await buildUpload();
@@ -106,10 +115,6 @@ export function activate(context: vscode.ExtensionContext) {
     await upload();
   });
 
-  vscode.commands.registerCommand("pros.updatecli", async () => {
-    analytics.sendAction("updatecli");
-    await updateCLI(context);
-  });
   vscode.commands.registerCommand("pros.build", async () => {
     analytics.sendAction("build");
     await build();
