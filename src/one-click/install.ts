@@ -232,7 +232,7 @@ export async function updateCLI(
       false
     );
   } catch (err) {
-    //console.log(err);
+    console.log(err);
   }
   var version = await getCliVersion(
     "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
@@ -347,16 +347,12 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 
 async function verify_cli() {
   var command = `pros c ls-templates --machine-output ${process.env["VSCODE FLAGS"]}`
-  console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(
     command, { timeout: 30000 }
   );
-  console.log("CLI response : ");
-  //console.log(stdout);
   if(stderr) {
     console.log(stderr);
   }
-  //console.log(stdout.includes(`'kernel', 'version': '3.5.4'`))
   return stdout.includes(`'kernel', 'version': '3.5.4'`);
 }
 
@@ -368,17 +364,13 @@ async function verify_toolchain() {
 
   var gppPath = path.join(toolchain_path, "bin", "arm-none-eabi-g++");
   var command = `"${gppPath}" --version`
-
-  console.log(command);
   
   //return false;
   const { stdout, stderr } = await promisify(child_process.exec)(
     command, { timeout: 5000 }
   );
-  console.log("Toolchain resposne : ");
   if(stderr) {
     console.log(stderr);
   }
-  console.log(stdout);
   return stdout.startsWith(`arm-none-eabi-g++ (GNU Arm Embedded Toolchain`);
 }

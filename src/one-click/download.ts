@@ -118,7 +118,6 @@ export async function extract(
         );
 
         for (const file of files) {
-          console.log(file);
           if (file.includes("toolchain")) {
             const interfiles = await fs.promises.readdir(
               path.join(globalPath, "install", file)
