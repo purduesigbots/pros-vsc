@@ -89,30 +89,50 @@ export async function extract(
 
       if (bz2) {
         // Read the contents of the bz2 file
-        var compressedData = await fs.promises.readFile(
+        console.log("Extracting bz2 file");
+        const compressedData = await fs.promises.readFile(
           path.join(globalPath, "download", storagePath)
         );
         // Decrypt the bz2 file contents.
-        var data = await bunzip.decode(compressedData);
+        const data = await bunzip.decode(compressedData);
         storagePath = storagePath.replace(".bz2", "");
         await fs.promises.writeFile(
           path.join(globalPath, "download", storagePath),
           data
         );
+        console.log("Completed extraction of bz2 file");
         // Write contents of the decrypted bz2 into "sigbots.pros/download/filename.tar"
-        read = fs.createReadStream(
-          path.join(globalPath, "download", storagePath)
-        );
-        storagePath = storagePath.replace(".tar","");
-        extract = tar.extract(path.join(globalPath, "install", storagePath));
+        console.log("Extracting tar file");
+
+        await new Promise(function(resolve, reject) {
+          // Create our read stream
+          read = fs.createReadStream(
+            path.join(globalPath, "download", storagePath)
+          );
+          // Remove tar from the filename
+          storagePath = storagePath.replace(".tar","");
+          // create our write stream
+          extract = tar.extract(path.join(globalPath, "install", storagePath));
+          // Pipe the read stream into the write stream
+          read.pipe(extract);
+          // When the write stream ends, resolve the promise
+          extract.on("finish", resolve);
+          // If there's an error, reject the promise and clean up
+          read.on("error", () => {
+            fs.unlink(path.join(globalPath, "install", storagePath), (_) => null);
+            reject();
+          });
+        });
         
+        /*
         await promisify(stream.pipeline)(read, extract).catch((e) => {
           console.log("Error occured on extraction");
           console.log(e);
           fs.unlink(path.join(globalPath, "install", storagePath), (_) => null); // Don't wait, and ignore error.
           throw e;
         });
-        
+        */
+
         const files = await fs.promises.readdir(
           path.join(globalPath, "install")
         );
