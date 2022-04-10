@@ -38,29 +38,31 @@ async function download(
 
       if (!response.ok) {
         throw new Error(`Failed to download $url`);
-      } else if (response.body) {
+      } 
+      const total_size = Number(response.headers.get("content-length"));
 
-        const total_size = Number(response.headers.get("content-length"));
-
-        response.body.on("data", (chunk: Buffer) => {
-          progress.report({ increment: chunk.length * 100 / total_size });
-        });
-
-        // Write file contents to "sigbots.pros/download/filename.tar.bz2"
-        out = fs.createWriteStream(
-          path.join(globalPath, "download", storagePath)
-        );
-        await promisify(stream.pipeline)(response.body, out).catch((e) => {
-          // Clean up the partial file if the download failed.
-          fs.unlink(
-            path.join(globalPath, "download", storagePath),
-            (_) => null
-          ); // Don't wait, and ignore error.
-          throw e;
-        });
-      }
+      response.body.on("data", (chunk: Buffer) => {
+        progress.report({ increment: chunk.length * 100 / total_size });
+      });
+      console.log("Write stream created")
+      // Write file contents to "sigbots.pros/download/filename.tar.bz2"
+      out = fs.createWriteStream(
+        path.join(globalPath, "download", storagePath)
+      );
+      console.log("Start stream pipeline");
+      await promisify(stream.pipeline)(response.body, out).catch((e) => {
+        // Clean up the partial file if the download failed.
+        fs.unlink(
+          path.join(globalPath, "download", storagePath),
+          (_) => null
+        ); // Don't wait, and ignore error.
+        console.log(e);
+        throw e;
+      });
+      console.log("Finished downloading")
     }
   );
+  console.log("returning bz2 status");
   return bz2;
 }
 
@@ -90,11 +92,17 @@ export async function extract(
       if (bz2) {
         // Read the contents of the bz2 file
         console.log("Extracting bz2 file");
-        const compressedData = await fs.promises.readFile(
+        var compressedData = fs.readFileSync(
           path.join(globalPath, "download", storagePath)
         );
+        console.log(Object.prototype.toString.call(compressedData));
+        console.log(storagePath);
+        console.log("bz2 extracted");
+
+        console.log("Decoding bz2");
         // Decrypt the bz2 file contents.
-        const data = await bunzip.decode(compressedData);
+        var data = bunzip.decode(compressedData);
+        console.log("Bz2 decoded");
         storagePath = storagePath.replace(".bz2", "");
         await fs.promises.writeFile(
           path.join(globalPath, "download", storagePath),
