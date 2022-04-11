@@ -92,21 +92,26 @@ export async function extract(
       if (bz2) {
         // Read the contents of the bz2 file
         console.log("Extracting bz2 file");
-        var compressedData = fs.readFileSync(
+        var compressedData = await fs.promises.readFile(
           path.join(globalPath, "download", storagePath)
         );
-        console.log(Object.prototype.toString.call(compressedData));
-        console.log(storagePath);
-        console.log("bz2 extracted");
 
         console.log("Decoding bz2");
         // Decrypt the bz2 file contents.
-        var data = bunzip.decode(compressedData);
+        let decompressedData;
+        try {
+          decompressedData = bunzip.decode(compressedData);
+        } catch(e: any) {
+          console.log(e);
+          vscode.window.showErrorMessage("An error occured while decoding the toolchain");
+          console.log("Decoding failed");
+        }
+
         console.log("Bz2 decoded");
         storagePath = storagePath.replace(".bz2", "");
         await fs.promises.writeFile(
           path.join(globalPath, "download", storagePath),
-          data
+          decompressedData
         );
         console.log("Completed extraction of bz2 file");
         // Write contents of the decrypted bz2 into "sigbots.pros/download/filename.tar"
@@ -132,14 +137,6 @@ export async function extract(
           });
         });
         
-        /*
-        await promisify(stream.pipeline)(read, extract).catch((e) => {
-          console.log("Error occured on extraction");
-          console.log(e);
-          fs.unlink(path.join(globalPath, "install", storagePath), (_) => null); // Don't wait, and ignore error.
-          throw e;
-        });
-        */
 
         const files = await fs.promises.readdir(
           path.join(globalPath, "install")
