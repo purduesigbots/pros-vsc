@@ -285,23 +285,25 @@ export async function cleanup(
          * Probably something with the readStream in the extraction function...
          */
         // await removeDirAsync(path.join(globalPath, "download"), false);
+          
+        // Ensure that toolchain and cli are working
+        const cli_success = await verify_cli();
+        const toolchain_success = await verify_toolchain();
+        console.log(cli_success);
+        console.log(toolchain_success);
+        if(cli_success && toolchain_success) {
+          vscode.window.showInformationMessage("CLI and Toolchain are working!");
+        } else {
+          vscode.window.showErrorMessage(`${cli_success ? "" : "CLI"} ${!cli_success && !toolchain_success ? "" : "and"} ${toolchain_success ? "" : "Toolchain"} Installation Failed!`);
+          vscode.window.showInformationMessage(`Please try installing again! If this problem persists, consider trying an alternative install method: https://pros.cs.purdue.edu/v5/getting-started/${system}.html`);
+        }
+      
+      
       } catch(err) {
         console.log(err);
       }
     }
   );
-  
-  // Ensure that toolchain and cli are working
-  const cli_success = await verify_cli();
-  const toolchain_success = await verify_toolchain();
-  console.log(cli_success);
-  console.log(toolchain_success);
-  if(cli_success && toolchain_success) {
-    vscode.window.showInformationMessage("CLI and Toolchain are working!");
-  } else {
-    vscode.window.showErrorMessage(`${cli_success ? "" : "CLI"} ${!cli_success && !toolchain_success ? "" : "and"} ${toolchain_success ? "" : "Toolchain"} Installation Failed!`);
-    vscode.window.showInformationMessage(`Please try installing again! If this problem persists, consider trying an alternative install method: https://pros.cs.purdue.edu/v5/getting-started/${system}.html`);
-  }
 
 }
 
