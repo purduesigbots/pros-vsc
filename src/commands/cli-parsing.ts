@@ -41,16 +41,16 @@ export const parseMakeOutput = (stdout: any) => {
 
 export const parseErrorMessage = (stdout: any) => {
   const errorSplit = stdout.split(/\r?\n/);
+  let err = "NOERROR";
   for (let e of errorSplit) {
     if (!e.startsWith(PREFIX)) {
       continue;
     }
     let jdata = JSON.parse(e.substr(PREFIX.length));
     if (jdata.type.startsWith("log") && jdata.level === "ERROR") {
-      console.log("An error occured");
       console.log(jdata.simpleMessage);
-      return jdata.simpleMessage;
+      err = jdata.simpleMessage;
     }
   }
-  return null;
+  return err;
 };

@@ -48,18 +48,16 @@ const runCapture = async (output: string) => {
                 var command = `pros v5 capture ${output} --force ${process.env["VSCODE FLAGS"]} --machine-output`;
                 console.log(command);
                 const { stdout, stderr } = await promisify(child_process.exec)(
-                    command, { timeout: 30000 }
+                    command, { timeout: 6000,  maxBuffer: 1024 * 1024 * 10 }
                 );
                 let result = parseErrorMessage(stdout);
-                if (!(result===null)) {
+                if (!(result === "NOERROR")) {
                     throw new Error(result);
-                    return;
                 }
                 vscode.window.showInformationMessage("Capture saved!");
             }
             catch (error: any) {
-                console.log(error.stdout);
-                throw new Error(parseErrorMessage(error.stdout));
+                throw new Error(error);
             }
 
         }
