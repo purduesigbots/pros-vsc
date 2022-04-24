@@ -47,7 +47,10 @@ export const parseErrorMessage = (stdout: any) => {
     }
     let jdata = JSON.parse(e.substr(PREFIX.length));
     if (jdata.type.startsWith("log") && jdata.level === "ERROR") {
+      console.log("An error occured");
+      console.log(jdata.simpleMessage);
       return jdata.simpleMessage;
     }
   }
+  return null;
 };
