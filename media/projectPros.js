@@ -21,6 +21,9 @@
   const projectName = /** @type {HTMLInputElement} */ (
     document.getElementById("projectName")
   );
+  const teamName = /** @type {HTMLInputElement} */ (
+    document.getElementById("teamName")
+  );
 
   slotSelection.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
@@ -29,7 +32,12 @@
 
   projectName.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
-    vscode.postMessage({ type: "setName", projectName: selector.value });
+    vscode.postMessage({ type: "setProjectName", projectName: selector.value });
+  });
+
+  teamName.addEventListener("change", (e) => {
+    const selector = /** @type {HTMLInputElement} */ (e.target);
+    vscode.postMessage({ type: "setTeamName", teamName: selector.value });
   });
 
   function updateContent(/** @type {string} */ text) {
@@ -46,6 +54,7 @@
 
     // Render the current settings
     projectName.value = json["py/state"]["project_name"];
+    teamName.value = json["py/state"]["team_name"];
     if (json["py/state"]["upload_options"]?.slot) {
       slotSelection.value = json["py/state"]["upload_options"]["slot"];
     }

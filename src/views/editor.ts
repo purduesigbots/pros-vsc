@@ -59,11 +59,14 @@ export class ProsProjectEditorProvider
     // Receive message from the webview.
     webviewPanel.webview.onDidReceiveMessage((e) => {
       switch (e.type) {
+        case "setTeamName":
+          this.setTeamName(document, e);
+          return;
         case "setSlot":
           this.setSlot(document, e);
           return;
-        case "setName":
-          this.setName(document, e);
+        case "setProjectName":
+          this.setProjectName(document, e);
           return;
       }
     });
@@ -128,6 +131,36 @@ export class ProsProjectEditorProvider
           </div>
         </div>
 
+
+        <div class="setting-item-contents settings-row-inner-container">
+          <div class="setting-item-title">
+            <div class="setting-item-cat-label-container">
+              <span class="setting-item-category" title="files.autoSave">
+                Upload: 
+              </span>
+              <span class="setting-item-label" title="files.autoSave">
+                Team Name
+              </span>
+            </div>
+          </div>
+          <div class="setting-item-description">
+            <div class="setting-item-markdown">
+              <p>
+                This shows as the team's name on the brain when uploaded.
+              </p>
+            </div>
+          </div>
+          <div class="setting-item-value">
+            <div class="setting-item-control">
+              <div class="monaco-inputbox" style="background-color: rgb(60, 60, 60); color: rgb(204, 204, 204);">
+                <div class="ibwrapper">
+                  <input id="teamName" class="input setting-control-focus-target" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" tabindex="-1" data-focusable="true" style="background-color: inherit; color: rgb(204, 204, 204);">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="setting-item-contents settings-row-inner-container">
           <div class="setting-item-title">
             <div class="setting-item-cat-label-container">
@@ -156,6 +189,8 @@ export class ProsProjectEditorProvider
             </div>
           </div>
         </div>
+        
+
 
         <script nonce="${nonce}" src="${scriptUri}"></script>
 
@@ -171,10 +206,18 @@ export class ProsProjectEditorProvider
     return this.updateTextDocument(document, json);
   }
 
-  private setName(document: vscode.TextDocument, e: any) {
+  private setProjectName(document: vscode.TextDocument, e: any) {
     const json = this.getDocumentAsJson(document);
 
     json["py/state"]["project_name"] = e["projectName"];
+
+    return this.updateTextDocument(document, json);
+  }
+
+  private setTeamName(document: vscode.TextDocument, e: any) {
+    const json = this.getDocumentAsJson(document);
+
+    json["py/state"]["team_name"] = e["teamName"];
 
     return this.updateTextDocument(document, json);
   }
