@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as os from "os";
-import { downloadextract, chmod} from "./download";
+import { downloadextract, chmod } from "./download";
 import {
   getCurrentVersion,
   getCliVersion,
@@ -246,7 +246,6 @@ export async function updateCLI(
   //await paths(globalPath, system ,context);
 }
 
-
 /*
 
 Code Implemented from clangd source code
@@ -264,7 +263,6 @@ async function createDirs(storagePath: string) {
   return { install: install, download: download };
 }
 
-
 export async function cleanup(
   context: vscode.ExtensionContext,
   system: string = getOperatingSystem()
@@ -281,37 +279,42 @@ export async function cleanup(
         await chmod(globalPath, system);
         await configurePaths(context);
         /*
-         * The line commented below is causing a hang. 
+         * The line commented below is causing a hang.
          * Probably something with the readStream in the extraction function...
          */
         // await removeDirAsync(path.join(globalPath, "download"), false);
-          
+
         // Ensure that toolchain and cli are working
         const cli_success = await verify_cli();
         const toolchain_success = await verify_toolchain();
         console.log(cli_success);
         console.log(toolchain_success);
-        if(cli_success && toolchain_success) {
-          vscode.window.showInformationMessage("CLI and Toolchain are working!");
+        if (cli_success && toolchain_success) {
+          vscode.window.showInformationMessage(
+            "CLI and Toolchain are working!"
+          );
         } else {
-          vscode.window.showErrorMessage(`${cli_success ? "" : "CLI"} ${!cli_success && !toolchain_success ? "" : "and"} ${toolchain_success ? "" : "Toolchain"} Installation Failed!`);
-          vscode.window.showInformationMessage(`Please try installing again! If this problem persists, consider trying an alternative install method: https://pros.cs.purdue.edu/v5/getting-started/${system}.html`);
+          vscode.window.showErrorMessage(
+            `${cli_success ? "" : "CLI"} ${
+              !cli_success && !toolchain_success ? "" : "and"
+            } ${toolchain_success ? "" : "Toolchain"} Installation Failed!`
+          );
+          vscode.window.showInformationMessage(
+            `Please try installing again! If this problem persists, consider trying an alternative install method: https://pros.cs.purdue.edu/v5/getting-started/${system}.html`
+          );
         }
-      
-      
-      } catch(err) {
+      } catch (err) {
         console.log(err);
       }
     }
   );
-
 }
 
 export async function configurePaths(context: vscode.ExtensionContext) {
   const globalPath = context.globalStorageUri.fsPath;
   const system = getOperatingSystem();
 
-  const cliExecPath = path.join(globalPath, "install", `pros-cli-${system}`);
+  let cliExecPath = path.join(globalPath, "install", `pros-cli-${system}`);
   // Check if user has CLI installed through one-click or other means.
   let [version, isOneClickInstall] = await getCurrentVersion(
     path.join(cliExecPath, "pros")
@@ -320,7 +323,6 @@ export async function configurePaths(context: vscode.ExtensionContext) {
     version >= 324 ? "--no-sentry --no-analytics" : "";
 
   if (!isOneClickInstall) {
-    console.log(cliExecPath);
     // Use system defaults if user does not have one-click CLI
     CLI_EXEC_PATH = "";
     TOOLCHAIN = "LOCAL";
@@ -329,30 +331,38 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 
   PATH_SEP = system === "windows" ? ";" : ":";
   // Set toolchain environmental variable file location
-  TOOLCHAIN = path.join(
+  let toolchainPath = path.join(
     globalPath,
     "install",
     `pros-toolchain-${
       system === "windows" ? path.join("windows", "usr") : system
     }`
   );
+  toolchainPath = toolchainPath.replace(" ", "\\ ");
+  TOOLCHAIN = toolchainPath;
   // Set CLI environmental variable file location
   CLI_EXEC_PATH = cliExecPath;
 
+  // need to escape spaces in file paths
+  cliExecPath = cliExecPath.replace(" ", "\\ ");
   // Prepend CLI to path
-  process.env["PATH"] = cliExecPath + PATH_SEP + process.env["PATH"];
+  process.env["PATH"] =
+    cliExecPath +
+    PATH_SEP +
+    path.join(toolchainPath, "bin") +
+    PATH_SEP +
+    process.env["PATH"];
   // Having `PROS_TOOLCHAIN` set to TOOLCHAIN breaks everything, so idk. Empty string works don't question it
   process.env["PROS_TOOLCHAIN"] = TOOLCHAIN;
   process.env.LC_ALL = "en_US.utf-8";
 }
 
-
 async function verify_cli() {
-  var command = `pros c ls-templates --machine-output ${process.env["VSCODE FLAGS"]}`
-  const { stdout, stderr } = await promisify(child_process.exec)(
-    command, { timeout: 30000 }
-  );
-  if(stderr) {
+  var command = `pros c ls-templates --machine-output ${process.env["VSCODE FLAGS"]}`;
+  const { stdout, stderr } = await promisify(child_process.exec)(command, {
+    timeout: 30000,
+  });
+  if (stderr) {
     console.log(stderr);
   }
   return stdout.includes(`'kernel', 'version': '3.5.4'`);
@@ -365,13 +375,13 @@ async function verify_toolchain() {
   }
 
   var gppPath = path.join(toolchain_path, "bin", "arm-none-eabi-g++");
-  var command = `"${gppPath}" --version`
-  
+  var command = `"${gppPath}" --version`;
+
   //return false;
-  const { stdout, stderr } = await promisify(child_process.exec)(
-    command, { timeout: 5000 }
-  );
-  if(stderr) {
+  const { stdout, stderr } = await promisify(child_process.exec)(command, {
+    timeout: 5000,
+  });
+  if (stderr) {
     console.log(stderr);
   }
   return stdout.startsWith(`arm-none-eabi-g++ (GNU Arm Embedded Toolchain`);
