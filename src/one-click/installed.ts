@@ -40,7 +40,7 @@ export async function getInstallPromptTitle(oneClickPath: string) {
     var title = "You do not have the PROS CLI installed. Install it now? (Recommended).";
     const recent = +(await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest')).replace(/\./gi,"");
     const [version, oneClicked] = await getCurrentVersion(oneClickPath);
-    
+
     if(oneClicked) {
         if(version >= recent) {
             title = "PROS is up to date!";
