@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
 import { getNonce } from "./nonce";
-import { version, getCurrentVersion } from "../one-click/installed";
-var currentIcon = "pros";
+
 export class ProsProjectEditorProvider
   implements vscode.CustomTextEditorProvider
 {
@@ -95,9 +94,7 @@ export class ProsProjectEditorProvider
     var usable_icons = [];
     for(var i of icons) {
       i=i.replace(".png","");
-      if(version >=323) {
-        usable_icons.push(i);
-      }
+      usable_icons.push(i);
     }
     const nonce = getNonce();
 
@@ -295,9 +292,7 @@ export class ProsProjectEditorProvider
   private setIcon(document: vscode.TextDocument, e: any) {
     const json = this.getDocumentAsJson(document);
 
-    if(version >= 323) {
-      json["py/state"]["upload_options"]["icon"] = e["icon"];
-    }
+    json["py/state"]["upload_options"]["icon"] = e["icon"];
 
     return this.updateTextDocument(document, json);
   }

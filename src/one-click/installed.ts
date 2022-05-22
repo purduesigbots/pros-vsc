@@ -2,8 +2,6 @@ import * as child_process from "child_process";
 import { promisify } from "util";
 var fetch = require('node-fetch');
 
-export var version : number;
-export var oneClicked : boolean;
 export async function getCliVersion(url: string) {
     // Fetch the url
     const response = await fetch(url);
@@ -35,14 +33,14 @@ export async function getCurrentVersion(oneClickPath: string) {
             console.log(err);
         }
     }
-    version = versionint;
-    oneClicked = oc;
+    return [versionint, oc];
 }
 
 export async function getInstallPromptTitle(oneClickPath: string) {
     var title = "You do not have the PROS CLI installed. Install it now? (Recommended).";
     const recent = +(await getCliVersion('https://api.github.com/repos/purduesigbots/pros-cli/releases/latest')).replace(/\./gi,"");
-    //const [version, oneClicked] = await getCurrentVersion(oneClickPath);
+    const [version, oneClicked] = await getCurrentVersion(oneClickPath);
+    
     if(oneClicked) {
         if(version >= recent) {
             title = "PROS is up to date!";
