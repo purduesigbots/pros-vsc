@@ -94,6 +94,10 @@
         "title": "PROS: Create New PROS Project"
       },
       {
+        "command": "pros.settings",
+        "title": "PROS: Open Project Settings"
+      },
+      {
         "command": "pros.welcome",
         "title": "PROS: Welcome"
       },

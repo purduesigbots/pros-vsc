@@ -15,6 +15,7 @@ import {
   createNewProject,
   upgradeProject,
   upload,
+  settings
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -123,6 +124,11 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.new", () => {
     analytics.sendAction("projectCreated");
     createNewProject();
+  });
+
+  vscode.commands.registerCommand("pros.settings", async () => {
+    analytics.sendAction("settings");
+    await settings();
   });
 
   vscode.commands.registerCommand("pros.welcome", async () => {
@@ -300,7 +306,7 @@ export function deactivate() {
   analytics.endSession();
 }
 
-async function workspaceContainsProjectPros(): Promise<boolean> {
+export async function workspaceContainsProjectPros(): Promise<boolean> {
   const filename = "project.pros";
 
   if (
