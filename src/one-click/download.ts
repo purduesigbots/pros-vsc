@@ -9,7 +9,6 @@ import * as stream from "stream";
 import * as path from "path";
 import { promisify } from "util";
 
-//const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function download(
   globalPath: string,
@@ -80,7 +79,6 @@ export async function extract(
       cancellable: true,
     },
     async (progress, token) => {
-      //progress.report({ increment: 0 });
       var read: fs.ReadStream;
       var extract: fs.WriteStream;
       token.onCancellationRequested((token) => {
@@ -257,7 +255,7 @@ export async function extract(
                   await fs.promises.rename(originalPath, newPath);
                 } // file in subfolder
               } // folder in gcc-arm-none-eabiversion
-              //await fs.promises.rmdir(dir, { recursive: true });
+
             } // if subfolder is gcc-arm-none-eabiversion
 
 

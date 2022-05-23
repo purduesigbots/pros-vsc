@@ -26,18 +26,6 @@ const getOperatingSystem = () => {
   return "linux";
 };
 
-/*
-
-Code that maybe works to wait for both toolchain and cli to be installed???
-a and b arguments are arrays in the format:
-{download_url, download_name, system_type}
-
-async function downloadCli_and_toolchain(context:vscode.ExtensionContext,a:string[],b:string[]) {
-install(context,a[0],a[1],a[2]);
-await promisify(download)(context,b[0],b[1],b[2]);
-return true;
-}
-*/
 
 export async function removeDirAsync(directory: string, begin: boolean) {
   // get all files in directory
@@ -136,14 +124,8 @@ export async function install(context: vscode.ExtensionContext) {
       "Install it now!",
       "No Thanks."
     );
-    // const labelResponse = await vscode.window.showQuickPick(
-    //     [{ label: "Install it now!", description: "recommended" }, { label: "No I am good." }],
-    //     {
-    //         placeHolder: "Install it now!",
-    //         canPickMany: false,
-    //         title: title,
-    //     }
-    // );
+
+
     if (labelResponse === "Install it now!") {
       // Install CLI if user chooses to.
 
@@ -157,23 +139,14 @@ export async function install(context: vscode.ExtensionContext) {
       //add install and download directories
       const dirs = await createDirs(context.globalStorageUri.fsPath);
 
-      /*
-            Code to potentially wait for the cli and toolchain to be downloaded.
-
-            const cli_info = [downloadCli,cliName,system];
-            const toolchain_info = [downloadToolchain,toolchainName,system];
-            await downloadCli_and_toolchain(context,cli_info,toolchain_info);
-            */
       const promises = [
         downloadextract(context, downloadCli, cliName),
         downloadextract(context, downloadToolchain, toolchainName),
       ];
+
       await Promise.all(promises);
       await cleanup(context, system);
-      // Delete the download subdirectory once everything is installed
 
-      //await removeDirAsync(dirs.download,false);
-      // vscode.window.showInformationMessage("PROS is now Installed!");
       vscode.workspace
         .getConfiguration("pros")
         .update("showInstallOnStartup", false);
@@ -208,7 +181,6 @@ export async function updateCLI(
     }
     if (title.includes("not")) {
       await install(context);
-      //await cleanup(context, system);
       return;
     }
     const labelResponse = await vscode.window.showInformationMessage(
@@ -238,14 +210,7 @@ export async function updateCLI(
   // Title of prompt depending on user's installed CLI
   await downloadextract(context, downloadCli, cliName);
   await cleanup(context, system);
-  //await paths(globalPath, system ,context);
 }
-
-/*
-
-Code Implemented from clangd source code
-
-*/
 
 async function createDirs(storagePath: string) {
   // Create the download and install subdirectories
@@ -273,26 +238,21 @@ export async function cleanup(
       try {
         await chmod(globalPath, system);
         await configurePaths(context);
-        /*
-         * The line commented below is causing a hang.
-         * Probably something with the readStream in the extraction function...
-         */
-        // await removeDirAsync(path.join(globalPath, "download"), false);
 
         // Ensure that toolchain and cli are working
-        const cli_success = await verify_cli();
-        const toolchain_success = await verify_toolchain();
-        console.log(cli_success);
-        console.log(toolchain_success);
-        if (cli_success && toolchain_success) {
+        const cliSuccess = await verifyCli();
+        const toolchainSuccess = await verifyToolchain();
+        console.log(cliSuccess);
+        console.log(toolchainSuccess);
+        if (cliSuccess && toolchainSuccess) {
           vscode.window.showInformationMessage(
             "CLI and Toolchain are working!"
           );
         } else {
           vscode.window.showErrorMessage(
-            `${cli_success ? "" : "CLI"} ${
-              !cli_success && !toolchain_success ? "" : "and"
-            } ${toolchain_success ? "" : "Toolchain"} Installation Failed!`
+            `${cliSuccess ? "" : "CLI"} ${
+              !cliSuccess && !toolchainSuccess ? "" : "and"
+            } ${toolchainSuccess ? "" : "Toolchain"} Installation Failed!`
           );
           vscode.window.showInformationMessage(
             `Please try installing again! If this problem persists, consider trying an alternative install method: https://pros.cs.purdue.edu/v5/getting-started/${system}.html`
@@ -347,12 +307,12 @@ export async function configurePaths(context: vscode.ExtensionContext) {
     path.join(toolchainPath, "bin") +
     PATH_SEP +
     process.env["PATH"];
-  // Having `PROS_TOOLCHAIN` set to TOOLCHAIN breaks everything, so idk. Empty string works don't question it
+  
   process.env["PROS_TOOLCHAIN"] = TOOLCHAIN;
   process.env.LC_ALL = "en_US.utf-8";
 }
 
-async function verify_cli() {
+async function verifyCli() {
   var command = `pros c ls-templates --machine-output ${process.env["VSCODE FLAGS"]}`;
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     timeout: 30000,
@@ -363,7 +323,7 @@ async function verify_cli() {
   return stdout.includes(`'kernel', 'version': '3.5.4'`);
 }
 
-async function verify_toolchain() {
+async function verifyToolchain() {
   const toolchain_path = process.env["PROS_TOOLCHAIN"];
   if (!toolchain_path) {
     return false;
@@ -372,7 +332,6 @@ async function verify_toolchain() {
   var gppPath = path.join(toolchain_path, "bin", "arm-none-eabi-g++");
   var command = `"${gppPath}" --version`;
 
-  //return false;
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     timeout: 5000,
   });
