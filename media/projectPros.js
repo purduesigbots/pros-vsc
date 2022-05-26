@@ -18,18 +18,73 @@
   const slotSelection = /** @type {HTMLInputElement} */ (
     document.getElementById("slotSelection")
   );
+
+  const iconSelection = /** @type {HTMLInputElement} */ (
+    document.getElementById("iconSelection")
+  );
+  const iconPreview = /** @type {HTMLInputElement} */ (
+    document.getElementById("iconPreview")
+  );
+
   const projectName = /** @type {HTMLInputElement} */ (
     document.getElementById("projectName")
   );
+  const description = /** @type {HTMLInputElement} */ (
+    document.getElementById("projectDesc")
+  );
 
+  const runafter = /** @type {HTMLInputElement} */ (
+    document.getElementById("runafter")
+  );
+  
   slotSelection.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
     vscode.postMessage({ type: "setSlot", slot: selector.value });
+    });
+
+  var prevname;
+  var nametimer;
+  projectName.addEventListener("keyup", (e) => {
+    const selector = /** @type {HTMLInputElement} */ (e.target);
+    if(prevname==selector.value) {
+      return;
+    }
+    prevname = selector.value;
+
+    clearTimeout(nametimer);
+    nametimer = setTimeout(function() {
+      vscode.postMessage({ type: "setName", projectName: selector.value });
+    },!selector.value ? 3000 : 500);
+
   });
 
-  projectName.addEventListener("change", (e) => {
+  var prevdesc;
+  var desctimer;
+  description.addEventListener("keyup", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
-    vscode.postMessage({ type: "setName", projectName: selector.value });
+    if(prevdesc==selector.value) {
+      return;
+    }
+    prevdesc = selector.value;
+    clearTimeout(desctimer);
+    desctimer = setTimeout(function() {
+      vscode.postMessage({ type: "setDesc", description: selector.value });
+    },!selector.value ? 3000 : 500);
+  });
+
+  iconSelection.addEventListener("change", (e) => {
+    const selector = /** @type {HTMLInputElement} */ (e.target);
+    vscode.postMessage({ type: "setIcon", icon: selector.value });
+    iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/icons/${selector.value}.png`;
+    iconPreview.onerror = function (event) {
+      iconPreview.onerror = null;
+      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${selector.value}.png`
+    };
+  });
+
+  runafter.addEventListener("change", (e) => {
+    const selector = /** @type {HTMLInputElement} */ (e.target);
+    vscode.postMessage({ type: "setAfter", runafter: selector.value });
   });
 
   function updateContent(/** @type {string} */ text) {
@@ -45,11 +100,46 @@
     errorContainer.style.display = "none";
 
     // Render the current settings
-    projectName.value = json["py/state"]["project_name"];
+
+    // Current Project Name
+    projectName.value = json["py/state"]["project_name"] ? json["py/state"]["project_name"] : "Pros Project";
+    
+    // Current Project Description
+    if (json["py/state"]["upload_options"]?.description) {
+      description.value = json["py/state"]["upload_options"]["description"];
+    } else {
+      description.value = "My PROS Project";
+    }
+
+    // Current Project Slot
     if (json["py/state"]["upload_options"]?.slot) {
       slotSelection.value = json["py/state"]["upload_options"]["slot"];
     }
-  }
+
+    // Current Project Icon
+    if (json["py/state"]["upload_options"]?.icon) {
+      iconSelection.value = json["py/state"]["upload_options"]["icon"];
+      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/icons/${iconSelection.value}.png`;
+      iconPreview.onerror = function (event) {
+        iconPreview.onerror = null;
+        iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${iconSelection.value}.png`
+      };
+    } else {
+      iconSelection.value = "pros";
+      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/icons/pros.png`;
+      iconPreview.onerror = function (event) {
+        iconPreview.onerror = null;
+        iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${iconSelection.value}.png`
+      };
+    }
+
+    // Current run-after option
+    if(json["py/state"]["upload_options"]?.after) {
+      runafter.value = json["py/state"]["upload_options"]["after"];
+    } else {
+      runafter.value = "screen";
+    }
+    }
 
   // Handle messages sent from the extension to the webview
   window.addEventListener("message", (event) => {

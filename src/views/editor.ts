@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-
+import * as fs from 'fs';
 import { getNonce } from "./nonce";
 
 export class ProsProjectEditorProvider
@@ -65,6 +65,15 @@ export class ProsProjectEditorProvider
         case "setName":
           this.setName(document, e);
           return;
+        case "setDesc":
+          this.setDesc(document, e);
+          return;
+        case "setIcon":
+          this.setIcon(document, e);
+          return;
+        case "setAfter":
+          this.setAfter(document, e);
+          return;
       }
     });
 
@@ -81,7 +90,12 @@ export class ProsProjectEditorProvider
     const styleVSCodeUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.context.extensionUri, "media", "vscode.css")
     );
-
+    const icons = fs.readdirSync(vscode.Uri.joinPath(this.context.extensionUri, "media", "icons").fsPath);
+    var usable_icons = [];
+    for(var i of icons) {
+      i=i.replace(".png","");
+      usable_icons.push(i);
+    }
     const nonce = getNonce();
 
     // TODO: run after upload option?
@@ -97,6 +111,64 @@ export class ProsProjectEditorProvider
       <body>
         <div class="settings-group-title-label settings-row-inner-container settings-group-level-1 settings-group-first">
           PROS Project Settings
+        </div>
+
+        <div class="setting-item-contents settings-row-inner-container">
+          <div class="setting-item-title">
+            <div class="setting-item-cat-label-container">
+              <span class="setting-item-category" title="files.autoSave">
+                Upload: 
+              </span>
+              <span class="setting-item-label" title="files.autoSave">
+                Project Name
+              </span>
+            </div>
+          </div>
+          <div class="setting-item-description">
+            <div class="setting-item-markdown">
+              <p>
+                This shows as the program's name on the brain when uploaded.
+              </p>
+            </div>
+          </div>
+          <div class="setting-item-value">
+            <div class="setting-item-control">
+              <div class="monaco-inputbox" style="background-color: rgb(60, 60, 60); color: rgb(204, 204, 204);">
+                <div class="ibwrapper">
+                  <input id="projectName" class="input setting-control-focus-target" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" tabindex="-1" data-focusable="true" style="background-color: inherit; color: rgb(204, 204, 204);">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-item-contents settings-row-inner-container">
+          <div class="setting-item-title">
+            <div class="setting-item-cat-label-container">
+              <span class="setting-item-category" title="files.autoSave">
+                Upload: 
+              </span>
+              <span class="setting-item-label" title="files.autoSave">
+                Project Description
+              </span>
+            </div>
+          </div>
+          <div class="setting-item-description">
+            <div class="setting-item-markdown">
+              <p>
+                This shows as the program's description on the brain when uploaded.
+              </p>
+            </div>
+          </div>
+          <div class="setting-item-value">
+            <div class="setting-item-control">
+              <div class="monaco-inputbox" style="background-color: rgb(60, 60, 60); color: rgb(204, 204, 204);">
+                <div class="ibwrapper">
+                  <input id="projectDesc" class="input setting-control-focus-target" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" tabindex="-1" data-focusable="true" style="background-color: inherit; color: rgb(204, 204, 204);">
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="setting-item-contents settings-row-inner-container">
@@ -135,24 +207,54 @@ export class ProsProjectEditorProvider
                 Upload: 
               </span>
               <span class="setting-item-label" title="files.autoSave">
-                Project Name
+                Program Icon
               </span>
             </div>
           </div>
           <div class="setting-item-description">
             <div class="setting-item-markdown">
               <p>
-                This shows as the program's name on the brain when uploaded.
+                Set the Program Icon do be displayed on the V5 Brain.
               </p>
             </div>
           </div>
           <div class="setting-item-value">
-            <div class="setting-item-control">
-              <div class="monaco-inputbox" style="background-color: rgb(60, 60, 60); color: rgb(204, 204, 204);">
-                <div class="ibwrapper">
-                  <input id="projectName" class="input setting-control-focus-target" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" wrap="off" tabindex="-1" data-focusable="true" style="background-color: inherit; color: rgb(204, 204, 204);">
-                </div>
-              </div>
+            <div class="setting-item-control select-container">
+              <select id="iconSelection" class="monaco-select-box monaco-select-box-dropdown-padding setting-control-focus-target" tabindex="-1" title="off" style="background-color: rgb(60, 60, 60); color: rgb(240, 240, 240); border-color: rgb(60, 60, 60);" data-focusable="true">
+              ${usable_icons.map(
+                  (i) => `<option value="${i}">${i=="pros" ? i.toUpperCase() : i.charAt(0).toUpperCase() + i.slice(1)}</option>`
+              )}
+              </select>
+            </div>
+          </div>
+          <img id="iconPreview" style="width: 87px; height: 87px; object-fit: contain;"/>
+        </div>
+
+        <div class="setting-item-contents settings-row-inner-container">
+          <div class="setting-item-title">
+            <div class="setting-item-cat-label-container">
+              <span class="setting-item-category" title="files.autoSave">
+                Upload: 
+              </span>
+              <span class="setting-item-label" title="files.autoSave">
+                Action After Upload
+              </span>
+            </div>
+          </div>
+          <div class="setting-item-description">
+            <div class="setting-item-markdown">
+              <p>
+                Set what the V5 Brain does after uploading the project.
+              </p>
+            </div>
+          </div>
+          <div class="setting-item-value">
+            <div class="setting-item-control select-container">
+              <select id="runafter" class="monaco-select-box monaco-select-box-dropdown-padding setting-control-focus-target" tabindex="-1" title="off" style="background-color: rgb(60, 60, 60); color: rgb(240, 240, 240); border-color: rgb(60, 60, 60);" data-focusable="true">
+                ${[["none","Do Nothing"],["screen","Display Program Screen"],["run","Run Program"]].map(
+                  (i) => `<option value="${i[0]}">${i[1]}</option>`
+                )}
+              </select>
             </div>
           </div>
         </div>
@@ -179,6 +281,29 @@ export class ProsProjectEditorProvider
     return this.updateTextDocument(document, json);
   }
 
+  private setDesc(document: vscode.TextDocument, e: any) {
+    const json = this.getDocumentAsJson(document);
+
+    json["py/state"]["upload_options"]["description"] = e["description"];
+
+    return this.updateTextDocument(document, json);
+  }
+
+  private setIcon(document: vscode.TextDocument, e: any) {
+    const json = this.getDocumentAsJson(document);
+
+    json["py/state"]["upload_options"]["icon"] = e["icon"];
+
+    return this.updateTextDocument(document, json);
+  }
+
+  private setAfter(document : vscode.TextDocument, e: any) {
+    const json = this.getDocumentAsJson(document);
+    
+    json["py/state"]["upload_options"]["after"] = e["runafter"];
+  
+    return this.updateTextDocument(document, json);
+  }
   /**
    * Try to get a current document as json text.
    */
