@@ -15,6 +15,7 @@ import {
   createNewProject,
   upgradeProject,
   upload,
+  capture,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -65,7 +66,6 @@ export const getProsTerminal = async (
 
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
-
   configurePaths(context);
 
   workspaceContainsProjectPros().then((isProsProject) => {
@@ -142,6 +142,11 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  vscode.commands.registerCommand("pros.capture", async ()  => {
+    analytics.sendAction("capture");
+    await capture();
+  });
+  
   vscode.commands.registerCommand("pros.upgrade", () => {
     analytics.sendAction("upgrade");
     upgradeProject();

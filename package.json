@@ -21,7 +21,7 @@
     "color": "#D6B872",
     "theme": "dark"
   },
-  "version": "0.2.2",
+  "version": "0.3.0",
   "engines": {
     "vscode": "^1.56.0"
   },
@@ -84,6 +84,10 @@
       {
         "command": "pros.showterminal",
         "title": "PROS: Integrated Terminal"
+      },
+      {
+        "command": "pros.capture",
+        "title": "PROS: Screenshot V5 Brain"
       },
       {
         "command": "pros.upgrade",
@@ -231,5 +235,8 @@
     "tar-fs": "^2.1.1",
     "universal-analytics": "^0.4.23",
     "unzipper": "^0.10.11"
-  }
+  },
+  "extensionDependencies": [
+    "llvm-vs-code-extensions.vscode-clangd"
+  ]
 }
