@@ -4,3 +4,4 @@ export * from "./upload";
 export * from "./build";
 export * from "./clean";
 export * from "./buildUpload";
+export * from "./capture";

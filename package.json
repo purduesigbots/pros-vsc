@@ -86,6 +86,10 @@
         "title": "PROS: Integrated Terminal"
       },
       {
+        "command": "pros.capture",
+        "title": "PROS: Screenshot V5 Brain"
+      },
+      {
         "command": "pros.upgrade",
         "title": "PROS: Upgrade Project"
       },
