@@ -89,6 +89,11 @@ async function getUrls(version: number) {
     downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-macos-64bit.zip`;
     downloadToolchain =
       "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2";
+    os.cpus().some((cpu) => {
+      if (cpu.model.includes("Apple M1")) {
+        downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-macos-arm64bit.zip`;
+      }
+    });
   }
 
   return [downloadCli, downloadToolchain];
