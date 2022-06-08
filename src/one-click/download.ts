@@ -301,6 +301,8 @@ export async function chmod(globalPath: string, system: string) {
       0o751
     ),
   ];
+
+  /*
   if (system === "macos") {
     chmodList.push(
       fs.promises.chmod(
@@ -309,5 +311,6 @@ export async function chmod(globalPath: string, system: string) {
       )
     );
   }
+  */
   await Promise.all(chmodList);
 }

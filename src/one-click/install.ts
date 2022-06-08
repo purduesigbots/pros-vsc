@@ -10,6 +10,7 @@ import {
 import * as fs from "fs";
 import { promisify } from "util";
 import * as child_process from "child_process";
+import { ClientRequest } from "http";
 
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
@@ -114,7 +115,7 @@ export async function install(context: vscode.ExtensionContext) {
   var cliName = `pros-cli-${system}.zip`;
   // Title of prompt depending on user's installed CLI
   var title = await getInstallPromptTitle(
-    path.join(globalPath, "install", `pros-cli-${system}`, "pros")
+    path.join(`"${path.join(globalPath, "install", `pros-cli-${system}`)}"`,"pros")
   );
   // Name of toolchain download depending on system
   var toolchainName = `pros-toolchain-${
@@ -233,6 +234,7 @@ export async function cleanup(
   system: string = getOperatingSystem()
 ) {
   const globalPath = context.globalStorageUri.fsPath;
+  await configurePaths(context);
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -247,8 +249,6 @@ export async function cleanup(
         // Ensure that toolchain and cli are working
         const cliSuccess = await verifyCli();
         const toolchainSuccess = await verifyToolchain();
-        console.log(cliSuccess);
-        console.log(toolchainSuccess);
         if (cliSuccess && toolchainSuccess) {
           vscode.window.showInformationMessage(
             "CLI and Toolchain are working!"
@@ -264,6 +264,7 @@ export async function cleanup(
           );
         }
       } catch (err) {
+        vscode.window.showInformationMessage("ERROR DURING VERIFICATION");
         console.log(err);
       }
     }
@@ -274,10 +275,31 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   const globalPath = context.globalStorageUri.fsPath;
   const system = getOperatingSystem();
 
-  let cliExecPath = path.join(globalPath, "install", `pros-cli-${system}`);
+
+  // path to cli
+  let cliExecPath = `${path.join(globalPath, "install", `pros-cli-${system}`)}`;
+
+
+  // path to toolchain
+  let toolchainPath = path.join(
+    globalPath,
+    "install",
+    `pros-toolchain-${
+      system === "windows" ? path.join("windows", "usr") : system
+    }`,
+    "bin"
+  );
+
+  // return if the path is already configured
+  if(process.env["PATH"]?.includes(cliExecPath) &&
+  process.env["PROS_TOOLCHAIN"]?.includes(toolchainPath)) {
+    console.log("path already configured");
+    return;
+  }
+
   // Check if user has CLI installed through one-click or other means.
   let [version, isOneClickInstall] = await getCurrentVersion(
-    path.join(cliExecPath, "pros")
+    path.join(`"${cliExecPath}"`, "pros")
   );
   process.env["VSCODE FLAGS"] =
     version >= 324 ? "--no-sentry --no-analytics" : "";
@@ -290,30 +312,17 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   }
 
   PATH_SEP = system === "windows" ? ";" : ":";
-  // Set toolchain environmental variable file location
-  let toolchainPath = path.join(
-    globalPath,
-    "install",
-    `pros-toolchain-${
-      system === "windows" ? path.join("windows", "usr") : system
-    }`
-  );
-  toolchainPath = toolchainPath.replace(" ", "\\ ");
+
   TOOLCHAIN = toolchainPath;
   // Set CLI environmental variable file location
   CLI_EXEC_PATH = cliExecPath;
 
-  // need to escape spaces in file paths
-  cliExecPath = cliExecPath.replace(" ", "\\ ");
-  // Prepend CLI to path
-  process.env["PATH"] =
-    cliExecPath +
-    PATH_SEP +
-    path.join(toolchainPath, "bin") +
-    PATH_SEP +
-    process.env["PATH"];
-  
-  process.env["PROS_TOOLCHAIN"] = TOOLCHAIN;
+   // Prepend CLI and TOOLCHAIN to path
+  process.env["PATH"] = `${process.env["PATH"]}${PATH_SEP}${cliExecPath}${PATH_SEP}${toolchainPath}`;
+
+  // Make PROS_TOOCLAHIN variable
+  process.env["PROS_TOOLCHAIN"] = `${TOOLCHAIN}`;
+
   process.env.LC_ALL = "en_US.utf-8";
 }
 
@@ -334,8 +343,7 @@ async function verifyToolchain() {
     return false;
   }
 
-  var gppPath = path.join(toolchain_path, "bin", "arm-none-eabi-g++");
-  var command = `"${gppPath}" --version`;
+  var command = `arm-none-eabi-g++ --version`;
 
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     timeout: 5000,

@@ -16,8 +16,9 @@ export async function getCliVersion(url: string) {
 
 export async function getCurrentVersion(oneClickPath: string) {
     try {
+        console.log(oneClickPath);
         const { stdout, stderr } = await promisify(child_process.exec)(
-        `"${oneClickPath}" --version`
+        `${oneClickPath} --version`
         );
         const versionint = +(stdout.replace("pros, version ","").replace(/\./gi,""));
         return [versionint, true];
