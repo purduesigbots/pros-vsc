@@ -10,7 +10,6 @@ import {
 import * as fs from "fs";
 import { promisify } from "util";
 import * as child_process from "child_process";
-import { ClientRequest } from "http";
 
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;

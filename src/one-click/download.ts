@@ -302,15 +302,5 @@ export async function chmod(globalPath: string, system: string) {
     ),
   ];
 
-  /*
-  if (system === "macos") {
-    chmodList.push(
-      fs.promises.chmod(
-        path.join(globalPath, "install", "pros-cli-macos", "lib", "*.so"),
-        0o751
-      )
-    );
-  }
-  */
   await Promise.all(chmodList);
 }
