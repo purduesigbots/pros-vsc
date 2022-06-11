@@ -285,8 +285,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
     "install",
     `pros-toolchain-${
       system === "windows" ? path.join("windows", "usr") : system
-    }`,
-    "bin"
+    }`
   );
 
   // return if the path is already configured
@@ -317,7 +316,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   CLI_EXEC_PATH = cliExecPath;
 
    // Prepend CLI and TOOLCHAIN to path
-  process.env["PATH"] = `${process.env["PATH"]}${PATH_SEP}${cliExecPath}${PATH_SEP}${toolchainPath}`;
+  process.env["PATH"] = `${process.env["PATH"]}${PATH_SEP}${cliExecPath}`;
 
   // Make PROS_TOOCLAHIN variable
   process.env["PROS_TOOLCHAIN"] = `${TOOLCHAIN}`;
