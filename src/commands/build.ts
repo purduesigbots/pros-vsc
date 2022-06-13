@@ -19,15 +19,17 @@ const runBuild = async () => {
     async (progress, token) => {
       try {
         // Command to run to build project
-        var command = `pros make --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`
+        var command = `pros make --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`;
         console.log(command);
-        const { stdout, stderr } = await promisify(child_process.exec)(
-          command
-        );
+        const { stdout, stderr } = await promisify(child_process.exec)(command);
         vscode.window.showInformationMessage("Project Built!");
-      } catch (error) {
-        const rtn = await vscode.window.showErrorMessage(parseMakeOutput(error.stdout),"View Output!","No Thanks!");
-        if (rtn==="View Output!") {
+      } catch (error: any) {
+        const rtn = await vscode.window.showErrorMessage(
+          parseMakeOutput(error.stdout),
+          "View Output!",
+          "No Thanks!"
+        );
+        if (rtn === "View Output!") {
           output.show();
         }
       }
@@ -38,7 +40,7 @@ const runBuild = async () => {
 export const build = async () => {
   try {
     await runBuild();
-  } catch (err) {
+  } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
 };

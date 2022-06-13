@@ -308,7 +308,10 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 
   // Check if user has CLI installed through one-click or other means.
   let [version, isOneClickInstall] = await getCurrentVersion(
-    path.join(`${addQuotes?`"`:""}${cliExecPath}${addQuotes?`"`:""}`, "pros")
+    path.join(
+      `${addQuotes ? `"` : ""}${cliExecPath}${addQuotes ? `"` : ""}`,
+      "pros"
+    )
   );
   process.env["VSCODE FLAGS"] =
     version >= 324 ? "--no-sentry --no-analytics" : "";
@@ -339,21 +342,26 @@ async function verifyCli() {
   var command = `pros c ls-templates --machine-output ${process.env["VSCODE FLAGS"]}`;
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     timeout: 30000,
+    env: {
+      ...process.env,
+      PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+    },
   });
   if (stderr) {
     console.log(stderr);
   }
+  console.log(stdout);
   return stdout.includes(`'kernel', 'version': '3.5.4'`);
 }
 
 async function verifyToolchain() {
-  const toolchain_path = process.env["PROS_TOOLCHAIN"];
-  if (!toolchain_path) {
+  let toolchainPath = process.env["PROS_TOOLCHAIN"]?.replace(/\\/g, "");
+  if (!toolchainPath) {
     return false;
   }
 
   var command = `"${path.join(
-    toolchain_path,
+    toolchainPath,
     "bin",
     "arm-none-eabi-g++"
   )}" --version`;
