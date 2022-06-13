@@ -5,6 +5,7 @@ import * as path from "path";
 import * as fs from "fs";
 
 import { parseErrorMessage, PREFIX } from "./cli-parsing";
+import { getChildProcessPath } from "../one-click/path";
 /**
  * Query the user for the directory where the project will be created.
  *
@@ -79,7 +80,7 @@ const selectKernelVersion = async (target: string) => {
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     env: {
       ...process.env,
-      PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+      PATH: getChildProcessPath(),
     },
   });
   let versions: vscode.QuickPickItem[] = [
@@ -149,7 +150,7 @@ const runCreateProject = async (
             timeout: 30000,
             env: {
               ...process.env,
-              PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+              PATH: getChildProcessPath(),
             },
           }
           // Not sure what the maxBuffer should be, but 1024*1024*5 was too small sometimes

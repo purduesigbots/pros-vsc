@@ -7,6 +7,7 @@ import axios from "axios";
 import { PREFIX } from "../commands/cli-parsing";
 import { getNonce } from "./nonce";
 import { install } from "../one-click/install";
+import { getChildProcessPath } from "../one-click/path";
 
 var fetch = require("node-fetch");
 /**
@@ -21,7 +22,7 @@ export const fetchKernelVersion = async (): Promise<string> => {
       {
         env: {
           ...process.env,
-          PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+          PATH: getChildProcessPath(),
         },
       }
     );

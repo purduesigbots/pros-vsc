@@ -4,6 +4,7 @@ import { promisify } from "util";
 
 import { parseMakeOutput } from "./cli-parsing";
 import { output } from "../extension";
+import { getChildProcessPath } from "../one-click/path";
 /**
  * Call the PROS build CLI command.
  *
@@ -27,7 +28,7 @@ const runBuildUpload = async () => {
           {
             env: {
               ...process.env,
-              PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+              PATH: getChildProcessPath(),
             },
           }
         );

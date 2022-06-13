@@ -1,5 +1,6 @@
 import * as child_process from "child_process";
 import { promisify } from "util";
+import { getChildProcessPath } from "./path";
 var fetch = require("node-fetch");
 
 export async function getCliVersion(url: string) {
@@ -22,7 +23,7 @@ export async function getCurrentVersion(oneClickPath: string) {
       {
         env: {
           ...process.env,
-          PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+          PATH: getChildProcessPath(),
         },
       }
     );
@@ -37,7 +38,7 @@ export async function getCurrentVersion(oneClickPath: string) {
         {
           env: {
             ...process.env,
-            PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+            PATH: getChildProcessPath(),
           },
         }
       );

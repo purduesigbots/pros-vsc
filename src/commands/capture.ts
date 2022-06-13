@@ -5,6 +5,7 @@ import * as fs from "fs";
 import { promisify } from "util";
 
 import { parseErrorMessage } from "./cli-parsing";
+import { getChildProcessPath } from "../one-click/path";
 
 const selectDirectory = async () => {
   const directoryOptions: vscode.OpenDialogOptions = {
@@ -54,7 +55,7 @@ const runCapture = async (output: string) => {
             maxBuffer: 1024 * 1024 * 10,
             env: {
               ...process.env,
-              PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+              PATH: getChildProcessPath(),
             },
           }
         );

@@ -4,6 +4,7 @@ import { promisify } from "util";
 import { gt } from "semver";
 
 import { PREFIX, parseErrorMessage } from "./cli-parsing";
+import { getChildProcessPath } from "../one-click/path";
 /**
  * Queries the PROS project data for the target device.
  *
@@ -21,7 +22,7 @@ const fetchTarget = async (): Promise<{
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     env: {
       ...process.env,
-      PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+      PATH: getChildProcessPath(),
     },
   });
 
@@ -59,7 +60,7 @@ const fetchServerVersions = async (
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     env: {
       ...process.env,
-      PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+      PATH: getChildProcessPath(),
     },
   });
 
@@ -97,7 +98,7 @@ const runUpgrade = async () => {
     maxBuffer: 1024 * 1024 * 50,
     env: {
       ...process.env,
-      PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+      PATH: getChildProcessPath(),
     },
   });
 

@@ -11,13 +11,14 @@ import * as fs from "fs";
 import { promisify } from "util";
 import * as child_process from "child_process";
 import { O_RDONLY } from "constants";
+import { getChildProcessPath, getIntegratedTerminalPaths } from "./path";
 
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
 export var CLI_EXEC_PATH: string;
 export var PATH_SEP: string;
 
-const getOperatingSystem = () => {
+export const getOperatingSystem = () => {
   if (process.platform === "win32") {
     return "windows";
   }
@@ -273,39 +274,20 @@ export async function cleanup(
 }
 
 export async function configurePaths(context: vscode.ExtensionContext) {
-  const globalPath = context.globalStorageUri.fsPath;
-  const system = getOperatingSystem();
-
-  // path to cli
-  let cliExecPath = `${path.join(globalPath, "install", `pros-cli-${system}`)}`;
-
-  // path to toolchain
-  let toolchainPath = path.join(
-    globalPath,
-    "install",
-    `pros-toolchain-${
-      system === "windows" ? path.join("windows", "usr") : system
-    }`
-  );
-
-  let addQuotes = true;
-
-  if (system === "macos" && !os.cpus()[0].model.includes("Apple M")) {
-    // Escape spaces in paths on Intel Mac
-    cliExecPath = cliExecPath.replace(/(\s+)/g, "\\$1");
-    toolchainPath = toolchainPath.replace(/(\s+)/g, "\\$1");
-    addQuotes = false;
-  }
+  const [cliExecPath, toolchainPath] = getIntegratedTerminalPaths(context);
 
   // return if the path is already configured
   if (
     process.env["PATH"]?.includes(cliExecPath) &&
-    process.env["PROS_TOOLCHAIN"]?.includes(toolchainPath)
+    getChildProcessToolchainPath()TOOLCHAIN"]?.includes(toolchainPath)
   ) {
     console.log("path already configured");
     return;
   }
 
+  const addQuotes = !(
+    getOperatingSystem() === "macos" && !os.cpus()[0].model.includes("Apple M")
+  );
   // Check if user has CLI installed through one-click or other means.
   let [version, isOneClickInstall] = await getCurrentVersion(
     path.join(
@@ -323,7 +305,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
     return;
   }
 
-  PATH_SEP = system === "windows" ? ";" : ":";
+  PATH_SEP = getOperatingSystem() === "windows" ? ";" : ":";
 
   TOOLCHAIN = toolchainPath;
   // Set CLI environmental variable file location
@@ -335,7 +317,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   }${PATH_SEP}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}`;
 
   // Make PROS_TOOCLHAIN variable
-  process.env["PROS_TOOLCHAIN"] = `${TOOLCHAIN}`;
+  getChildProcessToolchainPath()TOOLCHAIN"] = `${TOOLCHAIN}`;
 
   process.env.LC_ALL = "en_US.utf-8";
 }
@@ -346,7 +328,7 @@ async function verifyCli() {
     timeout: 30000,
     env: {
       ...process.env,
-      PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+      PATH: getChildProcessPath(),
     },
   });
   if (stderr) {
@@ -372,7 +354,7 @@ async function verifyToolchain() {
     timeout: 5000,
     env: {
       ...process.env,
-      PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+      PATH: getChildProcessPath(),
     },
   });
   if (stderr) {

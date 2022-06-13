@@ -4,6 +4,7 @@ import { promisify } from "util";
 
 import { parseErrorMessage } from "./cli-parsing";
 import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install";
+import { getChildProcessPath } from "../one-click/path";
 /**
  * Call the PROS upload CLI command.
  *
@@ -39,7 +40,7 @@ const runUpload = async () => {
             maxBuffer: 1024 * 1024 * 50,
             env: {
               ...process.env,
-              PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+              PATH: getChildProcessPath(),
             },
           }
         );

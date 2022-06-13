@@ -3,6 +3,7 @@ import * as child_process from "child_process";
 import { promisify } from "util";
 
 import { parseErrorMessage } from "./cli-parsing";
+import { getChildProcessPath } from "../one-click/path";
 /**
  * Call the PROS build CLI command.
  *
@@ -27,7 +28,7 @@ const runClean = async () => {
             timeout: 30000,
             env: {
               ...process.env,
-              PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+              PATH: getChildProcessPath(),
             },
           }
         );
