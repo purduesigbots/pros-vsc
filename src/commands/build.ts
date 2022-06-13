@@ -3,6 +3,10 @@ import * as child_process from "child_process";
 import { promisify } from "util";
 import { parseMakeOutput } from "./cli-parsing";
 import { output } from "../extension";
+import {
+  getChildProcessPath,
+  getChildProcessProsToolchainPath,
+} from "../one-click/path";
 /**
  * Call the PROS build CLI command.
  *
@@ -19,15 +23,27 @@ const runBuild = async () => {
     async (progress, token) => {
       try {
         // Command to run to build project
-        var command = `pros make --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`
+        var command = `pros make --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`;
         console.log(command);
+        console.log(process.env["PATH"]);
         const { stdout, stderr } = await promisify(child_process.exec)(
-          command
+          command,
+          {
+            env: {
+              ...process.env,
+              PATH: getChildProcessPath(),
+              PROS_TOOLCHAIN: getChildProcessProsToolchainPath(),
+            },
+          }
         );
         vscode.window.showInformationMessage("Project Built!");
-      } catch (error) {
-        const rtn = await vscode.window.showErrorMessage(parseMakeOutput(error.stdout),"View Output!","No Thanks!");
-        if (rtn==="View Output!") {
+      } catch (error: any) {
+        const rtn = await vscode.window.showErrorMessage(
+          parseMakeOutput(error.stdout),
+          "View Output!",
+          "No Thanks!"
+        );
+        if (rtn === "View Output!") {
           output.show();
         }
       }
@@ -38,7 +54,7 @@ const runBuild = async () => {
 export const build = async () => {
   try {
     await runBuild();
-  } catch (err) {
+  } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
 };

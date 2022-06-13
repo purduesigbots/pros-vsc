@@ -5,6 +5,7 @@ import * as path from "path";
 import * as fs from "fs";
 
 import { parseErrorMessage, PREFIX } from "./cli-parsing";
+import { getChildProcessPath } from "../one-click/path";
 /**
  * Query the user for the directory where the project will be created.
  *
@@ -76,9 +77,12 @@ const selectKernelVersion = async (target: string) => {
   // Command to run to fetch all kernel versions
   var command = `pros c ls-templates --target ${target} --machine-output ${process.env["VSCODE FLAGS"]}`;
   console.log(command);
-  const { stdout, stderr } = await promisify(child_process.exec)(
-    command/*, {timeout : 15000}*/
-  );
+  const { stdout, stderr } = await promisify(child_process.exec)(command, {
+    env: {
+      ...process.env,
+      PATH: getChildProcessPath(),
+    },
+  });
   let versions: vscode.QuickPickItem[] = [
     { label: "latest", description: "Recommended" },
   ];
@@ -139,17 +143,29 @@ const runCreateProject = async (
         var command = `pros c n "${projectPath}" ${target} ${version} --machine-output --build-cache ${process.env["VSCODE FLAGS"]}`;
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
-          command, { encoding: "utf8", maxBuffer: 1024 * 1024 * 50, timeout: 30000 }
+          command,
+          {
+            encoding: "utf8",
+            maxBuffer: 1024 * 1024 * 50,
+            timeout: 30000,
+            env: {
+              ...process.env,
+              PATH: getChildProcessPath(),
+            },
+          }
           // Not sure what the maxBuffer should be, but 1024*1024*5 was too small sometimes
         );
         if (stderr) {
-          throw new Error(stderr);
+          let err = parseErrorMessage(stderr);
+          if(!(err === "NOERROR")) {
+            throw new Error(err);
+          }
         }
 
         vscode.window.showInformationMessage("Project created!");
       } catch (error: any) {
-        console.log(error.stdout);
-        throw new Error(parseErrorMessage(error.stdout));
+        console.log(error);
+        throw new Error(error);
       }
     }
   );
