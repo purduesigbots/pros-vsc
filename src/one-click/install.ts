@@ -277,7 +277,11 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 
   // path to cli
   let cliExecPath = `${path.join(globalPath, "install", `pros-cli-${system}`)}`;
-
+  os.cpus().some((cpu) => {
+    if (system === "macos" && !cpu.model.includes("Apple M1")) {
+      cliExecPath = cliExecPath.replace(/ /g, '\ ');
+    }
+  });
 
   // path to toolchain
   let toolchainPath = path.join(
