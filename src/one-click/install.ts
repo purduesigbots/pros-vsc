@@ -341,7 +341,7 @@ async function verifyToolchain() {
     return false;
   }
 
-  var command = `${path.join(toolchain_path,"bin","arm-none-eabi-g++")} --version`;
+  var command = `"${path.join(toolchain_path,"bin","arm-none-eabi-g++")}" --version`;
 
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     timeout: 5000,
