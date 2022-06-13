@@ -16,11 +16,14 @@ const fetchTarget = async (): Promise<{
   curOkapi: string | undefined;
 }> => {
   // Command to run to fetch the current project that needs to be updated
-  var command = `pros c info-project --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`
+  var command = `pros c info-project --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`;
   // console.log(command);
-  const { stdout, stderr } = await promisify(child_process.exec)(
-    command
-  );
+  const { stdout, stderr } = await promisify(child_process.exec)(command, {
+    env: {
+      ...process.env,
+      PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+    },
+  });
 
   // Get okapi and kernel version of current project
   for (let e of stdout.split(/\r?\n/)) {
@@ -51,11 +54,14 @@ const fetchServerVersions = async (
   target: string
 ): Promise<{ newKernel: string; newOkapi: string | undefined }> => {
   // Command to run to fetch latest okapi and kernel versions
-  var command = `pros c q --target ${target} --machine-output ${process.env["VSCODE FLAGS"]}`
+  var command = `pros c q --target ${target} --machine-output ${process.env["VSCODE FLAGS"]}`;
   // console.log(command);
-  const { stdout, stderr } = await promisify(child_process.exec)(
-    command/*, {timeout : 15000}*/
-  );
+  const { stdout, stderr } = await promisify(child_process.exec)(command, {
+    env: {
+      ...process.env,
+      PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+    },
+  });
 
   let newKernel = "0.0.0";
   let newOkapi = "0.0.0";
@@ -84,11 +90,16 @@ const fetchServerVersions = async (
  */
 const runUpgrade = async () => {
   // Command to run to upgrade project to a newer version
-  var command = `pros c u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`
+  var command = `pros c u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`;
   console.log(command);
-  const { stdout, stderr } = await promisify(child_process.exec)(
-    command, { encoding: "utf8", maxBuffer: 1024 * 1024 * 50 }
-  );
+  const { stdout, stderr } = await promisify(child_process.exec)(command, {
+    encoding: "utf8",
+    maxBuffer: 1024 * 1024 * 50,
+    env: {
+      ...process.env,
+      PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+    },
+  });
 
   const errorMessage = parseErrorMessage(stdout);
   if (errorMessage) {
@@ -106,7 +117,6 @@ const userApproval = async (
   kernel: string | undefined,
   okapi: string | undefined
 ) => {
-
   // Ask for user confirmation before upgrading kernal and/or okapi version
   let title;
   if (kernel && okapi) {
@@ -144,7 +154,7 @@ export const upgradeProject = async () => {
     await runUpgrade();
 
     await vscode.window.showInformationMessage("Project updated!");
-  } catch (err) {
+  } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
 };

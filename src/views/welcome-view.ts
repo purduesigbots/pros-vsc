@@ -8,73 +8,80 @@ import { PREFIX } from "../commands/cli-parsing";
 import { getNonce } from "./nonce";
 import { install } from "../one-click/install";
 
-var fetch = require('node-fetch');
+var fetch = require("node-fetch");
 /**
  * Queries the server for the latest available library version.
  *
  * @returns The kernel library versions
  */
 export const fetchKernelVersion = async (): Promise<string> => {
-	try {
-	const { stdout, stderr } = await promisify(child_process.exec)(
-		`pros c q --target v5 --machine-output`
-	);
+  try {
+    const { stdout, stderr } = await promisify(child_process.exec)(
+      `pros c q --target v5 --machine-output`,
+      {
+        env: {
+          ...process.env,
+          PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+        },
+      }
+    );
 
-	let newKernel = "0.0.0";
+    let newKernel = "0.0.0";
 
-	for (let e of stdout.split(/\r?\n/)) {
-		if (e.startsWith(PREFIX)) {
-			let jdata = JSON.parse(e.substr(PREFIX.length));
-			if (jdata.type === "finalize") {
-				for (let ver of jdata.data) {
-					if (ver.name === "kernel" && gt(ver.version, newKernel)) {
-						newKernel = ver.version;
-					}
-				}
-			}
-		}
-	}
+    for (let e of stdout.split(/\r?\n/)) {
+      if (e.startsWith(PREFIX)) {
+        let jdata = JSON.parse(e.substr(PREFIX.length));
+        if (jdata.type === "finalize") {
+          for (let ver of jdata.data) {
+            if (ver.name === "kernel" && gt(ver.version, newKernel)) {
+              newKernel = ver.version;
+            }
+          }
+        }
+      }
+    }
 
-	return newKernel;
-} catch(error) {
-	return "0.0.0";
-}
+    return newKernel;
+  } catch (error) {
+    return "0.0.0";
+  }
 };
-
 
 export const fetchKernelVersionNonCLIDependent = async (): Promise<string> => {
-    const response = await fetch("https://api.github.com/repos/purduesigbots/pros/releases/latest");
-    if (!response.ok) {
-      console.log(response.url, response.status, response.statusText);
-      throw new Error(`Can't fetch kernel release: ${response.statusText}`);
-    }
-    var v = (await response.json()).tag_name;
-    return v;
+  const response = await fetch(
+    "https://api.github.com/repos/purduesigbots/pros/releases/latest"
+  );
+  if (!response.ok) {
+    console.log(response.url, response.status, response.statusText);
+    throw new Error(`Can't fetch kernel release: ${response.statusText}`);
+  }
+  var v = (await response.json()).tag_name;
+  return v;
 };
 export const fetchCliVersion = async (): Promise<string> => {
-	const response = await axios.get(
-		"https://purduesigbots.github.io/pros-mainline/stable/UpgradeManifestV1.json"
-	);
-	return `${response.data.version.major}.${response.data.version.minor}.${response.data.version.patch}`;
+  const response = await axios.get(
+    "https://purduesigbots.github.io/pros-mainline/stable/UpgradeManifestV1.json"
+  );
+  return `${response.data.version.major}.${response.data.version.minor}.${response.data.version.patch}`;
 };
 
 export function getWebviewContent(
-	styleUri: vscode.Uri,
-	scriptUri: vscode.Uri,
-	imgHeaderPath: vscode.Uri,
-	imgIconPath: vscode.Uri,
-	imgActionPath: vscode.Uri,
-	imgProjectProsPath: vscode.Uri,
-	newKernel: string,
-	newCli: string,
-	useGoogleAnalytics: boolean,
-	showWelcomeOnStartup: boolean,
-	context: vscode.ExtensionContext
+  styleUri: vscode.Uri,
+  scriptUri: vscode.Uri,
+  imgHeaderPath: vscode.Uri,
+  imgIconPath: vscode.Uri,
+  imgActionPath: vscode.Uri,
+  imgProjectProsPath: vscode.Uri,
+  newKernel: string,
+  newCli: string,
+  useGoogleAnalytics: boolean,
+  showWelcomeOnStartup: boolean,
+  context: vscode.ExtensionContext
 ) {
-	const nonce = getNonce();
-	// install(context);
+  const nonce = getNonce();
+  // install(context);
 
-	return `
+  return `
 	<!DOCTYPE html>
 	<html lang="en">
 	   <head>
@@ -122,13 +129,15 @@ export function getWebviewContent(
 						<div class="body__settings">
 							<div class="body__settings_header">Settings</div>
 							<div class="body__settings_checkbox">
-								<div><input type="checkbox" ${useGoogleAnalytics ? "checked" : ""
-		} id="useGoogleAnalytics"/></div>
+								<div><input type="checkbox" ${
+                  useGoogleAnalytics ? "checked" : ""
+                } id="useGoogleAnalytics"/></div>
 								<div><label>Send anonymous usage statistics</label></div>
 							</div>
 							<div class="body__settings_checkbox">
-								<div><input type="checkbox" ${showWelcomeOnStartup ? "checked" : ""
-		} id="showWelcomeOnStartup" /></div>
+								<div><input type="checkbox" ${
+                  showWelcomeOnStartup ? "checked" : ""
+                } id="showWelcomeOnStartup" /></div>
 								<div><label>Show Welcome Guide when opening VSCode</label></div>
 							</div>
 						</div>

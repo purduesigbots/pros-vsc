@@ -10,7 +10,6 @@ import { output } from "../extension";
  * @param slot The slot number to place the executable in
  */
 
-
 const runBuildUpload = async () => {
   await vscode.window.withProgress(
     {
@@ -21,20 +20,30 @@ const runBuildUpload = async () => {
     async (progress, token) => {
       try {
         // Command to run to build and upload project
-        var command = `pros mu --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`
+        var command = `pros mu --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`;
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
-          command
+          command,
+          {
+            env: {
+              ...process.env,
+              PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+            },
+          }
         );
         await vscode.window.showInformationMessage("Project Built!");
-      } catch (error) {
-        if(!error.stdout.includes("No v5 ports")) {
-          const rtn = await vscode.window.showErrorMessage(parseMakeOutput(error.stdout),"View Output!","No Thanks!");
-          if (rtn==="View Output!") {
+      } catch (error: any) {
+        if (!error.stdout.includes("No v5 ports")) {
+          const rtn = await vscode.window.showErrorMessage(
+            parseMakeOutput(error.stdout),
+            "View Output!",
+            "No Thanks!"
+          );
+          if (rtn === "View Output!") {
             output.show();
           }
         } else {
-          vscode.window.showErrorMessage(parseMakeOutput(error.stdout))
+          vscode.window.showErrorMessage(parseMakeOutput(error.stdout));
         }
       }
     }
@@ -44,7 +53,7 @@ const runBuildUpload = async () => {
 export const buildUpload = async () => {
   try {
     await runBuildUpload();
-  } catch (err) {
+  } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
 };

@@ -21,7 +21,20 @@ const runBuild = async () => {
         // Command to run to build project
         var command = `pros make --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`;
         console.log(command);
-        const { stdout, stderr } = await promisify(child_process.exec)(command);
+        console.log(process.env["PATH"]);
+        const { stdout, stderr } = await promisify(child_process.exec)(
+          command,
+          {
+            env: {
+              ...process.env,
+              PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+              PROS_TOOLCHAIN: `"${process.env["PROS_TOOLCHAIN"]?.replace(
+                /\\/g,
+                ""
+              )}"`,
+            },
+          }
+        );
         vscode.window.showInformationMessage("Project Built!");
       } catch (error: any) {
         const rtn = await vscode.window.showErrorMessage(

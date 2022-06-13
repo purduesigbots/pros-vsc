@@ -19,13 +19,20 @@ const runClean = async () => {
     async (progress, token) => {
       try {
         // Command to run to clean project
-        var command = `pros make clean --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`
+        var command = `pros make clean --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`;
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
-          command, { timeout: 30000 }
+          command,
+          {
+            timeout: 30000,
+            env: {
+              ...process.env,
+              PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+            },
+          }
         );
         vscode.window.showInformationMessage("Project Cleaned!");
-      } catch (error) {
+      } catch (error: any) {
         throw new Error(parseErrorMessage(error.stdout));
       }
     }
@@ -35,7 +42,7 @@ const runClean = async () => {
 export const clean = async () => {
   try {
     await runClean();
-  } catch (err) {
+  } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
 };

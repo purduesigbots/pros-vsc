@@ -76,9 +76,12 @@ const selectKernelVersion = async (target: string) => {
   // Command to run to fetch all kernel versions
   var command = `pros c ls-templates --target ${target} --machine-output ${process.env["VSCODE FLAGS"]}`;
   console.log(command);
-  const { stdout, stderr } = await promisify(child_process.exec)(
-    command/*, {timeout : 15000}*/
-  );
+  const { stdout, stderr } = await promisify(child_process.exec)(command, {
+    env: {
+      ...process.env,
+      PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+    },
+  });
   let versions: vscode.QuickPickItem[] = [
     { label: "latest", description: "Recommended" },
   ];
@@ -139,7 +142,16 @@ const runCreateProject = async (
         var command = `pros c n "${projectPath}" ${target} ${version} --machine-output --build-cache ${process.env["VSCODE FLAGS"]}`;
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
-          command, { encoding: "utf8", maxBuffer: 1024 * 1024 * 50, timeout: 30000 }
+          command,
+          {
+            encoding: "utf8",
+            maxBuffer: 1024 * 1024 * 50,
+            timeout: 30000,
+            env: {
+              ...process.env,
+              PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+            },
+          }
           // Not sure what the maxBuffer should be, but 1024*1024*5 was too small sometimes
         );
         if (stderr) {

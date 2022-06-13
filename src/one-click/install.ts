@@ -330,9 +330,11 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   CLI_EXEC_PATH = cliExecPath;
 
   // Prepend CLI and TOOLCHAIN to path
-  process.env["PATH"] = `${process.env["PATH"]}${PATH_SEP}${cliExecPath}`;
+  process.env["PATH"] = `${
+    process.env["PATH"]
+  }${PATH_SEP}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}`;
 
-  // Make PROS_TOOCLAHIN variable
+  // Make PROS_TOOCLHAIN variable
   process.env["PROS_TOOLCHAIN"] = `${TOOLCHAIN}`;
 
   process.env.LC_ALL = "en_US.utf-8";
@@ -368,6 +370,10 @@ async function verifyToolchain() {
 
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     timeout: 5000,
+    env: {
+      ...process.env,
+      PATH: `"${process.env["PATH"]?.replace(/\\/g, "")}"`,
+    },
   });
   if (stderr) {
     console.log(stderr);
