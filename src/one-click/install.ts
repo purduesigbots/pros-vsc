@@ -288,10 +288,13 @@ export async function configurePaths(context: vscode.ExtensionContext) {
     }`
   );
 
+  let addQuotes = true;
+
   if (system === "macos" && !os.cpus()[0].model.includes("Apple M")) {
     // Escape spaces in paths on Intel Mac
     cliExecPath = cliExecPath.replace(/(\s+)/g, "\\$1");
     toolchainPath = toolchainPath.replace(/(\s+)/g, "\\$1");
+    addQuotes = false;
   }
 
   // return if the path is already configured
@@ -305,7 +308,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 
   // Check if user has CLI installed through one-click or other means.
   let [version, isOneClickInstall] = await getCurrentVersion(
-    path.join(`${cliExecPath}`, "pros")
+    path.join(`${addQuotes?`"`:""}${cliExecPath}${addQuotes?`"`:""}`, "pros")
   );
   process.env["VSCODE FLAGS"] =
     version >= 324 ? "--no-sentry --no-analytics" : "";
