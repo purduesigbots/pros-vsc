@@ -51,7 +51,7 @@ export const getChildProcessPath = (): string | undefined => {
 export const getChildProcessProsToolchainPath = (): string | undefined => {
   let toolchainPath = process.env["PROS_TOOLCHAIN"];
   if (getOperatingSystem() === "macos") {
-    toolchainPath = `"${toolchainPath?.replace(/\\/g, "")}"`;
+    toolchainPath = `${toolchainPath?.replace(/\\/g, "")}`;
   }
   return toolchainPath;
 };
