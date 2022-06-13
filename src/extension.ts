@@ -43,6 +43,7 @@ export const getProsTerminal = async (
   if (prosTerminals.length > 1) {
     // Clean up duplicate terminals
     prosTerminals.slice(1).forEach((t) => t.dispose());
+
   }
 
   // Create a new PROS Terminal if one doesn't exist
@@ -66,6 +67,7 @@ export const getProsTerminal = async (
 
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
+
   configurePaths(context);
 
   workspaceContainsProjectPros().then((isProsProject) => {
@@ -74,6 +76,7 @@ export function activate(context: vscode.ExtensionContext) {
       "pros.isPROSProject",
       isProsProject
     );
+
     if (isProsProject) {
       getProsTerminal(context).then((terminal) => {
         terminal.sendText("pros build-compile-commands");
@@ -114,6 +117,10 @@ export function activate(context: vscode.ExtensionContext) {
     await upload();
   });
 
+  vscode.commands.registerCommand("pros.updatecli", async() => {
+    analytics.sendAction("updatecli");
+    await updateCLI(context);
+  });
   vscode.commands.registerCommand("pros.build", async () => {
     analytics.sendAction("build");
     await build();

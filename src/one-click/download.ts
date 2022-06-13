@@ -10,6 +10,7 @@ import * as path from "path";
 import { promisify } from "util";
 
 
+
 async function download(
   globalPath: string,
   downloadURL: string,
@@ -59,6 +60,7 @@ async function download(
         throw e;
       });
       console.log("Finished downloading")
+
     }
   );
   console.log("returning bz2 status");
