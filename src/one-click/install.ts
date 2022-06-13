@@ -11,7 +11,7 @@ import * as fs from "fs";
 import { promisify } from "util";
 import * as child_process from "child_process";
 import { O_RDONLY } from "constants";
-import { getChildProcessPath, getIntegratedTerminalPaths } from "./path";
+import { getChildProcessPath, getIntegratedTerminalPaths, getChildProcessProsToolchainPath } from "./path";
 
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
@@ -339,7 +339,7 @@ async function verifyCli() {
 }
 
 async function verifyToolchain() {
-  let toolchainPath = process.env["PROS_TOOLCHAIN"]?.replace(/\\/g, "");
+  let toolchainPath = getChildProcessProsToolchainPath();
   if (!toolchainPath) {
     return false;
   }
