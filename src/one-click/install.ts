@@ -279,7 +279,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   // return if the path is already configured
   if (
     process.env["PATH"]?.includes(cliExecPath) &&
-    getChildProcessToolchainPath()TOOLCHAIN"]?.includes(toolchainPath)
+    process.env["PROS_TOOLCHAIN"]?.includes(toolchainPath)
   ) {
     console.log("path already configured");
     return;
@@ -317,7 +317,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   }${PATH_SEP}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}`;
 
   // Make PROS_TOOCLHAIN variable
-  getChildProcessToolchainPath()TOOLCHAIN"] = `${TOOLCHAIN}`;
+  process.env["PROS_TOOLCHAIN"] = `${TOOLCHAIN}`;
 
   process.env.LC_ALL = "en_US.utf-8";
 }

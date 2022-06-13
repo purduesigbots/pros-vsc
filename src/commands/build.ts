@@ -3,7 +3,10 @@ import * as child_process from "child_process";
 import { promisify } from "util";
 import { parseMakeOutput } from "./cli-parsing";
 import { output } from "../extension";
-import { getChildProcessPath } from "../one-click/path";
+import {
+  getChildProcessPath,
+  getChildProcessProsToolchainPath,
+} from "../one-click/path";
 /**
  * Call the PROS build CLI command.
  *
@@ -29,10 +32,7 @@ const runBuild = async () => {
             env: {
               ...process.env,
               PATH: getChildProcessPath(),
-              PROS_TOOLCHAIN: `"${process.env["PROS_TOOLCHAIN"]?.replace(
-                /\\/g,
-                ""
-              )}"`,
+              PROS_TOOLCHAIN: getChildProcessProsToolchainPath(),
             },
           }
         );
