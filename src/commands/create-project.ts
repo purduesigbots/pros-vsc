@@ -156,13 +156,16 @@ const runCreateProject = async (
           // Not sure what the maxBuffer should be, but 1024*1024*5 was too small sometimes
         );
         if (stderr) {
-          throw new Error(stderr);
+          let err = parseErrorMessage(stderr);
+          if(!(err === "NOERROR")) {
+            throw new Error(err);
+          }
         }
 
         vscode.window.showInformationMessage("Project created!");
       } catch (error: any) {
-        console.log(error.stdout);
-        throw new Error(parseErrorMessage(error.stdout));
+        console.log(error);
+        throw new Error(error);
       }
     }
   );
