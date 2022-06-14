@@ -117,10 +117,6 @@ export function activate(context: vscode.ExtensionContext) {
     await upload();
   });
 
-  vscode.commands.registerCommand("pros.updatecli", async() => {
-    analytics.sendAction("updatecli");
-    await updateCLI(context);
-  });
   vscode.commands.registerCommand("pros.build", async () => {
     analytics.sendAction("build");
     await build();
