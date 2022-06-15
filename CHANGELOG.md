@@ -2,6 +2,10 @@
 
 Below are our release notes with their release dates corresponding to each version.
 
+## [0.4.0] - 2022-06-15 - Beta Version
+### Added
+- Added One-Click 2.0 which brings stability and major bug fixes to One-Click.
+
 ## [0.3.0] - 2022-01-16 - Beta Version
 ### Added
 - Added One-Click button to update CLI only 
