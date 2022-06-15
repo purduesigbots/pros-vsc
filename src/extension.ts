@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import * as os from 'os';
+import * as os from "os";
 import { TreeDataProvider } from "./views/tree-view";
 import {
   getWebviewContent,
@@ -15,42 +15,68 @@ import {
   createNewProject,
   upgradeProject,
   upload,
+  capture,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
-import { install, configurePaths, uninstall, updateCLI } from "./one-click/install";
+import {
+  install,
+  configurePaths,
+  uninstall,
+  updateCLI,
+  cleanup
+} from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 let analytics: Analytics;
 
-export var system : string;
+export var system: string;
 export const output = vscode.window.createOutputChannel("PROS Output");
 
-/// Get a reference to the "PROS Terminal" VSCode terminal used for running 
+/// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
-export const getProsTerminal = async (context: vscode.ExtensionContext): Promise<vscode.Terminal> => {
-  const prosTerminals = vscode.window.terminals.filter(t => t.name === "PROS Terminal");
+export const getProsTerminal = async (
+  context: vscode.ExtensionContext
+): Promise<vscode.Terminal> => {
+  const prosTerminals = vscode.window.terminals.filter(
+    (t) => t.name === "PROS Terminal"
+  );
   if (prosTerminals.length > 1) {
     // Clean up duplicate terminals
-    prosTerminals.slice(1).forEach(t => t.dispose());
+    prosTerminals.slice(1).forEach((t) => t.dispose());
+
   }
 
   // Create a new PROS Terminal if one doesn't exist
   if (prosTerminals.length) {
-    return prosTerminals[0];
+    const options: Readonly<vscode.TerminalOptions> =
+      prosTerminals[0].creationOptions;
+    if (options?.env?.PATH?.includes("pros-cli")) {
+      // Only keep the existing terminal if it has the correct path
+      return prosTerminals[0];
+    }
   }
 
-  if (!process.env["PATH"]?.includes("pros-cli")) {
-    await configurePaths(context);
-  }
+  await configurePaths(context);
 
-  return vscode.window.createTerminal({name:"PROS Terminal", env: process.env});
+
+  return vscode.window.createTerminal({
+    name: "PROS Terminal",
+    env: process.env,
+  });
 };
 
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
-  
+
+  configurePaths(context);
+
   workspaceContainsProjectPros().then((isProsProject) => {
-    vscode.commands.executeCommand("setContext", "pros.isPROSProject", isProsProject);
+    vscode.commands.executeCommand(
+      "setContext",
+      "pros.isPROSProject",
+      isProsProject
+    );
+
     if (isProsProject) {
       getProsTerminal(context).then((terminal) => {
         terminal.sendText("pros build-compile-commands");
@@ -69,9 +95,17 @@ export function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("install");
     await install(context);
   });
-  vscode.commands.registerCommand("pros.uninstall",async () => {
+  vscode.commands.registerCommand("pros.uninstall", async () => {
     analytics.sendAction("uninstall");
     await uninstall(context);
+  });
+  vscode.commands.registerCommand("pros.updatecli", async () => {
+    analytics.sendAction("updatecli");
+    await updateCLI(context);
+  });
+  vscode.commands.registerCommand("pros.verify", async () => {
+    analytics.sendAction("verify");
+    await cleanup(context);
   });
   vscode.commands.registerCommand("pros.build&upload", async () => {
     analytics.sendAction("build&upload");
@@ -83,10 +117,6 @@ export function activate(context: vscode.ExtensionContext) {
     await upload();
   });
 
-  vscode.commands.registerCommand("pros.updatecli", async() => {
-    analytics.sendAction("updatecli");
-    await updateCLI(context);
-  });
   vscode.commands.registerCommand("pros.build", async () => {
     analytics.sendAction("build");
     await build();
@@ -100,7 +130,7 @@ export function activate(context: vscode.ExtensionContext) {
       const terminal = await getProsTerminal(context);
       terminal.sendText("pros terminal");
       terminal.show();
-    } catch(err: any) {
+    } catch (err: any) {
       vscode.window.showErrorMessage(err.message);
     }
   });
@@ -115,6 +145,11 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  vscode.commands.registerCommand("pros.capture", async ()  => {
+    analytics.sendAction("capture");
+    await capture();
+  });
+  
   vscode.commands.registerCommand("pros.upgrade", () => {
     analytics.sendAction("upgrade");
     upgradeProject();
@@ -215,16 +250,21 @@ export function activate(context: vscode.ExtensionContext) {
     install(context);
   }
 
-
   // heuristic to add new files to the compilation database without requiring a full build
   vscode.workspace.onDidCreateFiles(async (event) => {
     // terminate early if there's no pros project or workspace folder open
-    if (!await workspaceContainsProjectPros() || !vscode.workspace.workspaceFolders) {
+    if (
+      !(await workspaceContainsProjectPros()) ||
+      !vscode.workspace.workspaceFolders
+    ) {
       return;
     }
 
     const workspaceRootUri = vscode.workspace.workspaceFolders[0].uri;
-    const compilationDbUri = vscode.Uri.joinPath(workspaceRootUri, 'compile_commands.json');
+    const compilationDbUri = vscode.Uri.joinPath(
+      workspaceRootUri,
+      "compile_commands.json"
+    );
 
     // first check if the cdb exists. if not, attempt to build the project to generate it
     try {
@@ -242,7 +282,9 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     // now we know there is a cdb present, we can load it
-    const compilationDbData: [{ arguments: string[], directory: string, file: string }] = JSON.parse(
+    const compilationDbData: [
+      { arguments: string[]; directory: string; file: string }
+    ] = JSON.parse(
       new TextDecoder().decode(
         await vscode.workspace.fs.readFile(compilationDbUri)
       )
@@ -250,7 +292,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     let compilationDbDirty = false;
 
-    const mainArgs = compilationDbData.find((entry) => entry.file === "src/main.cpp")?.arguments;
+    const mainArgs = compilationDbData.find(
+      (entry) => entry.file === "src/main.cpp"
+    )?.arguments;
 
     // if for some reason there isn't an entry for main.cpp then i give up
     if (!mainArgs) {
@@ -261,10 +305,15 @@ export function activate(context: vscode.ExtensionContext) {
       // the cdb only has entries for source files
       if (file.fsPath.includes("src")) {
         // since the cdb encodes the file as a relative path we have to do the same for the files given to us by the event
-        const thisFileRelative = path.relative(workspaceRootUri.path, file.path);
+        const thisFileRelative = path.relative(
+          workspaceRootUri.path,
+          file.path
+        );
 
         // anyway, if there is already an entry for this file somehow, just skip it
-        if (compilationDbData.find((entry) => entry.file === thisFileRelative)) {
+        if (
+          compilationDbData.find((entry) => entry.file === thisFileRelative)
+        ) {
           continue;
         }
 
@@ -274,12 +323,12 @@ export function activate(context: vscode.ExtensionContext) {
         // create an entry for this file
         compilationDbData.push({
           arguments: [
-            ...args.reverse(),                             // (re-reverse the arguments list)
-            `${thisFileRelative.replace('src', 'bin')}.o`, // sure hope there aren't users who have src/**/src/**/ in their projects...
-            thisFileRelative
+            ...args.reverse(), // (re-reverse the arguments list)
+            `${thisFileRelative.replace("src", "bin")}.o`, // sure hope there aren't users who have src/**/src/**/ in their projects...
+            thisFileRelative,
           ],
           directory: workspaceRootUri.path,
-          file: thisFileRelative
+          file: thisFileRelative,
         });
 
         // mark the cdb dirty
@@ -289,7 +338,12 @@ export function activate(context: vscode.ExtensionContext) {
 
     // write changes back to the cdb if there are any
     if (compilationDbDirty) {
-      await vscode.workspace.fs.writeFile(compilationDbUri, new TextEncoder().encode(JSON.stringify(compilationDbData, undefined, 4)));
+      await vscode.workspace.fs.writeFile(
+        compilationDbUri,
+        new TextEncoder().encode(
+          JSON.stringify(compilationDbData, undefined, 4)
+        )
+      );
     }
   });
 

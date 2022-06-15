@@ -3,7 +3,8 @@ import * as child_process from "child_process";
 import { promisify } from "util";
 
 import { parseErrorMessage } from "./cli-parsing";
-import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install"
+import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install";
+import { getChildProcessPath } from "../one-click/path";
 /**
  * Call the PROS upload CLI command.
  *
@@ -18,7 +19,7 @@ const setVariables = async () => {
   process.env.PATH += PATH_SEP + CLI_EXEC_PATH;
   // Set language variable
   process.env.LC_ALL = "en_US.utf-8";
-}
+};
 
 const runUpload = async () => {
   await vscode.window.withProgress(
@@ -30,14 +31,22 @@ const runUpload = async () => {
     async (progress, token) => {
       try {
         // Command to run to upload project to brain
-        var command = `pros u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`
+        var command = `pros u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`;
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
-          command, {encoding: "utf8", maxBuffer: 1024 * 1024 * 50 }
+          command,
+          {
+            encoding: "utf8",
+            maxBuffer: 1024 * 1024 * 50,
+            env: {
+              ...process.env,
+              PATH: getChildProcessPath(),
+            },
+          }
         );
 
         vscode.window.showInformationMessage("Project Uploaded!");
-      } catch (error) {
+      } catch (error: any) {
         // Parse and display error message if one occured
         throw new Error(parseErrorMessage(error.stdout));
       }
@@ -50,7 +59,7 @@ export const upload = async () => {
     // Set environmental variables
     // Run upload command
     await runUpload();
-  } catch (err) {
+  } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
 };
