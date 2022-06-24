@@ -98,6 +98,10 @@
         "title": "PROS: Create New PROS Project"
       },
       {
+        "command": "pros.extensionMarketplace",
+        "title": "PROS: Extension Marketplace"
+      },
+      {
         "command": "pros.welcome",
         "title": "PROS: Welcome"
       },

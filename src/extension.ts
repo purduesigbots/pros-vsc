@@ -18,6 +18,7 @@ import {
   capture,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
+import { templateMarketplace } from "./views/templates";
 import { Analytics } from "./ga";
 import {
   install,
@@ -158,6 +159,20 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.new", () => {
     analytics.sendAction("projectCreated");
     createNewProject();
+  });
+
+  vscode.commands.registerCommand("pros.templateMarketplace", async () => {
+    analytics.sendAction("templateMarketplace");
+    const panel = vscode.window.createWebviewPanel(
+      "template marketplace",
+      "Template Marketplace",
+      vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+      }
+    );
+    panel.webview.html = await templateMarketplace(context, panel.webview);
   });
 
   vscode.commands.registerCommand("pros.welcome", async () => {

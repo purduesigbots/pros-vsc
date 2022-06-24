@@ -7,7 +7,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	constructor() {
 		this.data = [new TreeItem('Quick Actions', [new TreeItem('Build & Upload', undefined, 'pros.build&upload'), new TreeItem('Upload', undefined, 'pros.upload'), new TreeItem('Build', undefined, 'pros.build'), new TreeItem('Clean', undefined, 'pros.clean'),new TreeItem('Brain Terminal', undefined, 'pros.terminal'),new TreeItem('Integrated Terminal', undefined, 'pros.showterminal'), new TreeItem('Capture Image', undefined, 'pros.capture')]),
-		new TreeItem('Conductor', [new TreeItem('Upgrade Project', undefined, 'pros.upgrade'), new TreeItem('Create Project', undefined, 'pros.new')]),
+		new TreeItem('Conductor', [new TreeItem('Upgrade Project', undefined, 'pros.upgrade'), new TreeItem('Create Project', undefined, 'pros.new'), new TreeItem('Template Marketplace', undefined, 'pros.templateMarketplace')]),
 		new TreeItem('Other',[new TreeItem('Install PROS', undefined, 'pros.install'),new TreeItem('Uninstall PROS', undefined, 'pros.uninstall'),new TreeItem('Update PROS CLI', undefined, 'pros.updatecli'), new TreeItem('Verify PROS Installation', undefined, 'pros.verify')])];
 	}
 
