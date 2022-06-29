@@ -79,11 +79,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     if (isProsProject) {
       getProsTerminal(context).then((terminal) => {
-        terminal.sendText("pros build-compile-commands");
+       terminal.sendText("pros build-compile-commands");
       });
     }
+    else{
+      chooseProject();
+    }
   });
-
+  
   if (
     vscode.workspace
       .getConfiguration("pros")
@@ -377,4 +380,85 @@ async function workspaceContainsProjectPros(): Promise<boolean> {
     exists = false;
   }
   return exists;
+}
+
+async function chooseProject(){
+  if (
+    vscode.workspace.workspaceFolders === undefined ||
+    vscode.workspace.workspaceFolders === null
+  )
+  {
+  return;
+  }
+  var array = await prosProjects();
+  if(array.length === 0)
+  {
+    return;
+  }
+  const targetOptions: vscode.QuickPickOptions = {
+    placeHolder: array[0].name,
+    title: "Select the target folder",
+  };
+  var folderNames :Array<vscode.QuickPickItem>= [];
+  //Specify type for any
+  for(const f of array)
+  {
+    folderNames.push({label: f[0], description: 'pros projects'});
+  }
+  console.log(folderNames);
+  const target = await vscode.window.showQuickPick(
+    folderNames,
+    targetOptions
+  );
+  if (target === undefined) {
+    throw new Error();
+  }
+  await vscode.commands.executeCommand(
+    "vscode.openFolder",
+    vscode.Uri.file(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath,target.label))
+  );
+  
+}
+
+
+async function prosProjects(){
+  //Specify type for any later
+  var array :any = [];
+  if (
+    vscode.workspace.workspaceFolders === undefined ||
+    vscode.workspace.workspaceFolders === null
+  ) {
+    console.log(vscode.workspace.workspaceFolders);
+    return array;
+  }
+  console.log(vscode.workspace.workspaceFolders);
+
+    
+   
+    for(const workspace of vscode.workspace.workspaceFolders)
+    {
+      const currentDir = workspace.uri;
+      const folders = (await vscode.workspace.fs.readDirectory(currentDir));
+    for(const folder of folders)
+    {
+    var exists = true;
+    try {
+      // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
+      // of if the workspace is using a physical file system or not.
+      const workspaceUri = vscode.Uri.file(path.join(currentDir.fsPath, folder[0]));
+      const uriString = `${workspaceUri.scheme}:${workspaceUri.path}/${'project.pros'}`;
+      const uri = vscode.Uri.parse(uriString);
+      await vscode.workspace.fs.stat(uri);
+    } catch (e) {
+      console.error(e);
+      exists = false;
+    }
+    if(exists)
+    {
+      array.push(folder);
+    }
+  }
+  }
+  console.log(array);
+  return array;   
 }
