@@ -3,12 +3,11 @@ import * as path from "path";
 import * as fs from "fs";
 import * as pros from "@purduesigbots/pros-cli-middleware";
 
-import { parseErrorMessage, PREFIX } from "./cli-parsing";
+import { parseErrorMessage, PREFIX, ansi_regex} from "./cli-parsing";
 import { TOOLCHAIN, CLI_EXEC_PATH, PATH_SEP } from "../one-click/install";
 import { FinalizeOutput, FinalizeTemplateQuery, handleFinalize, handleLog, handleNotify, handlePrompt, NotifyOutput } from "../util/middleware-linkage";
 import { NotificationMetadata } from "../util/progress-notification";
 import { output } from "../extension";
-
 /**
  * Query the user for the directory where the project will be created.
  *
@@ -131,6 +130,15 @@ const runCreateProject = async (
     let shouldShowEchoOutputInNotification = true;
 
     // create new project
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Creating Project",
+        cancellable: false,
+      },
+      async (progress, token) => {
+
+
     await pros.createNewProject({
       notify: handleNotify(notifications, (notificationTracker: NotificationMetadata, data: NotifyOutput) => {
         // creating a project triggers a build immediately after creation and
@@ -144,12 +152,12 @@ const runCreateProject = async (
           notificationTracker.notification.notify(data.simpleMessage);
           if (data.text.includes('Building')) {
             output.show(true);
-            output.appendLine(data.text);
+            output.appendLine(data.text.replace(ansi_regex, ""));
             shouldShowEchoOutputInNotification = false;
           }
         } else {
           // TODO: strip ANSI color codes
-          output.appendLine(data.text);
+          output.appendLine(data.text.replace(ansi_regex, ""));
         }
       }),
       finalize: handleFinalize,
@@ -159,6 +167,8 @@ const runCreateProject = async (
       // we've already handled everything that should need it
       input: () => {},
     }, projectPath, version, target);
+
+  });
 
     vscode.window.showInformationMessage("Project created!");
   } catch (error: any) {
