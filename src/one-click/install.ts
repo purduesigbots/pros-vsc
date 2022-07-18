@@ -86,7 +86,7 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
     // Set system, path seperator, and downloads to windows version
     downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-win-64bit.zip`;
     downloadToolchain =
-    `https://github.com/purduesigbots/toolchain/releases/download/${toolchainVersion}/pros-tooclhain-windows.zip`;
+    `https://github.com/purduesigbots/toolchain/releases/download/${toolchainVersion}/pros-toolchain-windows.zip`;
   } else if (getOperatingSystem() === "macos") {
     // Set system, path seperator, and downloads to windows version
     downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-macos-64bit.zip`;
