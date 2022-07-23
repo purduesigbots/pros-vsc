@@ -11,7 +11,7 @@ import {
 import * as fs from "fs";
 import { promisify } from "util";
 import * as child_process from "child_process";
-import { O_RDONLY } from "constants";
+import { URL } from "url";
 import { getChildProcessPath, getIntegratedTerminalPaths, getChildProcessProsToolchainPath } from "./path";
 
 
@@ -102,9 +102,22 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
   const custom_cli = vscode.workspace.getConfiguration("pros").get<string>("OneClick: CliDownloadURL")??"default";
   const custom_toolchain = vscode.workspace.getConfiguration("pros").get<string>("OneClick: ToolchainDownloadURL")??"default";
 
+  try {
+    const cliurl = new URL(custom_cli);
+    downloadCli = custom_cli === "default" ? downloadCli : custom_cli;
+  } catch(e: any) {
+    console.log(e);
+    console.log("CLI Url specified in PROS extension settings was invalid. Using default instead");
+  }
 
-  downloadCli = custom_cli === "default" ? downloadCli : custom_cli;
-  downloadToolchain = custom_toolchain === "default" ? downloadToolchain : custom_toolchain;
+  try {
+    const toolchainurl = new URL(custom_toolchain);
+    downloadToolchain = custom_toolchain === "default" ? downloadToolchain : custom_toolchain;
+  } catch(e: any) {
+    console.log(e);
+    console.log("Toolchain Url specified in PROS extension settings was invalid. Using default instead");
+  }
+  
 
 
 
@@ -267,17 +280,18 @@ export async function cleanup(
         await configurePaths(context);
 
         // Ensure that toolchain and cli are working
-        const cliSuccess = await verifyCli();
-        const toolchainSuccess = await verifyToolchain();
+        let cliSuccess = await verifyCli().catch((err) => {})??false;
+        let toolchainSuccess = await verifyToolchain().catch((err) => {console.log(err);})??false;
         if (cliSuccess && toolchainSuccess) {
           vscode.window.showInformationMessage(
             "CLI and Toolchain are working!"
           );
         } else {
           vscode.window.showErrorMessage(
-            `${cliSuccess ? "" : "CLI"} ${
-              !cliSuccess && !toolchainSuccess ? "" : "and"
-            } ${toolchainSuccess ? "" : "Toolchain"} Installation Failed!`
+            `${cliSuccess ? "" : "CLI"} 
+            ${!cliSuccess && !toolchainSuccess ? " and " : ""} 
+            ${toolchainSuccess ? "" : "Toolchain"} 
+            Installation Failed!`
           );
           vscode.window.showInformationMessage(
             `Please try installing again! If this problem persists, consider trying an alternative install method: https://pros.cs.purdue.edu/v5/getting-started/${system}.html`
@@ -313,15 +327,9 @@ export async function configurePaths(context: vscode.ExtensionContext) {
       "pros"
     )
   );
-  process.env["VSCODE FLAGS"] =
+  process.env["PROS_VSCODE_FLAGS"] =
     version >= 324 ? "--no-sentry --no-analytics" : "";
   console.log(`${isOneClickInstall} | ${version}`);
-  if (!isOneClickInstall) {
-    // Use system defaults if user does not have one-click CLI
-    CLI_EXEC_PATH = "";
-    TOOLCHAIN = "LOCAL";
-    return;
-  }
 
   PATH_SEP = getOperatingSystem() === "windows" ? ";" : ":";
 
@@ -341,7 +349,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 }
 
 async function verifyCli() {
-  var command = `pros c ls-templates --machine-output ${process.env["VSCODE FLAGS"]}`;
+  var command = `pros c ls-templates --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     timeout: 30000,
     env: {
@@ -357,7 +365,7 @@ async function verifyCli() {
 }
 
 async function verifyToolchain() {
-  let toolchainPath = getChildProcessProsToolchainPath();
+  let toolchainPath = getChildProcessProsToolchainPath()??'';
   if (!toolchainPath) {
     return false;
   }
@@ -368,7 +376,7 @@ async function verifyToolchain() {
     "arm-none-eabi-g++"
   )}" --version`;
 
-  const { stdout, stderr } = await promisify(child_process.exec)(command, {
+  const { stdout, stderr } = await promisify(child_process.exec)("arm-none-eabi-g++ --version", {
     timeout: 5000,
     env: {
       ...process.env,

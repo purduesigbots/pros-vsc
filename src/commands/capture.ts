@@ -46,7 +46,7 @@ const runCapture = async (output: string) => {
     async (progress, token) => {
       try {
         // Command to run to clean project
-        var command = `pros v5 capture ${output} --force ${process.env["VSCODE FLAGS"]} --machine-output`;
+        var command = `pros v5 capture ${output} --force ${process.env["PROS_VSCODE_FLAGS"]} --machine-output`;
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
           command,

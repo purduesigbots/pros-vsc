@@ -17,7 +17,7 @@ const fetchTarget = async (): Promise<{
   curOkapi: string | undefined;
 }> => {
   // Command to run to fetch the current project that needs to be updated
-  var command = `pros c info-project --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`;
+  var command = `pros c info-project --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
   // console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     env: {
@@ -55,7 +55,7 @@ const fetchServerVersions = async (
   target: string
 ): Promise<{ newKernel: string; newOkapi: string | undefined }> => {
   // Command to run to fetch latest okapi and kernel versions
-  var command = `pros c q --target ${target} --machine-output ${process.env["VSCODE FLAGS"]}`;
+  var command = `pros c q --target ${target} --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
   // console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     env: {
@@ -91,7 +91,7 @@ const fetchServerVersions = async (
  */
 const runUpgrade = async () => {
   // Command to run to upgrade project to a newer version
-  var command = `pros c u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`;
+  var command = `pros c u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
   console.log(command);
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     encoding: "utf8",
