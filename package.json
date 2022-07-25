@@ -21,7 +21,7 @@
     "color": "#D6B872",
     "theme": "dark"
   },
-  "version": "0.4.0",
+  "version": "0.4.1",
   "engines": {
     "vscode": "^1.56.0"
   },
@@ -197,6 +197,16 @@
           "type": "boolean",
           "default": true,
           "description": "Prompt for PROS CLI install on startup."
+        },
+        "pros.OneClick: CliDownloadURL": {
+          "type": "string",
+          "default": "default",
+          "description": "URL to download PROS CLI from. SHOULD NOT BE CHANGED BY MOST USERS!"
+        },
+        "pros.OneClick: ToolchainDownloadURL": {
+          "type": "string",
+          "default": "default",
+          "description": "URL to download PROS Toolchain from. SHOULD NOT BE CHANGED BY MOST USERS!"
         }
       }
     }

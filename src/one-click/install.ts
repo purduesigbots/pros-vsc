@@ -5,13 +5,13 @@ import * as os from "os";
 import { downloadextract, chmod } from "./download";
 import {
   getCurrentVersion,
-  getCliVersion,
+  getCurrentReleaseVersion,
   getInstallPromptTitle,
 } from "./installed";
 import * as fs from "fs";
 import { promisify } from "util";
 import * as child_process from "child_process";
-import { O_RDONLY } from "constants";
+import { URL } from "url";
 import { getChildProcessPath, getIntegratedTerminalPaths, getChildProcessProsToolchainPath } from "./path";
 
 
@@ -77,27 +77,49 @@ export async function uninstall(context: vscode.ExtensionContext) {
   }
 }
 
-async function getUrls(version: number) {
-  var downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-lin-64bit.zip`;
+async function getUrls(cliVersion: number, toolchainVersion: string) {
+  var downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-lin-64bit.zip`;
   var downloadToolchain =
     "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2";
 
   if (getOperatingSystem() === "windows") {
     // Set system, path seperator, and downloads to windows version
-    downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-win-64bit.zip`;
+    downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-win-64bit.zip`;
     downloadToolchain =
-      "https://artprodcus3.artifacts.visualstudio.com/A268c8aad-3bb0-47d2-9a57-cf06a843d2e8/3a3f509b-ad80-4d2a-8bba-174ad5fd1dde/_apis/artifact/cGlwZWxpbmVhcnRpZmFjdDovL3B1cmR1ZS1hY20tc2lnYm90cy9wcm9qZWN0SWQvM2EzZjUwOWItYWQ4MC00ZDJhLThiYmEtMTc0YWQ1ZmQxZGRlL2J1aWxkSWQvMjg4Ni9hcnRpZmFjdE5hbWUvdG9vbGNoYWluLTY0Yml00/content?format=file&subPath=%2Fpros-toolchain-w64-3.0.1-standalone.zip";
+    `https://github.com/purduesigbots/toolchain/releases/download/${toolchainVersion}/pros-toolchain-windows.zip`;
   } else if (getOperatingSystem() === "macos") {
     // Set system, path seperator, and downloads to windows version
-    downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-macos-64bit.zip`;
+    downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-macos-64bit.zip`;
     downloadToolchain =
       "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2";
     os.cpus().some((cpu) => {
       if (cpu.model.includes("Apple M")) {
-        downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${version}/pros_cli-${version}-macos-arm64bit.zip`;
+        downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-macos-arm64bit.zip`;
       }
     });
   }
+
+  const custom_cli = vscode.workspace.getConfiguration("pros").get<string>("OneClick: CliDownloadURL")??"default";
+  const custom_toolchain = vscode.workspace.getConfiguration("pros").get<string>("OneClick: ToolchainDownloadURL")??"default";
+
+  try {
+    const cliurl = new URL(custom_cli);
+    downloadCli = custom_cli === "default" ? downloadCli : custom_cli;
+  } catch(e: any) {
+    console.log(e);
+    console.log("CLI Url specified in PROS extension settings was invalid. Using default instead");
+  }
+
+  try {
+    const toolchainurl = new URL(custom_toolchain);
+    downloadToolchain = custom_toolchain === "default" ? downloadToolchain : custom_toolchain;
+  } catch(e: any) {
+    console.log(e);
+    console.log("Toolchain Url specified in PROS extension settings was invalid. Using default instead");
+  }
+  
+
+
 
   return [downloadCli, downloadToolchain];
 }
@@ -105,14 +127,17 @@ async function getUrls(version: number) {
 export async function install(context: vscode.ExtensionContext) {
   const globalPath = context.globalStorageUri.fsPath;
   const system = getOperatingSystem();
-  var version = await getCliVersion(
+  var cliVersion = await getCurrentReleaseVersion(
     "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
   );
-  console.log("Latest Available CLI Version: " + version);
+  const toolchainVersion = await getCurrentReleaseVersion(
+    "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
+  )
+  console.log("Latest Available CLI Version: " + cliVersion);
 
   // Get system type, path string separator, CLI download url, and toolchain download url.
   // Default variables are based on linux.
-  let [downloadCli, downloadToolchain] = await getUrls(version);
+  let [downloadCli, downloadToolchain] = await getUrls(cliVersion, toolchainVersion);
   // Set the installed file names
   var cliName = `pros-cli-${system}.zip`;
   // Title of prompt depending on user's installed CLI
@@ -127,8 +152,8 @@ export async function install(context: vscode.ExtensionContext) {
     system === "windows" ? `${system}.zip` : `${system}.tar.bz2`
   }`;
   // Does the user's CLI have an update or does the user need to install/update
-  const cliVersion = title.includes("up to date") ? "UTD" : null;
-  if (cliVersion === null) {
+  const cliUpToDate = title.includes("up to date") ? "UTD" : null;
+  if (cliUpToDate === null) {
     // Ask user to install CLI if it is not installed.
     const labelResponse = await vscode.window.showInformationMessage(
       title,
@@ -211,10 +236,14 @@ export async function updateCLI(
   } catch (err) {
     console.log(err);
   }
-  var version = await getCliVersion(
+  var cliVersion = await getCurrentReleaseVersion(
     "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
   );
-  let [downloadCli, downloadToolchain] = await getUrls(version);
+  const toolchainVersion = await getCurrentReleaseVersion(
+    "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
+  )
+
+  let [downloadCli, downloadToolchain] = await getUrls(cliVersion, toolchainVersion);
   // Set the installed file names
   var cliName = `pros-cli-${system}.zip`;
   // Title of prompt depending on user's installed CLI
@@ -251,17 +280,18 @@ export async function cleanup(
         await configurePaths(context);
 
         // Ensure that toolchain and cli are working
-        const cliSuccess = await verifyCli();
-        const toolchainSuccess = await verifyToolchain();
+        let cliSuccess = await verifyCli().catch((err) => {})??false;
+        let toolchainSuccess = await verifyToolchain().catch((err) => {console.log(err);})??false;
         if (cliSuccess && toolchainSuccess) {
           vscode.window.showInformationMessage(
             "CLI and Toolchain are working!"
           );
         } else {
           vscode.window.showErrorMessage(
-            `${cliSuccess ? "" : "CLI"} ${
-              !cliSuccess && !toolchainSuccess ? "" : "and"
-            } ${toolchainSuccess ? "" : "Toolchain"} Installation Failed!`
+            `${cliSuccess ? "" : "CLI"} 
+            ${!cliSuccess && !toolchainSuccess ? " and " : ""} 
+            ${toolchainSuccess ? "" : "Toolchain"} 
+            Installation Failed!`
           );
           vscode.window.showInformationMessage(
             `Please try installing again! If this problem persists, consider trying an alternative install method: https://pros.cs.purdue.edu/v5/getting-started/${system}.html`
@@ -297,26 +327,20 @@ export async function configurePaths(context: vscode.ExtensionContext) {
       "pros"
     )
   );
-  process.env["VSCODE FLAGS"] =
+  process.env["PROS_VSCODE_FLAGS"] =
     version >= 324 ? "--no-sentry --no-analytics" : "";
   console.log(`${isOneClickInstall} | ${version}`);
-  if (!isOneClickInstall) {
-    // Use system defaults if user does not have one-click CLI
-    CLI_EXEC_PATH = "";
-    TOOLCHAIN = "LOCAL";
-    return;
-  }
 
   PATH_SEP = getOperatingSystem() === "windows" ? ";" : ":";
 
-  TOOLCHAIN = toolchainPath;
+  TOOLCHAIN = isOneClickInstall?toolchainPath:(process.env["PROS_TOOLCHAIN"] ?? "");
   // Set CLI environmental variable file location
   CLI_EXEC_PATH = cliExecPath;
 
   // Prepend CLI and TOOLCHAIN to path
-  process.env["PATH"] = `${
+  process.env["PATH"] = `${PATH_SEP}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}${
     process.env["PATH"]
-  }${PATH_SEP}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}`;
+  }`;
 
   // Make PROS_TOOCLHAIN variable
   process.env["PROS_TOOLCHAIN"] = `${TOOLCHAIN}`;
@@ -325,7 +349,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 }
 
 async function verifyCli() {
-  var command = `pros c ls-templates --machine-output ${process.env["VSCODE FLAGS"]}`;
+  var command = `pros c --help --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     timeout: 30000,
     env: {
@@ -337,11 +361,11 @@ async function verifyCli() {
     console.log(stderr);
   }
   console.log(stdout);
-  return stdout.includes(`'kernel', 'version': '3.5.4'`);
+  return stdout.includes(`Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version:`);
 }
 
 async function verifyToolchain() {
-  let toolchainPath = getChildProcessProsToolchainPath();
+  let toolchainPath = getChildProcessProsToolchainPath()??'';
   if (!toolchainPath) {
     return false;
   }
@@ -352,7 +376,7 @@ async function verifyToolchain() {
     "arm-none-eabi-g++"
   )}" --version`;
 
-  const { stdout, stderr } = await promisify(child_process.exec)(command, {
+  const { stdout, stderr } = await promisify(child_process.exec)("arm-none-eabi-g++ --version", {
     timeout: 5000,
     env: {
       ...process.env,
@@ -362,5 +386,5 @@ async function verifyToolchain() {
   if (stderr) {
     console.log(stderr);
   }
-  return stdout.startsWith(`arm-none-eabi-g++ (GNU Arm Embedded Toolchain`);
+  return stdout.replace(".exe","").startsWith(`arm-none-eabi-g++ (G`);
 }

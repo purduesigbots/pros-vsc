@@ -23,7 +23,7 @@ const runBuild = async () => {
     async (progress, token) => {
       try {
         // Command to run to build project
-        var command = `pros make --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["VSCODE FLAGS"]}`;
+        var command = `pros make --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
         console.log(command);
         console.log(process.env["PATH"]);
         const { stdout, stderr } = await promisify(child_process.exec)(

@@ -29,7 +29,6 @@ async function download(
     async (progress, token) => {
       var out: fs.WriteStream;
       token.onCancellationRequested(() => {
-        console.log("User canceled the long running operation");
         out!.destroy();
       });
       // Fetch the file to download
@@ -44,12 +43,10 @@ async function download(
       response.body.on("data", (chunk: Buffer) => {
         progress.report({ increment: chunk.length * 100 / total_size });
       });
-      console.log("Write stream created")
       // Write file contents to "sigbots.pros/download/filename.tar.bz2"
       out = fs.createWriteStream(
         path.join(globalPath, "download", storagePath)
       );
-      console.log("Start stream pipeline");
       await promisify(stream.pipeline)(response.body, out).catch((e) => {
         // Clean up the partial file if the download failed.
         fs.unlink(
@@ -59,11 +56,9 @@ async function download(
         console.log(e);
         throw e;
       });
-      console.log("Finished downloading")
 
     }
   );
-  console.log("returning bz2 status");
   return bz2;
 }
 
@@ -91,12 +86,11 @@ export async function extract(
 
       if (bz2) {
         // Read the contents of the bz2 file
-        console.log("Extracting bz2 file");
         var compressedData = await fs.promises.readFile(
           path.join(globalPath, "download", storagePath)
         );
 
-        console.log("Decoding bz2");
+
         // Decrypt the bz2 file contents.
         let decompressedData;
         try {
@@ -104,18 +98,16 @@ export async function extract(
         } catch(e: any) {
           console.log(e);
           vscode.window.showErrorMessage("An error occured while decoding the toolchain");
-          console.log("Decoding failed");
         }
 
-        console.log("Bz2 decoded");
+
         storagePath = storagePath.replace(".bz2", "");
         await fs.promises.writeFile(
           path.join(globalPath, "download", storagePath),
           decompressedData
         );
-        console.log("Completed extraction of bz2 file");
         // Write contents of the decrypted bz2 into "sigbots.pros/download/filename.tar"
-        console.log("Extracting tar file");
+
 
         await new Promise(function(resolve, reject) {
           // Create our read stream
@@ -166,24 +158,21 @@ export async function extract(
         
       } // if bz2
       else {
-        console.log("start extraction");
         let readPath = path.join(globalPath, "download", storagePath);
         storagePath = storagePath.replace(".zip","");
         let writePath = path.join(globalPath, "install", storagePath);
 
         // Extract the contents of the zip file
         await fs.createReadStream(readPath).pipe(unzipper.Extract({ path: writePath})).promise();
-        console.log("Start file moving");
         if (storagePath.includes("pros-toolchain-windows")) {
           
           // create tmp folder
-          console.log("Create tmp folder");
           await fs.promises.mkdir(
             path.join(globalPath, "install", "pros-toolchain-windows", "tmp")
             );
           
           // extract contents of gcc-arm-none-eabi-version folder
-          console.log("began reading usr");
+
           const files = await fs.promises.readdir(
             path.join(globalPath, "install", "pros-toolchain-windows", "usr")
           );
