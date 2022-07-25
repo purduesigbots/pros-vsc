@@ -333,7 +333,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 
   PATH_SEP = getOperatingSystem() === "windows" ? ";" : ":";
 
-  TOOLCHAIN = toolchainPath;
+  TOOLCHAIN = isOneClickInstall?toolchainPath:(process.env["PROS_TOOLCHAIN"] ?? "");
   // Set CLI environmental variable file location
   CLI_EXEC_PATH = cliExecPath;
 
