@@ -3,7 +3,7 @@ import { promisify } from "util";
 import { getChildProcessPath } from "./path";
 var fetch = require("node-fetch");
 
-export async function getCliVersion(url: string) {
+export async function getCurrentReleaseVersion(url: string) {
   // Fetch the url
   const response = await fetch(url);
   if (!response.ok) {
@@ -11,7 +11,8 @@ export async function getCliVersion(url: string) {
     throw new Error(`Can't fetch release: ${response.statusText}`);
   }
   // Get the version number from the returned json
-  var vString = (await response.json()).tag_name;
+  const json = await response.json();
+  var vString = json.tag_name;
   return vString;
 }
 
@@ -55,7 +56,7 @@ export async function getCurrentVersion(oneClickPath: string) {
 
 export async function getInstallPromptTitle(oneClickPath: string) {
   const recent = +(
-    await getCliVersion(
+    await getCurrentReleaseVersion(
       "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
     )
   ).replace(/\./gi, "");
