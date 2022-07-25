@@ -30,6 +30,7 @@ const runBuildUpload = async () => {
               ...process.env,
               PATH: getChildProcessPath(),
             },
+            maxBuffer: 1024 * 1024 * 50
           }
         );
         await vscode.window.showInformationMessage("Project Built!");
