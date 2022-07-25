@@ -338,9 +338,9 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   CLI_EXEC_PATH = cliExecPath;
 
   // Prepend CLI and TOOLCHAIN to path
-  process.env["PATH"] = `${
+  process.env["PATH"] = `${PATH_SEP}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}${
     process.env["PATH"]
-  }${PATH_SEP}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}`;
+  }`;
 
   // Make PROS_TOOCLHAIN variable
   process.env["PROS_TOOLCHAIN"] = `${TOOLCHAIN}`;
@@ -349,7 +349,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 }
 
 async function verifyCli() {
-  var command = `pros c ls-templates --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
+  var command = `pros c --help --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     timeout: 30000,
     env: {
@@ -361,7 +361,7 @@ async function verifyCli() {
     console.log(stderr);
   }
   console.log(stdout);
-  return stdout.includes(`'kernel', 'version': '3.5.4'`);
+  return stdout.includes(`Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version:`);
 }
 
 async function verifyToolchain() {
@@ -386,5 +386,5 @@ async function verifyToolchain() {
   if (stderr) {
     console.log(stderr);
   }
-  return stdout.replace(".exe","").startsWith(`arm-none-eabi-g++ (GNU Arm Embedded Toolchain`);
+  return stdout.replace(".exe","").startsWith(`arm-none-eabi-g++ (G`);
 }
