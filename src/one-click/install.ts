@@ -309,13 +309,6 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   const [cliExecPath, toolchainPath] = getIntegratedTerminalPaths(context);
 
   // return if the path is already configured
-  if (
-    process.env["PATH"]?.includes(cliExecPath) &&
-    process.env["PROS_TOOLCHAIN"]?.includes(toolchainPath)
-  ) {
-    console.log("path already configured");
-    return;
-  }
 
   const addQuotes = !(
     getOperatingSystem() === "macos" && !os.cpus()[0].model.includes("Apple M")
@@ -337,10 +330,15 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   // Set CLI environmental variable file location
   CLI_EXEC_PATH = cliExecPath;
 
+  if (
+    process.env["PATH"]?.includes(cliExecPath) &&
+    process.env["PROS_TOOLCHAIN"]?.includes(TOOLCHAIN)
+  ) {
+    console.log("path already configured");
+    return;
+  }
   // Prepend CLI and TOOLCHAIN to path
-  process.env["PATH"] = `${PATH_SEP}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}${
-    process.env["PATH"]
-  }`;
+  process.env["PATH"] = `${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}${PATH_SEP}${process.env["PATH"]}`;
 
   // Make PROS_TOOCLHAIN variable
   process.env["PROS_TOOLCHAIN"] = `${TOOLCHAIN}`;
