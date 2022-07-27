@@ -2,6 +2,16 @@
 
 Below are our release notes with their release dates corresponding to each version.
 
+## [0.4.2] - 2022-07-27 - Beta Version
+### Added
+- Fix PATH separator issue
+
+## [0.4.1] - 2022-07-24 - Beta Version
+### Added
+- Resolve windows toolchain issues
+- Add support for custom toolchain and cli downoad URLs
+- Add 50MB max buffer for build&upload command.
+
 ## [0.4.0] - 2022-06-15 - Beta Version
 ### Added
 - Added One-Click 2.0 which brings stability and major bug fixes to One-Click.
