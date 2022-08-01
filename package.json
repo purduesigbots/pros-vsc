@@ -16,6 +16,7 @@
     "url": "https://github.com/purduesigbots/pros-vsc.git"
   },
   "homepage": "http://pros.cs.purdue.edu",
+  "keywords": ["vex", "v5", "pros", "education", "outreach", "robotics", "vrc", "cortex", "code", "autonomous", "opcontrol"],
   "icon": "media/pros-tux-white.png",
   "galleryBanner": {
     "color": "#D6B872",
