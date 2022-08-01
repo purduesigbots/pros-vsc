@@ -76,7 +76,7 @@ export function activate(context: vscode.ExtensionContext) {
       "pros.isPROSProject",
       isProsProject
     );
-
+    //This checks if user is currently working on a project, if not it allows user to select one
     if (isProsProject) {
       getProsTerminal(context).then((terminal) => {
        terminal.sendText("pros build-compile-commands");
@@ -381,7 +381,7 @@ async function workspaceContainsProjectPros(): Promise<boolean> {
   }
   return exists;
 }
-
+//This code calls prosProjects and allows user to choose which pros project to work on
 async function chooseProject(){
   if (
     vscode.workspace.workspaceFolders === undefined ||
@@ -397,30 +397,38 @@ async function chooseProject(){
   }
   const targetOptions: vscode.QuickPickOptions = {
     placeHolder: array[0].name,
-    title: "Select the target folder",
+    title: "Select the PROS project to work on",
   };
   var folderNames :Array<vscode.QuickPickItem>= [];
   //Specify type for any
   for(const f of array)
   {
-    folderNames.push({label: f[0], description: 'pros projects'});
+    folderNames.push({label: f[0], description: ''});
   }
   console.log(folderNames);
+  
   const target = await vscode.window.showQuickPick(
     folderNames,
     targetOptions
   );
+  while(!target)
+  {
+    const target = await vscode.window.showQuickPick(
+      folderNames,
+      targetOptions
+    );
   if (target === undefined) {
     throw new Error();
   }
+  //This will open the folder the user selects
   await vscode.commands.executeCommand(
     "vscode.openFolder",
     vscode.Uri.file(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath,target.label))
   );
-  
+  }
 }
 
-
+//This function will return an array full of folder names containing pros project file
 async function prosProjects(){
   //Specify type for any later
   var array :any = [];
