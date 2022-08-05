@@ -1,9 +1,9 @@
 ---
 name: Bug Report template
 about: Default template for bug reports
-title: "\U0001F41B"
+title: "🐛"
 labels: ''
-assignees: BennyBot
+assignees: ''
 
 ---
 
