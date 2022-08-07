@@ -126,7 +126,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   vscode.commands.registerCommand("pros.clean", clean);
-
+  vscode.commands.registerCommand("pros.selectProject", chooseProject);
   vscode.commands.registerCommand("pros.terminal", async () => {
     analytics.sendAction("serialterminal");
     try {
@@ -393,6 +393,7 @@ async function chooseProject(){
   var array = await prosProjects();
   if(array.length === 0)
   {
+    vscode.window.showInformationMessage("No PROS Projects found in current directory!");
     return;
   }
   const targetOptions: vscode.QuickPickOptions = {
@@ -405,18 +406,13 @@ async function chooseProject(){
   {
     folderNames.push({label: f[0], description: ''});
   }
-  console.log(folderNames);
+  //console.log(folderNames);
   
+  // Display the options to users
   const target = await vscode.window.showQuickPick(
     folderNames,
     targetOptions
   );
-  while(!target)
-  {
-    const target = await vscode.window.showQuickPick(
-      folderNames,
-      targetOptions
-    );
   if (target === undefined) {
     throw new Error();
   }
@@ -425,7 +421,7 @@ async function chooseProject(){
     "vscode.openFolder",
     vscode.Uri.file(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath,target.label))
   );
-  }
+
 }
 
 //This function will return an array full of folder names containing pros project file

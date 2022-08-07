@@ -34,7 +34,7 @@
     "onCommand:pros.welcome",
     "onCommand:pros.build&upload",
     "onView:prosTreeview",
-    "onCommand:vscode.openFolder"
+    "onCommand:pros.selectProject"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -119,8 +119,8 @@
         "title": "PROS: Verify PROS Installation"
       },
       {
-        "command": "vscode.openFolder",
-        "title": "Open The Folder Back Up"
+        "command": "pros.selectProject",
+        "title": "PROS: Select PROS Project"
       }
     ],
     "menus": {
@@ -173,8 +173,8 @@
           "command": "pros.install"
         },
         {
-          "when": "",
-          "command": "vscode.openFolder"
+          "when": "true",
+          "command": "pros.selectProject"
         }
       ]
     },
