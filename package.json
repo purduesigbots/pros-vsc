@@ -34,7 +34,8 @@
     "onCommand:pros.new",
     "onCommand:pros.welcome",
     "onCommand:pros.build&upload",
-    "onView:prosTreeview"
+    "onView:prosTreeview",
+    "onCommand:pros.selectProject"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -117,6 +118,10 @@
       {
         "command": "pros.verify",
         "title": "PROS: Verify PROS Installation"
+      },
+      {
+        "command": "pros.selectProject",
+        "title": "PROS: Select PROS Project"
       }
     ],
     "menus": {
@@ -167,6 +172,10 @@
         {
           "when": "pros.isPROSProject",
           "command": "pros.install"
+        },
+        {
+          "when": "true",
+          "command": "pros.selectProject"
         }
       ]
     },
