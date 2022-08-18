@@ -23,7 +23,7 @@ import {
   install,
   configurePaths,
   uninstall,
-  updateCLI,
+  //updateCLI,
   cleanup
 } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
@@ -104,7 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
   vscode.commands.registerCommand("pros.updatecli", async () => {
     analytics.sendAction("updatecli");
-    await updateCLI(context);
+    //await updateCLI(context);
   });
   vscode.commands.registerCommand("pros.verify", async () => {
     analytics.sendAction("verify");

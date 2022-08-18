@@ -101,23 +101,26 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
 
   const custom_cli = vscode.workspace.getConfiguration("pros").get<string>("OneClick: CliDownloadURL")??"default";
   const custom_toolchain = vscode.workspace.getConfiguration("pros").get<string>("OneClick: ToolchainDownloadURL")??"default";
-
-  try {
-    const cliurl = new URL(custom_cli);
-    downloadCli = custom_cli === "default" ? downloadCli : custom_cli;
-  } catch(e: any) {
-    console.log(e);
-    console.log("CLI Url specified in PROS extension settings was invalid. Using default instead");
+  console.log(`Custom URLS: ${custom_cli} | ${custom_toolchain}`);
+  if(custom_cli !== "default"){
+    try {
+      const cliurl = new URL(custom_cli);
+      downloadCli = custom_cli === "default" ? downloadCli : custom_cli;
+    } catch(e: any) {
+      console.log(e);
+      console.log("CLI Url specified in PROS extension settings was invalid. Using default instead");
+    }
   }
 
-  try {
-    const toolchainurl = new URL(custom_toolchain);
-    downloadToolchain = custom_toolchain === "default" ? downloadToolchain : custom_toolchain;
-  } catch(e: any) {
-    console.log(e);
-    console.log("Toolchain Url specified in PROS extension settings was invalid. Using default instead");
+  if(custom_toolchain !== "default"){
+    try {
+      const toolchainurl = new URL(custom_toolchain);
+      downloadToolchain = custom_toolchain === "default" ? downloadToolchain : custom_toolchain;
+    } catch(e: any) {
+      console.log(e);
+      console.log("Toolchain Url specified in PROS extension settings was invalid. Using default instead");
+    }
   }
-  
 
 
 
@@ -125,11 +128,12 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
 }
 
 export async function install(context: vscode.ExtensionContext) {
+  await configurePaths(context);
   const globalPath = context.globalStorageUri.fsPath;
   const system = getOperatingSystem();
-  var cliVersion = await getCurrentReleaseVersion(
+  var cliVersion = +(await getCurrentReleaseVersion(
     "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
-  );
+  ));
   const toolchainVersion = await getCurrentReleaseVersion(
     "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
   )
@@ -145,60 +149,108 @@ export async function install(context: vscode.ExtensionContext) {
     path.join(
       `"${path.join(globalPath, "install", `pros-cli-${system}`)}"`,
       "pros"
-    )
+    ), cliVersion
   );
+  console.log(title);
+  // Verify that the CLI and toolchain are working before prompting user to install.
+  const cliWorking = await verifyCli().catch((err) => {console.log(err)})??false;
+  const toolchainWorking = await verifyToolchain().catch((err) => {console.log(err)})??false;
+
+  console.log("CLI Working: " + cliWorking);
+  console.log("Toolchain Working: " + toolchainWorking);
   // Name of toolchain download depending on system
   var toolchainName = `pros-toolchain-${
     system === "windows" ? `${system}.zip` : `${system}.tar.bz2`
   }`;
+
   // Does the user's CLI have an update or does the user need to install/update
-  const cliUpToDate = title.includes("up to date") ? "UTD" : null;
-  if (cliUpToDate === null) {
-    // Ask user to install CLI if it is not installed.
+  const cliUpToDate = title.includes("up to date") ? true : false;
+
+  // Last step for this that is unknown is determining if the toolchain is up to date or not.
+  // I think that toolchain upates are rare enough where it's not worth the effort to check.
+  
+
+  let promises: Promise<any>[] = [];
+
+  //if everything works and cli is up to date, do nothing
+  if (cliWorking && toolchainWorking && cliUpToDate) {
+    // tell the user that everything is up to date
+    vscode.window.showInformationMessage(
+      "CLI and Toolchain currently working and up to date."
+    );
+    return;
+  }
+
+  // if CLI is up to date but toolchain is not working, install just the toolchain
+  else if (cliUpToDate && cliWorking && !toolchainWorking) {
+    const prompttitle = "PROS Toolchain is not working. Install now?";
     const labelResponse = await vscode.window.showInformationMessage(
-      title,
-      "Install it now!",
+      prompttitle,
+      "Install Now!",
       "No Thanks."
     );
+    if (labelResponse === "Install Now!") {
+      promises = [downloadextract(context, downloadToolchain, toolchainName)];
+    } else {
+      return;
+    }
+    // if the toolchain is working but the cli is not working or out of date, install just the cli
 
-    if (labelResponse === "Install it now!") {
-      // Install CLI if user chooses to.
+  } else if (toolchainWorking && !(cliWorking && cliUpToDate)) {
+    const prompttitle = `PROS CLI is ${cliWorking ? "out of date. Update" : "not working. Install"} now?`;
+    const option1 = `${cliWorking ? "Update" : "Install"} Now!`;
+    const labelResponse = await vscode.window.showInformationMessage(
+      prompttitle,
+      option1,
+      "No Thanks."
+    );
+    if (labelResponse === option1) {
+      promises = [downloadextract(context, downloadCli, cliName)];
+    } else {
+      return;
+    }
 
-      //delete the directory
+  // if neither the cli or toolchain is working
+  } else if (!cliWorking && !toolchainWorking) {
+    const prompttitle = "PROS CLI and Toolchain are not working. Install now?";
+    const labelResponse = await vscode.window.showInformationMessage(
+      prompttitle,
+      "Install Now!",
+      "No Thanks."
 
-      try {
-        await removeDirAsync(context.globalStorageUri.fsPath, false);
-      } catch (err) {
-        console.log(err);
-      }
-      //add install and download directories
-      const dirs = await createDirs(context.globalStorageUri.fsPath);
-
-      const promises = [
+    );
+    if (labelResponse === "Install Now!") {
+      promises = [
         downloadextract(context, downloadCli, cliName),
         downloadextract(context, downloadToolchain, toolchainName),
       ];
-
-      await Promise.all(promises);
-      await cleanup(context, system);
-
-      vscode.workspace
-        .getConfiguration("pros")
-        .update("showInstallOnStartup", false);
     } else {
-      vscode.workspace
-        .getConfiguration("pros")
-        .update("showInstallOnStartup", false);
+      return;
     }
-  } else {
-    // User already has the CLI installed
-    vscode.window.showInformationMessage(title);
-    vscode.workspace
-      .getConfiguration("pros")
-      .update("showInstallOnStartup", false);
   }
+
+  try {
+    await removeDirAsync(context.globalStorageUri.fsPath, false);
+  } catch (err) {
+    console.log(err);
+  }
+  //add install and download directories
+  const dirs = await createDirs(context.globalStorageUri.fsPath);
+
+  await Promise.all(promises);
+  await cleanup(context, system);
+
+
+
+  // Do we want to auto disable install on startup? This will remove the auto update portion of the extension right?
+  /*
+  vscode.workspace
+    .getConfiguration("pros")
+    .update("showInstallOnStartup", false);
+    */
 }
 
+/*
 export async function updateCLI(
   context: vscode.ExtensionContext,
   force = false
@@ -250,7 +302,7 @@ export async function updateCLI(
   await downloadextract(context, downloadCli, cliName);
   await cleanup(context, system);
 }
-
+*/
 async function createDirs(storagePath: string) {
   // Create the download and install subdirectories
   const install = path.join(storagePath, "install");
@@ -326,7 +378,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 
   PATH_SEP = getOperatingSystem() === "windows" ? ";" : ":";
 
-  TOOLCHAIN = isOneClickInstall?toolchainPath:(process.env["PROS_TOOLCHAIN"] ?? "");
+  TOOLCHAIN = process.env["PROS_TOOLCHAIN"] ?? toolchainPath;
   // Set CLI environmental variable file location
   CLI_EXEC_PATH = cliExecPath;
 
