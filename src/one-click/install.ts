@@ -291,6 +291,7 @@ export async function cleanup(
   system: string = getOperatingSystem()
 ) {
   const globalPath = context.globalStorageUri.fsPath;
+  await removeDirAsync(path.join(globalPath, 'download'), false);
   await configurePaths(context);
   await vscode.window.withProgress(
     {
