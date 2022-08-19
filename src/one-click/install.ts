@@ -33,7 +33,17 @@ export const getOperatingSystem = () => {
 export async function removeDirAsync(directory: string, begin: boolean) {
   // get all files in directory
   if (begin) {
-    vscode.window.showInformationMessage("Clearing directory");
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title:
+          "Cleaning Directory",
+        cancellable: false,
+      },
+      async (progress, token) => {
+        await removeDirAsync(directory, false);
+      }
+    );
   }
   const files = await fs.promises.readdir(directory);
   if (files.length > 0) {
@@ -107,7 +117,7 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
       const cliurl = new URL(custom_cli);
       downloadCli = custom_cli === "default" ? downloadCli : custom_cli;
     } catch(e: any) {
-      console.log(e);
+      //console.log(e);
       console.log("CLI Url specified in PROS extension settings was invalid. Using default instead");
     }
   }
@@ -117,7 +127,7 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
       const toolchainurl = new URL(custom_toolchain);
       downloadToolchain = custom_toolchain === "default" ? downloadToolchain : custom_toolchain;
     } catch(e: any) {
-      console.log(e);
+      //console.log(e);
       console.log("Toolchain Url specified in PROS extension settings was invalid. Using default instead");
     }
   }
@@ -131,13 +141,15 @@ export async function install(context: vscode.ExtensionContext) {
   await configurePaths(context);
   const globalPath = context.globalStorageUri.fsPath;
   const system = getOperatingSystem();
-  var cliVersion = +(await getCurrentReleaseVersion(
+  var cliVersion = (await getCurrentReleaseVersion(
     "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
   ));
+  console.log(cliVersion);
+  let release_version_number = +cliVersion.replace(/\./gi,'') ?? 0;
   const toolchainVersion = await getCurrentReleaseVersion(
     "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
   )
-  console.log("Latest Available CLI Version: " + cliVersion);
+  console.log("Latest Available CLI Version: " + release_version_number);
 
   // Get system type, path string separator, CLI download url, and toolchain download url.
   // Default variables are based on linux.
@@ -149,7 +161,7 @@ export async function install(context: vscode.ExtensionContext) {
     path.join(
       `"${path.join(globalPath, "install", `pros-cli-${system}`)}"`,
       "pros"
-    ), cliVersion
+    ), release_version_number ?? 0
   );
   console.log(title);
   // Verify that the CLI and toolchain are working before prompting user to install.
@@ -171,6 +183,8 @@ export async function install(context: vscode.ExtensionContext) {
   
 
   let promises: Promise<any>[] = [];
+  let targeted_portion: string = "";
+
 
   //if everything works and cli is up to date, do nothing
   if (cliWorking && toolchainWorking && cliUpToDate) {
@@ -190,6 +204,11 @@ export async function install(context: vscode.ExtensionContext) {
       "No Thanks."
     );
     if (labelResponse === "Install Now!") {
+      targeted_portion = path.join("install", `pros-toolchain-${system}`);
+      let delete_dir = path.join(context.globalStorageUri.fsPath, targeted_portion)
+      console.log("removing directory " + delete_dir);
+      await removeDirAsync(delete_dir, true).catch((e) => {console.log(e);});
+
       promises = [downloadextract(context, downloadToolchain, toolchainName)];
     } else {
       return;
@@ -205,6 +224,11 @@ export async function install(context: vscode.ExtensionContext) {
       "No Thanks."
     );
     if (labelResponse === option1) {
+      targeted_portion = path.join("install", `pros-cli-${system}}`);
+      let delete_dir = path.join(context.globalStorageUri.fsPath, targeted_portion)
+      console.log("removing directory " + delete_dir);
+      await removeDirAsync(delete_dir, true).catch((e) => {console.log(e);});
+
       promises = [downloadextract(context, downloadCli, cliName)];
     } else {
       return;
@@ -220,6 +244,7 @@ export async function install(context: vscode.ExtensionContext) {
 
     );
     if (labelResponse === "Install Now!") {
+      await removeDirAsync(context.globalStorageUri.fsPath, true).catch((e) => {console.log(e);});
       promises = [
         downloadextract(context, downloadCli, cliName),
         downloadextract(context, downloadToolchain, toolchainName),
@@ -229,11 +254,11 @@ export async function install(context: vscode.ExtensionContext) {
     }
   }
 
-  try {
-    await removeDirAsync(context.globalStorageUri.fsPath, false);
-  } catch (err) {
-    console.log(err);
-  }
+
+  let delete_dir = path.join(context.globalStorageUri.fsPath, targeted_portion)
+  console.log("removing directory " + delete_dir);
+
+  await removeDirAsync(delete_dir, false).catch((e) => {console.log(e);});
   //add install and download directories
   const dirs = await createDirs(context.globalStorageUri.fsPath);
 
@@ -250,59 +275,6 @@ export async function install(context: vscode.ExtensionContext) {
     */
 }
 
-/*
-export async function updateCLI(
-  context: vscode.ExtensionContext,
-  force = false
-) {
-  const globalPath = context.globalStorageUri.fsPath;
-  const system = getOperatingSystem();
-
-  if (!force) {
-    var title = await getInstallPromptTitle(
-      path.join(globalPath, "install", `pros-cli-${system}`, "pros")
-    );
-    if (title.includes("up to date")) {
-      vscode.window.showInformationMessage(title);
-      return;
-    }
-    if (title.includes("not")) {
-      await install(context);
-      return;
-    }
-    const labelResponse = await vscode.window.showInformationMessage(
-      title,
-      "Update Now!",
-      "No Thanks."
-    );
-
-    if (labelResponse?.toLowerCase().includes("no thanks")) {
-      return;
-    }
-  }
-  try {
-    await removeDirAsync(
-      path.join(globalPath, "install", `pros-cli-${system}`),
-      false
-    );
-  } catch (err) {
-    console.log(err);
-  }
-  var cliVersion = await getCurrentReleaseVersion(
-    "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
-  );
-  const toolchainVersion = await getCurrentReleaseVersion(
-    "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
-  )
-
-  let [downloadCli, downloadToolchain] = await getUrls(cliVersion, toolchainVersion);
-  // Set the installed file names
-  var cliName = `pros-cli-${system}.zip`;
-  // Title of prompt depending on user's installed CLI
-  await downloadextract(context, downloadCli, cliName);
-  await cleanup(context, system);
-}
-*/
 async function createDirs(storagePath: string) {
   // Create the download and install subdirectories
   const install = path.join(storagePath, "install");
@@ -410,7 +382,7 @@ async function verifyCli() {
   if (stderr) {
     console.log(stderr);
   }
-  console.log(stdout);
+  //console.log(stdout);
   return stdout.includes(`Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version:`);
 }
 
