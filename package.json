@@ -255,5 +255,8 @@
     "tar-fs": "^2.1.1",
     "universal-analytics": "^0.4.23",
     "unzipper": "^0.10.11"
-  }
+  },
+  "extensionDependencies": [
+    "llvm-vs-code-extensions.vscode-clangd"
+  ]
 }
