@@ -27,6 +27,7 @@ import {
   cleanup
 } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
+import { Logger } from "./logger";
 let analytics: Analytics;
 
 export var system: string;
@@ -66,6 +67,9 @@ export const getProsTerminal = async (
 };
 
 export function activate(context: vscode.ExtensionContext) {
+
+  let OneClickLogger = new Logger(context, "OneClick.log", true);
+
   analytics = new Analytics(context);
 
   configurePaths(context);
