@@ -13,7 +13,7 @@ import { promisify } from "util";
 import * as child_process from "child_process";
 import { URL } from "url";
 import { getChildProcessPath, getIntegratedTerminalPaths, getChildProcessProsToolchainPath } from "./path";
-
+import { OneClickLogger } from "../extension";
 
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
@@ -138,22 +138,32 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
 }
 
 export async function install(context: vscode.ExtensionContext) {
+  while(!OneClickLogger.ready);
+  await OneClickLogger.log("Configuring Environment Variables for PROS");
   await configurePaths(context);
   const globalPath = context.globalStorageUri.fsPath;
+  await OneClickLogger.log("Fetching Operating System....");
   const system = getOperatingSystem();
+  await OneClickLogger.log(`Operating System Detected: ${system}`);
+
+  await OneClickLogger.log("Fetching Latest CLI Version....");
   var cliVersion = (await getCurrentReleaseVersion(
     "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
   ));
-  console.log(cliVersion);
   let release_version_number = +cliVersion.replace(/\./gi,'') ?? 0;
   const toolchainVersion = await getCurrentReleaseVersion(
     "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
   )
-  console.log("Latest Available CLI Version: " + release_version_number);
+
+  await OneClickLogger.log(`CLI Version: ${cliVersion}`);
 
   // Get system type, path string separator, CLI download url, and toolchain download url.
   // Default variables are based on linux.
+  await OneClickLogger.log("Fetching CLI and Toolchain Download URLs....");
   let [downloadCli, downloadToolchain] = await getUrls(cliVersion, toolchainVersion);
+  await OneClickLogger.log(`CLI Download URL: ${downloadCli}`);
+  await OneClickLogger.log(`Toolchain Download URL: ${downloadToolchain}`);
+
   // Set the installed file names
   var cliName = `pros-cli-${system}.zip`;
   // Title of prompt depending on user's installed CLI
@@ -163,10 +173,14 @@ export async function install(context: vscode.ExtensionContext) {
       "pros"
     ), release_version_number ?? 0
   );
-  console.log(title);
   // Verify that the CLI and toolchain are working before prompting user to install.
+  await OneClickLogger.log("Checking Status of CLI and Toolchain....");
   const cliWorking = await verifyCli().catch((err) => {console.log(err)})??false;
   const toolchainWorking = await verifyToolchain().catch((err) => {console.log(err)})??false;
+  
+  //log the result of cli and toolchain working
+  await OneClickLogger.log(`${cliWorking ? "CLI appears to be functional" : "CLI not functional or not installed"}`, cliWorking ? "INFO" : "WARNING");
+  await OneClickLogger.log(`${toolchainWorking ? "Toolchain appears to be functional" : "Toolchain not functional or not installed"}`, toolchainWorking ? "INFO" : "WARNING");
 
   console.log("CLI Working: " + cliWorking);
   console.log("Toolchain Working: " + toolchainWorking);
@@ -177,7 +191,7 @@ export async function install(context: vscode.ExtensionContext) {
 
   // Does the user's CLI have an update or does the user need to install/update
   const cliUpToDate = title.includes("up to date") ? true : false;
-
+  await OneClickLogger.log(`${cliUpToDate ? "CLI is up to date" : "CLI is not up to date"}`, cliUpToDate ? "INFO" : "WARNING");
   // Last step for this that is unknown is determining if the toolchain is up to date or not.
   // I think that toolchain upates are rare enough where it's not worth the effort to check.
   
@@ -192,6 +206,7 @@ export async function install(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage(
       "CLI and Toolchain currently working and up to date."
     );
+    OneClickLogger.log("CLI and Toolchain currently working and up to date. Nothing else must be done");
     return;
   }
 

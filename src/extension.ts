@@ -32,7 +32,7 @@ let analytics: Analytics;
 
 export var system: string;
 export const output = vscode.window.createOutputChannel("PROS Output");
-
+export var OneClickLogger: Logger;
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
 export const getProsTerminal = async (
@@ -67,9 +67,6 @@ export const getProsTerminal = async (
 };
 
 export function activate(context: vscode.ExtensionContext) {
-
-  let OneClickLogger = new Logger(context, "OneClick.log", true);
-
   analytics = new Analytics(context);
 
   configurePaths(context);
@@ -100,6 +97,13 @@ export function activate(context: vscode.ExtensionContext) {
   }
   vscode.commands.registerCommand("pros.install", async () => {
     analytics.sendAction("install");
+    console.log("clicked install");
+    try {
+    OneClickLogger = new Logger(context, "One_Click_Log");
+    } catch(e:any) {
+      console.log(e);
+    }
+    console.log("OneClickLogger created");
     await install(context);
   });
   vscode.commands.registerCommand("pros.uninstall", async () => {
