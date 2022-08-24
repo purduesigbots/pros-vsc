@@ -112,10 +112,6 @@
         "title": "PROS: Uninstall PROS"
       },
       {
-        "command": "pros.updatecli",
-        "title": "PROS: Update PROS CLI"
-      },
-      {
         "command": "pros.verify",
         "title": "PROS: Verify PROS Installation"
       },

@@ -33,6 +33,7 @@ let analytics: Analytics;
 export var system: string;
 export const output = vscode.window.createOutputChannel("PROS Output");
 export var OneClickLogger: Logger;
+export var SidebarActionLogger: Logger;
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
 export const getProsTerminal = async (
@@ -69,6 +70,7 @@ export const getProsTerminal = async (
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
+  SidebarActionLogger = new Logger(context, "SidebarActions", false);
   configurePaths(context);
 
   workspaceContainsProjectPros().then((isProsProject) => {
@@ -109,10 +111,6 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.uninstall", async () => {
     analytics.sendAction("uninstall");
     await uninstall(context);
-  });
-  vscode.commands.registerCommand("pros.updatecli", async () => {
-    analytics.sendAction("updatecli");
-    //await updateCLI(context);
   });
   vscode.commands.registerCommand("pros.verify", async () => {
     analytics.sendAction("verify");
