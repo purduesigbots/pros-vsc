@@ -19,7 +19,7 @@ export class Logger {
         try {
             fs.statSync(this.logFolder);
         } catch(e:any){
-            fs.mkdirSync(this.logFolder);
+            fs.mkdirSync(this.logFolder, {recursive: true});
         }
 
         console.log(this.file_fullpath);

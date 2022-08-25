@@ -60,6 +60,9 @@ export const getProsTerminal = async (
 
   await configurePaths(context);
 
+  console.log(`CURRENT PATH: ${process.env.PATH}`);
+
+  
 
   return vscode.window.createTerminal({
     name: "PROS Terminal",
