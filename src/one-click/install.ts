@@ -14,7 +14,7 @@ import * as child_process from "child_process";
 import { URL } from "url";
 import { getChildProcessPath, getIntegratedTerminalPaths, getChildProcessProsToolchainPath } from "./path";
 import { OneClickLogger } from "../extension";
-
+import { BackgroundProgress } from "../logger";
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
 export var CLI_EXEC_PATH: string;
@@ -139,6 +139,10 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
 
 export async function install(context: vscode.ExtensionContext) {
   while(!OneClickLogger.ready);
+
+  const preparing = new BackgroundProgress("Preparing to install PROS", false, true);
+  console.log("eee");
+  //preparing.start();
   await OneClickLogger.log("Configuring Environment Variables for PROS");
   await configurePaths(context);
   const globalPath = context.globalStorageUri.fsPath;
@@ -195,11 +199,10 @@ export async function install(context: vscode.ExtensionContext) {
   // Last step for this that is unknown is determining if the toolchain is up to date or not.
   // I think that toolchain upates are rare enough where it's not worth the effort to check.
   
-
   let promises: Promise<any>[] = [];
   let targeted_portion: string = "";
 
-
+  preparing.stop();
   //if everything works and cli is up to date, do nothing
   if (cliWorking && toolchainWorking && cliUpToDate) {
     // tell the user that everything is up to date

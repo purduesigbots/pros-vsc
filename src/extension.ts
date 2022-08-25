@@ -259,7 +259,7 @@ export function activate(context: vscode.ExtensionContext) {
       .getConfiguration("pros")
       .get<boolean>("showInstallOnStartup")
   ) {
-    install(context);
+    vscode.commands.executeCommand("pros.install");
   }
 
   // heuristic to add new files to the compilation database without requiring a full build

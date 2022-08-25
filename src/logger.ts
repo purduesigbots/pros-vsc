@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
+import { deflateSync } from "zlib";
 
 
 export class Logger {
@@ -22,24 +23,64 @@ export class Logger {
             fs.mkdirSync(this.logFolder, {recursive: true});
         }
 
-        console.log(this.file_fullpath);
+        //console.log(this.file_fullpath);
 
         fs.writeFile(this.file_fullpath, "", { flag: 'wx' }, function (err) {
             //if (err) throw err;
         });
 
 
-        console.log(`LOG URI :::: ${this.file_fullpath}`);
+        //console.log(`LOG URI :::: ${this.file_fullpath}`);
         this.ready = true;
     }
 
     async log(message: string, level: string = "info", timestamp: boolean = true) {
         if (!this.ready) return;
-        console.log("gotalog");
+        //console.log("gotalog");
         this.message_count++;
         let full_message = ` ${timestamp? new Date().toISOString() : ""} | ${level.toUpperCase()} :: ${message}`;
-        console.log('stuff happened probably');
+        //console.log('stuff happened probably');
         await fs.promises.appendFile(this.file_fullpath, full_message + "\n", {encoding: 'utf8'});
-        console.log("wrote the message");
+        //console.log("wrote the message");
+    }
+}
+
+
+export class BackgroundProgress {
+    title: string;
+    cancellable: boolean;
+    end: boolean = false;
+    progress: number = 0;
+    started_progress: boolean = false;
+    constructor(title: string, cancel: boolean = false, autostart: boolean = false) {
+        this.title = title;
+        this.cancellable = cancel;
+        if(autostart) this.start();
+    }
+
+    async start () {
+        vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: this.title,
+                cancellable: this.cancellable
+            },
+            async(progress, token) => {
+                const loop = async() => {
+                    if(this.end) return;
+                    if(this.progress > 0) {
+                        progress.report({increment: this.progress});
+                        this.progress = 0;
+                    }
+                    setTimeout(loop, 50);
+                }
+            }
+        );
+    }
+
+    stop = async() => {
+        this.end = true;
+    }
+    increment = async(amount: number) => {
+        this.progress += amount;
     }
 }
