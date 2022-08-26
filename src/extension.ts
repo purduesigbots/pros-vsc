@@ -73,7 +73,7 @@ export const getProsTerminal = async (
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
-  SidebarActionLogger = new Logger(context, "SidebarActions", false);
+  SidebarActionLogger = new Logger(context, "SidebarActions", false, "commandLogging");
   configurePaths(context);
 
   workspaceContainsProjectPros().then((isProsProject) => {
@@ -104,7 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("install");
     console.log("clicked install");
     try {
-    OneClickLogger = new Logger(context, "One_Click_Log");
+    OneClickLogger = new Logger(context, "One_Click_Log", true, "installationLogging");
     } catch(e:any) {
       console.log(e);
     }

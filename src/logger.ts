@@ -11,12 +11,14 @@ export class Logger {
     file_fullpath: string;
     message_count: number;
     ready: boolean = false;
-    constructor(context: vscode.ExtensionContext, logfile: string, timestamp_logfile_name: boolean = true) {
+    setting: string = "";
+    constructor(context: vscode.ExtensionContext, logfile: string, timestamp_logfile_name: boolean = true, check_setting: string = "NA") {
         this.logUri = context.globalStorageUri;
         this.logFolder = path.join(this.logUri.fsPath, "logs");
         this.lfname = `${logfile}${timestamp_logfile_name ? "_" + new Date().toISOString().replace(/:/gi, "-") : ""}.txt`;
         this.message_count = 0;
         this.file_fullpath = path.join(this.logFolder, this.lfname);
+        this.setting = check_setting;
         try {
             fs.statSync(this.logFolder);
         } catch(e:any){
@@ -36,12 +38,12 @@ export class Logger {
 
     async log(message: string, level: string = "info", timestamp: boolean = true) {
         if (!this.ready) return;
-        //console.log("gotalog");
+        console.log(`THE VALUE THING ${vscode.workspace.getConfiguration("pros").get<boolean>(this.setting) ?? "DNE"}`);
+        if (!(vscode.workspace.getConfiguration("pros").get<boolean>(this.setting)??false)) return;
+
         this.message_count++;
         let full_message = ` ${timestamp? new Date().toISOString() : ""} | ${level.toUpperCase()} :: ${message}`;
-        //console.log('stuff happened probably');
         await fs.promises.appendFile(this.file_fullpath, full_message + "\n", {encoding: 'utf8'});
-        //console.log("wrote the message");
     }
 }
 

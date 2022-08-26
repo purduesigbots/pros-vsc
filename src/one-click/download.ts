@@ -9,7 +9,7 @@ import * as stream from "stream";
 import * as path from "path";
 import { promisify } from "util";
 
-
+import { OneClickLogger } from "../extension";
 
 async function download(
   globalPath: string,
@@ -17,7 +17,10 @@ async function download(
   storagePath: string
 ) {
   // Check if file type is .tar.bz or .zip
+
   const bz2 = downloadURL.includes(".bz2");
+  await OneClickLogger.log(`Downloading ${downloadURL}`);
+  await OneClickLogger.log(`Storage Path: ${storagePath}`);
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -67,6 +70,7 @@ export async function extract(
   storagePath: string,
   bz2: boolean
 ) {
+  await OneClickLogger.log(`Extracting ${storagePath}`);
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -79,12 +83,14 @@ export async function extract(
       var read: fs.ReadStream;
       var extract: fs.WriteStream;
       token.onCancellationRequested((token) => {
+        OneClickLogger.log(`Cancelled extraction of ${storagePath}`);
         console.log("User canceled the long running operation");
         read!.destroy();
         extract!.destroy();
       });
 
       if (bz2) {
+        await OneClickLogger.log(`Reading compressed data from ${storagePath}`);
         // Read the contents of the bz2 file
         var compressedData = await fs.promises.readFile(
           path.join(globalPath, "download", storagePath)
@@ -93,15 +99,18 @@ export async function extract(
 
         // Decrypt the bz2 file contents.
         let decompressedData;
+        await OneClickLogger.log(`Decompressing ${storagePath}`);
         try {
           decompressedData = bunzip.decode(compressedData);
         } catch(e: any) {
           console.log(e);
+          await OneClickLogger.log(`Failed to decompress ${storagePath}`);
           vscode.window.showErrorMessage("An error occured while decoding the toolchain");
         }
 
 
         storagePath = storagePath.replace(".bz2", "");
+        await OneClickLogger.log(`Writing decompressed data to ${storagePath}`);
         await fs.promises.writeFile(
           path.join(globalPath, "download", storagePath),
           decompressedData
@@ -111,12 +120,14 @@ export async function extract(
 
         await new Promise(function(resolve, reject) {
           // Create our read stream
+          OneClickLogger.log(`Creating read stream for ${storagePath}`);
           read = fs.createReadStream(
             path.join(globalPath, "download", storagePath)
           );
           // Remove tar from the filename
           storagePath = storagePath.replace(".tar","");
           // create our write stream
+          OneClickLogger.log(`Extracting ${storagePath} to install folder`);
           extract = tar.extract(path.join(globalPath, "install", storagePath));
           // Pipe the read stream into the write stream
           read.pipe(extract);
@@ -124,6 +135,7 @@ export async function extract(
           extract.on("finish", resolve);
           // If there's an error, reject the promise and clean up
           read.on("error", () => {
+            OneClickLogger.log(`Error occured for ${storagePath}`);
             fs.unlink(path.join(globalPath, "install", storagePath), (_) => null);
             reject();
           });
@@ -136,15 +148,19 @@ export async function extract(
 
         for (const file of files) {
           if (file.includes("toolchain")) {
+
+            await OneClickLogger.log(`Finding toolchain files to move`);
             const interfiles = await fs.promises.readdir(
               path.join(globalPath, "install", file)
             );
             for (const intfile of interfiles) {
+              
               if (intfile.includes("gcc-arm-none-eabi")) {
                 const to_bring_out = await fs.promises.readdir(
                   path.join(globalPath, "install", file, intfile)
                 );
                 for(const f of to_bring_out) {
+                  await OneClickLogger.log(`Moving ${f} to ${file}`);
                   await fs.promises.rename(
                     path.join(globalPath, "install", file, intfile, f),
                     path.join(globalPath, "install", file, f)
@@ -265,6 +281,7 @@ export async function downloadextract(
   downloadURL: string,
   storagePath: string
 ) {
+  
   const globalPath = context.globalStorageUri.fsPath;
   const bz2 = await download(globalPath, downloadURL, storagePath);
   await extract(globalPath, storagePath,  bz2);
@@ -273,8 +290,10 @@ export async function downloadextract(
   return true;
 }
 
+
 export async function chmod(globalPath: string, system: string) {
   if (system === "windows") {
+    OneClickLogger.log("No chmod needed on windows");
     return;
   }
 
