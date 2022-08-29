@@ -13,7 +13,7 @@ import { promisify } from "util";
 import * as child_process from "child_process";
 import { URL } from "url";
 import { getChildProcessPath, getIntegratedTerminalPaths, getChildProcessProsToolchainPath } from "./path";
-import { OneClickLogger } from "../extension";
+import { oneClickLogger } from "../extension";
 import { BackgroundProgress } from "../logger";
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
@@ -92,15 +92,15 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
   var downloadToolchain =
     "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2";
 
-  await OneClickLogger.log(`Selecting proper download URLS for CLI and Toolchain`);
+  await oneClickLogger.log(`Selecting proper download URLS for CLI and Toolchain`);
   if (getOperatingSystem() === "windows") {
-    await OneClickLogger.log(`Windows detected, using Windows URLS`);
+    await oneClickLogger.log(`Windows detected, using Windows URLS`);
     // Set system, path seperator, and downloads to windows version
     downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-win-64bit.zip`;
     downloadToolchain =
     `https://github.com/purduesigbots/toolchain/releases/download/${toolchainVersion}/pros-toolchain-windows.zip`;
   } else if (getOperatingSystem() === "macos") {
-    await OneClickLogger.log(`MacOS detected, using MacOS URLS`);
+    await oneClickLogger.log(`MacOS detected, using MacOS URLS`);
     // Set system, path seperator, and downloads to windows version
     downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-macos-64bit.zip`;
     downloadToolchain =
@@ -111,21 +111,20 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
       }
     });
   } else {
-    await OneClickLogger.log(`Linux detected, using Linux URLS`);
+    await oneClickLogger.log(`Linux detected, using Linux URLS`);
   }
 
   const custom_cli = vscode.workspace.getConfiguration("pros").get<string>("OneClick: CliDownloadURL")??"default";
   const custom_toolchain = vscode.workspace.getConfiguration("pros").get<string>("OneClick: ToolchainDownloadURL")??"default";
-  await OneClickLogger.log(`Checking for custom installation URLs`);
+  await oneClickLogger.log(`Checking for custom installation URLs`);
   console.log(`Custom URLS: ${custom_cli} | ${custom_toolchain}`);
   if(custom_cli !== "default"){
     try {
       const cliurl = new URL(custom_cli);
       downloadCli = custom_cli === "default" ? downloadCli : custom_cli;
-      await OneClickLogger.log(`Using custom CLI download URL: ${downloadCli}`);
+      await oneClickLogger.log(`Using custom CLI download URL: ${downloadCli}`);
     } catch(e: any) {
-      //console.log(e);
-      await OneClickLogger.log(`Invalid custom CLI URL: ${custom_cli}`);
+      await oneClickLogger.log(`Invalid custom CLI URL: ${custom_cli}`);
       console.log("CLI Url specified in PROS extension settings was invalid. Using default instead");
     }
   }
@@ -134,10 +133,9 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
     try {
       const toolchainurl = new URL(custom_toolchain);
       downloadToolchain = custom_toolchain === "default" ? downloadToolchain : custom_toolchain;
-      await OneClickLogger.log(`Using custom Toolchain download URL: ${downloadToolchain}`);
+      await oneClickLogger.log(`Using custom Toolchain download URL: ${downloadToolchain}`);
     } catch(e: any) {
-      //console.log(e);
-      await OneClickLogger.log(`Invalid custom Toolchain URL: ${custom_toolchain}`);
+      await oneClickLogger.log(`Invalid custom Toolchain URL: ${custom_toolchain}`);
       console.log("Toolchain Url specified in PROS extension settings was invalid. Using default instead");
     }
   }
@@ -148,19 +146,19 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
 }
 
 export async function install(context: vscode.ExtensionContext) {
-  while(!OneClickLogger.ready);
+  while(!oneClickLogger.ready);
 
   const preparing = new BackgroundProgress("Preparing to install PROS", false, true);
   console.log("eee");
   //preparing.start();
-  await OneClickLogger.log("Configuring Environment Variables for PROS");
+  await oneClickLogger.log("Configuring Environment Variables for PROS");
   await configurePaths(context);
   const globalPath = context.globalStorageUri.fsPath;
-  await OneClickLogger.log("Fetching Operating System....");
+  await oneClickLogger.log("Fetching Operating System....");
   const system = getOperatingSystem();
-  await OneClickLogger.log(`Operating System Detected: ${system}`);
+  await oneClickLogger.log(`Operating System Detected: ${system}`);
 
-  await OneClickLogger.log("Fetching Latest CLI Version....");
+  await oneClickLogger.log("Fetching Latest CLI Version....");
   var cliVersion = (await getCurrentReleaseVersion(
     "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
   ));
@@ -169,14 +167,14 @@ export async function install(context: vscode.ExtensionContext) {
     "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
   )
 
-  await OneClickLogger.log(`CLI Version: ${cliVersion}`);
+  await oneClickLogger.log(`CLI Version: ${cliVersion}`);
 
   // Get system type, path string separator, CLI download url, and toolchain download url.
   // Default variables are based on linux.
-  await OneClickLogger.log("Fetching CLI and Toolchain Download URLs....");
+  await oneClickLogger.log("Fetching CLI and Toolchain Download URLs....");
   let [downloadCli, downloadToolchain] = await getUrls(cliVersion, toolchainVersion);
-  await OneClickLogger.log(`CLI Download URL: ${downloadCli}`);
-  await OneClickLogger.log(`Toolchain Download URL: ${downloadToolchain}`);
+  await oneClickLogger.log(`CLI Download URL: ${downloadCli}`);
+  await oneClickLogger.log(`Toolchain Download URL: ${downloadToolchain}`);
 
   // Set the installed file names
   var cliName = `pros-cli-${system}.zip`;
@@ -188,13 +186,13 @@ export async function install(context: vscode.ExtensionContext) {
     ), release_version_number ?? 0
   );
   // Verify that the CLI and toolchain are working before prompting user to install.
-  await OneClickLogger.log("Checking Status of CLI and Toolchain....");
+  await oneClickLogger.log("Checking Status of CLI and Toolchain....");
   const cliWorking = await verifyCli().catch((err) => {console.log(err)})??false;
   const toolchainWorking = await verifyToolchain().catch((err) => {console.log(err)})??false;
   
   //log the result of cli and toolchain working
-  await OneClickLogger.log(`${cliWorking ? "CLI appears to be functional" : "CLI not functional or not installed"}`, cliWorking ? "INFO" : "WARNING");
-  await OneClickLogger.log(`${toolchainWorking ? "Toolchain appears to be functional" : "Toolchain not functional or not installed"}`, toolchainWorking ? "INFO" : "WARNING");
+  await oneClickLogger.log(`${cliWorking ? "CLI appears to be functional" : "CLI not functional or not installed"}`, cliWorking ? "INFO" : "WARNING");
+  await oneClickLogger.log(`${toolchainWorking ? "Toolchain appears to be functional" : "Toolchain not functional or not installed"}`, toolchainWorking ? "INFO" : "WARNING");
 
   console.log("CLI Working: " + cliWorking);
   console.log("Toolchain Working: " + toolchainWorking);
@@ -205,7 +203,7 @@ export async function install(context: vscode.ExtensionContext) {
 
   // Does the user's CLI have an update or does the user need to install/update
   const cliUpToDate = title.includes("up to date") ? true : false;
-  await OneClickLogger.log(`${cliUpToDate ? "CLI is up to date" : "CLI is not up to date"}`, cliUpToDate ? "INFO" : "WARNING");
+  await oneClickLogger.log(`${cliUpToDate ? "CLI is up to date" : "CLI is not up to date"}`, cliUpToDate ? "INFO" : "WARNING");
   // Last step for this that is unknown is determining if the toolchain is up to date or not.
   // I think that toolchain upates are rare enough where it's not worth the effort to check.
   
@@ -219,7 +217,7 @@ export async function install(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage(
       "CLI and Toolchain currently working and up to date."
     );
-    OneClickLogger.log("CLI and Toolchain currently working and up to date. Nothing else must be done");
+    await oneClickLogger.log("CLI and Toolchain currently working and up to date. Nothing else must be done");
     return;
   }
 
@@ -235,12 +233,12 @@ export async function install(context: vscode.ExtensionContext) {
       targeted_portion = path.join("install", `pros-toolchain-${system}`);
       let delete_dir = path.join(context.globalStorageUri.fsPath, targeted_portion)
       console.log("removing directory " + delete_dir);
-      OneClickLogger.log("removing directory " + delete_dir);
+      await oneClickLogger.log("removing directory " + delete_dir);
       await removeDirAsync(delete_dir, true).catch((e) => {console.log(e);});
-      OneClickLogger.log("Toolchain is not working. Installing just the toolchain");
+      await oneClickLogger.log("Toolchain is not working. Installing just the toolchain");
       promises = [downloadextract(context, downloadToolchain, toolchainName)];
     } else {
-      OneClickLogger.log("Toolchain is not working. User refused prompt to install toolchain");
+      await oneClickLogger.log("Toolchain is not working. User refused prompt to install toolchain");
       return;
     }
     // if the toolchain is working but the cli is not working or out of date, install just the cli
@@ -257,12 +255,12 @@ export async function install(context: vscode.ExtensionContext) {
       targeted_portion = path.join("install", `pros-cli-${system}}`);
       let delete_dir = path.join(context.globalStorageUri.fsPath, targeted_portion)
       console.log("removing directory " + delete_dir);
-      OneClickLogger.log("removing directory " + delete_dir);
+      await oneClickLogger.log("removing directory " + delete_dir);
       await removeDirAsync(delete_dir, true).catch((e) => {console.log(e);});
-      OneClickLogger.log("CLI is not working. Installing just the CLI");
+      await oneClickLogger.log("CLI is not working. Installing just the CLI");
       promises = [downloadextract(context, downloadCli, cliName)];
     } else {
-      OneClickLogger.log("CLI is not working. User refused prompt to install CLI");
+      await oneClickLogger.log("CLI is not working. User refused prompt to install CLI");
       return;
     }
 
@@ -276,15 +274,15 @@ export async function install(context: vscode.ExtensionContext) {
 
     );
     if (labelResponse === "Install Now!") {
-      OneClickLogger.log("Removing Old CLI and Toolchain");
+      await oneClickLogger.log("Removing Old CLI and Toolchain");
       await removeDirAsync(context.globalStorageUri.fsPath, true).catch((e) => {console.log(e);});
-      OneClickLogger.log("CLI and Toolchain are not working. Installing just the CLI and Toolchain");
+      await oneClickLogger.log("CLI and Toolchain are not working. Installing just the CLI and Toolchain");
       promises = [
         downloadextract(context, downloadCli, cliName),
         downloadextract(context, downloadToolchain, toolchainName),
       ];
     } else {
-      OneClickLogger.log("CLI and Toolchain are not working. User refused prompt to install CLI and Toolchain");
+      await oneClickLogger.log("CLI and Toolchain are not working. User refused prompt to install CLI and Toolchain");
       return;
     }
   }
@@ -295,13 +293,13 @@ export async function install(context: vscode.ExtensionContext) {
 
   await removeDirAsync(delete_dir, false).catch((e) => {console.log(e);});
   //add install and download directories
-  await OneClickLogger.log("Adding install and download directories");
+  await oneClickLogger.log("Adding install and download directories");
   const dirs = await createDirs(context.globalStorageUri.fsPath);
 
-  await OneClickLogger.log("Downloading and extracting files");
+  await oneClickLogger.log("Downloading and extracting files");
   await Promise.all(promises);
 
-  await OneClickLogger.log("Cleaning up after installation");
+  await oneClickLogger.log("Cleaning up after installation");
   await cleanup(context, system);
 
 
@@ -319,7 +317,7 @@ async function createDirs(storagePath: string) {
   const install = path.join(storagePath, "install");
   const download = path.join(storagePath, "download");
   for (const dir of [install, download]) {
-    await OneClickLogger.log(`Recursively creating directory ${dir}`);
+    await oneClickLogger.log(`Recursively creating directory ${dir}`);
     await fs.promises.mkdir(dir, { recursive: true });
   }
   // Return the two created directories
@@ -331,11 +329,11 @@ export async function cleanup(
   system: string = getOperatingSystem()
 ) {
   const globalPath = context.globalStorageUri.fsPath;
-  await OneClickLogger.log(`Removing temporary download directory`);
+  await oneClickLogger.log(`Removing temporary download directory`);
   await removeDirAsync(path.join(globalPath, 'download'), false);
-  await OneClickLogger.log(`Configuring environment variables`);
+  await oneClickLogger.log(`Configuring environment variables`);
   await configurePaths(context);
-  await OneClickLogger.log(`Verifying that CLI and Toolchain are working`);
+  await oneClickLogger.log(`Verifying that CLI and Toolchain are working`);
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -375,7 +373,7 @@ export async function cleanup(
 }
 
 export async function configurePaths(context: vscode.ExtensionContext) {
-  await OneClickLogger.log("Getting paths for integrated terminal");
+  await oneClickLogger.log("Getting paths for integrated terminal");
   let [cliExecPath, toolchainPath] = getIntegratedTerminalPaths(context);
 
   // return if the path is already configured
@@ -383,7 +381,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
     getOperatingSystem() === "macos" && !os.cpus()[0].model.includes("Apple M")
   );
   // Check if user has CLI installed through one-click or other means.
-  await OneClickLogger.log("Checking HOW CLI is installed");
+  await oneClickLogger.log("Checking HOW CLI is installed");
   let [version, isOneClickInstall] = await getCurrentVersion(
     path.join(
       `${addQuotes ? `"` : ""}${cliExecPath}${addQuotes ? `"` : ""}`,
@@ -392,7 +390,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   );
   process.env["PROS_VSCODE_FLAGS"] =
     version >= 324 ? "--no-sentry --no-analytics" : "";
-  OneClickLogger.log(`CLI is installed through ${isOneClickInstall ? "one-click" : "other means"} with version ${version}`);
+  await oneClickLogger.log(`CLI is installed through ${isOneClickInstall ? "one-click" : "other means"} with version ${version}`);
   console.log(`${isOneClickInstall} | ${version}`);
 
   PATH_SEP = getOperatingSystem() === "windows" ? ";" : ":";
@@ -411,11 +409,11 @@ export async function configurePaths(context: vscode.ExtensionContext) {
     return;
   }
   // Prepend CLI and TOOLCHAIN to path
-  OneClickLogger.log("Appending CLI and TOOLCHAIN to PATH");
+  await oneClickLogger.log("Appending CLI and TOOLCHAIN to PATH");
   process.env.PATH = `${!addQuotes?`"`:""}${process.env.PATH}${PATH_SEP}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}${!addQuotes?`"`:""}`;
 
   // Make PROS_TOOCLHAIN variable
-  OneClickLogger.log("Setting PROS_TOOLCHAIN");
+  await oneClickLogger.log("Setting PROS_TOOLCHAIN");
   process.env.PROS_TOOLCHAIN = `${!addQuotes?`"`:""}${TOOLCHAIN}${!addQuotes?`"`:""}`;
 
   process.env.LC_ALL = "en_US.utf-8";
@@ -424,7 +422,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 async function verifyCli() {
 
   var command = `pros c --help --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
-  OneClickLogger.log(`Verifying CLI with command ${command}`);
+  await oneClickLogger.log(`Verifying CLI with command ${command}`);
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     timeout: 30000,
     env: {
@@ -433,30 +431,29 @@ async function verifyCli() {
     },
   });
   if (stderr) {
-    OneClickLogger.log(`CLI verification failed with error ${stderr}`, "error");
+    await oneClickLogger.log(`CLI verification failed with error ${stderr}`, "error");
     console.log(stderr);
   }
-  //console.log(stdout);
   return stdout.includes(`Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version:`);
 }
 
 async function verifyToolchain() {
-  OneClickLogger.log("Verifying TOOLCHAIN");
+  await oneClickLogger.log("Verifying TOOLCHAIN");
 
   let toolchainPath = getChildProcessProsToolchainPath()??'';
   if (!toolchainPath) {
-    OneClickLogger.log("No valid toolchain path found", "error");
+    await oneClickLogger.log("No valid toolchain path found", "error");
     return false;
   }
   
-  OneClickLogger.log(`Using toolchain path ${toolchainPath}`);
+  await oneClickLogger.log(`Using toolchain path ${toolchainPath}`);
 
   var command = `"${path.join(
     toolchainPath,
     "bin",
     "arm-none-eabi-g++"
   )}" --version`;
-  OneClickLogger.log(`Verifying TOOLCHAIN with command ${command}`);
+  await oneClickLogger.log(`Verifying TOOLCHAIN with command ${command}`);
 
   const { stdout, stderr } = await promisify(child_process.exec)("arm-none-eabi-g++ --version", {
     timeout: 5000,
@@ -466,7 +463,7 @@ async function verifyToolchain() {
     },
   });
   if (stderr) {
-    OneClickLogger.log(`TOOLCHAIN verification failed with error ${stderr}`, "error");
+    await oneClickLogger.log(`TOOLCHAIN verification failed with error ${stderr}`, "error");
     console.log(stderr);
   }
   return stdout.replace(".exe","").startsWith(`arm-none-eabi-g++ (G`);

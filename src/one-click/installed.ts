@@ -1,6 +1,5 @@
 import * as child_process from "child_process";
 import { promisify } from "util";
-//import vscode
 import * as vscode from "vscode";
 import { getChildProcessPath } from "./path";
 var fetch = require("node-fetch");

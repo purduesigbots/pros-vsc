@@ -4,7 +4,6 @@ import * as os from "os";
 import { TreeDataProvider } from "./views/tree-view";
 import {
   getWebviewContent,
-  fetchKernelVersion,
   fetchCliVersion,
   fetchKernelVersionNonCLIDependent,
 } from "./views/welcome-view";
@@ -23,7 +22,6 @@ import {
   install,
   configurePaths,
   uninstall,
-  //updateCLI,
   cleanup
 } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
@@ -32,8 +30,8 @@ let analytics: Analytics;
 
 export var system: string;
 export const output = vscode.window.createOutputChannel("PROS Output");
-export var OneClickLogger: Logger;
-export var SidebarActionLogger: Logger;
+export var oneClickLogger: Logger;
+export var sidebarActionLogger: Logger;
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
 export const getProsTerminal = async (
@@ -59,9 +57,6 @@ export const getProsTerminal = async (
   }
 
   await configurePaths(context);
-
-  console.log(`CURRENT PATH: ${process.env.PATH}`);
-
   
 
   return vscode.window.createTerminal({
@@ -73,7 +68,9 @@ export const getProsTerminal = async (
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
-  SidebarActionLogger = new Logger(context, "SidebarActions", false, "commandLogging");
+  sidebarActionLogger = new Logger(context);
+  sidebarActionLogger.init("SidebarActions", false, "commandLogging")
+  oneClickLogger = new Logger(context);
   configurePaths(context);
 
   workspaceContainsProjectPros().then((isProsProject) => {
@@ -104,11 +101,11 @@ export function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("install");
     console.log("clicked install");
     try {
-    OneClickLogger = new Logger(context, "One_Click_Log", true, "installationLogging");
+      await oneClickLogger.init("One_Click_Log", true, "installationLogging");
     } catch(e:any) {
       console.log(e);
     }
-    console.log("OneClickLogger created");
+    console.log("oneClickLogger created");
     await install(context);
   });
   vscode.commands.registerCommand("pros.uninstall", async () => {
@@ -415,7 +412,6 @@ async function chooseProject(){
   {
     folderNames.push({label: f[0], description: ''});
   }
-  //console.log(folderNames);
   
   // Display the options to users
   const target = await vscode.window.showQuickPick(
