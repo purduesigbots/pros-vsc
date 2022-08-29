@@ -329,12 +329,7 @@ export async function cleanup(
   context: vscode.ExtensionContext,
   system: string = getOperatingSystem()
 ) {
-  const globalPath = context.globalStorageUri.fsPath;
-  await prosLogger.log("OneClick", `Removing temporary download directory`);
-  await removeDirAsync(path.join(globalPath, 'download'), false);
-  await prosLogger.log("OneClick", `Configuring environment variables`);
-  await configurePaths(context);
-  await prosLogger.log("OneClick", `Verifying that CLI and Toolchain are working`);
+
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -343,6 +338,14 @@ export async function cleanup(
     },
     async (progress, token) => {
       try {
+
+        const globalPath = context.globalStorageUri.fsPath;
+        await prosLogger.log("OneClick", `Removing temporary download directory`);
+        await removeDirAsync(path.join(globalPath, 'download'), false).catch((e) => {});
+        await prosLogger.log("OneClick", `Configuring environment variables`);
+        await configurePaths(context);
+        await prosLogger.log("OneClick", `Verifying that CLI and Toolchain are working`);
+        
         await chmod(globalPath, system);
 
         //await configurePaths(context);
@@ -450,13 +453,13 @@ async function verifyToolchain() {
   await prosLogger.log("OneClick", `Using toolchain path ${toolchainPath}`);
 
   var command = `"${path.join(
-    toolchainPath,
+    toolchainPath.replace(/\"/g,""),
     "bin",
     "arm-none-eabi-g++"
   )}" --version`;
   await prosLogger.log("OneClick", `Verifying TOOLCHAIN with command ${command}`);
 
-  const { stdout, stderr } = await promisify(child_process.exec)("arm-none-eabi-g++ --version", {
+  const { stdout, stderr } = await promisify(child_process.exec)(command, {
     timeout: 5000,
     env: {
       ...process.env,
