@@ -9,7 +9,7 @@ import * as stream from "stream";
 import * as path from "path";
 import { promisify } from "util";
 
-import { oneClickLogger } from "../extension";
+import { prosLogger } from "../extension";
 
 async function download(
   globalPath: string,
@@ -19,8 +19,8 @@ async function download(
   // Check if file type is .tar.bz or .zip
 
   const bz2 = downloadURL.includes(".bz2");
-  await oneClickLogger.log(`Downloading ${downloadURL}`);
-  await oneClickLogger.log(`Storage Path: ${storagePath}`);
+  await prosLogger.log("OneClick", `Downloading ${downloadURL}`);
+  await prosLogger.log("OneClick", `Storage Path: ${storagePath}`);
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -70,7 +70,7 @@ export async function extract(
   storagePath: string,
   bz2: boolean
 ) {
-  await oneClickLogger.log(`Extracting ${storagePath}`);
+  await prosLogger.log("OneClick", `Extracting ${storagePath}`);
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -83,14 +83,14 @@ export async function extract(
       var read: fs.ReadStream;
       var extract: fs.WriteStream;
       token.onCancellationRequested((token) => {
-        oneClickLogger.log(`Cancelled extraction of ${storagePath}`);
+        prosLogger.log("OneClick", `Cancelled extraction of ${storagePath}`);
         console.log("User canceled the long running operation");
         read!.destroy();
         extract!.destroy();
       });
 
       if (bz2) {
-        await oneClickLogger.log(`Reading compressed data from ${storagePath}`);
+        await prosLogger.log("OneClick", `Reading compressed data from ${storagePath}`);
         // Read the contents of the bz2 file
         var compressedData = await fs.promises.readFile(
           path.join(globalPath, "download", storagePath)
@@ -99,18 +99,18 @@ export async function extract(
 
         // Decrypt the bz2 file contents.
         let decompressedData;
-        await oneClickLogger.log(`Decompressing ${storagePath}`);
+        await prosLogger.log("OneClick", `Decompressing ${storagePath}`);
         try {
           decompressedData = bunzip.decode(compressedData);
         } catch(e: any) {
           console.log(e);
-          await oneClickLogger.log(`Failed to decompress ${storagePath}`);
+          await prosLogger.log("OneClick", `Failed to decompress ${storagePath}`);
           vscode.window.showErrorMessage("An error occured while decoding the toolchain");
         }
 
 
         storagePath = storagePath.replace(".bz2", "");
-        await oneClickLogger.log(`Writing decompressed data to ${storagePath}`);
+        await prosLogger.log("OneClick", `Writing decompressed data to ${storagePath}`);
         await fs.promises.writeFile(
           path.join(globalPath, "download", storagePath),
           decompressedData
@@ -120,14 +120,14 @@ export async function extract(
 
         await new Promise(function(resolve, reject) {
           // Create our read stream
-          oneClickLogger.log(`Creating read stream for ${storagePath}`);
+          prosLogger.log("OneClick", `Creating read stream for ${storagePath}`);
           read = fs.createReadStream(
             path.join(globalPath, "download", storagePath)
           );
           // Remove tar from the filename
           storagePath = storagePath.replace(".tar","");
           // create our write stream
-          oneClickLogger.log(`Extracting ${storagePath} to install folder`);
+          prosLogger.log("OneClick", `Extracting ${storagePath} to install folder`);
           extract = tar.extract(path.join(globalPath, "install", storagePath));
           // Pipe the read stream into the write stream
           read.pipe(extract);
@@ -135,7 +135,7 @@ export async function extract(
           extract.on("finish", resolve);
           // If there's an error, reject the promise and clean up
           read.on("error", () => {
-            oneClickLogger.log(`Error occured for ${storagePath}`);
+            prosLogger.log("OneClick", `Error occured for ${storagePath}`);
             fs.unlink(path.join(globalPath, "install", storagePath), (_) => null);
             reject();
           });
@@ -149,7 +149,7 @@ export async function extract(
         for (const file of files) {
           if (file.includes("toolchain")) {
 
-            await oneClickLogger.log(`Finding toolchain files to move`);
+            await prosLogger.log("OneClick", `Finding toolchain files to move`);
             const interfiles = await fs.promises.readdir(
               path.join(globalPath, "install", file)
             );
@@ -160,7 +160,7 @@ export async function extract(
                   path.join(globalPath, "install", file, intfile)
                 );
                 for(const f of to_bring_out) {
-                  await oneClickLogger.log(`Moving ${f} to ${file}`);
+                  await prosLogger.log("OneClick", `Moving ${f} to ${file}`);
                   await fs.promises.rename(
                     path.join(globalPath, "install", file, intfile, f),
                     path.join(globalPath, "install", file, f)
@@ -180,20 +180,20 @@ export async function extract(
 
         // Extract the contents of  the zip file
         await fs.createReadStream(readPath).pipe(unzipper.Extract({ path: writePath})).promise();
-        await oneClickLogger.log(`Extracting ${readPath} to ${writePath}`);
+        await prosLogger.log("OneClick", `Extracting ${readPath} to ${writePath}`);
         if (storagePath.includes("pros-toolchain-windows")) {
           
           // create tmp folder
           await fs.promises.mkdir(
             path.join(globalPath, "install", "pros-toolchain-windows", "tmp")
             );
-          await oneClickLogger.log(`Creating tmp directory`);
+          await prosLogger.log("OneClick", `Creating tmp directory`);
           // extract contents of gcc-arm-none-eabi-version folder
 
           const files = await fs.promises.readdir(
             path.join(globalPath, "install", "pros-toolchain-windows", "usr")
           );
-          await oneClickLogger.log(`Finding gcc-arm-none-eabi-version folder`);
+          await prosLogger.log("OneClick", `Finding gcc-arm-none-eabi-version folder`);
           for await (const dir of files) {
             if (dir.includes("gcc-arm-none")) {
               // iterate through each folder in gcc-arm-none-eabi-version
@@ -208,7 +208,7 @@ export async function extract(
               );
               for await (const folder of folders) {
                 if (!folder.includes("arm-none")) {
-                  await oneClickLogger.log(`Extracting ${folder} out of gcc-arm-none-eabi-version directory`);
+                  await prosLogger.log("OneClick", `Extracting ${folder} out of gcc-arm-none-eabi-version directory`);
           
                   const subfiles = await fs.promises.readdir(
                     path.join(
@@ -297,7 +297,7 @@ export async function downloadextract(
 
 export async function chmod(globalPath: string, system: string) {
   if (system === "windows") {
-    await oneClickLogger.log("No chmod needed on windows");
+    await prosLogger.log("OneClick", "No chmod needed on windows");
     return;
   }
 
@@ -315,6 +315,6 @@ export async function chmod(globalPath: string, system: string) {
       0o751
     ),
   ];
-  await oneClickLogger.log("Changing permissions on pros, intercept-c++, and intercept-cc executables");
+  await prosLogger.log("OneClick", "Changing permissions on pros, intercept-c++, and intercept-cc executables");
   await Promise.all(chmodList);
 }

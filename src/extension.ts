@@ -30,8 +30,9 @@ let analytics: Analytics;
 
 export var system: string;
 export const output = vscode.window.createOutputChannel("PROS Output");
-export var oneClickLogger: Logger;
-export var sidebarActionLogger: Logger;
+
+export var prosLogger: Logger;
+
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
 export const getProsTerminal = async (
@@ -68,9 +69,8 @@ export const getProsTerminal = async (
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
-  sidebarActionLogger = new Logger(context);
-  sidebarActionLogger.init("SidebarActions", false, "commandLogging")
-  oneClickLogger = new Logger(context);
+  prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");
+
   configurePaths(context);
 
   workspaceContainsProjectPros().then((isProsProject) => {
@@ -99,13 +99,6 @@ export function activate(context: vscode.ExtensionContext) {
   }
   vscode.commands.registerCommand("pros.install", async () => {
     analytics.sendAction("install");
-    console.log("clicked install");
-    try {
-      await oneClickLogger.init("One_Click_Log", true, "installationLogging");
-    } catch(e:any) {
-      console.log(e);
-    }
-    console.log("oneClickLogger created");
     await install(context);
   });
   vscode.commands.registerCommand("pros.uninstall", async () => {
@@ -130,6 +123,17 @@ export function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("build");
     await build();
   });
+
+  vscode.commands.registerCommand("pros.deleteLogs", async () => {
+    analytics.sendAction("deleteLogs");
+    await prosLogger.deleteLogs();
+  });
+
+  vscode.commands.registerCommand("pros.openLog", async () => {
+    analytics.sendAction("openLog");
+    await prosLogger.openLog();
+  });
+
 
   vscode.commands.registerCommand("pros.clean", clean);
   vscode.commands.registerCommand("pros.selectProject", chooseProject);
