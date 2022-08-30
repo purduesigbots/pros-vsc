@@ -88,6 +88,10 @@
         "title": "PROS: Integrated Terminal"
       },
       {
+        "command": "pros.batterymedic",
+        "title": "PROS: Run Battery Medic"
+      },
+      {
         "command": "pros.capture",
         "title": "PROS: Screenshot V5 Brain"
       },

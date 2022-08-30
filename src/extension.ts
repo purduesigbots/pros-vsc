@@ -16,6 +16,7 @@ import {
   upgradeProject,
   upload,
   capture,
+  medic
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -110,6 +111,12 @@ export function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("verify");
     await cleanup(context);
   });
+
+  vscode.commands.registerCommand("pros.batterymedic", async () => {
+    analytics.sendAction("batterymedic");
+    await medic(context);
+  });
+
   vscode.commands.registerCommand("pros.build&upload", async () => {
     analytics.sendAction("build&upload");
     await buildUpload();
