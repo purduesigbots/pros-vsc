@@ -16,6 +16,7 @@ import {
   upgradeProject,
   upload,
   capture,
+  updateFirmware,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -24,7 +25,7 @@ import {
   configurePaths,
   uninstall,
   updateCLI,
-  cleanup
+  cleanup,
 } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 let analytics: Analytics;
@@ -43,7 +44,6 @@ export const getProsTerminal = async (
   if (prosTerminals.length > 1) {
     // Clean up duplicate terminals
     prosTerminals.slice(1).forEach((t) => t.dispose());
-
   }
 
   // Create a new PROS Terminal if one doesn't exist
@@ -57,7 +57,6 @@ export const getProsTerminal = async (
   }
 
   await configurePaths(context);
-
 
   return vscode.window.createTerminal({
     name: "PROS Terminal",
@@ -79,14 +78,13 @@ export function activate(context: vscode.ExtensionContext) {
     //This checks if user is currently working on a project, if not it allows user to select one
     if (isProsProject) {
       getProsTerminal(context).then((terminal) => {
-       terminal.sendText("pros build-compile-commands");
+        terminal.sendText("pros build-compile-commands");
       });
-    }
-    else{
+    } else {
       chooseProject();
     }
   });
-  
+
   if (
     vscode.workspace
       .getConfiguration("pros")
@@ -148,11 +146,11 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  vscode.commands.registerCommand("pros.capture", async ()  => {
+  vscode.commands.registerCommand("pros.capture", async () => {
     analytics.sendAction("capture");
     await capture();
   });
-  
+
   vscode.commands.registerCommand("pros.upgrade", () => {
     analytics.sendAction("upgrade");
     upgradeProject();
@@ -161,6 +159,11 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.new", () => {
     analytics.sendAction("projectCreated");
     createNewProject();
+  });
+
+  vscode.commands.registerCommand("pros.firmwareupdate", async () => {
+    analytics.sendAction("batterymedic");
+    await updateFirmware();
   });
 
   vscode.commands.registerCommand("pros.welcome", async () => {
@@ -382,52 +385,49 @@ async function workspaceContainsProjectPros(): Promise<boolean> {
   return exists;
 }
 //This code calls prosProjects and allows user to choose which pros project to work on
-async function chooseProject(){
+async function chooseProject() {
   if (
     vscode.workspace.workspaceFolders === undefined ||
     vscode.workspace.workspaceFolders === null
-  )
-  {
-  return;
+  ) {
+    return;
   }
   var array = await prosProjects();
-  if(array.length === 0)
-  {
-    vscode.window.showInformationMessage("No PROS Projects found in current directory!");
+  if (array.length === 0) {
+    vscode.window.showInformationMessage(
+      "No PROS Projects found in current directory!"
+    );
     return;
   }
   const targetOptions: vscode.QuickPickOptions = {
     placeHolder: array[0].name,
     title: "Select the PROS project to work on",
   };
-  var folderNames :Array<vscode.QuickPickItem>= [];
+  var folderNames: Array<vscode.QuickPickItem> = [];
   //Specify type for any
-  for(const f of array)
-  {
-    folderNames.push({label: f[0], description: ''});
+  for (const f of array) {
+    folderNames.push({ label: f[0], description: "" });
   }
   //console.log(folderNames);
-  
+
   // Display the options to users
-  const target = await vscode.window.showQuickPick(
-    folderNames,
-    targetOptions
-  );
+  const target = await vscode.window.showQuickPick(folderNames, targetOptions);
   if (target === undefined) {
     throw new Error();
   }
   //This will open the folder the user selects
   await vscode.commands.executeCommand(
     "vscode.openFolder",
-    vscode.Uri.file(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath,target.label))
+    vscode.Uri.file(
+      path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, target.label)
+    )
   );
-
 }
 
 //This function will return an array full of folder names containing pros project file
-async function prosProjects(){
+async function prosProjects() {
   //Specify type for any later
-  var array :any = [];
+  var array: any = [];
   if (
     vscode.workspace.workspaceFolders === undefined ||
     vscode.workspace.workspaceFolders === null
@@ -437,32 +437,31 @@ async function prosProjects(){
   }
   console.log(vscode.workspace.workspaceFolders);
 
-    
-   
-    for(const workspace of vscode.workspace.workspaceFolders)
-    {
-      const currentDir = workspace.uri;
-      const folders = (await vscode.workspace.fs.readDirectory(currentDir));
-    for(const folder of folders)
-    {
-    var exists = true;
-    try {
-      // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
-      // of if the workspace is using a physical file system or not.
-      const workspaceUri = vscode.Uri.file(path.join(currentDir.fsPath, folder[0]));
-      const uriString = `${workspaceUri.scheme}:${workspaceUri.path}/${'project.pros'}`;
-      const uri = vscode.Uri.parse(uriString);
-      await vscode.workspace.fs.stat(uri);
-    } catch (e) {
-      console.error(e);
-      exists = false;
+  for (const workspace of vscode.workspace.workspaceFolders) {
+    const currentDir = workspace.uri;
+    const folders = await vscode.workspace.fs.readDirectory(currentDir);
+    for (const folder of folders) {
+      var exists = true;
+      try {
+        // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
+        // of if the workspace is using a physical file system or not.
+        const workspaceUri = vscode.Uri.file(
+          path.join(currentDir.fsPath, folder[0])
+        );
+        const uriString = `${workspaceUri.scheme}:${
+          workspaceUri.path
+        }/${"project.pros"}`;
+        const uri = vscode.Uri.parse(uriString);
+        await vscode.workspace.fs.stat(uri);
+      } catch (e) {
+        console.error(e);
+        exists = false;
+      }
+      if (exists) {
+        array.push(folder);
+      }
     }
-    if(exists)
-    {
-      array.push(folder);
-    }
-  }
   }
   console.log(array);
-  return array;   
+  return array;
 }
