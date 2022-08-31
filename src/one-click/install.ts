@@ -201,20 +201,23 @@ export async function install(context: vscode.ExtensionContext) {
 
   // Does the user's CLI have an update or does the user need to install/update
   const cliUpToDate = title.includes("up to date") ? true : false;
+  console.log("title: " + title);
   await prosLogger.log("OneClick", `${cliUpToDate ? "CLI is up to date" : "CLI is not up to date"}`, cliUpToDate ? "INFO" : "WARNING");
   // Last step for this that is unknown is determining if the toolchain is up to date or not.
   // I think that toolchain upates are rare enough where it's not worth the effort to check.
-  
   let promises: Promise<any>[] = [];
   let targeted_portion: string = "";
 
-  
+  console.log('eeeee');
+
+  console.log("cliUpToDate: " + cliUpToDate + " | cliWorking: " + cliWorking + " | toolchainWorking: " + toolchainWorking);
   //if everything works and cli is up to date, do nothing
   if (cliWorking && toolchainWorking && cliUpToDate) {
     // tell the user that everything is up to date
-    vscode.window.showInformationMessage(
+    await vscode.window.showInformationMessage(
       "CLI and Toolchain currently working and up to date."
     );
+    console.log("Everything is up to date");
     preparingInstall.stop();
     await prosLogger.log("OneClick", "CLI and Toolchain currently working and up to date. Nothing else must be done");
     return;
@@ -222,13 +225,15 @@ export async function install(context: vscode.ExtensionContext) {
 
   // if CLI is up to date but toolchain is not working, install just the toolchain
   else if (cliUpToDate && cliWorking && !toolchainWorking) {
-    const prompttitle = "PROS Toolchain is not working. Install now?";
-    const labelResponse = await vscode.window.showInformationMessage(
+    let prompttitle = "PROS Toolchain is not working. Install now?";
+    console.log(prompttitle);
+    let labelResponse = await vscode.window.showInformationMessage(
       prompttitle,
       "Install Now!",
       "No Thanks."
     );
-    preparingInstall.stop();
+    console.log("sent : " + prompttitle);
+    await preparingInstall.stop();
     if (labelResponse === "Install Now!") {
       targeted_portion = path.join("install", `pros-toolchain-${system}`);
       let delete_dir = path.join(context.globalStorageUri.fsPath, targeted_portion)
@@ -246,11 +251,13 @@ export async function install(context: vscode.ExtensionContext) {
   } else if (toolchainWorking && !(cliWorking && cliUpToDate)) {
     const prompttitle = `PROS CLI is ${cliWorking ? "out of date. Update" : "not working. Install"} now?`;
     const option1 = `${cliWorking ? "Update" : "Install"} Now!`;
+    console.log(prompttitle);
     const labelResponse = await vscode.window.showInformationMessage(
       prompttitle,
       option1,
       "No Thanks."
     );
+    console.log("sent : " + prompttitle);
     preparingInstall.stop();
     if (labelResponse === option1) {
       targeted_portion = path.join("install", `pros-cli-${system}}`);
@@ -266,18 +273,23 @@ export async function install(context: vscode.ExtensionContext) {
     }
 
   // if neither the cli or toolchain is working
-  } else if (!cliWorking && !toolchainWorking) {
+  } else {
     const prompttitle = "PROS CLI and Toolchain are not working. Install now?";
+    console.log(prompttitle);
     const labelResponse = await vscode.window.showInformationMessage(
       prompttitle,
       "Install Now!",
       "No Thanks."
     );
+    console.log("sent : " + prompttitle);
     preparingInstall.stop();
     if (labelResponse === "Install Now!") {
       await prosLogger.log("OneClick", "Removing Old CLI and Toolchain");
-      await removeDirAsync(context.globalStorageUri.fsPath, true).catch((e) => {console.log(e);});
+      console.log("removing old cli and toolchain");
+      await removeDirAsync(path.join(context.globalStorageUri.fsPath, "install"), true).catch((e) => {console.log(e);});
+      await removeDirAsync(path.join(context.globalStorageUri.fsPath, "download"), false).catch((e) => {console.log(e);});
       await prosLogger.log("OneClick", "CLI and Toolchain are not working. Installing just the CLI and Toolchain");
+      console.log("installing just the cli and toolchain");
       promises = [
         downloadextract(context, downloadCli, cliName),
         downloadextract(context, downloadToolchain, toolchainName),
@@ -292,9 +304,10 @@ export async function install(context: vscode.ExtensionContext) {
   let delete_dir = path.join(context.globalStorageUri.fsPath, targeted_portion)
   console.log("removing directory " + delete_dir);
 
-  await removeDirAsync(delete_dir, false).catch((e) => {console.log(e);});
+  //await removeDirAsync(delete_dir, false).catch((e) => {console.log(e);});
   //add install and download directories
   await prosLogger.log("OneClick", "Adding install and download directories");
+  console.log("adding install and download directories");
   const dirs = await createDirs(context.globalStorageUri.fsPath);
 
   await prosLogger.log("OneClick", "Downloading and extracting files");
