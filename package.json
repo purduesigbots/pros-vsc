@@ -122,6 +122,10 @@
       {
         "command": "pros.selectProject",
         "title": "PROS: Select PROS Project"
+      },
+      {
+        "command": "pros.updatefirmware",
+        "title": "PROS: Update VexOS Firmware"
       }
     ],
     "menus": {

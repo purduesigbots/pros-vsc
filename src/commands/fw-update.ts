@@ -2,19 +2,18 @@ import * as vscode from "vscode";
 import * as child_process from "child_process";
 import { promisify } from "util";
 
-import { parseErrorMessage } from "./cli-parsing";
 import { getChildProcessPath } from "../one-click/path";
 
-export const updateFirmware = async () => {
+const runFirmwareUpdate = async () => {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
       title: "Updating Firmware",
       cancellable: false,
     },
-    async (progress, token) => {
+    async (_progress, _token) => {
       try {
-        var command = `vexcom --help`; // TODO: set this to something real
+        var command = "vexcom --vexos latest";
         const { stdout, stderr } = await promisify(child_process.exec)(
           command,
           {
@@ -22,16 +21,27 @@ export const updateFirmware = async () => {
             maxBuffer: 1024 * 1024 * 50,
             env: {
               ...process.env,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               PATH: getChildProcessPath(),
             },
           }
         );
+        console.log(stdout);
+        console.error(stderr);
 
-        vscode.window.showInformationMessage("Project Uploaded!");
+        vscode.window.showInformationMessage("Firmware updated!");
       } catch (error: any) {
-        // Parse and display error message if one occured
-        await vscode.window.showErrorMessage(parseErrorMessage(error.stdout));
+        console.log(error.stderr);
+        throw new Error(error.stderr);
       }
     }
   );
+};
+
+export const updateFirmware = async () => {
+  try {
+    await runFirmwareUpdate();
+  } catch (err: any) {
+    await vscode.window.showErrorMessage(err.message);
+  }
 };

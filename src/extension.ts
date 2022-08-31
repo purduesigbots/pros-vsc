@@ -161,7 +161,7 @@ export function activate(context: vscode.ExtensionContext) {
     createNewProject();
   });
 
-  vscode.commands.registerCommand("pros.firmwareupdate", async () => {
+  vscode.commands.registerCommand("pros.updatefirmware", async () => {
     analytics.sendAction("batterymedic");
     await updateFirmware();
   });
