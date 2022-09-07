@@ -132,7 +132,7 @@ export async function install(context: vscode.ExtensionContext) {
   );
   const toolchainVersion = await getCurrentReleaseVersion(
     "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
-  )
+  );
   console.log("Latest Available CLI Version: " + cliVersion);
 
   // Get system type, path string separator, CLI download url, and toolchain download url.
@@ -197,6 +197,35 @@ export async function install(context: vscode.ExtensionContext) {
       .getConfiguration("pros")
       .update("showInstallOnStartup", false);
   }
+}
+
+export async function installVision(context: vscode.ExtensionContext) {
+  const globalPath = context.globalStorageUri.fsPath;
+  const system = getOperatingSystem();
+  const windowsVision = "https://github.com/purduesigbots/pros-cli/releases/download/3.1.3/vex_vision_utility-0.2.4-win.zip";
+
+  // Set the installed file names
+  var visionName = `pros-vision-${system}.zip`;
+  if(system === "windows") {
+    
+  }
+  else if(system === "macos") {
+  
+  }
+
+      //add install and download directories
+      const dirs = await createDirs(context.globalStorageUri.fsPath);
+
+      const promises = [
+        downloadextract(context, windowsVision, visionName)
+      ];
+
+      await Promise.all(promises);
+      await cleanup(context, system);
+
+      vscode.workspace
+        .getConfiguration("pros")
+        .update("showInstallOnStartup", false);
 }
 
 export async function updateCLI(
