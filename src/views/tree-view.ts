@@ -15,7 +15,6 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
         new TreeItem("Brain Terminal", undefined, "pros.terminal"),
         new TreeItem("Integrated Terminal", undefined, "pros.showterminal"),
         new TreeItem("Capture Image", undefined, "pros.capture"),
-		new TreeItem("Update VexOS", undefined, "pros.updatefirmware"),
       ]),
       new TreeItem("Conductor", [
         new TreeItem("Upgrade Project", undefined, "pros.upgrade"),
@@ -26,6 +25,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
         new TreeItem("Uninstall PROS", undefined, "pros.uninstall"),
         new TreeItem("Update PROS CLI", undefined, "pros.updatecli"),
         new TreeItem("Verify PROS Installation", undefined, "pros.verify"),
+        new TreeItem("Update VEXos", undefined, "pros.updatefirmware"),
       ]),
     ];
   }
