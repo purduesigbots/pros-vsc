@@ -5,3 +5,4 @@ export * from "./build";
 export * from "./clean";
 export * from "./buildUpload";
 export * from "./capture";
+export * from "./fw-update";
