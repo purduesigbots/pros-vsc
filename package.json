@@ -167,6 +167,14 @@
         },
         {
           "when": "pros.isPROSProject",
+          "command": "pros.run"
+        },
+        {
+          "when": "pros.isPROSProject",
+          "command": "pros.stop"
+        },
+        {
+          "when": "pros.isPROSProject",
           "command": "pros.clean"
         },
         {

@@ -12,6 +12,8 @@ import {
   buildUpload,
   clean,
   build,
+  run,
+  stop,
   createNewProject,
   upgradeProject,
   upload,
@@ -123,6 +125,16 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.build", async () => {
     analytics.sendAction("build");
     await build();
+  });
+
+  vscode.commands.registerCommand("pros.run", async () => {
+    analytics.sendAction("run");
+    await run();
+  });
+  
+  vscode.commands.registerCommand("pros.stop", async () => {
+    analytics.sendAction("stop");
+    await stop();
   });
 
   vscode.commands.registerCommand("pros.clean", clean);
