@@ -76,6 +76,14 @@
         "title": "PROS: Build"
       },
       {
+        "command": "pros.run",
+        "title": "PROS: Run"
+      },
+      {
+        "command": "pros.stop",
+        "title": "PROS: Stop"
+      },
+      {
         "command": "pros.clean",
         "title": "PROS: Clean"
       },
