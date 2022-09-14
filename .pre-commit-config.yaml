@@ -17,6 +17,6 @@ repos:
       - id: eslint
         stages: [commit, push]
         name: Run eslint for js/ts
-        entry: npm run lint
+        entry: npm run lint --fix
         language: system
         files: \.(js|jsx|ts|tsx)$
