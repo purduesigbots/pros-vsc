@@ -98,10 +98,10 @@ export function getWebviewContent(
 			 </a>
 			 <p class="header__blurb">
 			 	 <a title="Open PROS on GitHub" href="https://github.com/purduesigbots/pros">Open Source</a>
-				 C/C++ Development for <b>VEX V5</b> and <b>VEX Cortex</b>. PROS is a lightweight and 
-				 fast alternative open source operating system for VEX EDR Microcontrollers. It features multitasking, 
-				 low-level control, and Wiring compatible functions to harness the full power of the Cortex. 
-				 PROS is built with developers in mind and with a focus on providing an environment for 
+				 C/C++ Development for <b>VEX V5</b> and <b>VEX Cortex</b>. PROS is a lightweight and
+				 fast alternative open source operating system for VEX EDR Microcontrollers. It features multitasking,
+				 low-level control, and Wiring compatible functions to harness the full power of the Cortex.
+				 PROS is built with developers in mind and with a focus on providing an environment for
 				 industry-applicable experience.
 			 </p>
 		     </header>
@@ -114,7 +114,7 @@ export function getWebviewContent(
 							See what's new in <a href="https://pros.cs.purdue.edu/v5/releases/cli${newCli}.html">CLI ${newCli}</a> and <a href="https://pros.cs.purdue.edu/v5/releases/kernel${newKernel}.html">Kernel ${newKernel}</a>
 						</div>
 						<div class="body__blurb">
-							Primary maintenance of PROS is done by students at Purdue University through Purdue ACM SIGBots. Inspiration for this project came from several computer science and engineering students itching to write code for VEX U's extended autonomous period. We created PROS to leverage this opportunity. 	
+							Primary maintenance of PROS is done by students at Purdue University through Purdue ACM SIGBots. Inspiration for this project came from several computer science and engineering students itching to write code for VEX U's extended autonomous period. We created PROS to leverage this opportunity.
 						</div>
 						<hr>
 						<div class="body__features">

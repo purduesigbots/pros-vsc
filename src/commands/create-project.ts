@@ -157,7 +157,7 @@ const runCreateProject = async (
         );
         if (stderr) {
           let err = parseErrorMessage(stderr);
-          if(!(err === "NOERROR")) {
+          if (!(err === "NOERROR")) {
             throw new Error(err);
           }
         }

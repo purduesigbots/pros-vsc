@@ -24,7 +24,7 @@ import {
   configurePaths,
   uninstall,
   updateCLI,
-  cleanup
+  cleanup,
 } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 let analytics: Analytics;
@@ -43,7 +43,6 @@ export const getProsTerminal = async (
   if (prosTerminals.length > 1) {
     // Clean up duplicate terminals
     prosTerminals.slice(1).forEach((t) => t.dispose());
-
   }
 
   // Create a new PROS Terminal if one doesn't exist
@@ -57,7 +56,6 @@ export const getProsTerminal = async (
   }
 
   await configurePaths(context);
-
 
   return vscode.window.createTerminal({
     name: "PROS Terminal",
@@ -145,11 +143,11 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  vscode.commands.registerCommand("pros.capture", async ()  => {
+  vscode.commands.registerCommand("pros.capture", async () => {
     analytics.sendAction("capture");
     await capture();
   });
-  
+
   vscode.commands.registerCommand("pros.upgrade", () => {
     analytics.sendAction("upgrade");
     upgradeProject();

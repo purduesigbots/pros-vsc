@@ -74,4 +74,3 @@ export async function getInstallPromptTitle(oneClickPath: string) {
     return "An outdated version of PROS was detected on your system, not installed through VS Code. Would you like to install the update with VS Code?";
   }
 }
-
