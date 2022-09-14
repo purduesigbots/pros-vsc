@@ -14,10 +14,9 @@ repos:
         language: system
         types: [file]
         files: \.(js|jsx|ts|tsx|html|json|md|mdx|yml|yaml|css)$
-      # A few too many errors here currently to use this hook yet
-      # - id: eslint
-      #   stages: [commit, push]
-      #   name: Run eslint for js/ts
-      #   entry: npm run lint
-      #   language: system
-      #   files: \.(js|jsx|ts|tsx)$
+      - id: eslint
+        stages: [commit, push]
+        name: Run eslint for js/ts
+        entry: npm run lint
+        language: system
+        files: \.(js|jsx|ts|tsx)$

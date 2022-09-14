@@ -22,6 +22,7 @@ export const fetchKernelVersion = async (): Promise<string> => {
       {
         env: {
           ...process.env,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           PATH: getChildProcessPath(),
         },
       }

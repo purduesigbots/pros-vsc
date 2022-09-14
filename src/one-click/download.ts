@@ -36,10 +36,10 @@ async function download(
       if (!response.ok) {
         throw new Error(`Failed to download $url`);
       }
-      const total_size = Number(response.headers.get("content-length"));
+      const totalSize = Number(response.headers.get("content-length"));
 
       response.body.on("data", (chunk: Buffer) => {
-        progress.report({ increment: (chunk.length * 100) / total_size });
+        progress.report({ increment: (chunk.length * 100) / totalSize });
       });
       // Write file contents to "sigbots.pros/download/filename.tar.bz2"
       out = fs.createWriteStream(
@@ -136,10 +136,10 @@ export async function extract(
             );
             for (const intfile of interfiles) {
               if (intfile.includes("gcc-arm-none-eabi")) {
-                const to_bring_out = await fs.promises.readdir(
+                const toBringOut = await fs.promises.readdir(
                   path.join(globalPath, "install", file, intfile)
                 );
-                for (const f of to_bring_out) {
+                for (const f of toBringOut) {
                   await fs.promises.rename(
                     path.join(globalPath, "install", file, intfile, f),
                     path.join(globalPath, "install", file, f)

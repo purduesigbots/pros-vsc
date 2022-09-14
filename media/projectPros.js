@@ -46,7 +46,7 @@
   var nametimer;
   projectName.addEventListener("keyup", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
-    if (prevname == selector.value) {
+    if (prevname === selector.value) {
       return;
     }
     prevname = selector.value;
@@ -64,7 +64,7 @@
   var desctimer;
   description.addEventListener("keyup", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
-    if (prevdesc == selector.value) {
+    if (prevdesc === selector.value) {
       return;
     }
     prevdesc = selector.value;

@@ -24,6 +24,7 @@ export async function getCurrentVersion(oneClickPath: string) {
       {
         env: {
           ...process.env,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           PATH: getChildProcessPath(),
         },
       }
@@ -39,6 +40,7 @@ export async function getCurrentVersion(oneClickPath: string) {
         {
           env: {
             ...process.env,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             PATH: getChildProcessPath(),
           },
         }

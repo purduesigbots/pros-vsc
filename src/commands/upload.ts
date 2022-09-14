@@ -40,6 +40,7 @@ const runUpload = async () => {
             maxBuffer: 1024 * 1024 * 50,
             env: {
               ...process.env,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               PATH: getChildProcessPath(),
             },
           }

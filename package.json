@@ -217,7 +217,7 @@
     "deploy": "vsce publish --yarn",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
-    "lint": "eslint --fix --cache --max-warnings=0 '**/*.{js,jsx,ts,tsx}'",
+    "lint": "eslint --fix --cache --max-warnings=0",
     "test": "node ./out/test/runTest.js",
     "format": "prettier --write --json-recursive-sort"
   },

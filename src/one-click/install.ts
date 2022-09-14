@@ -101,18 +101,18 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
     });
   }
 
-  const custom_cli =
+  const customCli =
     vscode.workspace
       .getConfiguration("pros")
       .get<string>("OneClick: CliDownloadURL") ?? "default";
-  const custom_toolchain =
+  const customToolchain =
     vscode.workspace
       .getConfiguration("pros")
       .get<string>("OneClick: ToolchainDownloadURL") ?? "default";
 
   try {
-    const cliurl = new URL(custom_cli);
-    downloadCli = custom_cli === "default" ? downloadCli : custom_cli;
+    const cliurl = new URL(customCli);
+    downloadCli = customCli === "default" ? downloadCli : customCli;
   } catch (e: any) {
     console.log(e);
     console.log(
@@ -121,9 +121,9 @@ async function getUrls(cliVersion: number, toolchainVersion: string) {
   }
 
   try {
-    const toolchainurl = new URL(custom_toolchain);
+    const toolchainurl = new URL(customToolchain);
     downloadToolchain =
-      custom_toolchain === "default" ? downloadToolchain : custom_toolchain;
+      customToolchain === "default" ? downloadToolchain : customToolchain;
   } catch (e: any) {
     console.log(e);
     console.log(
@@ -376,6 +376,7 @@ async function verifyCli() {
     timeout: 30000,
     env: {
       ...process.env,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       PATH: getChildProcessPath(),
     },
   });
@@ -406,6 +407,7 @@ async function verifyToolchain() {
       timeout: 5000,
       env: {
         ...process.env,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         PATH: getChildProcessPath(),
       },
     }

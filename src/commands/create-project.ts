@@ -80,6 +80,7 @@ const selectKernelVersion = async (target: string) => {
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     env: {
       ...process.env,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       PATH: getChildProcessPath(),
     },
   });
@@ -150,6 +151,7 @@ const runCreateProject = async (
             timeout: 30000,
             env: {
               ...process.env,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               PATH: getChildProcessPath(),
             },
           }
