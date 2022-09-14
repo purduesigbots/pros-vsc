@@ -6,15 +6,12 @@ on: push
 jobs:
   format_check:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: 18.x
     steps:
       - uses: actions/checkout@v3
       - name: Use node.js
         uses: actions/set-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 18.x
           cache: "npm"
       - run: npm ci
       - run: prettier --check '**/*.{js,jsx,ts,tsx}'
