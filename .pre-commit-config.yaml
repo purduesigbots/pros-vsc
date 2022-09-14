@@ -1,0 +1,23 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.4.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: prettier
+        stages: [commit, push]
+        name: Format js/ts/html/json/yaml/md/css using prettier
+        entry: npm run prettier
+        language: system
+        types: [file]
+        files: \.(js|jsx|ts|tsx|html|json|md|mdx|yml|yaml|css)$
+      # A few too many errors here currently to use this hook yet
+      # - id: eslint
+      #   stages: [commit, push]
+      #   name: Run eslint for js/ts
+      #   entry: npm run lint
+      #   language: system
+      #   files: \.(js|jsx|ts|tsx)$

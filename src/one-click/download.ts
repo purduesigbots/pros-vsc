@@ -9,8 +9,6 @@ import * as stream from "stream";
 import * as path from "path";
 import { promisify } from "util";
 
-
-
 async function download(
   globalPath: string,
   downloadURL: string,
@@ -37,11 +35,11 @@ async function download(
 
       if (!response.ok) {
         throw new Error(`Failed to download $url`);
-      } 
+      }
       const total_size = Number(response.headers.get("content-length"));
 
       response.body.on("data", (chunk: Buffer) => {
-        progress.report({ increment: chunk.length * 100 / total_size });
+        progress.report({ increment: (chunk.length * 100) / total_size });
       });
       // Write file contents to "sigbots.pros/download/filename.tar.bz2"
       out = fs.createWriteStream(
@@ -49,14 +47,10 @@ async function download(
       );
       await promisify(stream.pipeline)(response.body, out).catch((e) => {
         // Clean up the partial file if the download failed.
-        fs.unlink(
-          path.join(globalPath, "download", storagePath),
-          (_) => null
-        ); // Don't wait, and ignore error.
+        fs.unlink(path.join(globalPath, "download", storagePath), (_) => null); // Don't wait, and ignore error.
         console.log(e);
         throw e;
       });
-
     }
   );
   return bz2;
@@ -90,16 +84,16 @@ export async function extract(
           path.join(globalPath, "download", storagePath)
         );
 
-
         // Decrypt the bz2 file contents.
         let decompressedData;
         try {
           decompressedData = bunzip.decode(compressedData);
-        } catch(e: any) {
+        } catch (e: any) {
           console.log(e);
-          vscode.window.showErrorMessage("An error occured while decoding the toolchain");
+          vscode.window.showErrorMessage(
+            "An error occured while decoding the toolchain"
+          );
         }
-
 
         storagePath = storagePath.replace(".bz2", "");
         await fs.promises.writeFile(
@@ -108,14 +102,13 @@ export async function extract(
         );
         // Write contents of the decrypted bz2 into "sigbots.pros/download/filename.tar"
 
-
-        await new Promise(function(resolve, reject) {
+        await new Promise(function (resolve, reject) {
           // Create our read stream
           read = fs.createReadStream(
             path.join(globalPath, "download", storagePath)
           );
           // Remove tar from the filename
-          storagePath = storagePath.replace(".tar","");
+          storagePath = storagePath.replace(".tar", "");
           // create our write stream
           extract = tar.extract(path.join(globalPath, "install", storagePath));
           // Pipe the read stream into the write stream
@@ -124,11 +117,13 @@ export async function extract(
           extract.on("finish", resolve);
           // If there's an error, reject the promise and clean up
           read.on("error", () => {
-            fs.unlink(path.join(globalPath, "install", storagePath), (_) => null);
+            fs.unlink(
+              path.join(globalPath, "install", storagePath),
+              (_) => null
+            );
             reject();
           });
         });
-        
 
         const files = await fs.promises.readdir(
           path.join(globalPath, "install")
@@ -144,33 +139,34 @@ export async function extract(
                 const to_bring_out = await fs.promises.readdir(
                   path.join(globalPath, "install", file, intfile)
                 );
-                for(const f of to_bring_out) {
+                for (const f of to_bring_out) {
                   await fs.promises.rename(
                     path.join(globalPath, "install", file, intfile, f),
                     path.join(globalPath, "install", file, f)
-                  )
+                  );
                 }
               }
             }
             console.log(path.join(globalPath, "install", storagePath));
           }
         }
-        
       } // if bz2
       else {
         let readPath = path.join(globalPath, "download", storagePath);
-        storagePath = storagePath.replace(".zip","");
+        storagePath = storagePath.replace(".zip", "");
         let writePath = path.join(globalPath, "install", storagePath);
 
         // Extract the contents of the zip file
-        await fs.createReadStream(readPath).pipe(unzipper.Extract({ path: writePath})).promise();
+        await fs
+          .createReadStream(readPath)
+          .pipe(unzipper.Extract({ path: writePath }))
+          .promise();
         if (storagePath.includes("pros-toolchain-windows")) {
-          
           // create tmp folder
           await fs.promises.mkdir(
             path.join(globalPath, "install", "pros-toolchain-windows", "tmp")
-            );
-          
+          );
+
           // extract contents of gcc-arm-none-eabi-version folder
 
           const files = await fs.promises.readdir(
@@ -246,13 +242,9 @@ export async function extract(
                   await fs.promises.rename(originalPath, newPath);
                 } // file in subfolder
               } // folder in gcc-arm-none-eabiversion
-
             } // if subfolder is gcc-arm-none-eabiversion
-
-
           } // for usr folder's subdirectories
         } // windows toolchain
-
       } // not bz2
     }
   );
@@ -267,7 +259,7 @@ export async function downloadextract(
 ) {
   const globalPath = context.globalStorageUri.fsPath;
   const bz2 = await download(globalPath, downloadURL, storagePath);
-  await extract(globalPath, storagePath,  bz2);
+  await extract(globalPath, storagePath, bz2);
   console.log(`Finished Installing ${storagePath}`);
   window.showInformationMessage(`Finished Installing ${storagePath}`);
   return true;
