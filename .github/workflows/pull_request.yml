@@ -12,3 +12,9 @@ jobs:
         uses: creyD/prettier_action@v4.2
         with:
           prettier_options: --check **/*.{js,ts,jsx,tsx,md,css,html}
+  eslint_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check code style using Eslint
+        uses: stefanoeb/eslint-action@1.0.2
