@@ -16,6 +16,19 @@
     "url": "https://github.com/purduesigbots/pros-vsc.git"
   },
   "homepage": "http://pros.cs.purdue.edu",
+  "keywords": [
+    "vex",
+    "v5",
+    "pros",
+    "education",
+    "outreach",
+    "robotics",
+    "vrc",
+    "cortex",
+    "code",
+    "autonomous",
+    "opcontrol"
+  ],
   "icon": "media/pros-tux-white.png",
   "galleryBanner": {
     "color": "#D6B872",
@@ -33,7 +46,8 @@
     "onCommand:pros.new",
     "onCommand:pros.welcome",
     "onCommand:pros.build&upload",
-    "onView:prosTreeview"
+    "onView:prosTreeview",
+    "onCommand:pros.selectProject"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -116,6 +130,14 @@
       {
         "command": "pros.verify",
         "title": "PROS: Verify PROS Installation"
+      },
+      {
+        "command": "pros.selectProject",
+        "title": "PROS: Select PROS Project"
+      },
+      {
+        "command": "pros.updatefirmware",
+        "title": "PROS: Update VEXos Firmware"
       }
     ],
     "menus": {
@@ -166,6 +188,10 @@
         {
           "when": "pros.isPROSProject",
           "command": "pros.install"
+        },
+        {
+          "when": "true",
+          "command": "pros.selectProject"
         }
       ]
     },
