@@ -8,10 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Use node.js
-        uses: actions/setup-node@v3
+      - name: Check formatting with Prettier
+        uses: creyD/prettier_action@v4.2
         with:
-          node-version: 18.x
-          cache: "npm"
-      - run: npm ci
-      - run: prettier --check '**/*.{js,jsx,ts,tsx}'
+          prettier_options: --check **/*.{js,ts,jsx,tsx,md,css,html}
