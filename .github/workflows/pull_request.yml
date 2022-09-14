@@ -1,7 +1,5 @@
 name: CI Checks
-on:
-  pull_request:
-    branches: [$default-branch]
+on: pull_request
 jobs:
   format_check:
     runs-on: ubuntu-latest
