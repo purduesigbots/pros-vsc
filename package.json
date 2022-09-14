@@ -219,7 +219,7 @@
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint --fix --cache --max-warnings=0 '**/*.{js,jsx,ts,tsx}'",
     "test": "node ./out/test/runTest.js",
-    "prettier": "prettier --write --json-recursive-sort"
+    "format": "prettier --write --json-recursive-sort"
   },
   "devDependencies": {
     "@types/glob": "^7.1.3",
