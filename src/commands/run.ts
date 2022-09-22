@@ -22,7 +22,7 @@ const runRun = async () => {
     },
     async (progress, token) => {
       try {
-        var command = `pros v5 run "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
+        var command = `pros v5 run --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
         console.log(command);
         console.log(process.env["PATH"]);
         const { stdout, stderr } = await promisify(child_process.exec)(
@@ -38,16 +38,6 @@ const runRun = async () => {
         vscode.window.showInformationMessage("Project Ran!");
       } catch (error: any) {
         if (!error.stdout.includes("No v5 ports")) {
-          const rtn = await vscode.window.showErrorMessage(
-            parseMakeOutput(error.stdout),
-            "View Output!",
-            "No Thanks!"
-          );
-          if (rtn === "View Output!") {
-            output.show();
-          }
-        } else {
-          vscode.window.showErrorMessage(parseMakeOutput(error.stdout));
         }
       }
     }

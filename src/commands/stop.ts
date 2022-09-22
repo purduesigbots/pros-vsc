@@ -22,7 +22,7 @@ const runStop = async () => {
     },
     async (progress, token) => {
       try {
-        var command = `pros v5 stop "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
+        var command = `pros v5 stop --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
         console.log(command);
         console.log(process.env["PATH"]);
         const { stdout, stderr } = await promisify(child_process.exec)(
