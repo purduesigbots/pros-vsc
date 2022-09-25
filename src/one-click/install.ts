@@ -80,7 +80,10 @@ export async function uninstall(context: vscode.ExtensionContext) {
         cancellable: false,
       },
       async (progress, token) => {
-        await removeDirAsync(globalPath, false);
+        let promises: Promise<any>[] = []
+        promises.push(removeDirAsync(path.join(globalPath, "install"), true));
+        promises.push(removeDirAsync(path.join(globalPath, "download"), true));
+        await Promise.all(promises);
       }
     );
     vscode.window.showInformationMessage("PROS Uninstalled!");
@@ -274,7 +277,7 @@ export async function install(context: vscode.ExtensionContext) {
 
   // if neither the cli or toolchain is working
   } else {
-    const prompttitle = "PROS CLI and Toolchain are not working. Install now?";
+    const prompttitle = "PROS CLI and Toolchain are out of date or not working. Install now?";
     console.log(prompttitle);
     const labelResponse = await vscode.window.showInformationMessage(
       prompttitle,
@@ -394,7 +397,7 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   let [cliExecPath, toolchainPath] = getIntegratedTerminalPaths(context);
 
   // return if the path is already configured
-  const addQuotes = !(
+  const addQuotes = (
     getOperatingSystem() === "macos" && !os.cpus()[0].model.includes("Apple M")
   );
   // Check if user has CLI installed through one-click or other means.
@@ -427,11 +430,12 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   }
   // Prepend CLI and TOOLCHAIN to path
   await prosLogger.log("OneClick", "Appending CLI and TOOLCHAIN to PATH");
-  process.env.PATH = `${!addQuotes?`"`:""}${process.env.PATH}${PATH_SEP}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}${!addQuotes?`"`:""}`;
+  process.env.PATH = `${process.env.PATH}`; // bypass compile errors
+  process.env.PATH = `${addQuotes?`"`:""}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}${PATH_SEP}${(process.env.PATH).replace(/\"/g, "")}${addQuotes?`"`:""}`;
 
   // Make PROS_TOOCLHAIN variable
   await prosLogger.log("OneClick", "Setting PROS_TOOLCHAIN");
-  process.env.PROS_TOOLCHAIN = `${!addQuotes?`"`:""}${TOOLCHAIN}${!addQuotes?`"`:""}`;
+  process.env.PROS_TOOLCHAIN = `${addQuotes?`"`:""}${TOOLCHAIN}${addQuotes?`"`:""}`;
 
   process.env.LC_ALL = "en_US.utf-8";
 }
@@ -465,11 +469,7 @@ async function verifyToolchain() {
   
   await prosLogger.log("OneClick", `Using toolchain path ${toolchainPath}`);
 
-  var command = `"${path.join(
-    toolchainPath.replace(/\"/g,""),
-    "bin",
-    "arm-none-eabi-g++"
-  )}" --version`;
+  let command = "arm-none-eabi-g++ --version";
   await prosLogger.log("OneClick", `Verifying TOOLCHAIN with command ${command}`);
 
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
