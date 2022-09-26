@@ -4,7 +4,6 @@ import * as os from "os";
 import { TreeDataProvider } from "./views/tree-view";
 import {
   getWebviewContent,
-  fetchKernelVersion,
   fetchCliVersion,
   fetchKernelVersionNonCLIDependent,
 } from "./views/welcome-view";
@@ -24,14 +23,16 @@ import {
   install,
   configurePaths,
   uninstall,
-  updateCLI,
-  cleanup,
+  cleanup
 } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
+import { Logger } from "./logger";
 let analytics: Analytics;
 
 export var system: string;
 export const output = vscode.window.createOutputChannel("PROS Output");
+
+export var prosLogger: Logger;
 
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
@@ -67,6 +68,8 @@ export const getProsTerminal = async (
 export function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
+  prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");
+
   configurePaths(context);
 
   workspaceContainsProjectPros().then((isProsProject) => {
@@ -100,10 +103,6 @@ export function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("uninstall");
     await uninstall(context);
   });
-  vscode.commands.registerCommand("pros.updatecli", async () => {
-    analytics.sendAction("updatecli");
-    await updateCLI(context);
-  });
   vscode.commands.registerCommand("pros.verify", async () => {
     analytics.sendAction("verify");
     await cleanup(context);
@@ -122,6 +121,17 @@ export function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("build");
     await build();
   });
+
+  vscode.commands.registerCommand("pros.deleteLogs", async () => {
+    analytics.sendAction("deleteLogs");
+    await prosLogger.deleteLogs();
+  });
+
+  vscode.commands.registerCommand("pros.openLog", async () => {
+    analytics.sendAction("openLog");
+    await prosLogger.openLog();
+  });
+
 
   vscode.commands.registerCommand("pros.clean", clean);
   vscode.commands.registerCommand("pros.selectProject", chooseProject);
@@ -253,7 +263,7 @@ export function activate(context: vscode.ExtensionContext) {
       .getConfiguration("pros")
       .get<boolean>("showInstallOnStartup")
   ) {
-    install(context);
+    vscode.commands.executeCommand("pros.install");
   }
 
   // heuristic to add new files to the compilation database without requiring a full build
@@ -408,7 +418,6 @@ async function chooseProject() {
   for (const f of array) {
     folderNames.push({ label: f[0], description: "" });
   }
-  //console.log(folderNames);
 
   // Display the options to users
   const target = await vscode.window.showQuickPick(folderNames, targetOptions);

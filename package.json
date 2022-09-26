@@ -124,16 +124,20 @@
         "title": "PROS: Uninstall PROS"
       },
       {
-        "command": "pros.updatecli",
-        "title": "PROS: Update PROS CLI"
-      },
-      {
         "command": "pros.verify",
         "title": "PROS: Verify PROS Installation"
       },
       {
         "command": "pros.selectProject",
         "title": "PROS: Select PROS Project"
+      },
+      {
+        "command": "pros.deleteLogs",
+        "title": "PROS: Delete Logs"
+      },
+      {
+        "command": "pros.openLog",
+        "title": "PROS: Open Log"
       },
       {
         "command": "pros.updatefirmware",
@@ -223,6 +227,11 @@
           "type": "boolean",
           "default": true,
           "description": "Prompt for PROS CLI install on startup."
+        },
+        "pros.useLogger": {
+          "type": "boolean",
+          "default": true,
+          "description": "Log PROS Extension events into a log file. Will help people provide better tech support if something goes wrong."
         },
         "pros.OneClick: CliDownloadURL": {
           "type": "string",
