@@ -24,10 +24,12 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
         new TreeItem("Install PROS", undefined, "pros.install"),
         new TreeItem("Uninstall PROS", undefined, "pros.uninstall"),
         new TreeItem("Verify PROS Installation", undefined, "pros.verify"),
-        new TreeItem("Update VEXos", undefined, "pros.updatefirmware")
+        new TreeItem("Update VEXos", undefined, "pros.updatefirmware"),
+        new TreeItem('Battery Medic', undefined, 'pros.batterymedic')
       ]),
     ];
   }
+
 
   getTreeItem(element: TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
     return element;
