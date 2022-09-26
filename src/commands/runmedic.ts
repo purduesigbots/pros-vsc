@@ -29,7 +29,7 @@ const runMedic = async () => {
           }
         );
 
-        vscode.window.showInformationMessage("Project Uploaded!");
+        vscode.window.showInformationMessage("Battery Medic Started!");
       } catch (error: any) {
         // Parse and display error message if one occured
         throw new Error(parseErrorMessage(error.stdout));
