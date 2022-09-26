@@ -7,3 +7,5 @@ export * from "./buildUpload";
 export * from "./capture";
 export * from "./run";
 export * from "./stop";
+export * from "./runmedic";
+export * from "./fw-update";
