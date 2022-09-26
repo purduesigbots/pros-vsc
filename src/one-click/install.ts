@@ -357,9 +357,9 @@ export async function cleanup(
 
         const globalPath = context.globalStorageUri.fsPath;
         await prosLogger.log("OneClick", `Removing temporary download directory`);
-        await removeDirAsync(path.join(globalPath, 'download'), false).catch((e) => {});
+        await removeDirAsync(path.join(globalPath, 'download'), false).catch((e) => {prosLogger.log("OneClick", e, "ERROR");});
         await prosLogger.log("OneClick", `Configuring environment variables`);
-        await configurePaths(context);
+        await configurePaths(context).catch((e) => {prosLogger.log("OneClick", e, "ERROR");});
         await prosLogger.log("OneClick", `Verifying that CLI and Toolchain are working`);
         
         await chmod(globalPath, system);
@@ -367,8 +367,8 @@ export async function cleanup(
         //await configurePaths(context);
 
         // Ensure that toolchain and cli are working
-        let cliSuccess = await verifyCli().catch((err) => {})??false;
-        let toolchainSuccess = await verifyToolchain().catch((err) => {console.log(err);})??false;
+        let cliSuccess = await verifyCli().catch((err) => {prosLogger.log("OneClick", err, "ERROR");})??false;
+        let toolchainSuccess = await verifyToolchain().catch((err) => {prosLogger.log("OneClick", err, "ERROR");})??false;
         if (cliSuccess && toolchainSuccess) {
           vscode.window.showInformationMessage(
             "CLI and Toolchain are working!"
@@ -384,9 +384,9 @@ export async function cleanup(
             `Please try installing again! If this problem persists, consider trying an alternative install method: https://pros.cs.purdue.edu/v5/getting-started/${system}.html`
           );
         }
-      } catch (err) {
+      } catch (err:any) {
         vscode.window.showInformationMessage("ERROR DURING VERIFICATION");
-        console.log(err);
+        prosLogger.log("OneClick", err, "ERROR");
       }
     }
   );
