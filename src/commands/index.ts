@@ -6,3 +6,4 @@ export * from "./clean";
 export * from "./buildUpload";
 export * from "./capture";
 export * from "./runmedic";
+export * from "./fw-update";
