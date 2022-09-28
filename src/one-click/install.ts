@@ -314,10 +314,11 @@ export async function install(context: vscode.ExtensionContext) {
   const dirs = await createDirs(context.globalStorageUri.fsPath);
 
   await prosLogger.log("OneClick", "Downloading and extracting files");
+  console.log("Beginning Downloads");
   await Promise.all(promises);
-
+  console.log("Cleanup and Verification");
   await prosLogger.log("OneClick", "Cleaning up after installation");
-  await cleanup(context, system);
+  await vscode.commands.executeCommand("pros.verify");
 
 
 
@@ -415,8 +416,10 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 
   PATH_SEP = getOperatingSystem() === "windows" ? ";" : ":";
   
-  cliExecPath = cliExecPath.replace(/\\/g,"");
-  toolchainPath = toolchainPath.replace(/\\/g,"");
+  if(PATH_SEP === ":") {
+    cliExecPath = cliExecPath.replace(/\\/g,"");
+    toolchainPath = toolchainPath.replace(/\\/g,"");
+  }
   TOOLCHAIN = process.env["PROS_TOOLCHAIN"] ?? toolchainPath;
   // Set CLI environmental variable file location
   CLI_EXEC_PATH = cliExecPath;
@@ -430,9 +433,12 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   }
   // Prepend CLI and TOOLCHAIN to path
   await prosLogger.log("OneClick", "Appending CLI and TOOLCHAIN to PATH");
+  await prosLogger.log("OneClick", `CLI Executable Path: ${cliExecPath}`);
+  await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   process.env.PATH = `${process.env.PATH}`; // bypass compile errors
+  await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   process.env.PATH = `${addQuotes?`"`:""}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}${PATH_SEP}${(process.env.PATH).replace(/\"/g, "")}${addQuotes?`"`:""}`;
-
+  await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   // Make PROS_TOOCLHAIN variable
   await prosLogger.log("OneClick", "Setting PROS_TOOLCHAIN");
   process.env.PROS_TOOLCHAIN = `${addQuotes?`"`:""}${TOOLCHAIN}${addQuotes?`"`:""}`;
