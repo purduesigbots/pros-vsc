@@ -393,7 +393,7 @@ export async function cleanup(
   );
 }
 
-export async function configurePaths(context: vscode.ExtensionContext) {
+export async function configurePaths(context: vscode.ExtensionContext, repeat: boolean = true) {
   await prosLogger.log("OneClick", "Getting paths for integrated terminal");
   let [cliExecPath, toolchainPath] = getIntegratedTerminalPaths(context);
 
@@ -424,11 +424,20 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   // Set CLI environmental variable file location
   CLI_EXEC_PATH = cliExecPath;
 
+
+  let path_cli_count : number = process.env["PATH"]?.split(PATH_SEP).filter((x) => x.includes(cliExecPath)).length ?? 0;
+  let path_toolchain_count : number = process.env["PATH"]?.split(PATH_SEP).filter((x) => x.includes(toolchainPath)).length ?? 0;
+  
+  prosLogger.log("OneClick", `CLI path count: ${path_cli_count}`);
+  prosLogger.log("OneClick", `Toolchain path count: ${path_toolchain_count}`);
+  console.log(`CLI path count: ${path_cli_count}`);
+  console.log(`Toolchain path count: ${path_toolchain_count}`);
   if (
-    process.env["PATH"]?.includes(cliExecPath) &&
+    path_cli_count > 2 && path_toolchain_count > 2 &&
     process.env["PROS_TOOLCHAIN"]?.includes(TOOLCHAIN)
   ) {
     console.log("path already configured");
+    await prosLogger.log("OneClick", "PATH is already configured");
     return;
   }
   // Prepend CLI and TOOLCHAIN to path
@@ -444,6 +453,10 @@ export async function configurePaths(context: vscode.ExtensionContext) {
   process.env.PROS_TOOLCHAIN = `${addQuotes?`"`:""}${TOOLCHAIN}${addQuotes?`"`:""}`;
 
   process.env.LC_ALL = "en_US.utf-8";
+  if(repeat) {
+    configurePaths(context, false); // recursive call to ensure that the path is configured. This is necessary because Macs are stupid and need the PATH updated twice for some reason.
+
+  }
 }
 
 async function verifyCli() {
