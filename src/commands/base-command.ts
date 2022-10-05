@@ -48,6 +48,13 @@ export class Base_Command {
         // eg. `pros make` must be called from within a PROS project, but `pros v5 capture` can be called from anywhere
 
 
+        // As far as implementing this onto each command, there are two ways you can do this.
+        // The first way is to do it how I layed it out above, where in each command file we make a json object and then pass it into the constructor.
+        // The second method is to change the above to become an abstract class, and then make a new class for each command which inherits from this class.
+        // There may be other ways to do this, but these are the two I can think of right now.
+        // I'm personally leaning towards the first method, as there isn't much if anything that would be different between each command.
+        // However, it's completely up to you which one you want to do, just make sure it works and is easy to understand.
+        
     }
 
     validate_pros_project = async(): Promise<boolean> => {
