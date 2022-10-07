@@ -125,7 +125,7 @@ export class Base_Command {
     }
 
     parse_output = async (live_output: Buffer[]): Promise<boolean> => {
-
+        const parse_regex: RegExp = RegExp('Error');
         // This function will parse the output of the command we ran.
         // Normally, we use the --machine-output flag to get the output in a json format.
         // This makes it easier to parse the output, as everything is categorized into different levels, such as Warning or error.
@@ -138,6 +138,12 @@ export class Base_Command {
         // If it does, we want to throw an error, and tell the user that the command failed.
 
         // If it does not, we want to return true.
+        console.log("Parsing Output")
+        var output_as_string: string = live_output.toString();
+        var test: boolean = parse_regex.test(output_as_string);
+        if (test == true){
+            throw new Error('Error occurred. Aborting command.');
+        }
 
         return true;
     }
