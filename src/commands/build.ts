@@ -14,6 +14,7 @@ import {
  */
 
 const runBuild = async () => {
+  console.log("Building")
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -38,6 +39,7 @@ const runBuild = async () => {
         );
         vscode.window.showInformationMessage("Project Built!");
       } catch (error: any) {
+        console.log(error.stdout);
         const rtn = await vscode.window.showErrorMessage(
           parseMakeOutput(error.stdout),
           "View Output!",
