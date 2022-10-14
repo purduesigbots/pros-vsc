@@ -1,3 +1,4 @@
+import * as child_process from "child_process";
 
 /*
 
@@ -21,6 +22,10 @@
 
 */
 export class Base_Command {
+    command: string;
+    args: string[];
+    options: Object;
+    requires_pros_project: boolean;
 
     constructor(command_data_json: any) {
         // the constructor is what is called whenever a new instance of the class is created
@@ -47,6 +52,10 @@ export class Base_Command {
         // we can also distinguish commands that must be called from a pros project or not.
         // eg. `pros make` must be called from within a PROS project, but `pros v5 capture` can be called from anywhere
 
+        this.command = command_data_json.command;
+        this.args = command_data_json.args;
+        this.options = command_data_json.options;
+        this.requires_pros_project = command_data_json.requires_pros_project;
 
         // As far as implementing this onto each command, there are two ways you can do this.
         // The first way is to do it how I layed it out above, where in each command file we make a json object and then pass it into the constructor.
@@ -89,6 +98,13 @@ export class Base_Command {
 
         // If the command does not require a pros project, we can continue on with the command.
 
+        if (this.requires_pros_project) {
+            let in_pros_project = await this.validate_pros_project;
+            if (!in_pros_project) {
+                // Throw error somehow
+            }
+        }
+
         // Next, we want to check if the command has any arguments.
 
         // If it does, we want to check if the user has provided any arguments.
@@ -109,6 +125,11 @@ export class Base_Command {
         // The arguments to pass to the command are the arguments we stored in the constructor.
         // The options to pass to the command are the options we stored in the constructor.
 
+        const {stdout, stderr} = child_process.spawn(
+            this.command,
+            this.args,
+            this.options
+        );
 
         // The spawn function returns a child process object.
         // This object has a few useful properties, but the one we are interested in is the `stdout` property.
@@ -122,9 +143,15 @@ export class Base_Command {
         // The event we want to listen for is the `data` event.
         // when that event is triggered, we want to call a function that will parse the output from the command (the parse_output function right below here).
 
+        stdout.on('data', (data) => {
+            this.parse_output(data);
+        });
+        stderr.on('data', (data) => {
+            this.parse_output(data);
+        });
     }
 
-    parse_output = async (live_output: Buffer[]): Promise<boolean> => {
+    parse_output = async (live_output: String): Promise<boolean> => {
 
         // This function will parse the output of the command we ran.
         // Normally, we use the --machine-output flag to get the output in a json format.
