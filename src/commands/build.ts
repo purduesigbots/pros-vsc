@@ -12,9 +12,18 @@ import {
  *
  * @param slot The slot number to place the executable in
  */
+ import { Base_Command } from "./base-command";
+ const testcmd: Base_Command = new Base_Command();
 
 const runBuild = async () => {
   console.log("Building")
+  var test_string: string = "ERROR: object yuam not found";
+  var test_2 = "uploading 23438588 bytes";
+  var test_3 = "########################";
+  var test_4 = "Do you want to continue: y/n";
+  var test_buf: Buffer = Buffer.from(test_string);
+  var buf_arr: Buffer[] = [test_buf,test_buf];
+  testcmd.parse_output(buf_arr);
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -37,7 +46,7 @@ const runBuild = async () => {
             },
           }
         );
-        vscode.window.showInformationMessage("Project Built!");
+        vscode.window.showInformationMessage("Project Quilt Ready!");
       } catch (error: any) {
         console.log(error.stdout);
         const rtn = await vscode.window.showErrorMessage(
