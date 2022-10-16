@@ -35,21 +35,27 @@ async function download(
         out!.destroy();
       });
       // Fetch the file to download
+      console.log("fetching");
       const response = await fetch(downloadURL);
+      console.log("incrementing");
       progress.report({ increment: 0 });
 
       if (!response.ok) {
         throw new Error(`Failed to download $url`);
       } 
+      console.log("downloading url OK")
       const total_size = Number(response.headers.get("content-length"));
 
       response.body.on("data", (chunk: Buffer) => {
+        console.log("chunk");
         progress.report({ increment: chunk.length * 100 / total_size });
       });
       // Write file contents to "sigbots.pros/download/filename.tar.bz2"
+      console.log("creating write stream");
       out = fs.createWriteStream(
         path.join(globalPath, "download", storagePath)
       );
+      console.log("writing to file");
       await promisify(stream.pipeline)(response.body, out).catch((e) => {
         // Clean up the partial file if the download failed.
         fs.unlink(
@@ -59,7 +65,7 @@ async function download(
         console.log(e);
         throw e;
       });
-
+      out.close();
     }
   );
   return bz2;
@@ -85,8 +91,8 @@ export async function extract(
       token.onCancellationRequested((token) => {
         prosLogger.log("OneClick", `Cancelled extraction of ${storagePath}`);
         console.log("User canceled the long running operation");
-        read!.destroy();
-        extract!.destroy();
+        read.close();
+        extract.close();
       });
 
       if (bz2) {

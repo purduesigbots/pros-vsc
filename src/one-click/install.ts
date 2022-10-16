@@ -314,10 +314,11 @@ export async function install(context: vscode.ExtensionContext) {
   const dirs = await createDirs(context.globalStorageUri.fsPath);
 
   await prosLogger.log("OneClick", "Downloading and extracting files");
+  console.log("Beginning Downloads");
   await Promise.all(promises);
-
+  console.log("Cleanup and Verification");
   await prosLogger.log("OneClick", "Cleaning up after installation");
-  await cleanup(context, system);
+  await vscode.commands.executeCommand("pros.verify");
 
 
 
@@ -392,7 +393,7 @@ export async function cleanup(
   );
 }
 
-export async function configurePaths(context: vscode.ExtensionContext) {
+export async function configurePaths(context: vscode.ExtensionContext, repeat: boolean = true) {
   await prosLogger.log("OneClick", "Getting paths for integrated terminal");
   let [cliExecPath, toolchainPath] = getIntegratedTerminalPaths(context);
 
@@ -415,29 +416,47 @@ export async function configurePaths(context: vscode.ExtensionContext) {
 
   PATH_SEP = getOperatingSystem() === "windows" ? ";" : ":";
   
-  cliExecPath = cliExecPath.replace(/\\/g,"");
-  toolchainPath = toolchainPath.replace(/\\/g,"");
+  if(PATH_SEP === ":") {
+    cliExecPath = cliExecPath.replace(/\\/g,"");
+    toolchainPath = toolchainPath.replace(/\\/g,"");
+  }
   TOOLCHAIN = process.env["PROS_TOOLCHAIN"] ?? toolchainPath;
   // Set CLI environmental variable file location
   CLI_EXEC_PATH = cliExecPath;
 
+
+  let path_cli_count : number = process.env["PATH"]?.split(PATH_SEP).filter((x) => x.includes(cliExecPath)).length ?? 0;
+  let path_toolchain_count : number = process.env["PATH"]?.split(PATH_SEP).filter((x) => x.includes(toolchainPath)).length ?? 0;
+  
+  prosLogger.log("OneClick", `CLI path count: ${path_cli_count}`);
+  prosLogger.log("OneClick", `Toolchain path count: ${path_toolchain_count}`);
+  console.log(`CLI path count: ${path_cli_count}`);
+  console.log(`Toolchain path count: ${path_toolchain_count}`);
   if (
-    process.env["PATH"]?.includes(cliExecPath) &&
+    path_cli_count > 2 && path_toolchain_count > 2 &&
     process.env["PROS_TOOLCHAIN"]?.includes(TOOLCHAIN)
   ) {
     console.log("path already configured");
+    await prosLogger.log("OneClick", "PATH is already configured");
     return;
   }
   // Prepend CLI and TOOLCHAIN to path
   await prosLogger.log("OneClick", "Appending CLI and TOOLCHAIN to PATH");
+  await prosLogger.log("OneClick", `CLI Executable Path: ${cliExecPath}`);
+  await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   process.env.PATH = `${process.env.PATH}`; // bypass compile errors
+  await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   process.env.PATH = `${addQuotes?`"`:""}${cliExecPath}${PATH_SEP}${path.join(toolchainPath, "bin")}${PATH_SEP}${(process.env.PATH).replace(/\"/g, "")}${addQuotes?`"`:""}`;
-
+  await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   // Make PROS_TOOCLHAIN variable
   await prosLogger.log("OneClick", "Setting PROS_TOOLCHAIN");
   process.env.PROS_TOOLCHAIN = `${addQuotes?`"`:""}${TOOLCHAIN}${addQuotes?`"`:""}`;
 
   process.env.LC_ALL = "en_US.utf-8";
+  if(repeat) {
+    configurePaths(context, false); // recursive call to ensure that the path is configured. This is necessary because Macs are stupid and need the PATH updated twice for some reason.
+
+  }
 }
 
 async function verifyCli() {
