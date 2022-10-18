@@ -155,7 +155,34 @@
         "command": "pros.updatefirmware",
         "title": "PROS: Update VEXos Firmware"
       }
-    ],
+    ],"keybindings": [
+      {
+        "key": "ctrl+shift+i",
+        "command": "pros.showterminal",
+        "mac": "cmd+shift+i"
+      },
+      {
+        "key": "ctrl+shift+b",
+        "command": "pros.build",
+        "mac": "cmd+shift+b"
+      },
+      {
+        "key": "ctrl+shift+u",
+        "command": "pros.upload",
+        "mac": "cmd+shift+u"
+      },
+      {
+        "key": "ctrl+shift+m",
+        "command": "pros.build&upload",
+        "mac": "cmd+shift+m"
+      },
+      {
+        "key": "ctrl+shift+t",
+        "command": "pros.terminal",
+        "mac": "cmd+shift+t"
+      }
+    
+      ],
     "menus": {
       "editor/title": [
         {
