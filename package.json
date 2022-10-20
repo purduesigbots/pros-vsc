@@ -88,6 +88,14 @@
         "title": "PROS: Build"
       },
       {
+        "command": "pros.run",
+        "title": "PROS: Run"
+      },
+      {
+        "command": "pros.stop",
+        "title": "PROS: Stop"
+      },
+      {
         "command": "pros.clean",
         "title": "PROS: Clean"
       },
@@ -98,6 +106,10 @@
       {
         "command": "pros.showterminal",
         "title": "PROS: Integrated Terminal"
+      },
+      {
+        "command": "pros.batterymedic",
+        "title": "PROS: Run Battery Medic"
       },
       {
         "command": "pros.capture",
@@ -124,10 +136,6 @@
         "title": "PROS: Uninstall PROS"
       },
       {
-        "command": "pros.updatecli",
-        "title": "PROS: Update PROS CLI"
-      },
-      {
         "command": "pros.verify",
         "title": "PROS: Verify PROS Installation"
       },
@@ -136,10 +144,45 @@
         "title": "PROS: Select PROS Project"
       },
       {
+        "command": "pros.deleteLogs",
+        "title": "PROS: Delete Logs"
+      },
+      {
+        "command": "pros.openLog",
+        "title": "PROS: Open Log"
+      },
+      {
         "command": "pros.updatefirmware",
         "title": "PROS: Update VEXos Firmware"
       }
-    ],
+    ],"keybindings": [
+      {
+        "key": "ctrl+shift+i",
+        "command": "pros.showterminal",
+        "mac": "cmd+shift+i"
+      },
+      {
+        "key": "ctrl+shift+b",
+        "command": "pros.build",
+        "mac": "cmd+shift+b"
+      },
+      {
+        "key": "ctrl+shift+u",
+        "command": "pros.upload",
+        "mac": "cmd+shift+u"
+      },
+      {
+        "key": "ctrl+shift+m",
+        "command": "pros.build&upload",
+        "mac": "cmd+shift+m"
+      },
+      {
+        "key": "ctrl+shift+t",
+        "command": "pros.terminal",
+        "mac": "cmd+shift+t"
+      }
+    
+      ],
     "menus": {
       "editor/title": [
         {
@@ -172,6 +215,14 @@
         {
           "when": "pros.isPROSProject",
           "command": "pros.build"
+        },
+        {
+          "when": "pros.isPROSProject",
+          "command": "pros.run"
+        },
+        {
+          "when": "pros.isPROSProject",
+          "command": "pros.stop"
         },
         {
           "when": "pros.isPROSProject",
@@ -223,6 +274,11 @@
           "type": "boolean",
           "default": true,
           "description": "Prompt for PROS CLI install on startup."
+        },
+        "pros.useLogger": {
+          "type": "boolean",
+          "default": true,
+          "description": "Log PROS Extension events into a log file. Will help people provide better tech support if something goes wrong."
         },
         "pros.OneClick: CliDownloadURL": {
           "type": "string",

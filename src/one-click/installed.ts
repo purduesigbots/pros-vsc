@@ -1,5 +1,7 @@
 import * as child_process from "child_process";
 import { promisify } from "util";
+import * as vscode from "vscode";
+import { prosLogger } from "../extension";
 import { getChildProcessPath } from "./path";
 var fetch = require("node-fetch");
 
@@ -8,7 +10,9 @@ export async function getCurrentReleaseVersion(url: string) {
   const response = await fetch(url);
   if (!response.ok) {
     console.log(response.url, response.status, response.statusText);
-    throw new Error(`Can't fetch release: ${response.statusText}`);
+    vscode.window.showErrorMessage("Could not get current release version");
+
+    return 0;
   }
   // Get the version number from the returned json
   const json = await response.json();
@@ -19,8 +23,9 @@ export async function getCurrentReleaseVersion(url: string) {
 export async function getCurrentVersion(oneClickPath: string) {
   try {
     console.log(oneClickPath);
+    prosLogger.log("One Click", "Executing PROS with One-Click Install directory: " + oneClickPath);
     const { stdout, stderr } = await promisify(child_process.exec)(
-      `${oneClickPath} --version`,
+      `"${oneClickPath}" --version`,
       {
         env: {
           ...process.env,
@@ -35,6 +40,7 @@ export async function getCurrentVersion(oneClickPath: string) {
     return [versionint, true];
   } catch {
     try {
+
       const { stdout, stderr } = await promisify(child_process.exec)(
         `pros --version`,
         {
@@ -56,14 +62,11 @@ export async function getCurrentVersion(oneClickPath: string) {
   }
 }
 
-export async function getInstallPromptTitle(oneClickPath: string) {
-  const recent = +(
-    await getCurrentReleaseVersion(
-      "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
-    )
-  ).replace(/\./gi, "");
+export async function getInstallPromptTitle(oneClickPath: string, recent : number) {
   const [version, oneClicked] = await getCurrentVersion(oneClickPath);
-
+  console.log("Version" + version);
+  console.log("Recent" + recent);
+  console.log("OneClicked" + oneClicked);
   if (!oneClicked && version === -1) {
     return "You do not have the PROS CLI installed. Install it now? (Recommended).";
   } else if (oneClicked && version >= recent) {

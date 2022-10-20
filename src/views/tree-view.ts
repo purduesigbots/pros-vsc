@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 
 export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
+
   onDidChangeTreeData?: vscode.Event<TreeItem | null | undefined> | undefined;
 
   data: TreeItem[];
@@ -12,6 +13,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
         new TreeItem("Upload", undefined, "pros.upload"),
         new TreeItem("Build", undefined, "pros.build"),
         new TreeItem("Clean", undefined, "pros.clean"),
+        new TreeItem('Run', undefined, 'pros.run'), 
+        new TreeItem('Stop', undefined, 'pros.stop'),
         new TreeItem("Brain Terminal", undefined, "pros.terminal"),
         new TreeItem("Integrated Terminal", undefined, "pros.showterminal"),
         new TreeItem("Capture Image", undefined, "pros.capture"),
@@ -23,12 +26,13 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
       new TreeItem("Other", [
         new TreeItem("Install PROS", undefined, "pros.install"),
         new TreeItem("Uninstall PROS", undefined, "pros.uninstall"),
-        new TreeItem("Update PROS CLI", undefined, "pros.updatecli"),
         new TreeItem("Verify PROS Installation", undefined, "pros.verify"),
         new TreeItem("Update VEXos", undefined, "pros.updatefirmware"),
+        new TreeItem('Battery Medic', undefined, 'pros.batterymedic')
       ]),
     ];
   }
+
 
   getTreeItem(element: TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
     return element;
