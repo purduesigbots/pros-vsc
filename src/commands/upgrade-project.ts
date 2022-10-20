@@ -22,6 +22,7 @@ const fetchTarget = async (): Promise<{
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     env: {
       ...process.env,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       PATH: getChildProcessPath(),
     },
   });
@@ -60,6 +61,7 @@ const fetchServerVersions = async (
   const { stdout, stderr } = await promisify(child_process.exec)(command, {
     env: {
       ...process.env,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       PATH: getChildProcessPath(),
     },
   });
@@ -98,6 +100,7 @@ const runUpgrade = async () => {
     maxBuffer: 1024 * 1024 * 50,
     env: {
       ...process.env,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       PATH: getChildProcessPath(),
     },
   });
