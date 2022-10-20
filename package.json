@@ -155,7 +155,8 @@
         "command": "pros.updatefirmware",
         "title": "PROS: Update VEXos Firmware"
       }
-    ],"keybindings": [
+    ],
+    "keybindings": [
       {
         "key": "ctrl+shift+i",
         "command": "pros.showterminal",
@@ -181,8 +182,7 @@
         "command": "pros.terminal",
         "mac": "cmd+shift+t"
       }
-    
-      ],
+    ],
     "menus": {
       "editor/title": [
         {
