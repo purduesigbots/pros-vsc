@@ -1,4 +1,5 @@
 import * as child_process from "child_process";
+import * as vscode from "vscode";
 import { BackgroundProgress } from "../logger";
 
 /*
@@ -102,7 +103,8 @@ export class Base_Command {
         if (this.requires_pros_project) {
             let in_pros_project = await this.validate_pros_project;
             if (!in_pros_project) {
-                // Throw error somehow
+                vscode.window.showInformationMessage("This command can only be run in a PROS project!");
+                return;
             }
         }
 
