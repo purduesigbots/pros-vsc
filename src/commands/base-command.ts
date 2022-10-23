@@ -1,4 +1,5 @@
 import * as child_process from "child_process";
+import { BackgroundProgress } from "../logger";
 
 /*
 
@@ -125,7 +126,9 @@ export class Base_Command {
         // The arguments to pass to the command are the arguments we stored in the constructor.
         // The options to pass to the command are the options we stored in the constructor.
 
-        const {stdout, stderr} = child_process.spawn(
+        const progressWindow = new BackgroundProgress("Running " + JSON.stringify(this), true, true);
+
+        const process = child_process.spawn(
             this.command,
             this.args,
             this.options
@@ -143,15 +146,19 @@ export class Base_Command {
         // The event we want to listen for is the `data` event.
         // when that event is triggered, we want to call a function that will parse the output from the command (the parse_output function right below here).
 
-        stdout.on('data', (data) => {
+        process.stdout.on('data', (data) => {
             this.parse_output(data);
         });
-        stderr.on('data', (data) => {
+        process.stderr.on('data', (data) => {
             this.parse_output(data);
+        });
+
+        process.on('exit', () => {
+            progressWindow.stop();
         });
     }
 
-    parse_output = async (live_output: String): Promise<boolean> => {
+    parse_output = async (live_output: string): Promise<boolean> => {
 
         // This function will parse the output of the command we ran.
         // Normally, we use the --machine-output flag to get the output in a json format.
