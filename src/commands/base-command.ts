@@ -125,7 +125,7 @@ export class Base_Command {
     }
     
     parse_output = async (live_output: (JSON|string)[] ): Promise<boolean> => {
-        const parse_regex: RegExp = RegExp('(Error: )|(ERROR: )*');
+        const parse_regex: RegExp = RegExp('((Error: )|(ERROR: ))(.+)');
         // This function will parse the output of the command we ran.
         // Normally, we use the --machine-output flag to get the output in a json format.
         // This makes it easier to parse the output, as everything is categorized into different levels, such as Warning or error.
@@ -137,16 +137,18 @@ export class Base_Command {
 
         // If it does, we want to throw an error, and tell the user that the command failed.
         var output_as_string: string = "";
+        console.log(live_output.length);
         // If it does not, we want to return true.
-        for(let i = 0;i < live_output.length-1, i++;){
-            
-            if(typeof(live_output[i]) === 'object'){
+        for(let i = 0;i < live_output.length; i++){
+            console.log(live_output[i]);
+            if(typeof live_output[i] === 'object'){
                 output_as_string += JSON.stringify(live_output[i]);
             }
             else{
                 output_as_string += live_output[i];
             }
         }
+        
         console.log("Parsing Output");
        
         console.log(output_as_string);
@@ -157,7 +159,7 @@ export class Base_Command {
         }
         console.log(test);
         if (test == true){
-            throw new Error('\n\n PROS Error occurred. Aborting command.\nError Message:'+error_msg![1]+'\n');
+            throw new Error('\n\n PROS Error occurred. Aborting command.\n'+error_msg!+'\n');
         }
 
         return true;

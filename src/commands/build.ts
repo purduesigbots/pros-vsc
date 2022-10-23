@@ -17,13 +17,13 @@ import {
 
 const runBuild = async () => {
   console.log("Building")
-  var test_string: string = "ERROR: object yuam not found";
-  var test_2 = "uploading 23438588 bytes";
-  var test_3 = "########################";
-  var test_4 = "Do you want to continue: y/n";
-  var test_buf: Buffer = Buffer.from(test_string);
-  var buf_arr: Buffer[] = [test_buf,test_buf];
-  testcmd.parse_output(buf_arr);
+  var test_string: (JSON|string)[] = ['Uc&42BWAaQ{"type": "log/message", "level": "INFO", "message": "INFO - pros.cli.common:callback - Debugging messages enabled", "simpleMessage": "Debugging messages enabled"}',
+  'Uc&42BWAaQ{"text": "Not sending analytics for this command.\n\n", "type": "notify/echo", "notify_value": 0}',
+  'Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version: 3.3.3", "simpleMessage": "CLI Version: 3.3.3"}',
+  'Usage: pros make [OPTIONS] [BUILD_ARGS]...',
+  '\n',
+  'Error: C:\Users\btdav is not inside a PROS project. Execute this command from within a PROS project or specify it with --project project/path'];
+  testcmd.parse_output(test_string);
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
