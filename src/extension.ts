@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import * as os from "os";
+import * as os from 'os';
 import { TreeDataProvider } from "./views/tree-view";
 import {
   getWebviewContent,
@@ -84,13 +84,16 @@ export function activate(context: vscode.ExtensionContext) {
     //This checks if user is currently working on a project, if not it allows user to select one
     if (isProsProject) {
       getProsTerminal(context).then((terminal) => {
-        terminal.sendText("pros build-compile-commands");
+       terminal.sendText("pros build-compile-commands");
       });
     } else {
       chooseProject();
     }
+    else{
+      chooseProject();
+    }
   });
-
+  
   if (
     vscode.workspace
       .getConfiguration("pros")
@@ -438,59 +441,3 @@ async function chooseProject() {
   for (const f of array) {
     folderNames.push({ label: f[0], description: "" });
   }
-
-  // Display the options to users
-  const target = await vscode.window.showQuickPick(folderNames, targetOptions);
-  if (target === undefined) {
-    throw new Error();
-  }
-  //This will open the folder the user selects
-  await vscode.commands.executeCommand(
-    "vscode.openFolder",
-    vscode.Uri.file(
-      path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, target.label)
-    )
-  );
-}
-
-//This function will return an array full of folder names containing pros project file
-async function prosProjects() {
-  //Specify type for any later
-  var array: any = [];
-  if (
-    vscode.workspace.workspaceFolders === undefined ||
-    vscode.workspace.workspaceFolders === null
-  ) {
-    console.log(vscode.workspace.workspaceFolders);
-    return array;
-  }
-  console.log(vscode.workspace.workspaceFolders);
-
-  for (const workspace of vscode.workspace.workspaceFolders) {
-    const currentDir = workspace.uri;
-    const folders = await vscode.workspace.fs.readDirectory(currentDir);
-    for (const folder of folders) {
-      var exists = true;
-      try {
-        // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
-        // of if the workspace is using a physical file system or not.
-        const workspaceUri = vscode.Uri.file(
-          path.join(currentDir.fsPath, folder[0])
-        );
-        const uriString = `${workspaceUri.scheme}:${
-          workspaceUri.path
-        }/${"project.pros"}`;
-        const uri = vscode.Uri.parse(uriString);
-        await vscode.workspace.fs.stat(uri);
-      } catch (e) {
-        console.error(e);
-        exists = false;
-      }
-      if (exists) {
-        array.push(folder);
-      }
-    }
-  }
-  console.log(array);
-  return array;
-}
