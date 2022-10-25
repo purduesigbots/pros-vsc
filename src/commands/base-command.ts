@@ -29,7 +29,7 @@ export class Base_Command {
     options: Object;
     requires_pros_project: boolean;
 
-    constructor(command_data_json: any) {
+    constructor(command_data_json: any = null) {
         // the constructor is what is called whenever a new instance of the class is created
         // eg. const my_command : Base_Command = new Base_Command();
 
@@ -160,8 +160,8 @@ export class Base_Command {
         });
     }
 
-    parse_output = async (live_output: string): Promise<boolean> => {
-
+    parse_output = async (live_output: (JSON|string)[] ): Promise<boolean> => {
+        const parse_regex: RegExp = RegExp('((Error: )|(ERROR: ))(.+)');
         // This function will parse the output of the command we ran.
         // Normally, we use the --machine-output flag to get the output in a json format.
         // This makes it easier to parse the output, as everything is categorized into different levels, such as Warning or error.
@@ -172,8 +172,31 @@ export class Base_Command {
         // In this case, we want to check if the output contains the string "error" or "Error". Or something along those lines
 
         // If it does, we want to throw an error, and tell the user that the command failed.
-
+        var output_as_string: string = "";
+        console.log(live_output.length);
         // If it does not, we want to return true.
+        for(let i = 0;i < live_output.length; i++){
+            console.log(live_output[i]);
+            if(typeof live_output[i] === 'object'){
+                output_as_string += JSON.stringify(live_output[i]);
+            }
+            else{
+                output_as_string += live_output[i];
+            }
+        }
+        
+        console.log("Parsing Output");
+       
+        console.log(output_as_string);
+        var error_msg = parse_regex.exec(output_as_string);
+        var test: boolean = false;
+        if(error_msg){
+            test = true;
+        }
+        console.log(test);
+        if (test == true){
+            throw new Error('\n\n PROS Error occurred. Aborting command.\n'+error_msg!+'\n');
+        }
 
         return true;
     }
