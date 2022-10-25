@@ -173,7 +173,8 @@ export class Base_Command {
         // In this case, we want to check if the output contains the string "error" or "Error". Or something along those lines
 
         // If it does, we want to throw an error, and tell the user that the command failed.
-        var output_as_string: string = "";
+        var output_as_string: string = live_output.toString();
+        /*
         console.log(live_output.length);
         // If it does not, we want to return true.
         for(let i = 0;i < live_output.length; i++){
@@ -185,6 +186,7 @@ export class Base_Command {
                 output_as_string += live_output[i];
             }
         }
+        */
         
         console.log("Parsing Output");
        

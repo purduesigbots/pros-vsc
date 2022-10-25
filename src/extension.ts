@@ -45,7 +45,7 @@ export var prosLogger: Logger;
 /// commands.
 
 const mycommand: Base_Command = new Base_Command({
-  name: "pros",
+  command: "pros",
   args: ["--version"],
   options: {
     env: {
