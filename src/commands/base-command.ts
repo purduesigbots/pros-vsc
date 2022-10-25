@@ -155,6 +155,10 @@ export class Base_Command {
             this.parse_output(data);
         });
 
+        progressWindow.token?.onCancellationRequested(() => {
+            process.kill();
+        });
+
         process.on('exit', () => {
             progressWindow.stop();
         });
