@@ -19,7 +19,8 @@ import {
   upload,
   capture,
   medic,
-  updateFirmware
+  updateFirmware,
+  Base_Command
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -29,6 +30,8 @@ import {
   uninstall,
   cleanup
 } from "./one-click/install";
+
+import { getChildProcessPath, getChildProcessProsToolchainPath  } from "./one-click/path";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
 let analytics: Analytics;
@@ -40,9 +43,28 @@ export var prosLogger: Logger;
 
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
+
+const mycommand: Base_Command = new Base_Command({
+  name: "pros",
+  args: ["--version"],
+  options: {
+    env: {
+      PATH: getChildProcessPath(),
+      PROS_TOOLCHAIN: getChildProcessProsToolchainPath()
+    }
+  },
+  requires_pros_project: false
+});
+
+mycommand.run_command();
+
+
 export const getProsTerminal = async (
   context: vscode.ExtensionContext
 ): Promise<vscode.Terminal> => {
+
+  console.log("--------\n\n\n\n\-----------\n\n\n\n");
+  mycommand.run_command();
   const prosTerminals = vscode.window.terminals.filter(
     (t) => t.name === "PROS Terminal"
   );
@@ -70,6 +92,9 @@ export const getProsTerminal = async (
 };
 
 export function activate(context: vscode.ExtensionContext) {
+  console.log("ldkfjalsk");
+  console.log("extension activated");
+  vscode.window.showInformationMessage("PROS extension activated");
   analytics = new Analytics(context);
 
   prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");

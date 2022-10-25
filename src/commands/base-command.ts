@@ -29,7 +29,7 @@ export class Base_Command {
     options: Object;
     requires_pros_project: boolean;
 
-    constructor(command_data_json: any = null) {
+    constructor(command_data_json: any) {
         // the constructor is what is called whenever a new instance of the class is created
         // eg. const my_command : Base_Command = new Base_Command();
 
@@ -99,14 +99,15 @@ export class Base_Command {
         //      If it is not, we want to throw an error, and tell the user that they need to be in a pros project to run this command.
 
         // If the command does not require a pros project, we can continue on with the command.
-
+        console.log("--------\n\n\n\n\-----------\n\n\n\n");
         if (this.requires_pros_project) {
-            let in_pros_project = await this.validate_pros_project;
+            let in_pros_project = await this.validate_pros_project();
             if (!in_pros_project) {
                 vscode.window.showInformationMessage("This command can only be run in a PROS project!");
                 return;
             }
         }
+
 
         // Next, we want to check if the command has any arguments.
 
