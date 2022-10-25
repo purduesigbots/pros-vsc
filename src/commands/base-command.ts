@@ -1,3 +1,6 @@
+import * as child_process from "child_process";
+import * as vscode from "vscode";
+import { BackgroundProgress } from "../logger";
 
 /*
 
@@ -21,8 +24,12 @@
 
 */
 export class Base_Command {
+    command: string;
+    args: string[];
+    options: Object;
+    requires_pros_project: boolean;
 
-    constructor(command_data_json: any = null) {
+    constructor(command_data_json: any) {
         // the constructor is what is called whenever a new instance of the class is created
         // eg. const my_command : Base_Command = new Base_Command();
 
@@ -47,6 +54,10 @@ export class Base_Command {
         // we can also distinguish commands that must be called from a pros project or not.
         // eg. `pros make` must be called from within a PROS project, but `pros v5 capture` can be called from anywhere
 
+        this.command = command_data_json.command;
+        this.args = command_data_json.args;
+        this.options = command_data_json.options;
+        this.requires_pros_project = command_data_json.requires_pros_project;
 
         // As far as implementing this onto each command, there are two ways you can do this.
         // The first way is to do it how I layed it out above, where in each command file we make a json object and then pass it into the constructor.
@@ -88,6 +99,15 @@ export class Base_Command {
         //      If it is not, we want to throw an error, and tell the user that they need to be in a pros project to run this command.
 
         // If the command does not require a pros project, we can continue on with the command.
+        console.log("--------\n\n\n\n\-----------\n\n\n\n");
+        if (this.requires_pros_project) {
+            let in_pros_project = await this.validate_pros_project();
+            if (!in_pros_project) {
+                vscode.window.showInformationMessage("This command can only be run in a PROS project!");
+                return;
+            }
+        }
+
 
         // Next, we want to check if the command has any arguments.
 
@@ -109,6 +129,13 @@ export class Base_Command {
         // The arguments to pass to the command are the arguments we stored in the constructor.
         // The options to pass to the command are the options we stored in the constructor.
 
+        const progressWindow = new BackgroundProgress("Running " + JSON.stringify(this), true, true);
+
+        const process = child_process.spawn(
+            this.command,
+            this.args,
+            this.options
+        );
 
         // The spawn function returns a child process object.
         // This object has a few useful properties, but the one we are interested in is the `stdout` property.
@@ -122,6 +149,16 @@ export class Base_Command {
         // The event we want to listen for is the `data` event.
         // when that event is triggered, we want to call a function that will parse the output from the command (the parse_output function right below here).
 
+        process.stdout.on('data', (data) => {
+            this.parse_output(data);
+        });
+        process.stderr.on('data', (data) => {
+            this.parse_output(data);
+        });
+
+        process.on('exit', () => {
+            progressWindow.stop();
+        });
     }
     
     parse_output = async (live_output: (string)[] ): Promise<boolean> => {
@@ -136,7 +173,8 @@ export class Base_Command {
         // In this case, we want to check if the output contains the string "error" or "Error". Or something along those lines
 
         // If it does, we want to throw an error, and tell the user that the command failed.
-        var output_as_string: string = "";
+        var output_as_string: string = live_output.toString();
+        /*
         console.log(live_output.length);
         // If it does not, we want to return true.
         for(let i = 0;i < live_output.length; i++){
@@ -158,6 +196,7 @@ export class Base_Command {
             //     output_as_string += live_output[i];
             // }
         }
+        */
         
         // console.log("Parsing Output");
        

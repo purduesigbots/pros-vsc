@@ -13,7 +13,6 @@ import {
  * @param slot The slot number to place the executable in
  */
  import { Base_Command } from "./base-command";
- const testcmd: Base_Command = new Base_Command();
 
 const runBuild = async () => {
   console.log("Building")
@@ -23,7 +22,7 @@ const runBuild = async () => {
   'Usage: pros make [OPTIONS] [BUILD_ARGS]...',
   '\n',
   'Error: C:\Users\btdav is not inside a PROS project. Execute this command from within a PROS project or specify it with --project project/path'];
-  testcmd.parse_output(test_string);
+  //testcmd.parse_output(test_string);
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
