@@ -22,6 +22,7 @@ export const fetchKernelVersion = async (): Promise<string> => {
       {
         env: {
           ...process.env,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           PATH: getChildProcessPath(),
         },
       }
@@ -49,21 +50,23 @@ export const fetchKernelVersion = async (): Promise<string> => {
 };
 
 export const fetchKernelVersionNonCLIDependent = async (): Promise<string> => {
-  const response = await fetch(
-    "https://api.github.com/repos/purduesigbots/pros/releases/latest"
-  );
-  if (!response.ok) {
-    console.log(response.url, response.status, response.statusText);
-    throw new Error(`Can't fetch kernel release: ${response.statusText}`);
-  }
-  var v = (await response.json()).tag_name;
-  return v;
+  //   const response = await fetch(
+  //     "https://api.github.com/repos/purduesigbots/pros/releases/latest"
+  //   );
+  //   if (!response.ok) {
+  //     console.log(response.url, response.status, response.statusText);
+  //     throw new Error(`Can't fetch kernel release: ${response.statusText}`);
+  //   }
+  //   var v = (await response.json()).tag_name;
+  //   return v;
+  return "0.0.0";
 };
 export const fetchCliVersion = async (): Promise<string> => {
-  const response = await axios.get(
-    "https://purduesigbots.github.io/pros-mainline/stable/UpgradeManifestV1.json"
-  );
-  return `${response.data.version.major}.${response.data.version.minor}.${response.data.version.patch}`;
+  return "0.0.0";
+  //   const response = await axios.get(
+  //     "https://purduesigbots.github.io/pros-mainline/stable/UpgradeManifestV1.json"
+  //   );
+  //   return `${response.data.version.major}.${response.data.version.minor}.${response.data.version.patch}`;
 };
 
 export function getWebviewContent(
@@ -98,10 +101,10 @@ export function getWebviewContent(
 			 </a>
 			 <p class="header__blurb">
 			 	 <a title="Open PROS on GitHub" href="https://github.com/purduesigbots/pros">Open Source</a>
-				 C/C++ Development for <b>VEX V5</b> and <b>VEX Cortex</b>. PROS is a lightweight and 
-				 fast alternative open source operating system for VEX EDR Microcontrollers. It features multitasking, 
-				 low-level control, and Wiring compatible functions to harness the full power of the Cortex. 
-				 PROS is built with developers in mind and with a focus on providing an environment for 
+				 C/C++ Development for <b>VEX V5</b> and <b>VEX Cortex</b>. PROS is a lightweight and
+				 fast alternative open source operating system for VEX EDR Microcontrollers. It features multitasking,
+				 low-level control, and Wiring compatible functions to harness the full power of the Cortex.
+				 PROS is built with developers in mind and with a focus on providing an environment for
 				 industry-applicable experience.
 			 </p>
 		     </header>
@@ -114,7 +117,7 @@ export function getWebviewContent(
 							See what's new in <a href="https://pros.cs.purdue.edu/v5/releases/cli${newCli}.html">CLI ${newCli}</a> and <a href="https://pros.cs.purdue.edu/v5/releases/kernel${newKernel}.html">Kernel ${newKernel}</a>
 						</div>
 						<div class="body__blurb">
-							Primary maintenance of PROS is done by students at Purdue University through Purdue ACM SIGBots. Inspiration for this project came from several computer science and engineering students itching to write code for VEX U's extended autonomous period. We created PROS to leverage this opportunity. 	
+							Primary maintenance of PROS is done by students at Purdue University through Purdue ACM SIGBots. Inspiration for this project came from several computer science and engineering students itching to write code for VEX U's extended autonomous period. We created PROS to leverage this opportunity.
 						</div>
 						<hr>
 						<div class="body__features">

@@ -2,30 +2,23 @@ import * as vscode from "vscode";
 import * as child_process from "child_process";
 import { promisify } from "util";
 
-import { parseErrorMessage } from "./cli-parsing";
 import { getChildProcessPath } from "../one-click/path";
-/**
- * Call the PROS build CLI command.
- *
- * @param slot The slot number to place the executable in
- */
 
-const runClean = async () => {
+const runFirmwareUpdate = async () => {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: "Cleaning Project",
+      title: "Updating Firmware",
       cancellable: false,
     },
-    async (progress, token) => {
+    async (_progress, _token) => {
       try {
-        // Command to run to clean project
-        var command = `pros make clean --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
-        console.log(command);
+        var command = "vexcom --vexos latest";
         const { stdout, stderr } = await promisify(child_process.exec)(
           command,
           {
-            timeout: 30000,
+            encoding: "utf8",
+            maxBuffer: 1024 * 1024 * 50,
             env: {
               ...process.env,
               // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -33,17 +26,21 @@ const runClean = async () => {
             },
           }
         );
-        vscode.window.showInformationMessage("Project Cleaned!");
+        console.log(stdout);
+        console.error(stderr);
+
+        vscode.window.showInformationMessage("Firmware updated!");
       } catch (error: any) {
-        throw new Error(parseErrorMessage(error.stdout));
+        console.log(error.stderr);
+        throw new Error(error.stderr);
       }
     }
   );
 };
 
-export const clean = async () => {
+export const updateFirmware = async () => {
   try {
-    await runClean();
+    await runFirmwareUpdate();
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }

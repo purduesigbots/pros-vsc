@@ -8,22 +8,21 @@ import {
   getChildProcessProsToolchainPath,
 } from "../one-click/path";
 /**
- * Call the PROS build CLI command.
+ * Call the PROS stop CLI command.
  *
  * @param slot The slot number to place the executable in
  */
 
-const runBuild = async () => {
+const runStop = async () => {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: "Building Project",
+      title: "Stopping Project",
       cancellable: false,
     },
     async (progress, token) => {
       try {
-        // Command to run to build project
-        var command = `pros make --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
+        var command = `pros v5 stop --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
         console.log(command);
         console.log(process.env["PATH"]);
         const { stdout, stderr } = await promisify(child_process.exec)(
@@ -38,24 +37,28 @@ const runBuild = async () => {
             },
           }
         );
-        vscode.window.showInformationMessage("Project Built!");
+        vscode.window.showInformationMessage("Project Stopped!");
       } catch (error: any) {
-        const rtn = await vscode.window.showErrorMessage(
-          parseMakeOutput(error.stdout),
-          "View Output!",
-          "No Thanks!"
-        );
-        if (rtn === "View Output!") {
-          output.show();
+        if (!error.stdout.includes("No v5 ports")) {
+          const rtn = await vscode.window.showErrorMessage(
+            parseMakeOutput(error.stdout),
+            "View Output!",
+            "No Thanks!"
+          );
+          if (rtn === "View Output!") {
+            output.show();
+          }
+        } else {
+          vscode.window.showErrorMessage(parseMakeOutput(error.stdout));
         }
       }
     }
   );
 };
 
-export const build = async () => {
+export const stop = async () => {
   try {
-    await runBuild();
+    await runStop();
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }

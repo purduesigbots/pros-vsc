@@ -1,5 +1,5 @@
 export const PREFIX = "Uc&42BWAaQ";
-import { output } from '../extension';
+import { output } from "../extension";
 /**
  * Finds the logging message that contains the error message.
  *
@@ -17,27 +17,27 @@ export const parseMakeOutput = (stdout: any) => {
     let jdata = JSON.parse(e.substr(PREFIX.length));
     if (jdata.type.startsWith("log") && jdata.level === "ERROR") {
       return jdata.simpleMessage;
-    }
-    else if (jdata.type.startsWith("notify") && String(jdata.text).includes("ERROR")) {
+    } else if (
+      jdata.type.startsWith("notify") &&
+      String(jdata.text).includes("ERROR")
+    ) {
       var errors = false;
-      output.appendLine('\n********************************\n');
+      output.appendLine("\n********************************\n");
       for (let err of errorSplit) {
-        if(err.substr(PREFIX.length).startsWith("{\"text")) {
-          e = JSON.parse(err.substr(PREFIX.length)).text
+        if (err.substr(PREFIX.length).startsWith('{"text')) {
+          e = JSON.parse(err.substr(PREFIX.length)).text;
           const regex = new RegExp(
-            '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))',
-          'g');
-          output.appendLine(e.replace(
-            regex,
-            ''
-          ));
+            "[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))",
+            "g"
+          );
+          output.appendLine(e.replace(regex, ""));
           errors = true;
         }
       }
-      return "Build Failed! See PROS output for details!"
+      return "Build Failed! See PROS output for details!";
     }
   }
-}
+};
 
 export const parseErrorMessage = (stdout: any) => {
   const errorSplit = stdout.split(/\r?\n/);

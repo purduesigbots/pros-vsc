@@ -4,28 +4,24 @@ import { promisify } from "util";
 
 import { parseErrorMessage } from "./cli-parsing";
 import { getChildProcessPath } from "../one-click/path";
-/**
- * Call the PROS build CLI command.
- *
- * @param slot The slot number to place the executable in
- */
 
-const runClean = async () => {
+const runMedic = async () => {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: "Cleaning Project",
+      title: "Running Brain Medic",
       cancellable: false,
     },
     async (progress, token) => {
       try {
-        // Command to run to clean project
-        var command = `pros make clean --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
+        // Command to run to upload project to brain
+        var command = `vexcom --medic`;
         console.log(command);
         const { stdout, stderr } = await promisify(child_process.exec)(
           command,
           {
-            timeout: 30000,
+            encoding: "utf8",
+            maxBuffer: 1024 * 1024 * 50,
             env: {
               ...process.env,
               // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -33,17 +29,21 @@ const runClean = async () => {
             },
           }
         );
-        vscode.window.showInformationMessage("Project Cleaned!");
+
+        vscode.window.showInformationMessage("Battery Medic Started!");
       } catch (error: any) {
+        // Parse and display error message if one occured
         throw new Error(parseErrorMessage(error.stdout));
       }
     }
   );
 };
 
-export const clean = async () => {
+export const medic = async (context: vscode.ExtensionContext) => {
   try {
-    await runClean();
+    // Set environmental variables
+    // Run upload command
+    await runMedic();
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
