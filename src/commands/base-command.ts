@@ -130,7 +130,7 @@ export class Base_Command {
 
         const progressWindow = new BackgroundProgress("Running " + JSON.stringify(this), true, true);
 
-        const process = child_process.spawn(
+        const child = child_process.spawn(
             this.command,
             this.args,
             this.options
@@ -148,18 +148,26 @@ export class Base_Command {
         // The event we want to listen for is the `data` event.
         // when that event is triggered, we want to call a function that will parse the output from the command (the parse_output function right below here).
 
-        process.stdout.on('data', (data) => {
-            this.parse_output(data);
+        child.stdout.on('data', (data) => {
+            try{
+                this.parse_output(data.toString().split("\n"));
+            } catch (e) {
+                vscode.window.showInformationMessage((e as Error).message);
+            }
         });
-        process.stderr.on('data', (data) => {
-            this.parse_output(data);
+        child.stderr.on('data', (data) => {
+            try {
+                this.parse_output(data.toString().split("\n"));
+            } catch (e) {
+                vscode.window.showInformationMessage((e as Error).message);
+            }
         });
 
         progressWindow.token?.onCancellationRequested(() => {
-            process.kill();
+            child.kill();
         });
 
-        process.on('exit', () => {
+        child.on('exit', () => {
             progressWindow.stop();
         });
     }
