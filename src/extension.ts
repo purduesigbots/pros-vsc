@@ -37,6 +37,7 @@ export const output = vscode.window.createOutputChannel("PROS Output");
 
 export var prosLogger: Logger;
 
+
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
 export const getProsTerminal = async (
@@ -151,6 +152,24 @@ export function activate(context: vscode.ExtensionContext) {
     await prosLogger.openLog();
   });
 
+  vscode.languages.registerHoverProvider('*', {
+    provideHover(document, position, token) {
+        //will be needed for word lookup
+        const range = document.getWordRangeAtPosition(position);
+        const word = document.getText(range);
+      
+      
+        let link = new vscode.MarkdownString(`[Open...](${"https://www.google.com/?client=safari"})`);
+        link.isTrusted = true;
+
+        let hover: vscode.Hover = {
+            contents: [link]
+        };
+        return hover;
+
+    }
+  });
+
   vscode.commands.registerCommand("pros.clean", clean);
   vscode.commands.registerCommand("pros.selectProject", chooseProject);
   vscode.commands.registerCommand("pros.terminal", async () => {
@@ -204,7 +223,7 @@ export function activate(context: vscode.ExtensionContext) {
         enableScripts: true,
       }
     );
-
+    
     panel.iconPath = vscode.Uri.file(
       path.join(context.extensionPath, "media", "pros-color-icon.png")
     );
