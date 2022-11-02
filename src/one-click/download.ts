@@ -37,6 +37,7 @@ async function download(
       // Fetch the file to download
       console.log("fetching");
       let response: any = undefined;
+      // workaround while repo is private
       if (downloadURL.includes("vexcom")) {
         response = await fetch(downloadURL,
           {

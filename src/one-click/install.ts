@@ -723,6 +723,7 @@ async function verifyVexcom() {
     timeout: 5000,
     env: {
       ...process.env,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       PATH: getChildProcessPath()
     }
   });
