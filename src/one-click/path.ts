@@ -9,7 +9,7 @@ import { getOperatingSystem } from "./install";
 // outside the integrated terminal.
 export const getIntegratedTerminalPaths = (
   context: vscode.ExtensionContext
-): [string, string] => {
+): [string, string, string] => {
   const globalPath = context.globalStorageUri.fsPath;
   const system = getOperatingSystem();
 
@@ -25,13 +25,16 @@ export const getIntegratedTerminalPaths = (
     }`
   );
 
+  let vexcomPath = path.join(globalPath, "install", `vex-vexcom-${system}`);
+
   if (system === "macos" && !os.cpus()[0].model.includes("Apple M")) {
     // Escape spaces in paths on Intel Mac
     cliExecPath = cliExecPath.replace(/(\s+)/g, "\\$1");
     toolchainPath = toolchainPath.replace(/(\s+)/g, "\\$1");
+    vexcomPath = vexcomPath.replace(/(\s+)/g, "\\$1");
   }
 
-  return [cliExecPath, toolchainPath];
+  return [cliExecPath, toolchainPath, vexcomPath];
 };
 
 // Returns the path to the PROS CLI.
