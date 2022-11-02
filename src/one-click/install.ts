@@ -277,8 +277,8 @@ export async function install(context: vscode.ExtensionContext) {
     "OneClick",
     `${
       vexcomWorking
-        ? "Toolchain appears to be functional"
-        : "Toolchain not functional or not installed"
+        ? "Vexcom appears to be functional"
+        : "Vexcom not functional or not installed"
     }`,
     vexcomWorking ? "INFO" : "WARNING"
   );
