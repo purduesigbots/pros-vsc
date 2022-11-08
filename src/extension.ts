@@ -48,12 +48,6 @@ export var prosLogger: Logger;
 const mycommand: Base_Command = new Base_Command({
   command: "pros",
   args: ["--version"],
-  options: {
-    env: {
-      PATH: getChildProcessPath(),
-      PROS_TOOLCHAIN: getChildProcessProsToolchainPath()
-    }
-  },
   requires_pros_project: false
 });
 

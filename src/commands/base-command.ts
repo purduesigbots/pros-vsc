@@ -1,6 +1,7 @@
 import * as child_process from "child_process";
 import * as vscode from "vscode";
 import { BackgroundProgress } from "../logger";
+import { getChildProcessPath, getChildProcessProsToolchainPath } from "../one-click/path";
 import { get_cwd_is_pros } from "../workspace";
 /*
 
@@ -26,7 +27,7 @@ import { get_cwd_is_pros } from "../workspace";
 export class Base_Command {
     command: string;
     args: string[];
-    options: Object;
+    cwd: string;
     requires_pros_project: boolean;
 
     constructor(command_data_json: any) {
@@ -56,7 +57,7 @@ export class Base_Command {
 
         this.command = command_data_json.command;
         this.args = command_data_json.args;
-        this.options = command_data_json.options;
+        this.cwd = process.cwd();
         this.requires_pros_project = command_data_json.requires_pros_project;
 
         // As far as implementing this onto each command, there are two ways you can do this.
@@ -69,7 +70,11 @@ export class Base_Command {
     }
 
     validate_pros_project = async(): Promise<boolean> => {
-        return (await get_cwd_is_pros())[1];
+        const [projectDir, isProsProject] = await get_cwd_is_pros();
+        if (isProsProject) {
+            this.cwd = projectDir.fsPath;
+        }
+        return isProsProject;
     }
 
     run_command = async () => {
@@ -117,7 +122,14 @@ export class Base_Command {
         const child = child_process.spawn(
             this.command,
             this.args,
-            this.options
+            {
+                cwd: this.cwd,
+                env: {
+                    ...process.env,
+                    PATH: getChildProcessPath(),
+                    PROS_TOOLCHAIN: getChildProcessProsToolchainPath()
+                }
+            }
         );
 
         // The spawn function returns a child process object.
