@@ -33,6 +33,8 @@ import {
 } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
+import { getChildProcessProsToolchainPath } from "./one-click/path";
+
 let analytics: Analytics;
 
 export var system: string;
@@ -508,6 +510,9 @@ const generate_c_cpp_files = async() => {
     return;
   }
 
+
+  // We will need to update this part with the new code in #110 once this all gets merged into develop. We can do a quick cleanup branch or something
+
   const workspaceRootUri = vscode.workspace.workspaceFolders[0].uri;
 
   const c_cpp_propertiesUri = vscode.Uri.joinPath(
@@ -586,7 +591,11 @@ const generate_c_cpp_files = async() => {
 const modifyJson = async (dirpath: vscode.Uri, json: any, os: string) => {
   //modify the json file then save it
 
-  json.configurations[0].includePath.push(path.join(dirpath.fsPath, "include"));
+  // if include is not already in the array
+  let include = path.join(dirpath.fsPath, "include");
+  if (!json.configurations[0].includePath.includes(include)) {
+    json.configurations[0].includePath.push(include);
+  }
   json.configurations[0].compileCommands = path.join(dirpath.fsPath, "compile_commands.json");
   json.configurations[0].intelliSenseMode = "gcc-arm";
   if(os === "macos") {
@@ -600,7 +609,11 @@ const modifyJson = async (dirpath: vscode.Uri, json: any, os: string) => {
     "databaseFilename": ""
   }
 
-  json.configurations[0].compilerPath = "${PROS_TOOLCHAIN}\\bin\\arm-none-eabi-g++";
-
+  let toolchain = getChildProcessProsToolchainPath();
+  if (toolchain) {
+    console.log(toolchain);
+    json.configurations[0].compilerPath = path.join(toolchain, "bin", "arm-none-eabi-g++");
+  }
+  
   await promisify(fs.writeFile)(path.join(dirpath.fsPath, ".vscode", "c_cpp_properties.json"), JSON.stringify(json, null, 2));
 }
