@@ -29,7 +29,7 @@ import {
   configurePaths,
   uninstall,
   cleanup,
-  getOperatingSystem
+  getOperatingSystem,
 } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
@@ -91,9 +91,8 @@ export function activate(context: vscode.ExtensionContext) {
       getProsTerminal(context).then((terminal) => {
         terminal.sendText("pros build-compile-commands");
       });
-      generate_c_cpp_files();
-    }
-    else{
+      generateCCppFiles();
+    } else {
       chooseProject();
     }
   });
@@ -290,7 +289,6 @@ export function activate(context: vscode.ExtensionContext) {
   ) {
     vscode.commands.executeCommand("pros.install");
   }
-
 
   // heuristic to add new files to the compilation database without requiring a full build
   vscode.workspace.onDidCreateFiles(async (event) => {
@@ -500,22 +498,16 @@ async function prosProjects() {
   return array;
 }
 
-
-const generate_c_cpp_files = async() => {
-
-  if (
-    !(workspaceContainsProjectPros()) ||
-    !vscode.workspace.workspaceFolders
-  ) {
+const generateCCppFiles = async () => {
+  if (!workspaceContainsProjectPros() || !vscode.workspace.workspaceFolders) {
     return;
   }
-
 
   // We will need to update this part with the new code in #110 once this all gets merged into develop. We can do a quick cleanup branch or something
 
   const workspaceRootUri = vscode.workspace.workspaceFolders[0].uri;
 
-  const c_cpp_propertiesUri = vscode.Uri.joinPath(
+  const cCppPropertiesUri = vscode.Uri.joinPath(
     workspaceRootUri,
     ".vscode",
     "c_cpp_properties.json"
@@ -531,7 +523,9 @@ const generate_c_cpp_files = async() => {
     // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
     // of if the workspace is using a physical file system or not.
     const workspaceUri = workspaceRootUri;
-    const uriString = `${workspaceUri.scheme}:${workspaceUri.path}/${'project.pros'}`;
+    const uriString = `${workspaceUri.scheme}:${
+      workspaceUri.path
+    }/${"project.pros"}`;
     const uri = vscode.Uri.parse(uriString);
     await vscode.workspace.fs.stat(uri);
   } catch (e) {
@@ -540,23 +534,25 @@ const generate_c_cpp_files = async() => {
   }
 
   if (exists || true) {
-
     const os = getOperatingSystem();
     let json;
     //check if the properties file exists
     console.log("checking if it exists");
-    try { 
+    try {
       // check if the file exists
-      let response = await vscode.workspace.fs.stat(c_cpp_propertiesUri);
+      let response = await vscode.workspace.fs.stat(cCppPropertiesUri);
       // do nothing
-      let filedata = await promisify(fs.readFile)(c_cpp_propertiesUri.fsPath, 'utf8');
+      let filedata = await promisify(fs.readFile)(
+        cCppPropertiesUri.fsPath,
+        "utf8"
+      );
       json = JSON.parse(filedata);
 
       await modifyJson(workspaceRootUri, json, os);
     } catch (e) {
       // make the file
       console.log("generating file");
-      
+
       const defaultJSON = `{
         "configurations": [
             {
@@ -576,17 +572,13 @@ const generate_c_cpp_files = async() => {
             }
         ],
         "version": 4
-    }`
+    }`;
 
-    json = JSON.parse(defaultJSON);
-    await modifyJson(workspaceRootUri, json, os);
+      json = JSON.parse(defaultJSON);
+      await modifyJson(workspaceRootUri, json, os);
     }
-    
-    
   }
-  
-}
-
+};
 
 const modifyJson = async (dirpath: vscode.Uri, json: any, os: string) => {
   //modify the json file then save it
@@ -596,24 +588,33 @@ const modifyJson = async (dirpath: vscode.Uri, json: any, os: string) => {
   if (!json.configurations[0].includePath.includes(include)) {
     json.configurations[0].includePath.push(include);
   }
-  json.configurations[0].compileCommands = path.join(dirpath.fsPath, "compile_commands.json");
+  json.configurations[0].compileCommands = path.join(
+    dirpath.fsPath,
+    "compile_commands.json"
+  );
   json.configurations[0].intelliSenseMode = "gcc-arm";
-  if(os === "macos") {
+  if (os === "macos") {
     json.configurations[0].macFrameworkPath = ["/System/Library/Frameworks"];
-  
   }
 
   json.configurations[0].browse = {
-    "path": [dirpath.fsPath],
-    "limitSymbolsToIncludedHeaders": true,
-    "databaseFilename": ""
-  }
+    path: [dirpath.fsPath],
+    limitSymbolsToIncludedHeaders: true,
+    databaseFilename: "",
+  };
 
   let toolchain = getChildProcessProsToolchainPath();
   if (toolchain) {
     console.log(toolchain);
-    json.configurations[0].compilerPath = path.join(toolchain, "bin", "arm-none-eabi-g++");
+    json.configurations[0].compilerPath = path.join(
+      toolchain,
+      "bin",
+      "arm-none-eabi-g++"
+    );
   }
-  
-  await promisify(fs.writeFile)(path.join(dirpath.fsPath, ".vscode", "c_cpp_properties.json"), JSON.stringify(json, null, 2));
-}
+
+  await promisify(fs.writeFile)(
+    path.join(dirpath.fsPath, ".vscode", "c_cpp_properties.json"),
+    JSON.stringify(json, null, 2)
+  );
+};
