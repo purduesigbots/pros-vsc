@@ -28,6 +28,7 @@ const runClean = async () => {
             timeout: 30000,
             env: {
               ...process.env,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               PATH: getChildProcessPath(),
             },
           }

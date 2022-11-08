@@ -23,12 +23,16 @@ export async function getCurrentReleaseVersion(url: string) {
 export async function getCurrentVersion(oneClickPath: string) {
   try {
     console.log(oneClickPath);
-    prosLogger.log("One Click", "Executing PROS with One-Click Install directory: " + oneClickPath);
+    prosLogger.log(
+      "One Click",
+      "Executing PROS with One-Click Install directory: " + oneClickPath
+    );
     const { stdout, stderr } = await promisify(child_process.exec)(
       `"${oneClickPath}" --version`,
       {
         env: {
           ...process.env,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           PATH: getChildProcessPath(),
         },
       }
@@ -39,12 +43,12 @@ export async function getCurrentVersion(oneClickPath: string) {
     return [versionint, true];
   } catch {
     try {
-
       const { stdout, stderr } = await promisify(child_process.exec)(
         `pros --version`,
         {
           env: {
             ...process.env,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             PATH: getChildProcessPath(),
           },
         }
@@ -60,7 +64,10 @@ export async function getCurrentVersion(oneClickPath: string) {
   }
 }
 
-export async function getInstallPromptTitle(oneClickPath: string, recent : number) {
+export async function getInstallPromptTitle(
+  oneClickPath: string,
+  recent: number
+) {
   const [version, oneClicked] = await getCurrentVersion(oneClickPath);
   console.log("Version" + version);
   console.log("Recent" + recent);
@@ -77,4 +84,3 @@ export async function getInstallPromptTitle(oneClickPath: string, recent : numbe
     return "An outdated version of PROS was detected on your system, not installed through VS Code. Would you like to install the update with VS Code?";
   }
 }
-

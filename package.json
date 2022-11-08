@@ -156,6 +156,33 @@
         "title": "PROS: Update VEXos Firmware"
       }
     ],
+    "keybindings": [
+      {
+        "key": "ctrl+shift+i",
+        "command": "pros.showterminal",
+        "mac": "cmd+shift+i"
+      },
+      {
+        "key": "ctrl+shift+b",
+        "command": "pros.build",
+        "mac": "cmd+shift+b"
+      },
+      {
+        "key": "ctrl+shift+u",
+        "command": "pros.upload",
+        "mac": "cmd+shift+u"
+      },
+      {
+        "key": "ctrl+shift+m",
+        "command": "pros.build&upload",
+        "mac": "cmd+shift+m"
+      },
+      {
+        "key": "ctrl+shift+t",
+        "command": "pros.terminal",
+        "mac": "cmd+shift+t"
+      }
+    ],
     "menus": {
       "editor/title": [
         {
@@ -272,8 +299,9 @@
     "deploy": "vsce publish --yarn",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "lint": "eslint --cache --max-warnings=0",
+    "test": "node ./out/test/runTest.js",
+    "format": "prettier --write --json-recursive-sort"
   },
   "devDependencies": {
     "@types/glob": "^7.1.3",
@@ -285,6 +313,8 @@
     "eslint": "^7.19.0",
     "glob": "^7.1.6",
     "mocha": "^8.2.1",
+    "prettier": "^2.7.1",
+    "prettier-plugin-sort-json": "^0.0.2",
     "typescript": "^4.1.3",
     "vsce": "^1.93.0",
     "vscode-test": "^1.5.0"

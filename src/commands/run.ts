@@ -30,7 +30,9 @@ const runRun = async () => {
           {
             env: {
               ...process.env,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               PATH: getChildProcessPath(),
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               PROS_TOOLCHAIN: getChildProcessProsToolchainPath(),
             },
           }

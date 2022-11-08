@@ -55,6 +55,7 @@ const runCapture = async (output: string) => {
             maxBuffer: 1024 * 1024 * 10,
             env: {
               ...process.env,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               PATH: getChildProcessPath(),
             },
           }
