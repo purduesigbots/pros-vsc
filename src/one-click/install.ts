@@ -198,7 +198,7 @@ export async function install(context: vscode.ExtensionContext) {
     const releaseVersionNumber = +cliVersion.replace(/\./gi,'') ?? 0;
     const toolchainVersion = await getCurrentReleaseVersion(
       "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
-    )
+    );
     await prosLogger.log("OneClick", `CLI Version: ${cliVersion}`);
   } catch(e: any) {
     await prosLogger.log("OneClick", "Failed to access version number");
