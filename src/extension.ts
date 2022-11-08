@@ -30,10 +30,11 @@ import {
   uninstall,
   cleanup
 } from "./one-click/install";
-
 import { getChildProcessPath, getChildProcessProsToolchainPath  } from "./one-click/path";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
+import { get_cwd_is_pros } from "./workspace";
+
 let analytics: Analytics;
 
 export var system: string;
@@ -92,8 +93,6 @@ export const getProsTerminal = async (
 };
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log("ldkfjalsk");
-  console.log("extension activated");
   vscode.window.showInformationMessage("PROS extension activated");
   analytics = new Analytics(context);
 
@@ -417,29 +416,9 @@ export function deactivate() {
 }
 
 async function workspaceContainsProjectPros(): Promise<boolean> {
-  const filename = "project.pros";
-
-  if (
-    vscode.workspace.workspaceFolders === undefined ||
-    vscode.workspace.workspaceFolders === null
-  ) {
-    return false;
-  }
-
-  let exists = true;
-  try {
-    // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
-    // of if the workspace is using a physical file system or not.
-    const workspaceUri = vscode.workspace.workspaceFolders[0].uri;
-    const uriString = `${workspaceUri.scheme}:${workspaceUri.path}/${filename}`;
-    const uri = vscode.Uri.parse(uriString);
-    await vscode.workspace.fs.stat(uri);
-  } catch (e) {
-    console.error(e);
-    exists = false;
-  }
-  return exists;
+  return ((await get_cwd_is_pros())[1]);
 }
+
 //This code calls prosProjects and allows user to choose which pros project to work on
 async function chooseProject() {
   if (

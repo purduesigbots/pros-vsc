@@ -1,7 +1,7 @@
 import * as child_process from "child_process";
 import * as vscode from "vscode";
 import { BackgroundProgress } from "../logger";
-
+import { get_cwd_is_pros } from "../workspace";
 /*
 
     I realize I missed something quite important in the presentation. It's the idea of synchronous v.s. asynchronous functions.
@@ -69,24 +69,7 @@ export class Base_Command {
     }
 
     validate_pros_project = async(): Promise<boolean> => {
-        // this function will check if the current directory is a pros project
-
-        // the easiest way to check this is by checking if a file called `project.pros` exists in the current working directory.
-        // if it does, then we are in a pros project, and we can return true
-        // a method of doing this can be seen on line 393 of src/extensions.ts. However, this method is not 100% reliable.
-        // This method assumes the 0th index of the workspaceFolders array is the current working directory, which may not always be the case according to documentation.
-        // Doing this could lead to problems if the user has multiple projects open at once.
-
-        // One thing you should look at doing is identifying the current working directory, and then checking if the file exists in that directory.
-        // A potential workaround for this is to do the following:
-        // identify a bash command that will return the current working directory
-        // use the child_process.exec() function to run that command
-        // parse the output of the command to get the current working directory
-        // check if the file exists in that directory
-
-        // if the file does not exist, then we can return false
-
-        return true;
+        return (await get_cwd_is_pros())[1];
     }
 
     run_command = async () => {
