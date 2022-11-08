@@ -161,9 +161,9 @@ export async function install(context: vscode.ExtensionContext) {
 
   await prosLogger.log("OneClick", "Fetching Latest CLI Version....");
   try{
-    var cliVersion = ((await getCurrentReleaseVersion(
+    var cliVersion = await getCurrentReleaseVersion(
       "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
-    )));
+    );
     let release_version_number = +cliVersion.replace(/\./gi,'') ?? 0;
     const toolchainVersion = await getCurrentReleaseVersion(
       "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
