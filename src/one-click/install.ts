@@ -191,18 +191,24 @@ export async function install(context: vscode.ExtensionContext) {
 
   await prosLogger.log("OneClick", "Fetching Latest CLI Version....");
 
-  try{
-    const cliVersion = await getCurrentReleaseVersion(
+  let cliVersion, releaseVersionNumber, toolchainVersion;
+  try {
+    cliVersion = await getCurrentReleaseVersion(
       "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
     );
-    const releaseVersionNumber = +cliVersion.replace(/\./gi,'') ?? 0;
-    const toolchainVersion = await getCurrentReleaseVersion(
+    releaseVersionNumber = +cliVersion.replace(/\./gi, "") ?? 0;
+    toolchainVersion = await getCurrentReleaseVersion(
       "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
     );
     await prosLogger.log("OneClick", `CLI Version: ${cliVersion}`);
-  } catch(e: any) {
+  } catch (e: any) {
     await prosLogger.log("OneClick", "Failed to access version number");
     console.log("Hit the rate limit, please try again after some time.");
+    cliVersion = undefined;
+  }
+
+  if (cliVersion === undefined || toolchainVersion === undefined) {
+    throw new Error("Failed to access version number");
   }
 
   // Get system type, path string separator, CLI download url, and toolchain download url.
