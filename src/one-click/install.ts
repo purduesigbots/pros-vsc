@@ -97,7 +97,7 @@ async function getUrls(cliVersion: number, toolchainVersion: string, vexcomVersi
   var downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-lin-64bit.zip`;
   var downloadToolchain =
     "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2";
-  var downloadVexcom = "https://pros.cs.purdue.edu/v5/_static/releases/vexcom_1_0_0_23-linux-x64.zip";
+  var downloadVexcom = `https://pros.cs.purdue.edu/v5/_static/releases/vexcom_${vexcomVersion}-linux-x64.zip`;
 
   await prosLogger.log(
     "OneClick",
@@ -108,14 +108,14 @@ async function getUrls(cliVersion: number, toolchainVersion: string, vexcomVersi
     // Set system, path seperator, and downloads to windows version
     downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-win-64bit.zip`;
     downloadToolchain = `https://github.com/purduesigbots/toolchain/releases/download/${toolchainVersion}/pros-toolchain-windows.zip`;
-    downloadVexcom = "https://pros.cs.purdue.edu/v5/_static/releases/vexcom_1_0_0_23-win32.zip";
+    downloadVexcom = `https://pros.cs.purdue.edu/v5/_static/releases/vexcom_${vexcomVersion}-win32.zip`;
   } else if (getOperatingSystem() === "macos") {
     await prosLogger.log("OneClick", `MacOS detected, using MacOS URLS`);
     // Set system, path seperator, and downloads to windows version
     downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-macos-64bit.zip`;
     downloadToolchain =
       "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2";
-    downloadVexcom = "https://pros.cs.purdue.edu/v5/_static/releases/vexcom_1_0_0_23-osx.zip";
+    downloadVexcom = `https://pros.cs.purdue.edu/v5/_static/releases/vexcom_${vexcomVersion}-osx.zip`;
     os.cpus().some((cpu) => {
       if (cpu.model.includes("Apple M")) {
         downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-macos-arm64bit.zip`;
@@ -200,7 +200,7 @@ export async function install(context: vscode.ExtensionContext) {
   const toolchainVersion = await getCurrentReleaseVersion(
     "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
   );
-  const vexcomVersion = "1.0.0";
+  const vexcomVersion = "1_0_0_23";
 
   await prosLogger.log("OneClick", `CLI Version: ${cliVersion}`);
 
