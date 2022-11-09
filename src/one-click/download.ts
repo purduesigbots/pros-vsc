@@ -37,19 +37,7 @@ async function download(
       // Fetch the file to download
       console.log("fetching");
       let response: any = undefined;
-      // workaround while repo is private
-      if (downloadURL.includes("vexcom")) {
-        response = await fetch(downloadURL,
-          {
-            headers: {
-              accept: "application/octet-stream",
-              authorization: "token INSERT_TOKEN_HERE"
-            }
-          }
-        );
-      } else {
-        response = await fetch(downloadURL);
-      }
+      response = await fetch(downloadURL);
       console.log("incrementing");
       progress.report({ increment: 0 });
 
