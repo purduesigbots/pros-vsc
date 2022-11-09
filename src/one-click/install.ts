@@ -190,15 +190,26 @@ export async function install(context: vscode.ExtensionContext) {
   await prosLogger.log("OneClick", `Operating System Detected: ${system}`);
 
   await prosLogger.log("OneClick", "Fetching Latest CLI Version....");
-  var cliVersion = await getCurrentReleaseVersion(
-    "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
-  );
-  let releaseVersionNumber = +cliVersion.replace(/\./gi, "") ?? 0;
-  const toolchainVersion = await getCurrentReleaseVersion(
-    "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
-  );
 
-  await prosLogger.log("OneClick", `CLI Version: ${cliVersion}`);
+  let cliVersion, releaseVersionNumber, toolchainVersion;
+  try {
+    cliVersion = await getCurrentReleaseVersion(
+      "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
+    );
+    releaseVersionNumber = +cliVersion.replace(/\./gi, "") ?? 0;
+    toolchainVersion = await getCurrentReleaseVersion(
+      "https://api.github.com/repos/purduesigbots/toolchain/releases/latest"
+    );
+    await prosLogger.log("OneClick", `CLI Version: ${cliVersion}`);
+  } catch (e: any) {
+    await prosLogger.log("OneClick", "Failed to access version number");
+    console.log("Hit the rate limit, please try again after some time.");
+    cliVersion = undefined;
+  }
+
+  if (cliVersion === undefined || toolchainVersion === undefined) {
+    throw new Error("Failed to access version number");
+  }
 
   // Get system type, path string separator, CLI download url, and toolchain download url.
   // Default variables are based on linux.
