@@ -84,8 +84,8 @@ export async function uninstall(context: vscode.ExtensionContext) {
       },
       async (progress, token) => {
         let promises: Promise<any>[] = [];
-        promises.push(removeDirAsync(path.join(globalPath, "install"), true));
-        promises.push(removeDirAsync(path.join(globalPath, "download"), true));
+        promises.push(removeDirAsync(path.join(globalPath, "install"), false));
+        promises.push(removeDirAsync(path.join(globalPath, "download"), false));
         await Promise.all(promises);
       }
     );
@@ -343,7 +343,7 @@ export async function install(context: vscode.ExtensionContext) {
       );
       console.log("removing directory " + deleteDir);
       await prosLogger.log("OneClick", "removing directory " + deleteDir);
-      await removeDirAsync(deleteDir, true).catch((e) => {
+      await removeDirAsync(deleteDir, false).catch((e) => {
         console.log(e);
       });
       await prosLogger.log(
@@ -380,7 +380,7 @@ export async function install(context: vscode.ExtensionContext) {
       );
       console.log("removing directory " + deleteDir);
       await prosLogger.log("OneClick", "removing directory " + deleteDir);
-      await removeDirAsync(deleteDir, true).catch((e) => {
+      await removeDirAsync(deleteDir, false).catch((e) => {
         console.log(e);
       });
       await removeDirAsync(
@@ -422,7 +422,7 @@ export async function install(context: vscode.ExtensionContext) {
       console.log("removing old cli and toolchain");
       await removeDirAsync(
         path.join(context.globalStorageUri.fsPath, "install"),
-        true
+        false
       ).catch((e) => {
         console.log(e);
       });
@@ -440,6 +440,7 @@ export async function install(context: vscode.ExtensionContext) {
       promises = [
         downloadextract(context, downloadCli, cliName),
         downloadextract(context, downloadToolchain, toolchainName),
+        downloadextract(context, downloadVexcom, vexcomName)
       ];
     } else {
       await prosLogger.log(
