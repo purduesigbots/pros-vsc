@@ -68,12 +68,12 @@ export const getProsTerminal = async (
   });
 };
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
   prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");
 
-  configurePaths(context);
+  await configurePaths(context);
 
   workspaceContainsProjectPros().then((isProsProject) => {
     vscode.commands.executeCommand(
