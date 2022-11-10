@@ -36,8 +36,7 @@ async function download(
       });
       // Fetch the file to download
       console.log("fetching");
-      let response: any = undefined;
-      response = await fetch(downloadURL);
+      const response = await fetch(downloadURL);
       console.log("incrementing");
       progress.report({ increment: 0 });
 
