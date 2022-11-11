@@ -340,6 +340,10 @@ export async function chmod(globalPath: string, system: string) {
       path.join(globalPath, "install", `pros-cli-${system}`, "intercept-cc"),
       0o751
     ),
+    fs.promises.chmod(
+      path.join(globalPath, "install", `vex-vexcom-${system}`, "vexcom"),
+      0o751
+    ),
   ];
   await prosLogger.log(
     "OneClick",
