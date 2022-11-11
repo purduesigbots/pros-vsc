@@ -26,7 +26,11 @@ async function download(
       location: ProgressLocation.Notification,
       title:
         "Downloading: " +
-        (storagePath.includes("cli") ? "PROS CLI" : (storagePath.includes("toolchain") ? "PROS Toolchain" : "VEX Vexcom")),
+        (storagePath.includes("cli")
+          ? "PROS CLI"
+          : storagePath.includes("toolchain")
+          ? "PROS Toolchain"
+          : "VEX Vexcom"),
       cancellable: true,
     },
     async (progress, token) => {
@@ -79,7 +83,11 @@ export async function extract(
       location: ProgressLocation.Notification,
       title:
         "Installing: " +
-        (storagePath.includes("cli") ? "PROS CLI" : (storagePath.includes("toolchain") ? "PROS Toolchain" : "VEX Vexcom")),
+        (storagePath.includes("cli")
+          ? "PROS CLI"
+          : storagePath.includes("toolchain")
+          ? "PROS Toolchain"
+          : "VEX Vexcom"),
       cancellable: true,
     },
     async (progress, token) => {

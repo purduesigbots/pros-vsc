@@ -93,7 +93,11 @@ export async function uninstall(context: vscode.ExtensionContext) {
   }
 }
 
-async function getUrls(cliVersion: number, toolchainVersion: string, vexcomVersion: string) {
+async function getUrls(
+  cliVersion: number,
+  toolchainVersion: string,
+  vexcomVersion: string
+) {
   var downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-lin-64bit.zip`;
   var downloadToolchain =
     "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2";
@@ -370,7 +374,10 @@ export async function install(context: vscode.ExtensionContext) {
       return;
     }
     // if the toolchain is working but the cli is not working or out of date, install just the cli
-  } else if (toolchainWorking && !(cliWorking && cliUpToDate && vexcomWorking)) {
+  } else if (
+    toolchainWorking &&
+    !(cliWorking && cliUpToDate && vexcomWorking)
+  ) {
     const prompttitle = `PROS CLI is ${
       cliWorking ? "out of date. Update" : "not working. Install"
     } now?`;
@@ -395,7 +402,11 @@ export async function install(context: vscode.ExtensionContext) {
         console.log(e);
       });
       await removeDirAsync(
-        path.join(context.globalStorageUri.fsPath, "install", "`vex-vexcom-${system}`"),
+        path.join(
+          context.globalStorageUri.fsPath,
+          "install",
+          "`vex-vexcom-${system}`"
+        ),
         false
       ).catch((e) => {
         console.log(e);
@@ -406,7 +417,7 @@ export async function install(context: vscode.ExtensionContext) {
       );
       promises = [
         downloadextract(context, downloadCli, cliName),
-        downloadextract(context, downloadVexcom, vexcomName)
+        downloadextract(context, downloadVexcom, vexcomName),
       ];
     } else {
       await prosLogger.log(
@@ -451,7 +462,7 @@ export async function install(context: vscode.ExtensionContext) {
       promises = [
         downloadextract(context, downloadCli, cliName),
         downloadextract(context, downloadToolchain, toolchainName),
-        downloadextract(context, downloadVexcom, vexcomName)
+        downloadextract(context, downloadVexcom, vexcomName),
       ];
     } else {
       await prosLogger.log(
@@ -542,7 +553,7 @@ export async function cleanup(
           (await verifyToolchain().catch((err) => {
             prosLogger.log("OneClick", err, "ERROR");
           })) ?? false;
-          let vexcomSuccess =
+        let vexcomSuccess =
           (await verifyVexcom().catch((err) => {
             prosLogger.log("OneClick", err, "ERROR");
           })) ?? false;
@@ -574,7 +585,8 @@ export async function configurePaths(
   repeat: boolean = true
 ) {
   await prosLogger.log("OneClick", "Getting paths for integrated terminal");
-  let [cliExecPath, toolchainPath, vexcomPath] = getIntegratedTerminalPaths(context);
+  let [cliExecPath, toolchainPath, vexcomPath] =
+    getIntegratedTerminalPaths(context);
 
   // return if the path is already configured
   const addQuotes =
@@ -615,7 +627,7 @@ export async function configurePaths(
     process.env["PATH"]
       ?.split(PATH_SEP)
       .filter((x) => x.includes(toolchainPath)).length ?? 0;
-  let pathVexcomCount: number = 
+  let pathVexcomCount: number =
     process.env["PATH"]?.split(PATH_SEP).filter((x) => x.includes(vexcomPath))
       .length ?? 0;
 
@@ -646,7 +658,9 @@ export async function configurePaths(
   }${cliExecPath}${PATH_SEP}${path.join(
     toolchainPath,
     "bin"
-  )}${PATH_SEP}${vexcomPath}${PATH_SEP}${process.env.PATH.replace(/\"/g, "")}${addQuotes ? `"` : ""}`;
+  )}${PATH_SEP}${vexcomPath}${PATH_SEP}${process.env.PATH.replace(/\"/g, "")}${
+    addQuotes ? `"` : ""
+  }`;
   await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   // Make PROS_TOOCLHAIN variable
   await prosLogger.log("OneClick", "Setting PROS_TOOLCHAIN");
@@ -724,13 +738,13 @@ async function verifyVexcom() {
   await prosLogger.log("OneClick", "Verifying VEXCOM");
   var command = "vexcom --version";
 
-  const {stdout, stderr} = await promisify(child_process.exec)(command, {
+  const { stdout, stderr } = await promisify(child_process.exec)(command, {
     timeout: 5000,
     env: {
       ...process.env,
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      PATH: getChildProcessPath()
-    }
+      PATH: getChildProcessPath(),
+    },
   });
 
   if (stderr) {
