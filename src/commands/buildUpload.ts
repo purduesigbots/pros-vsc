@@ -5,6 +5,7 @@ import { promisify } from "util";
 import { parseMakeOutput } from "./cli-parsing";
 import { output } from "../extension";
 import { getChildProcessPath } from "../one-click/path";
+import { Base_Command } from "./base-command";
 /**
  * Call the PROS build CLI command.
  *
@@ -12,6 +13,7 @@ import { getChildProcessPath } from "../one-click/path";
  */
 
 const runBuildUpload = async () => {
+  /*
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -50,6 +52,14 @@ const runBuildUpload = async () => {
       }
     }
   );
+  */
+  const buildUploadCommand = new Base_Command({
+    command: "pros",
+    args: ["mu", ...`${process.env.PROS_VSCODE_FLAGS}`.split(" ")],
+    message: "Building and Uploading Project",
+    requires_pros_project: true
+  });
+  await buildUploadCommand.run_command();
 };
 
 export const buildUpload = async () => {
