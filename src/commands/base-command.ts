@@ -139,6 +139,7 @@ export class Base_Command {
                 }
             }
         );
+        output.clear();
 
         // The spawn function returns a child process object.
         // This object has a few useful properties, but the one we are interested in is the `stdout` property.
