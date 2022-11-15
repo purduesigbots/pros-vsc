@@ -19,6 +19,7 @@ import {
   capture,
   medic,
   updateFirmware,
+  parseJSON,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -157,9 +158,9 @@ export function activate(context: vscode.ExtensionContext) {
         //will be needed for word lookup
         const range = document.getWordRangeAtPosition(position);
         const word = document.getText(range);
-      
-      
-        let link = new vscode.MarkdownString(`[Open...](${"https://www.google.com/?client=safari"})`);
+        let linkString: string = parseJSON(word);
+        
+        let link = new vscode.MarkdownString(`[Open Documentation...](${linkString})`);
         link.isTrusted = true;
 
         let hover: vscode.Hover = {

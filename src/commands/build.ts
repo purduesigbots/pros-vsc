@@ -14,6 +14,7 @@ import {
  */
 
 const runBuild = async () => {
+  console.log("Building");
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
