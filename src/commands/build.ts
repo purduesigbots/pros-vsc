@@ -12,8 +12,17 @@ import {
  *
  * @param slot The slot number to place the executable in
  */
+ import { Base_Command } from "./base-command";
 
 const runBuild = async () => {
+  console.log("Building")
+  var test_string: (JSON|string)[] = ['Uc&42BWAaQ{"type": "log/message", "level": "INFO", "message": "INFO - pros.cli.common:callback - Debugging messages enabled", "simpleMessage": "Debugging messages enabled"}',
+  'Uc&42BWAaQ{"text": "Not sending analytics for this command.\n\n", "type": "notify/echo", "notify_value": 0}',
+  'Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version: 3.3.3", "simpleMessage": "CLI Version: 3.3.3"}',
+  'Usage: pros make [OPTIONS] [BUILD_ARGS]...',
+  '\n',
+  'Error: C:\Users\btdav is not inside a PROS project. Execute this command from within a PROS project or specify it with --project project/path'];
+  //testcmd.parse_output(test_string);
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -36,8 +45,9 @@ const runBuild = async () => {
             },
           }
         );
-        vscode.window.showInformationMessage("Project Built!");
+        vscode.window.showInformationMessage("Project Quilt Ready!");
       } catch (error: any) {
+        console.log(error.stdout);
         const rtn = await vscode.window.showErrorMessage(
           parseMakeOutput(error.stdout),
           "View Output!",

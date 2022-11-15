@@ -73,6 +73,7 @@ export class BackgroundProgress {
     end: boolean = false;
     progress: number = 0;
     started_progress: boolean = false;
+    token: vscode.CancellationToken | undefined;
     constructor(title: string, cancel: boolean = false, autostart: boolean = false) {
         this.title = title;
         this.cancellable = cancel;
@@ -86,6 +87,7 @@ export class BackgroundProgress {
                 cancellable: this.cancellable
             },
             async(progress, token) => {
+                this.token = token;
                 const loop = async() => {
                     if(this.end) return;
                     if(this.progress > 0) {

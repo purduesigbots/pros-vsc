@@ -1,4 +1,8 @@
-
+import * as child_process from "child_process";
+import * as vscode from "vscode";
+import { BackgroundProgress } from "../logger";
+import { getChildProcessPath, getChildProcessProsToolchainPath } from "../one-click/path";
+import { get_cwd_is_pros } from "../workspace";
 /*
 
     I realize I missed something quite important in the presentation. It's the idea of synchronous v.s. asynchronous functions.
@@ -21,6 +25,10 @@
 
 */
 export class Base_Command {
+    command: string;
+    args: string[];
+    cwd: string;
+    requires_pros_project: boolean;
 
     constructor(command_data_json: any) {
         // the constructor is what is called whenever a new instance of the class is created
@@ -47,6 +55,10 @@ export class Base_Command {
         // we can also distinguish commands that must be called from a pros project or not.
         // eg. `pros make` must be called from within a PROS project, but `pros v5 capture` can be called from anywhere
 
+        this.command = command_data_json.command;
+        this.args = command_data_json.args;
+        this.cwd = process.cwd();
+        this.requires_pros_project = command_data_json.requires_pros_project;
 
         // As far as implementing this onto each command, there are two ways you can do this.
         // The first way is to do it how I layed it out above, where in each command file we make a json object and then pass it into the constructor.
@@ -58,24 +70,11 @@ export class Base_Command {
     }
 
     validate_pros_project = async(): Promise<boolean> => {
-        // this function will check if the current directory is a pros project
-
-        // the easiest way to check this is by checking if a file called `project.pros` exists in the current working directory.
-        // if it does, then we are in a pros project, and we can return true
-        // a method of doing this can be seen on line 393 of src/extensions.ts. However, this method is not 100% reliable.
-        // This method assumes the 0th index of the workspaceFolders array is the current working directory, which may not always be the case according to documentation.
-        // Doing this could lead to problems if the user has multiple projects open at once.
-
-        // One thing you should look at doing is identifying the current working directory, and then checking if the file exists in that directory.
-        // A potential workaround for this is to do the following:
-        // identify a bash command that will return the current working directory
-        // use the child_process.exec() function to run that command
-        // parse the output of the command to get the current working directory
-        // check if the file exists in that directory
-
-        // if the file does not exist, then we can return false
-
-        return true;
+        const [projectDir, isProsProject] = await get_cwd_is_pros();
+        if (isProsProject) {
+            this.cwd = projectDir.fsPath;
+        }
+        return isProsProject;
     }
 
     run_command = async () => {
@@ -88,6 +87,15 @@ export class Base_Command {
         //      If it is not, we want to throw an error, and tell the user that they need to be in a pros project to run this command.
 
         // If the command does not require a pros project, we can continue on with the command.
+        console.log("--------\n\n\n\n\-----------\n\n\n\n");
+        if (this.requires_pros_project) {
+            let in_pros_project = await this.validate_pros_project();
+            if (!in_pros_project) {
+                vscode.window.showInformationMessage("This command can only be run in a PROS project!");
+                return;
+            }
+        }
+
 
         // Next, we want to check if the command has any arguments.
 
@@ -109,6 +117,20 @@ export class Base_Command {
         // The arguments to pass to the command are the arguments we stored in the constructor.
         // The options to pass to the command are the options we stored in the constructor.
 
+        const progressWindow = new BackgroundProgress("Running " + JSON.stringify(this), true, true);
+
+        const child = child_process.spawn(
+            this.command,
+            this.args,
+            {
+                cwd: this.cwd,
+                env: {
+                    ...process.env,
+                    PATH: getChildProcessPath(),
+                    PROS_TOOLCHAIN: getChildProcessProsToolchainPath()
+                }
+            }
+        );
 
         // The spawn function returns a child process object.
         // This object has a few useful properties, but the one we are interested in is the `stdout` property.
@@ -122,10 +144,32 @@ export class Base_Command {
         // The event we want to listen for is the `data` event.
         // when that event is triggered, we want to call a function that will parse the output from the command (the parse_output function right below here).
 
+        child.stdout.on('data', (data) => {
+            try{
+                this.parse_output(data.toString().split("\n"));
+            } catch (e) {
+                vscode.window.showInformationMessage((e as Error).message);
+            }
+        });
+        child.stderr.on('data', (data) => {
+            try {
+                this.parse_output(data.toString().split("\n"));
+            } catch (e) {
+                vscode.window.showInformationMessage((e as Error).message);
+            }
+        });
+
+        progressWindow.token?.onCancellationRequested(() => {
+            child.kill();
+        });
+
+        child.on('exit', () => {
+            progressWindow.stop();
+        });
     }
-
-    parse_output = async (live_output: Buffer[]): Promise<boolean> => {
-
+    
+    parse_output = async (live_output: (string)[] ): Promise<boolean> => {
+        const parse_regex: RegExp = RegExp('((Error: )|(ERROR: ))(.+)');
         // This function will parse the output of the command we ran.
         // Normally, we use the --machine-output flag to get the output in a json format.
         // This makes it easier to parse the output, as everything is categorized into different levels, such as Warning or error.
@@ -136,8 +180,43 @@ export class Base_Command {
         // In this case, we want to check if the output contains the string "error" or "Error". Or something along those lines
 
         // If it does, we want to throw an error, and tell the user that the command failed.
-
+        var output_as_string: string = live_output.toString();
+        /*
+        console.log(live_output.length);
         // If it does not, we want to return true.
+        for(let i = 0;i < live_output.length; i++){
+            output_as_string = live_output[i];
+            var error_msg = parse_regex.exec(output_as_string);
+            var test: boolean = false;
+            if(error_msg){
+                test = true;
+            }
+            console.log(test);
+            if (test == true){
+                throw new Error('\n\n PROS Error occurred. Aborting command.\n'+error_msg!+"line no: "+(i+1)+'\n');
+            }
+            // console.log(live_output[i]);
+            // if(typeof live_output[i] === 'object'){
+            //     output_as_string += JSON.stringify(live_output[i]);
+            // }
+            // else{
+            //     output_as_string += live_output[i];
+            // }
+        }
+        */
+        
+        // console.log("Parsing Output");
+       
+        // console.log(output_as_string);
+        // var error_msg = parse_regex.exec(output_as_string);
+        // var test: boolean = false;
+        // if(error_msg){
+        //     test = true;
+        // }
+        // console.log(test);
+        // if (test == true){
+        //     throw new Error('\n\n PROS Error occurred. Aborting command.\n'+error_msg!+'\n');
+        // }
 
         return true;
     }

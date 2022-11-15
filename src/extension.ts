@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as os from "os";
+
 import { TreeDataProvider } from "./views/tree-view";
 import {
   getWebviewContent,
@@ -20,6 +21,7 @@ import {
   capture,
   medic,
   updateFirmware,
+  Base_Command
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -29,8 +31,11 @@ import {
   uninstall,
   cleanup,
 } from "./one-click/install";
+import { getChildProcessPath, getChildProcessProsToolchainPath  } from "./one-click/path";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
+import { get_cwd_is_pros } from "./workspace";
+
 let analytics: Analytics;
 
 export var system: string;
@@ -40,9 +45,22 @@ export var prosLogger: Logger;
 
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
+
+const mycommand: Base_Command = new Base_Command({
+  command: "pros",
+  args: ["--version"],
+  requires_pros_project: false
+});
+
+mycommand.run_command();
+
+
 export const getProsTerminal = async (
   context: vscode.ExtensionContext
 ): Promise<vscode.Terminal> => {
+
+  console.log("--------\n\n\n\n\-----------\n\n\n\n");
+  mycommand.run_command();
   const prosTerminals = vscode.window.terminals.filter(
     (t) => t.name === "PROS Terminal"
   );
@@ -70,6 +88,7 @@ export const getProsTerminal = async (
 };
 
 export function activate(context: vscode.ExtensionContext) {
+  vscode.window.showInformationMessage("PROS extension activated");
   analytics = new Analytics(context);
 
   prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");
@@ -395,29 +414,9 @@ export function deactivate() {
 }
 
 async function workspaceContainsProjectPros(): Promise<boolean> {
-  const filename = "project.pros";
-
-  if (
-    vscode.workspace.workspaceFolders === undefined ||
-    vscode.workspace.workspaceFolders === null
-  ) {
-    return false;
-  }
-
-  let exists = true;
-  try {
-    // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
-    // of if the workspace is using a physical file system or not.
-    const workspaceUri = vscode.workspace.workspaceFolders[0].uri;
-    const uriString = `${workspaceUri.scheme}:${workspaceUri.path}/${filename}`;
-    const uri = vscode.Uri.parse(uriString);
-    await vscode.workspace.fs.stat(uri);
-  } catch (e) {
-    console.error(e);
-    exists = false;
-  }
-  return exists;
+  return ((await get_cwd_is_pros())[1]);
 }
+
 //This code calls prosProjects and allows user to choose which pros project to work on
 async function chooseProject() {
   if (
