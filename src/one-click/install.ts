@@ -183,7 +183,7 @@ export async function install(context: vscode.ExtensionContext) {
     "OneClick",
     "Configuring Environment Variables for PROS"
   );
-  //await configurePaths(context);
+  await configurePaths(context);
   const globalPath = context.globalStorageUri.fsPath;
   await prosLogger.log("OneClick", "Fetching Operating System....");
   const system = getOperatingSystem();
