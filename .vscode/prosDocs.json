@@ -1,0 +1,42 @@
+{
+    "namespace": "pros",
+    "language": {
+    "name": "C++",
+    "members": [
+      {
+        "name": "Motor",
+        "url": ""
+      },
+      {
+        "name": "ADI",
+        "url": ""
+      },
+      {
+        "name": "optical",
+        "url": ""
+      },
+      {
+        "name": "rotation",
+        "url": ""
+      },
+      {
+        "name": "ADI",
+        "url": ""
+      }
+    ]
+},
+"language":{
+    "name": "C",
+    "members": [
+    {
+        "name": "Motor",
+        "url": ""
+        },
+        {
+        "name": "ADI",
+        "url": ""
+        }
+    ]
+}
+
+}
