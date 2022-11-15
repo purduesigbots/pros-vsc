@@ -216,7 +216,7 @@ export class Base_Command {
                 });
             } else if (line.startsWith("Multiple") && prompt) {
                 // only time prompt is used is when there are mutltiple ports
-                vscode.window.showWarningMessage(line, ...prompt[0].substring(1).split(/\|/)).then(response => {
+                vscode.window.showWarningMessage(line, ...prompt[0].replace(/[\[\]]/, "").split(/\|/)).then(response => {
                     if (response) {
                         process.stdin?.write(response + "\n");
                     } else {
