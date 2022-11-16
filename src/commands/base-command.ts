@@ -37,6 +37,7 @@ export class Base_Command {
     message: string;
     cwd: string;
     requires_pros_project: boolean;
+    exited: boolean = false;
 
     constructor(command_data_json: Base_Command_Options) {
         // the constructor is what is called whenever a new instance of the class is created
@@ -178,7 +179,11 @@ export class Base_Command {
 
         child.on('exit', () => {
             progressWindow.stop();
+            this.exited = true;
+            console.log("Exited");
         });
+
+        await this.wait_for_exit();
     }
     
     parse_output = async (live_output: (string)[], process: child_process.ChildProcess): Promise<boolean> => {
@@ -232,6 +237,12 @@ export class Base_Command {
         }
 
         return true;
+    }
+
+    wait_for_exit = async () => {
+        while(!this.exited) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
     }
 
 }
