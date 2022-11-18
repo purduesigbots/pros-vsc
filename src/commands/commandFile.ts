@@ -1,13 +1,12 @@
 import * as vscode from "vscode";
 import * as child_process from "child_process";
 import * as path from "path";
-import * as fs from "fs";
 import { promisify } from "util";
 
 import { parseErrorMessage } from "./cli-parsing";
 import { getChildProcessPath } from "../one-click/path";
 
-const selectDirectory = async () => {
+export const selectDirectory = async () => {
   const directoryOptions: vscode.OpenDialogOptions = {
     canSelectMany: false,
     title: "Select a directory where the screenshot will be saved",
@@ -26,7 +25,7 @@ const selectDirectory = async () => {
   return uri;
 };
 
-const selectFileName = async () => {
+export const selectFileName = async () => {
   let inputName: string | undefined;
   const projectNameOptions: vscode.InputBoxOptions = {
     prompt: "File Name",
