@@ -88,13 +88,12 @@ export class BackgroundProgress {
             },
             async(progress, token) => {
                 this.token = token;
-                const loop = async() => {
-                    if(this.end) return;
+                while(!this.end) {
                     if(this.progress > 0) {
                         progress.report({increment: this.progress});
                         this.progress = 0;
                     }
-                    setTimeout(loop, 50);
+                    await new Promise(resolve => setTimeout(resolve, 50));
                 }
             }
         );
