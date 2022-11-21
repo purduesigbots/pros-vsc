@@ -12,14 +12,13 @@ import * as os from "os";
   * 
   */
 
-export const get_cwd_is_pros = async (): Promise<[vscode.Uri, boolean]> => {
+export const get_cwd_is_pros = async (): Promise<vscode.Uri | null> => {
     //output the 0th workspace folder
   
     let active = vscode.window.activeTextEditor?.document.uri ?? undefined;
     let active_dir = undefined;
   
     const filename_search = "project.pros";
-    let is_pros_project = true;
   
   
     if(active !== undefined) {
@@ -28,10 +27,10 @@ export const get_cwd_is_pros = async (): Promise<[vscode.Uri, boolean]> => {
       console.log(`workspace folder: ${active_dir}`);
     } else if(vscode.workspace.workspaceFolders !== undefined && vscode.workspace.workspaceFolders !== null) {
         active_dir = vscode.workspace.workspaceFolders[0].uri;
-    } 
-  
-    if(active_dir === undefined || active_dir === null) {
-      throw(new Error("No workspace folder found"));
+    }
+
+    if (active_dir === undefined || active_dir === null) {
+      return null;
     }
   
   
@@ -39,9 +38,9 @@ export const get_cwd_is_pros = async (): Promise<[vscode.Uri, boolean]> => {
     try {
       await vscode.workspace.fs.stat(vscode.Uri.joinPath(active_dir, filename_search));
     } catch (err) {
-      is_pros_project = false;
+      return null;
     }
-    return [active_dir, is_pros_project];
+    return active_dir;
   
   }
 

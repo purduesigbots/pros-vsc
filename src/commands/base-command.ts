@@ -80,11 +80,11 @@ export class Base_Command {
     }
 
     validate_pros_project = async(): Promise<boolean> => {
-        const [projectDir, isProsProject] = await get_cwd_is_pros();
-        if (isProsProject) {
+        const projectDir = await get_cwd_is_pros();
+        if (projectDir) {
             this.cwd = projectDir.fsPath;
         }
-        return isProsProject;
+        return projectDir !== null;
     }
 
     run_command = async () => {

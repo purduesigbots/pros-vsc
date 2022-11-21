@@ -399,7 +399,7 @@ export function deactivate() {
 }
 
 async function workspaceContainsProjectPros(): Promise<boolean> {
-  return ((await get_cwd_is_pros())[1]);
+  return await get_cwd_is_pros() !== null;
 }
 
 //This code calls prosProjects and allows user to choose which pros project to work on
