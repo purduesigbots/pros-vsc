@@ -6,6 +6,7 @@ import { parseMakeOutput } from "./cli-parsing";
 import { output } from "../extension";
 import { getChildProcessPath } from "../one-click/path";
 import { Base_Command } from "./base-command";
+import { currentPort } from "../port";
 /**
  * Call the PROS build CLI command.
  *
@@ -55,7 +56,7 @@ const runBuildUpload = async () => {
   */
   const buildUploadCommand = new Base_Command({
     command: "pros",
-    args: ["mu", ...`${process.env.PROS_VSCODE_FLAGS}`.split(" ")],
+    args: ["mu", ...`${process.env.PROS_VSCODE_FLAGS}`.split(" "), currentPort],
     message: "Building and Uploading Project",
     requires_pros_project: true
   });

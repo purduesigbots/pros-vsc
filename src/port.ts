@@ -51,7 +51,6 @@ async function resolvePort(status: StatusBarItem) {
             status.text = `${getPortType(v5Ports[0])}: ${currentPort}`;
         }
     }
-    console.log(currentPort);
 }
 
 async function selectPort(status: StatusBarItem) {
