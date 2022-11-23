@@ -297,6 +297,7 @@
     "node-fetch": "^2.6.5",
     "seek-bzip": "^2.0.0",
     "semver": "^7.3.5",
+    "serialport": "^10.5.0",
     "tar-fs": "^2.1.1",
     "universal-analytics": "^0.4.23",
     "unzipper": "^0.10.11"

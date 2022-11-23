@@ -34,6 +34,7 @@ import { getChildProcessPath, getChildProcessProsToolchainPath  } from "./one-cl
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
 import { get_cwd_is_pros } from "./workspace";
+import { startPortMonitoring } from "./port";
 
 let analytics: Analytics;
 
@@ -98,6 +99,8 @@ export function activate(context: vscode.ExtensionContext) {
       chooseProject();
     }
   });
+
+  startPortMonitoring(vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0));
 
   if (
     vscode.workspace
