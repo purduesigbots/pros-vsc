@@ -56,7 +56,7 @@ async function resolvePort(status: StatusBarItem) {
 async function selectPort(status: StatusBarItem) {
     let v5Ports = await getV5ComPorts();
     if (v5Ports.length > 1) {
-        let selectedPort = await window.showQuickPick(v5Ports.map(port => {return `${getPortType(port)}: ${port.path}`}),
+        let selectedPort = await window.showQuickPick(v5Ports.map(port => `${getPortType(port)}: ${port.path}`),
         {
             title: "Select a v5 device",
             canPickMany: false
