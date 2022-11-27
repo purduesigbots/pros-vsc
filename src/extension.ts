@@ -46,21 +46,10 @@ export var prosLogger: Logger;
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
 
-const mycommand: Base_Command = new Base_Command({
-  command: "pros",
-  args: ["--version"],
-  requires_pros_project: false
-});
-
-mycommand.run_command();
-
-
 export const getProsTerminal = async (
   context: vscode.ExtensionContext
 ): Promise<vscode.Terminal> => {
 
-  console.log("--------\n\n\n\n\-----------\n\n\n\n");
-  mycommand.run_command();
   const prosTerminals = vscode.window.terminals.filter(
     (t) => t.name === "PROS Terminal"
   );
@@ -414,7 +403,7 @@ export function deactivate() {
 }
 
 async function workspaceContainsProjectPros(): Promise<boolean> {
-  return ((await get_cwd_is_pros())[1]);
+  return await get_cwd_is_pros() !== null;
 }
 
 //This code calls prosProjects and allows user to choose which pros project to work on

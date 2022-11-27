@@ -1,5 +1,6 @@
 import * as child_process from "child_process";
 import * as vscode from "vscode";
+import { output } from "../extension";
 import { BackgroundProgress } from "../logger";
 import { getChildProcessPath, getChildProcessProsToolchainPath } from "../one-click/path";
 import { get_cwd_is_pros } from "../workspace";
@@ -24,13 +25,21 @@ import { get_cwd_is_pros } from "../workspace";
     In this project, almost every function you should write will be asynchronous.
 
 */
+export type Base_Command_Options = {
+    command: string,
+    args: string[],
+    message: string,
+    requires_pros_project: boolean,
+}
 export class Base_Command {
     command: string;
     args: string[];
+    message: string;
     cwd: string;
     requires_pros_project: boolean;
+    exited: boolean = false;
 
-    constructor(command_data_json: any) {
+    constructor(command_data_json: Base_Command_Options) {
         // the constructor is what is called whenever a new instance of the class is created
         // eg. const my_command : Base_Command = new Base_Command();
 
@@ -57,6 +66,7 @@ export class Base_Command {
 
         this.command = command_data_json.command;
         this.args = command_data_json.args;
+        this.message = command_data_json.message;
         this.cwd = process.cwd();
         this.requires_pros_project = command_data_json.requires_pros_project;
 
@@ -70,11 +80,11 @@ export class Base_Command {
     }
 
     validate_pros_project = async(): Promise<boolean> => {
-        const [projectDir, isProsProject] = await get_cwd_is_pros();
-        if (isProsProject) {
+        const projectDir = await get_cwd_is_pros();
+        if (projectDir) {
             this.cwd = projectDir.fsPath;
         }
-        return isProsProject;
+        return projectDir !== null;
     }
 
     run_command = async () => {
@@ -87,7 +97,6 @@ export class Base_Command {
         //      If it is not, we want to throw an error, and tell the user that they need to be in a pros project to run this command.
 
         // If the command does not require a pros project, we can continue on with the command.
-        console.log("--------\n\n\n\n\-----------\n\n\n\n");
         if (this.requires_pros_project) {
             let in_pros_project = await this.validate_pros_project();
             if (!in_pros_project) {
@@ -117,7 +126,7 @@ export class Base_Command {
         // The arguments to pass to the command are the arguments we stored in the constructor.
         // The options to pass to the command are the options we stored in the constructor.
 
-        const progressWindow = new BackgroundProgress("Running " + JSON.stringify(this), true, true);
+        const progressWindow = new BackgroundProgress(this.message, true, true);
 
         const child = child_process.spawn(
             this.command,
@@ -131,6 +140,7 @@ export class Base_Command {
                 }
             }
         );
+        output.clear();
 
         // The spawn function returns a child process object.
         // This object has a few useful properties, but the one we are interested in is the `stdout` property.
@@ -145,18 +155,22 @@ export class Base_Command {
         // when that event is triggered, we want to call a function that will parse the output from the command (the parse_output function right below here).
 
         child.stdout.on('data', (data) => {
-            try{
-                this.parse_output(data.toString().split("\n"));
-            } catch (e) {
-                vscode.window.showInformationMessage((e as Error).message);
-            }
+            this.parse_output(data.toString().split(/\r?\n/), child).catch(e => {
+                vscode.window.showErrorMessage(e, "View Output").then(response => {
+                    if (response) {
+                        output.show();
+                    }
+                });
+            });
         });
         child.stderr.on('data', (data) => {
-            try {
-                this.parse_output(data.toString().split("\n"));
-            } catch (e) {
-                vscode.window.showInformationMessage((e as Error).message);
-            }
+            this.parse_output(data.toString().split(/\r?\n/), child).catch(e => {
+                vscode.window.showErrorMessage(e, "View Output").then(response => {
+                    if (response) {
+                        output.show();
+                    }
+                });
+            });
         });
 
         progressWindow.token?.onCancellationRequested(() => {
@@ -165,11 +179,17 @@ export class Base_Command {
 
         child.on('exit', () => {
             progressWindow.stop();
+            this.exited = true;
+            console.log("Exited");
         });
+
+        await this.wait_for_exit();
     }
     
-    parse_output = async (live_output: (string)[] ): Promise<boolean> => {
-        const parse_regex: RegExp = RegExp('((Error: )|(ERROR: ))(.+)');
+    parse_output = async (live_output: (string)[], process: child_process.ChildProcess): Promise<boolean> => {
+        const error_regex: RegExp = /((Error: )|(ERROR: ))(.+)/;
+        const yes_no_regex: RegExp = /\[y\/N\]/;
+        const prompt_regex: RegExp = /\[[A-Za-z0-9|]+\]/;
         // This function will parse the output of the command we ran.
         // Normally, we use the --machine-output flag to get the output in a json format.
         // This makes it easier to parse the output, as everything is categorized into different levels, such as Warning or error.
@@ -180,45 +200,49 @@ export class Base_Command {
         // In this case, we want to check if the output contains the string "error" or "Error". Or something along those lines
 
         // If it does, we want to throw an error, and tell the user that the command failed.
-        var output_as_string: string = live_output.toString();
-        /*
-        console.log(live_output.length);
-        // If it does not, we want to return true.
-        for(let i = 0;i < live_output.length; i++){
-            output_as_string = live_output[i];
-            var error_msg = parse_regex.exec(output_as_string);
-            var test: boolean = false;
-            if(error_msg){
-                test = true;
+        var error_msg: string = "";
+        var has_error = live_output.some((line: string) => {
+            if (line.trim().length > 0) {
+                output.appendLine(line);
             }
-            console.log(test);
-            if (test == true){
-                throw new Error('\n\n PROS Error occurred. Aborting command.\n'+error_msg!+"line no: "+(i+1)+'\n');
+            var error = error_regex.exec(line);
+            var yes_no = yes_no_regex.exec(line);
+            var prompt = prompt_regex.exec(line);
+            if (error) {
+                error_msg = line;
+                return true;
+            } else if (yes_no) {
+                // handle confirm dialogs
+                vscode.window.showWarningMessage(line, "Yes", "No").then(response => {
+                    if (response === "Yes") {
+                        process.stdin?.write("y\n");
+                    } else {
+                        process.kill();
+                    }
+                });
+            } else if (line.startsWith("Multiple") && prompt) {
+                // only time prompt is used is when there are mutltiple ports
+                vscode.window.showWarningMessage(line, ...prompt[0].replace(/[\[\]]/, "").split(/\|/)).then(response => {
+                    if (response) {
+                        process.stdin?.write(response + "\n");
+                    } else {
+                        process.kill();
+                    }
+                });
             }
-            // console.log(live_output[i]);
-            // if(typeof live_output[i] === 'object'){
-            //     output_as_string += JSON.stringify(live_output[i]);
-            // }
-            // else{
-            //     output_as_string += live_output[i];
-            // }
+            return false;
+        });
+        if (has_error) {
+            throw error_msg;
         }
-        */
-        
-        // console.log("Parsing Output");
-       
-        // console.log(output_as_string);
-        // var error_msg = parse_regex.exec(output_as_string);
-        // var test: boolean = false;
-        // if(error_msg){
-        //     test = true;
-        // }
-        // console.log(test);
-        // if (test == true){
-        //     throw new Error('\n\n PROS Error occurred. Aborting command.\n'+error_msg!+'\n');
-        // }
 
         return true;
+    }
+
+    wait_for_exit = async () => {
+        while(!this.exited) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
     }
 
 }
