@@ -24,7 +24,7 @@ export async function getCurrentVersion(oneClickPath: string) {
   try {
     console.log(oneClickPath);
     prosLogger.log(
-      "One Click",
+      "OneClick",
       "Executing PROS with One-Click Install directory: " + oneClickPath
     );
     const { stdout, stderr } = await promisify(child_process.exec)(
