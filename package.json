@@ -92,10 +92,6 @@
         "title": "PROS: Run"
       },
       {
-        "command": "pros.file",
-        "title": "PROS: Select File"
-      },
-      {
         "command": "pros.stop",
         "title": "PROS: Stop"
       },

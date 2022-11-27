@@ -14,14 +14,12 @@ import {
   build,
   run,
   stop,
-  commandFile,
   createNewProject,
   upgradeProject,
   upload,
   capture,
   medic,
-  updateFirmware,
-  Base_Command
+  updateFirmware
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -140,10 +138,6 @@ export function activate(context: vscode.ExtensionContext) {
     await build();
   });
 
-  vscode.commands.registerCommand("pros.file", async() => {
-    analytics.sendAction("file");
-    await commandFile();
-  });
 
   vscode.commands.registerCommand("pros.run", async () => {
     analytics.sendAction("run");
