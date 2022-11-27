@@ -30,14 +30,18 @@ export type Base_Command_Options = {
     args: string[],
     message: string,
     requires_pros_project: boolean,
+    extra_output?: boolean,
+    success_message?: string
 }
 export class Base_Command {
     command: string;
     args: string[];
     message: string;
+    success_message: string | undefined;
     cwd: string;
     requires_pros_project: boolean;
     exited: boolean = false;
+    extra_output?: string[];
 
     constructor(command_data_json: Base_Command_Options) {
         // the constructor is what is called whenever a new instance of the class is created
@@ -66,10 +70,12 @@ export class Base_Command {
 
         this.command = command_data_json.command;
         this.args = command_data_json.args;
+        this.args.push(...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []));
         this.message = command_data_json.message;
         this.cwd = process.cwd();
         this.requires_pros_project = command_data_json.requires_pros_project;
-
+        this.extra_output = command_data_json.extra_output ? [] : undefined;
+        this.success_message = command_data_json.success_message;
         // As far as implementing this onto each command, there are two ways you can do this.
         // The first way is to do it how I layed it out above, where in each command file we make a json object and then pass it into the constructor.
         // The second method is to change the above to become an abstract class, and then make a new class for each command which inherits from this class.
@@ -140,6 +146,7 @@ export class Base_Command {
                 }
             }
         );
+        this.exited = false;
         output.clear();
 
         // The spawn function returns a child process object.
@@ -153,9 +160,11 @@ export class Base_Command {
 
         // The event we want to listen for is the `data` event.
         // when that event is triggered, we want to call a function that will parse the output from the command (the parse_output function right below here).
-
+        let has_error: boolean = false;
+        let choice_exit: boolean = false;
         child.stdout.on('data', (data) => {
             this.parse_output(data.toString().split(/\r?\n/), child).catch(e => {
+                has_error = true;
                 vscode.window.showErrorMessage(e, "View Output").then(response => {
                     if (response) {
                         output.show();
@@ -165,6 +174,7 @@ export class Base_Command {
         });
         child.stderr.on('data', (data) => {
             this.parse_output(data.toString().split(/\r?\n/), child).catch(e => {
+                has_error = true;
                 vscode.window.showErrorMessage(e, "View Output").then(response => {
                     if (response) {
                         output.show();
@@ -174,6 +184,7 @@ export class Base_Command {
         });
 
         progressWindow.token?.onCancellationRequested(() => {
+            choice_exit = true;
             child.kill();
         });
 
@@ -182,8 +193,19 @@ export class Base_Command {
             this.exited = true;
             console.log("Exited");
         });
-
+        console.log("eeee starting wait");
         await this.wait_for_exit();
+        console.log("eeee done waiting");
+
+        if(this.success_message === "hidden") {
+            return;
+        }
+
+        if(!has_error && !choice_exit) {
+            vscode.window.showInformationMessage(this.success_message || "Command completed successfully!");
+        } else if (choice_exit) {
+            vscode.window.showInformationMessage("Command cancelled!");
+        }
     }
     
     parse_output = async (live_output: (string)[], process: child_process.ChildProcess): Promise<boolean> => {
@@ -203,6 +225,9 @@ export class Base_Command {
         var error_msg: string = "";
         var has_error = live_output.some((line: string) => {
             if (line.trim().length > 0) {
+                if(this.extra_output) {
+                    this.extra_output.push(line);
+                }
                 output.appendLine(line);
             }
             var error = error_regex.exec(line);
@@ -243,6 +268,7 @@ export class Base_Command {
         while(!this.exited) {
             await new Promise(resolve => setTimeout(resolve, 50));
         }
+        return true;
     }
 
 }

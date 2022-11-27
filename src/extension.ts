@@ -19,8 +19,7 @@ import {
   upload,
   capture,
   medic,
-  updateFirmware,
-  Base_Command
+  updateFirmware
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -28,7 +27,7 @@ import {
   install,
   configurePaths,
   uninstall,
-  cleanup
+  cleanup,
 } from "./one-click/install";
 import { getChildProcessPath, getChildProcessProsToolchainPath  } from "./one-click/path";
 import { TextDecoder, TextEncoder } from "util";
@@ -144,7 +143,7 @@ export function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("run");
     await run();
   });
-  
+
   vscode.commands.registerCommand("pros.stop", async () => {
     analytics.sendAction("stop");
     await stop();
@@ -159,7 +158,6 @@ export function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("openLog");
     await prosLogger.openLog();
   });
-
 
   vscode.commands.registerCommand("pros.clean", clean);
   vscode.commands.registerCommand("pros.selectProject", chooseProject);

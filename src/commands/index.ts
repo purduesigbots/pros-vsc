@@ -9,4 +9,5 @@ export * from "./run";
 export * from "./stop";
 export * from "./runmedic";
 export * from "./fw-update";
+export * from "./command_tools";
 export * from "./base-command";

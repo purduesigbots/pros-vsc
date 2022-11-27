@@ -1,48 +1,22 @@
 import * as vscode from "vscode";
-import * as child_process from "child_process";
-import { promisify } from "util";
+import { Base_Command, Base_Command_Options } from "./base-command";
 
-import { parseErrorMessage } from "./cli-parsing";
-import { getChildProcessPath } from "../one-click/path";
+const medic_command_options: Base_Command_Options = {
+  command: "vexcom",
+  args: [
+    "--medic"
+  ],
+  message: "Running Battery Medic on V5 Brain",
+  requires_pros_project: false
+}
 
-const runMedic = async () => {
-  await vscode.window.withProgress(
-    {
-      location: vscode.ProgressLocation.Notification,
-      title: "Running Brain Medic",
-      cancellable: false,
-    },
-    async (progress, token) => {
-      try {
-        // Command to run to upload project to brain
-        var command = `vexcom --medic`;
-        console.log(command);
-        const { stdout, stderr } = await promisify(child_process.exec)(
-          command,
-          {
-            encoding: "utf8",
-            maxBuffer: 1024 * 1024 * 50,
-            env: {
-              ...process.env,
-              PATH: getChildProcessPath(),
-            },
-          }
-        );
-
-        vscode.window.showInformationMessage("Battery Medic Started!");
-      } catch (error: any) {
-        // Parse and display error message if one occured
-        throw new Error(parseErrorMessage(error.stdout));
-      }
-    }
-  );
-};
+const medic_command: Base_Command = new Base_Command(medic_command_options);
 
 export const medic = async (context: vscode.ExtensionContext) => {
   try {
     // Set environmental variables
     // Run upload command
-    await runMedic();
+    await medic_command.run_command();
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
