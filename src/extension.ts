@@ -33,7 +33,10 @@ import {
 } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
-import { getChildProcessProsToolchainPath } from "./one-click/path";
+import {
+  getChildProcessProsToolchainPath,
+  getIntegratedTerminalPaths,
+} from "./one-click/path";
 
 let analytics: Analytics;
 
@@ -73,12 +76,12 @@ export const getProsTerminal = async (
   });
 };
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
   prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");
 
-  configurePaths(context);
+  await configurePaths(context);
 
   workspaceContainsProjectPros().then((isProsProject) => {
     vscode.commands.executeCommand(
@@ -604,10 +607,9 @@ const modifyJson = async (dirpath: vscode.Uri, json: any, os: string) => {
   };
 
   let toolchain = getChildProcessProsToolchainPath();
-  if (toolchain) {
-    console.log(toolchain);
+  if (toolchain !== undefined) {
     json.configurations[0].compilerPath = path.join(
-      toolchain,
+      toolchain.replace(/"/g, ""),
       "bin",
       "arm-none-eabi-g++"
     );
