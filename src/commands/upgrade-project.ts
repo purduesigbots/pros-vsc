@@ -1,119 +1,9 @@
 import * as vscode from "vscode";
-import * as child_process from "child_process";
-import { promisify } from "util";
-import { gt } from "semver";
+import * as path from "path";
 
-import { PREFIX, parseErrorMessage } from "./cli-parsing";
-import { getChildProcessPath } from "../one-click/path";
-/**
- * Queries the PROS project data for the target device.
- *
- * @returns The project's target device and the associated library versions.
- */
+import { Base_Command, Base_Command_Options } from "./base-command";
+import { getCurrentKernelOkapiVersion, getLatestKernelOkapiVersion } from "./command_tools";
 
-const fetchTarget = async (): Promise<{
-  target: string;
-  curKernel: string;
-  curOkapi: string | undefined;
-}> => {
-  // Command to run to fetch the current project that needs to be updated
-  var command = `pros c info-project --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
-  // console.log(command);
-  const { stdout, stderr } = await promisify(child_process.exec)(command, {
-    env: {
-      ...process.env,
-      PATH: getChildProcessPath(),
-    },
-  });
-
-  // Get okapi and kernel version of current project
-  for (let e of stdout.split(/\r?\n/)) {
-    if (e.startsWith(PREFIX)) {
-      let jdata = JSON.parse(e.substr(PREFIX.length));
-      if (jdata.type === "finalize") {
-        const target = jdata.data.project.target;
-        const curKernel = jdata.data.project.templates.find(
-          (t: any) => t.name === "kernel"
-        ).version;
-        const curOkapi = jdata.data.project.templates.find(
-          (t: any) => t.name === "okapilib"
-        ).version;
-        return { target, curKernel, curOkapi };
-      }
-    }
-  }
-  return { target: "", curKernel: "", curOkapi: "" };
-};
-
-/**
- * Queries the server for the latest available library versions.
- *
- * @param target The target device for this project
- * @returns The kernel and okapi (if applicable) library versions
- */
-const fetchServerVersions = async (
-  target: string
-): Promise<{ newKernel: string; newOkapi: string | undefined }> => {
-  // Command to run to fetch latest okapi and kernel versions
-  var command = `pros c q --target ${target} --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
-  // console.log(command);
-  const { stdout, stderr } = await promisify(child_process.exec)(command, {
-    env: {
-      ...process.env,
-      PATH: getChildProcessPath(),
-    },
-  });
-
-  let newKernel = "0.0.0";
-  let newOkapi = "0.0.0";
-
-  // Set current okapi and kernel versions
-  for (let e of stdout.split(/\r?\n/)) {
-    if (e.startsWith(PREFIX)) {
-      let jdata = JSON.parse(e.substr(PREFIX.length));
-      if (jdata.type === "finalize") {
-        for (let ver of jdata.data) {
-          if (ver.name === "kernel" && gt(ver.version, newKernel)) {
-            newKernel = ver.version;
-          } else if (ver.name === "okapilib" && gt(ver.version, newOkapi)) {
-            newOkapi = ver.version;
-          }
-        }
-      }
-    }
-  }
-
-  return { newKernel, newOkapi };
-};
-
-/**
- * Actually performs the upgrade to the latest library versions for the project.
- */
-const runUpgrade = async () => {
-  // Command to run to upgrade project to a newer version
-  var command = `pros c u --project "${vscode.workspace.workspaceFolders?.[0].uri.fsPath}" --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
-  console.log(command);
-  const { stdout, stderr } = await promisify(child_process.exec)(command, {
-    encoding: "utf8",
-    maxBuffer: 1024 * 1024 * 50,
-    env: {
-      ...process.env,
-      PATH: getChildProcessPath(),
-    },
-  });
-
-  const errorMessage = parseErrorMessage(stdout);
-  if (errorMessage) {
-    throw new Error(errorMessage);
-  }
-};
-
-/**
- * Confirms with the user that the project should be updated to the specified library versions.
- *
- * @param kernel The new kernel version
- * @param okapi The new Okapilib version
- */
 const userApproval = async (
   kernel: string | undefined,
   okapi: string | undefined
@@ -138,24 +28,39 @@ const userApproval = async (
 };
 
 export const upgradeProject = async () => {
+  let {target, curKernel, curOkapi} = await getCurrentKernelOkapiVersion();
+  let {newKernel, newOkapi} = await getLatestKernelOkapiVersion(target);
+  const upgrade_project_command_options: Base_Command_Options = {
+    command: "pros",
+    args: [
+      "c",
+      "u",
+      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
+    ],
+    message: "Upgrading Project",
+    requires_pros_project: true 
+  }
+
+  const upgrade_project_command: Base_Command = new Base_Command(upgrade_project_command_options);
+
   try {
-    const { target, curKernel, curOkapi } = await fetchTarget();
-    const { newKernel, newOkapi } = await fetchServerVersions(target);
+    const { target, curKernel, curOkapi } = await getCurrentKernelOkapiVersion();
+    const { newKernel, newOkapi } = await getLatestKernelOkapiVersion(target);
     if (curKernel === newKernel && curOkapi === newOkapi) {
       await vscode.window.showInformationMessage("Project is up to date!");
       return;
     }
 
-    // check to see if the update is okay?
     await userApproval(
       newKernel === curKernel ? undefined : newKernel,
       newOkapi === curOkapi ? undefined : newOkapi
     );
 
-    await runUpgrade();
+    await upgrade_project_command.run_command();
 
     await vscode.window.showInformationMessage("Project updated!");
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
+
 };

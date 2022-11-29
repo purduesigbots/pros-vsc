@@ -1,13 +1,28 @@
 import * as vscode from "vscode";
-import * as child_process from "child_process";
 import * as path from "path";
-import * as fs from "fs";
-import { promisify } from "util";
 
-import { parseErrorMessage } from "./cli-parsing";
-import { getChildProcessPath } from "../one-click/path";
+import { Base_Command, Base_Command_Options } from "./base-command";
+import { selectDirectory , selectFileName} from "./command_tools";
 
-const selectDirectory = async () => {
+export const capture = async () => {
+  let dir = await selectDirectory("Select a directory where the screenshot will be saved");
+  let file = await selectFileName("Enter file name for the screenshot");
+
+  const capture_command_options: Base_Command_Options = {
+    command: "prosv5",
+    args: [
+      "capture",
+      `${path.join(dir, file)}`,
+      "--build-cache",
+      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
+    ],
+    message: "Capturing Screenshot",
+    requires_pros_project: true 
+  }
+
+const capture_command: Base_Command = new Base_Command(capture_command_options);
+
+/*const selectDirectory = async () => {
   const directoryOptions: vscode.OpenDialogOptions = {
     canSelectMany: false,
     title: "Select a directory where the screenshot will be saved",
@@ -93,4 +108,12 @@ export const capture = async () => {
   } catch (error: any) {
     vscode.window.showErrorMessage(error.message);
   }
+};*/
+
+try {
+  await capture_command.run_command();
+  await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(path.join(dir, file)));
+} catch (err: any) {
+  await vscode.window.showErrorMessage(err.message);
+}
 };

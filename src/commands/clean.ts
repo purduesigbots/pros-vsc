@@ -1,16 +1,27 @@
 import * as vscode from "vscode";
-import * as child_process from "child_process";
-import { promisify } from "util";
+import { Base_Command } from "./base-command";
 
-import { parseErrorMessage } from "./cli-parsing";
-import { getChildProcessPath } from "../one-click/path";
+const runClean = async () => {
+  const cleanCommand = new Base_Command({
+    command: "pros",
+    args: [
+      "make",
+      "clean",
+      ...`${process.env.PROS_VSCODE_FLAGS}`.split(" ")
+    ],
+    message: "Cleaning Project",
+    requires_pros_project: true
+  });
+  await cleanCommand.run_command();
+};
+
 /**
  * Call the PROS build CLI command.
  *
  * @param slot The slot number to place the executable in
  */
 
-const runClean = async () => {
+/*const runClean = async () => {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -38,7 +49,7 @@ const runClean = async () => {
       }
     }
   );
-};
+};*/
 
 export const clean = async () => {
   try {

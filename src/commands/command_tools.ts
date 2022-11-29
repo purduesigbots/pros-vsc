@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { gt } from "semver";
 
 import { PREFIX } from "./cli-parsing";
 import { Base_Command, Base_Command_Options } from "./base-command";
@@ -46,6 +47,82 @@ export const selectTarget = async () => {
   }
   return target;
 };
+
+export const getCurrentKernelOkapiVersion = async () => {
+  const kernel_okapi_version_command_options: Base_Command_Options = {
+    command: "pros",
+    args: [
+      "c",
+      "info-project",
+      "--project",
+      "--machine-output",
+      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
+    ],
+    message: "Getting current kernel and okapi versions",
+    requires_pros_project: true,
+    extra_output: true
+  };
+
+  const kernel_okapi_version_command: Base_Command = new Base_Command(kernel_okapi_version_command_options);
+  await kernel_okapi_version_command.run_command();
+
+  for (let e of kernel_okapi_version_command.extra_output!) {
+    if (e.startsWith(PREFIX)) {
+      let jdata = JSON.parse(e.substr(PREFIX.length));
+      if (jdata.type === "finalize") {
+        const target = jdata.data.project.target;
+        const curKernel = jdata.data.project.templates.find(
+          (t: any) => t.name === "kernel"
+        ).version;
+        const curOkapi = jdata.data.project.templates.find(
+          (t: any) => t.name === "okapilib"
+        ).version;
+        return { target, curKernel, curOkapi };
+      }
+    }
+  }
+  return { target: "", curKernel: "", curOkapi: "" };
+};
+
+export const getLatestKernelOkapiVersion = async (target: string) => {
+  const latest_kernel_okapi_version_command_options: Base_Command_Options = {
+    command: "pros",
+    args: [
+      "c",
+      "q",
+      "--target",
+      target,
+      "--machine-output",
+      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
+    ],
+    message: "Getting latest kernel and okapi versions",
+    requires_pros_project: true,
+    extra_output: true
+  };
+
+  const latest_kernel_okapi_version_command: Base_Command = new Base_Command(latest_kernel_okapi_version_command_options);
+  await latest_kernel_okapi_version_command.run_command();
+
+  let newKernel = "0.0.0";
+  let newOkapi = "0.0.0";
+
+  for (let e of latest_kernel_okapi_version_command.extra_output!) {
+    if (e.startsWith(PREFIX)) {
+      let jdata = JSON.parse(e.substr(PREFIX.length));
+      if (jdata.type === "finalize") {
+        for (let ver of jdata.data) {
+          if (ver.name === "kernel" && gt(ver.version, newKernel)) {
+            newKernel = ver.version;
+          } else if (ver.name === "okapilib" && gt(ver.version, newOkapi)) {
+            newOkapi = ver.version;
+          }
+        }
+      }
+    }
+  }
+
+  return { newKernel, newOkapi };
+}
 
 export const selectKernelVersion = async (target: string) => {
   // Command to run to fetch all kernel versions
