@@ -615,6 +615,16 @@ const modifyJson = async (dirpath: vscode.Uri, json: any, os: string) => {
     );
   }
 
+  try {
+    fs.statSync(
+      path.join(dirpath.fsPath, ".vscode")
+    );
+  } catch (error) {
+    await promisify(fs.mkdir)(
+      path.join(dirpath.fsPath, ".vscode")
+    );
+  }
+  
   await promisify(fs.writeFile)(
     path.join(dirpath.fsPath, ".vscode", "c_cpp_properties.json"),
     JSON.stringify(json, null, 2)
