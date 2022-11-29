@@ -1,19 +1,33 @@
 import * as vscode from "vscode";
-import * as child_process from "child_process";
-import { promisify } from "util";
-import { parseMakeOutput } from "./cli-parsing";
-import { output } from "../extension";
-import {
-  getChildProcessPath,
-  getChildProcessProsToolchainPath,
-} from "../one-click/path";
+import { Base_Command, Base_Command_Options } from "./base-command";
+
+export const stop = async () => {
+  const stop_command_options: Base_Command_Options = {
+    command: "pros",
+    args: [
+      "v5",
+      "stop",
+      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
+    ],
+    message: "Stopping Project",
+    requires_pros_project: true
+  }
+
+const stop_command: Base_Command = new Base_Command(stop_command_options);
+
+try {
+  await stop_command.run_command();
+} catch (err: any) {
+  await vscode.window.showErrorMessage(err.message);
+}
+};
 /**
  * Call the PROS stop CLI command.
  *
  * @param slot The slot number to place the executable in
  */
 
-const runStop = async () => {
+/*const runStop = async () => {
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -60,4 +74,4 @@ export const stop = async () => {
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
-};
+};*/
