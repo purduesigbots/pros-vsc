@@ -11,11 +11,11 @@ const userApproval = async (
   // Ask for user confirmation before upgrading kernal and/or okapi version
   let title;
   if (kernel && okapi) {
-    title = `Upgrade to kernel ${kernel} and Okapilib ${okapi}?`;
-  } else if (kernel) {
-    title = `Upgrade to Okapilib ${okapi}?`;
+    title = `Upgrade to kernel ${kernel} and Okapilib ${okapi}? Warning: There may be breaking changes.`;
+  } else if (okapi) {
+    title = `Upgrade to Okapilib ${okapi}? Warning: There may be breaking changes.`;
   } else {
-    title = `Upgrade to kernel ${kernel}?`;
+    title = `Upgrade to kernel ${kernel}? Warning: There may be breaking changes.`;
   }
   await vscode.window.showQuickPick(
     [{ label: "yes", description: "recommended" }, { label: "no" }],
@@ -28,8 +28,8 @@ const userApproval = async (
 };
 
 export const upgradeProject = async () => {
-  let {target, curKernel, curOkapi} = await getCurrentKernelOkapiVersion();
-  let {newKernel, newOkapi} = await getLatestKernelOkapiVersion(target);
+  //let {target, curKernel, curOkapi} = await getCurrentKernelOkapiVersion();
+  //let {newKernel, newOkapi} = await getLatestKernelOkapiVersion(target);
   const upgrade_project_command_options: Base_Command_Options = {
     command: "pros",
     args: [

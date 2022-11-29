@@ -54,11 +54,10 @@ export const getCurrentKernelOkapiVersion = async () => {
     args: [
       "c",
       "info-project",
-      "--project",
       "--machine-output",
       ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
     ],
-    message: "Getting current kernel and okapi versions",
+    message: "Fetching Project Info",
     requires_pros_project: true,
     extra_output: true
   };

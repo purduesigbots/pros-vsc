@@ -3,8 +3,9 @@ import { Base_Command, Base_Command_Options } from "./base-command";
 
 export const stop = async () => {
   const stop_command_options: Base_Command_Options = {
-    command: "prosv5",
+    command: "pros",
     args: [
+      "v5",
       "stop",
       ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
     ],
