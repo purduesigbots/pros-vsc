@@ -15,12 +15,6 @@ const runClean = async () => {
   await cleanCommand.run_command();
 };
 
-/**
- * Call the PROS build CLI command.
- *
- * @param slot The slot number to place the executable in
- */
-
 export const clean = async () => {
   try {
     await runClean();

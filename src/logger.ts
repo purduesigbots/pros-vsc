@@ -5,67 +5,102 @@ import * as fs from "fs";
 import { removeDirAsync } from "./one-click/install";
 
 export class Logger {
-    logUri: vscode.Uri;
-    logFolder: string = "";
-    lfname: string = "";
-    file_fullpath: string = "";
-    message_count: number = 0;
-    ready: boolean = false;
-    setting: string = "";
+  logUri: vscode.Uri;
+  logFolder: string = "";
+  lfname: string = "";
+  fileFullpath: string = "";
+  messageCount: number = 0;
+  ready: boolean = false;
+  setting: string = "";
 
-    constructor(context: vscode.ExtensionContext, logfile: string, timestamp_logfile_name: boolean = true, check_setting: string = "NA") {
-        this.logUri = context.globalStorageUri;  
+  constructor(
+    context: vscode.ExtensionContext,
+    logfile: string,
+    timestampLogfileName: boolean = true,
+    checkSetting: string = "NA"
+  ) {
+    this.logUri = context.globalStorageUri;
 
-        this.logFolder = path.join(this.logUri.fsPath, "logs");
-        this.lfname = `${logfile}${timestamp_logfile_name ? "_" + new Date().toISOString().replace(/:/gi, "-") : ""}.txt`;
-        this.message_count = 0;
-        this.file_fullpath = path.join(this.logFolder, this.lfname);
-        this.setting = check_setting;
+    this.logFolder = path.join(this.logUri.fsPath, "logs");
+    this.lfname = `${logfile}${
+      timestampLogfileName
+        ? "_" + new Date().toISOString().replace(/:/gi, "-")
+        : ""
+    }.txt`;
+    this.messageCount = 0;
+    this.fileFullpath = path.join(this.logFolder, this.lfname);
+    this.setting = checkSetting;
 
-        fs.mkdirSync(this.logFolder, {recursive: true});
-        
-        this.ready = true;
+    fs.mkdirSync(this.logFolder, { recursive: true });
+
+    this.ready = true;
+  }
+
+  async log(
+    category: string,
+    message: string,
+    level: string = "info",
+    timestamp: boolean = true
+  ) {
+    if (
+      !this.ready ||
+      !(
+        vscode.workspace.getConfiguration("pros").get<boolean>(this.setting) ??
+        false
+      )
+    ) {
+      return;
+    }
+    this.messageCount++;
+    let fullMessage = `${category} | ${
+      timestamp ? new Date().toISOString() : ""
+    } | ${level.toUpperCase()} :: ${message}\n`;
+    await fs.promises.appendFile(this.fileFullpath, fullMessage, {
+      encoding: "utf8",
+    });
+  }
+
+  async deleteLogs() {
+    if (!this.ready) {
+      return;
     }
 
-    async log(category: string, message: string, level: string = "info", timestamp: boolean = true) {
-        if (!this.ready) return;
-        if (!(vscode.workspace.getConfiguration("pros").get<boolean>(this.setting)??false)) return;
-        this.message_count++;
-        let full_message = `${category} | ${timestamp? new Date().toISOString() : ""} | ${level.toUpperCase()} :: ${message}\n`;
-        await fs.promises.appendFile(this.file_fullpath, full_message, {encoding: 'utf8'});
+    // get a list of logs in the log folder
+    let logFiles = await fs.promises.readdir(this.logFolder);
+
+    // delete all logs that are not the current log
+    for (let file of logFiles) {
+      if (file !== this.lfname) {
+        await fs.promises.unlink(path.join(this.logFolder, file));
+      }
     }
+  }
 
-    async deleteLogs() {
-        if (!this.ready) return;
-
-        // get a list of logs in the log folder
-        let log_files = await fs.promises.readdir(this.logFolder);
-
-        // delete all logs that are not the current log
-        for (let file of log_files) {
-            if (file != this.lfname) {
-                await fs.promises.unlink(path.join(this.logFolder, file));
-            }
-        }
+  async openLog() {
+    // get a list of logs in the log folder
+    if (!this.ready) {
+      return;
     }
+    let logFiles = await fs.promises.readdir(this.logFolder);
 
-    async openLog() {
-        // get a list of logs in the log folder
-        if (!this.ready) return;
-        let log_files = await fs.promises.readdir(this.logFolder);
-        
-        //generate a vscode quickpick using the list of files
-        let log_options: Array<vscode.QuickPickItem> = log_files.map(file => {return {label: file, description: ""}});
+    //generate a vscode quickpick using the list of files
+    let logOptions: Array<vscode.QuickPickItem> = logFiles.map((file) => {
+      return { label: file, description: "" };
+    });
 
-        let log_selection = await vscode.window.showQuickPick(log_options, {title: "Select a PROS log to open"});
+    let logSelection = await vscode.window.showQuickPick(logOptions, {
+      title: "Select a PROS log to open",
+    });
 
-        //open the log in vscode
-        if (log_selection) {
-            vscode.commands.executeCommand("vscode.open", vscode.Uri.file(path.join(this.logFolder, log_selection.label)));
-        }
+    //open the log in vscode
+    if (logSelection) {
+      vscode.commands.executeCommand(
+        "vscode.open",
+        vscode.Uri.file(path.join(this.logFolder, logSelection.label))
+      );
     }
+  }
 }
-
 
 export class BackgroundProgress {
     title: string;

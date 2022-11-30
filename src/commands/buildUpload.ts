@@ -30,9 +30,10 @@ const runBuildUpload = async () => {
           {
             env: {
               ...process.env,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               PATH: getChildProcessPath(),
             },
-            maxBuffer: 1024 * 1024 * 50
+            maxBuffer: 1024 * 1024 * 50,
           }
         );
         await vscode.window.showInformationMessage("Project Built!");

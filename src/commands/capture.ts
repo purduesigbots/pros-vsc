@@ -20,12 +20,14 @@ export const capture = async () => {
     requires_pros_project: true 
   }
 
-const capture_command: Base_Command = new Base_Command(capture_command_options);
 
-try {
-  await capture_command.run_command();
-  await vscode.commands.executeCommand("vscode.open", vscode.Uri.file(path.join(dir, file.replace(".png","")+ ".png")));
-} catch (err: any) {
-  await vscode.window.showErrorMessage(err.message);
-}
+  const capture_command: Base_Command = new Base_Command(capture_command_options);
+
+
+  try {
+    await capture_command.run_command();
+    await vscode.commands.executeCommand("vscode.open", vscode.Uri.file(path.join(dir, file.replace(".png","")+ ".png")));
+  } catch (err: any) {
+    await vscode.window.showErrorMessage(err.message);
+  }
 };

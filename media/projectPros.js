@@ -36,40 +36,45 @@
   const runafter = /** @type {HTMLInputElement} */ (
     document.getElementById("runafter")
   );
-  
+
   slotSelection.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
     vscode.postMessage({ type: "setSlot", slot: selector.value });
-    });
+  });
 
   var prevname;
   var nametimer;
   projectName.addEventListener("keyup", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
-    if(prevname==selector.value) {
+    if (prevname === selector.value) {
       return;
     }
     prevname = selector.value;
 
     clearTimeout(nametimer);
-    nametimer = setTimeout(function() {
-      vscode.postMessage({ type: "setName", projectName: selector.value });
-    },!selector.value ? 3000 : 500);
-
+    nametimer = setTimeout(
+      function () {
+        vscode.postMessage({ type: "setName", projectName: selector.value });
+      },
+      !selector.value ? 3000 : 500
+    );
   });
 
   var prevdesc;
   var desctimer;
   description.addEventListener("keyup", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
-    if(prevdesc==selector.value) {
+    if (prevdesc === selector.value) {
       return;
     }
     prevdesc = selector.value;
     clearTimeout(desctimer);
-    desctimer = setTimeout(function() {
-      vscode.postMessage({ type: "setDesc", description: selector.value });
-    },!selector.value ? 3000 : 500);
+    desctimer = setTimeout(
+      function () {
+        vscode.postMessage({ type: "setDesc", description: selector.value });
+      },
+      !selector.value ? 3000 : 500
+    );
   });
 
   iconSelection.addEventListener("change", (e) => {
@@ -78,7 +83,7 @@
     iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/icons/${selector.value}.png`;
     iconPreview.onerror = function (event) {
       iconPreview.onerror = null;
-      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${selector.value}.png`
+      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${selector.value}.png`;
     };
   });
 
@@ -101,8 +106,10 @@
     // Render the current settings
 
     // Current Project Name
-    projectName.value = json["py/state"]["project_name"] ? json["py/state"]["project_name"] : "Pros Project";
-    
+    projectName.value = json["py/state"]["project_name"]
+      ? json["py/state"]["project_name"]
+      : "Pros Project";
+
     // Current Project Description
     if (json["py/state"]["upload_options"]?.description) {
       description.value = json["py/state"]["upload_options"]["description"];
@@ -121,24 +128,24 @@
       iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/icons/${iconSelection.value}.png`;
       iconPreview.onerror = function (event) {
         iconPreview.onerror = null;
-        iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${iconSelection.value}.png`
+        iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${iconSelection.value}.png`;
       };
     } else {
       iconSelection.value = "pros";
       iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/icons/pros.png`;
       iconPreview.onerror = function (event) {
         iconPreview.onerror = null;
-        iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${iconSelection.value}.png`
+        iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${iconSelection.value}.png`;
       };
     }
 
     // Current run-after option
-    if(json["py/state"]["upload_options"]?.after) {
+    if (json["py/state"]["upload_options"]?.after) {
       runafter.value = json["py/state"]["upload_options"]["after"];
     } else {
       runafter.value = "screen";
     }
-    }
+  }
 
   // Handle messages sent from the extension to the webview
   window.addEventListener("message", (event) => {
