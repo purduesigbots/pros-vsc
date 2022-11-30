@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as os from "os";
+import * as fs from "fs";
+import { promisify } from "util";
 import { TreeDataProvider } from "./views/tree-view";
 import {
   getWebviewContent,
@@ -27,9 +29,15 @@ import {
   configurePaths,
   uninstall,
   cleanup,
+  getOperatingSystem,
 } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
+import {
+  getChildProcessProsToolchainPath,
+  getIntegratedTerminalPaths,
+} from "./one-click/path";
+
 let analytics: Analytics;
 
 export var system: string;
@@ -68,12 +76,12 @@ export const getProsTerminal = async (
   });
 };
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
   prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");
 
-  configurePaths(context);
+  await configurePaths(context);
 
   workspaceContainsProjectPros().then((isProsProject) => {
     vscode.commands.executeCommand(
@@ -86,6 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
       getProsTerminal(context).then((terminal) => {
         terminal.sendText("pros build-compile-commands");
       });
+      generateCCppFiles();
     } else {
       chooseProject();
     }
@@ -299,7 +308,6 @@ export function activate(context: vscode.ExtensionContext) {
       workspaceRootUri,
       "compile_commands.json"
     );
-
     // first check if the cdb exists. if not, attempt to build the project to generate it
     try {
       await vscode.workspace.fs.stat(compilationDbUri);
@@ -492,3 +500,129 @@ async function prosProjects() {
   console.log(array);
   return array;
 }
+
+const generateCCppFiles = async () => {
+  if (!workspaceContainsProjectPros() || !vscode.workspace.workspaceFolders) {
+    return;
+  }
+
+  // We will need to update this part with the new code in #110 once this all gets merged into develop. We can do a quick cleanup branch or something
+
+  const workspaceRootUri = vscode.workspace.workspaceFolders[0].uri;
+
+  const cCppPropertiesUri = vscode.Uri.joinPath(
+    workspaceRootUri,
+    ".vscode",
+    "c_cpp_properties.json"
+  );
+
+  const os = getOperatingSystem();
+
+  // if we are in a pros project
+
+  let exists = true;
+  console.log("does project.pros exist: " + exists);
+  try {
+    // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
+    // of if the workspace is using a physical file system or not.
+    const workspaceUri = workspaceRootUri;
+    const uriString = `${workspaceUri.scheme}:${
+      workspaceUri.path
+    }/${"project.pros"}`;
+    const uri = vscode.Uri.parse(uriString);
+    await vscode.workspace.fs.stat(uri);
+  } catch (e) {
+    console.error(e);
+    exists = false;
+  }
+
+  if (exists || true) {
+    const os = getOperatingSystem();
+    let json;
+    //check if the properties file exists
+    console.log("checking if it exists");
+    try {
+      // check if the file exists
+      let response = await vscode.workspace.fs.stat(cCppPropertiesUri);
+      // do nothing
+      let filedata = await promisify(fs.readFile)(
+        cCppPropertiesUri.fsPath,
+        "utf8"
+      );
+      json = JSON.parse(filedata);
+
+      await modifyJson(workspaceRootUri, json, os);
+    } catch (e) {
+      // make the file
+      console.log("generating file");
+
+      const defaultJSON = `{
+        "configurations": [
+            {
+                "name": "PROS Project",
+                "includePath": [
+                    "\${workspaceFolder}/**"
+                ],
+                "defines": [
+                    "_DEBUG",
+                    "UNICODE",
+                    "_UNICODE"
+                ],
+                "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe",
+                "cStandard": "c17",
+                "cppStandard": "c++17",
+                "intelliSenseMode": "windows-msvc-x64"
+            }
+        ],
+        "version": 4
+    }`;
+
+      json = JSON.parse(defaultJSON);
+      await modifyJson(workspaceRootUri, json, os);
+    }
+  }
+};
+
+const modifyJson = async (dirpath: vscode.Uri, json: any, os: string) => {
+  //modify the json file then save it
+
+  // if include is not already in the array
+  let include = path.join(dirpath.fsPath, "include");
+  if (!json.configurations[0].includePath.includes(include)) {
+    json.configurations[0].includePath.push(include);
+  }
+  json.configurations[0].compileCommands = path.join(
+    dirpath.fsPath,
+    "compile_commands.json"
+  );
+  json.configurations[0].intelliSenseMode = "gcc-arm";
+  if (os === "macos") {
+    json.configurations[0].macFrameworkPath = ["/System/Library/Frameworks"];
+  }
+
+  json.configurations[0].browse = {
+    path: [dirpath.fsPath],
+    limitSymbolsToIncludedHeaders: true,
+    databaseFilename: "",
+  };
+
+  let toolchain = getChildProcessProsToolchainPath();
+  if (toolchain !== undefined) {
+    json.configurations[0].compilerPath = path.join(
+      toolchain.replace(/"/g, ""),
+      "bin",
+      "arm-none-eabi-g++"
+    );
+  }
+
+  try {
+    fs.statSync(path.join(dirpath.fsPath, ".vscode"));
+  } catch (error) {
+    await promisify(fs.mkdir)(path.join(dirpath.fsPath, ".vscode"));
+  }
+
+  await promisify(fs.writeFile)(
+    path.join(dirpath.fsPath, ".vscode", "c_cpp_properties.json"),
+    JSON.stringify(json, null, 2)
+  );
+};
