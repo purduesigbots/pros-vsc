@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { gt } from "semver";
 
 import { PREFIX } from "./cli-parsing";
-import { Base_Command, Base_Command_Options } from "./base-command";
+import { BaseCommand, BaseCommandOptions } from "./base-command";
 
 export const selectDirectory = async (prompt: string) => {
   const directoryOptions: vscode.OpenDialogOptions = {
@@ -49,7 +49,7 @@ export const selectTarget = async () => {
 };
 
 export const getCurrentKernelOkapiVersion = async () => {
-  const kernel_okapi_version_command_options: Base_Command_Options = {
+  const kernelOkapiVersionCommandOptions: BaseCommandOptions = {
     command: "pros",
     args: [
       "c",
@@ -58,14 +58,16 @@ export const getCurrentKernelOkapiVersion = async () => {
       ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
     ],
     message: "Fetching Project Info",
-    requires_pros_project: true,
-    extra_output: true
+    requiresProsProject: true,
+    extraOutput: true,
   };
 
-  const kernel_okapi_version_command: Base_Command = new Base_Command(kernel_okapi_version_command_options);
-  await kernel_okapi_version_command.run_command();
+  const kernelOkapiVersionCommand: BaseCommand = new BaseCommand(
+    kernelOkapiVersionCommandOptions
+  );
+  await kernelOkapiVersionCommand.runCommand();
 
-  for (let e of kernel_okapi_version_command.extra_output!) {
+  for (let e of kernelOkapiVersionCommand.extraOutput!) {
     if (e.startsWith(PREFIX)) {
       let jdata = JSON.parse(e.substr(PREFIX.length));
       if (jdata.type === "finalize") {
@@ -84,7 +86,7 @@ export const getCurrentKernelOkapiVersion = async () => {
 };
 
 export const getLatestKernelOkapiVersion = async (target: string) => {
-  const latest_kernel_okapi_version_command_options: Base_Command_Options = {
+  const latestKernelOkapiVersionCommandOptions: BaseCommandOptions = {
     command: "pros",
     args: [
       "c",
@@ -95,17 +97,19 @@ export const getLatestKernelOkapiVersion = async (target: string) => {
       ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
     ],
     message: "Getting latest kernel and okapi versions",
-    requires_pros_project: true,
-    extra_output: true
+    requiresProsProject: true,
+    extraOutput: true,
   };
 
-  const latest_kernel_okapi_version_command: Base_Command = new Base_Command(latest_kernel_okapi_version_command_options);
-  await latest_kernel_okapi_version_command.run_command();
+  const latestKernelOkapiVersionCommand: BaseCommand = new BaseCommand(
+    latestKernelOkapiVersionCommandOptions
+  );
+  await latestKernelOkapiVersionCommand.runCommand();
 
   let newKernel = "0.0.0";
   let newOkapi = "0.0.0";
 
-  for (let e of latest_kernel_okapi_version_command.extra_output!) {
+  for (let e of latestKernelOkapiVersionCommand.extraOutput!) {
     if (e.startsWith(PREFIX)) {
       let jdata = JSON.parse(e.substr(PREFIX.length));
       if (jdata.type === "finalize") {
@@ -121,11 +125,11 @@ export const getLatestKernelOkapiVersion = async (target: string) => {
   }
 
   return { newKernel, newOkapi };
-}
+};
 
 export const selectKernelVersion = async (target: string) => {
   // Command to run to fetch all kernel versions
-  const kernel_version_command_options: Base_Command_Options = {
+  const kernelVersionCommandOptions: BaseCommandOptions = {
     command: "prosv5",
     args: [
       "c",
@@ -136,18 +140,20 @@ export const selectKernelVersion = async (target: string) => {
       ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
     ],
     message: "Fetching kernel versions",
-    requires_pros_project: false,
-    extra_output: true
+    requiresProsProject: false,
+    extraOutput: true,
   };
 
-  const kernel_version_command: Base_Command = new Base_Command(kernel_version_command_options);
-  await kernel_version_command.run_command();
+  const kernelVersionCommand: BaseCommand = new BaseCommand(
+    kernelVersionCommandOptions
+  );
+  await kernelVersionCommand.runCommand();
 
   let versions: vscode.QuickPickItem[] = [
-    { label: "latest", description: "Recommended" }
+    { label: "latest", description: "Recommended" },
   ];
   // List all kernel versions as dropdown for users to select desired version.
-  for (let e of kernel_version_command.extra_output!) {
+  for (let e of kernelVersionCommand.extraOutput!) {
     if (e.startsWith(PREFIX)) {
       let jdata = JSON.parse(e.substr(PREFIX.length));
       if (jdata.type === "finalize") {

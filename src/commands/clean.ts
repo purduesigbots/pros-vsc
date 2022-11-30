@@ -1,18 +1,14 @@
 import * as vscode from "vscode";
-import { Base_Command } from "./base-command";
+import { BaseCommand } from "./base-command";
 
 const runClean = async () => {
-  const cleanCommand = new Base_Command({
+  const cleanCommand = new BaseCommand({
     command: "pros",
-    args: [
-      "make",
-      "clean",
-      ...`${process.env.PROS_VSCODE_FLAGS}`.split(" ")
-    ],
+    args: ["make", "clean", ...`${process.env.PROS_VSCODE_FLAGS}`.split(" ")],
     message: "Cleaning Project",
-    requires_pros_project: true
+    requiresProsProject: true,
   });
-  await cleanCommand.run_command();
+  await cleanCommand.runCommand();
 };
 
 export const clean = async () => {

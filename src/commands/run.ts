@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
-import { Base_Command, Base_Command_Options } from "./base-command";
-
+import { BaseCommand, BaseCommandOptions } from "./base-command";
 
 export const run = async () => {
-  const run_command_options: Base_Command_Options = {
+  const runCommandOptions: BaseCommandOptions = {
     command: "pros",
     args: [
       "v5",
@@ -11,18 +10,17 @@ export const run = async () => {
       ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
     ],
     message: "Running Project",
-    requires_pros_project: true
+    requiresProsProject: true,
+  };
+
+  const runCommand: BaseCommand = new BaseCommand(runCommandOptions);
+
+  try {
+    await runCommand.runCommand();
+  } catch (err: any) {
+    await vscode.window.showErrorMessage(err.message);
   }
-
-const run_command: Base_Command = new Base_Command(run_command_options);
-
-try {
-  await run_command.run_command();
-} catch (err: any) {
-  await vscode.window.showErrorMessage(err.message);
-}
 };
-
 
 /**
  * Call the PROS run CLI command.

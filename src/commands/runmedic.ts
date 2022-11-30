@@ -1,22 +1,20 @@
 import * as vscode from "vscode";
-import { Base_Command, Base_Command_Options } from "./base-command";
+import { BaseCommand, BaseCommandOptions } from "./base-command";
 
-const medic_command_options: Base_Command_Options = {
+const medicCommandOptions: BaseCommandOptions = {
   command: "vexcom",
-  args: [
-    "--medic"
-  ],
+  args: ["--medic"],
   message: "Running Battery Medic on V5 Brain",
-  requires_pros_project: false
-}
+  requiresProsProject: false,
+};
 
-const medic_command: Base_Command = new Base_Command(medic_command_options);
+const medicCommand: BaseCommand = new BaseCommand(medicCommandOptions);
 
 export const medic = async (context: vscode.ExtensionContext) => {
   try {
     // Set environmental variables
     // Run upload command
-    await medic_command.run_command();
+    await medicCommand.runCommand();
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }

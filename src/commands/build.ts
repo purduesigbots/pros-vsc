@@ -1,21 +1,17 @@
 import * as vscode from "vscode";
-import { Base_Command, Base_Command_Options } from "./base-command";
+import { BaseCommand, BaseCommandOptions } from "./base-command";
 
-
-const build_command_options: Base_Command_Options = {
+const buildCommandOptions: BaseCommandOptions = {
   command: "pros",
-  args: [
-    "build-compile-commands"
-  ],
+  args: ["build-compile-commands"],
   message: "Building Project",
-  requires_pros_project: true
-}
-const build_command: Base_Command = new Base_Command(build_command_options);
-
+  requiresProsProject: true,
+};
+const buildCommand: BaseCommand = new BaseCommand(buildCommandOptions);
 
 export const build = async () => {
   try {
-    await build_command.run_command();
+    await buildCommand.runCommand();
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }

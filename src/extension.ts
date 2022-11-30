@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import * as os from "os";
 import * as fs from "fs";
 import { promisify } from "util";
 
@@ -32,11 +31,11 @@ import {
   cleanup,
   getOperatingSystem,
 } from "./one-click/install";
-import { getChildProcessProsToolchainPath  } from "./one-click/path";
+import { getChildProcessProsToolchainPath } from "./one-click/path";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
 
-import { get_cwd_is_pros } from "./workspace";
+import { getCwdIsPros } from "./workspace";
 
 let analytics: Analytics;
 
@@ -51,7 +50,6 @@ export var prosLogger: Logger;
 export const getProsTerminal = async (
   context: vscode.ExtensionContext
 ): Promise<vscode.Terminal> => {
-
   const prosTerminals = vscode.window.terminals.filter(
     (t) => t.name === "PROS Terminal"
   );
@@ -78,9 +76,7 @@ export const getProsTerminal = async (
   });
 };
 
-
 export async function activate(context: vscode.ExtensionContext) {
-
   analytics = new Analytics(context);
 
   prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");
@@ -401,7 +397,7 @@ export function deactivate() {
 }
 
 async function workspaceContainsProjectPros(): Promise<boolean> {
-  return await get_cwd_is_pros() !== null;
+  return (await getCwdIsPros()) !== null;
 }
 
 //This code calls prosProjects and allows user to choose which pros project to work on

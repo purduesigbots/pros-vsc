@@ -1,20 +1,17 @@
 import * as vscode from "vscode";
-import { Base_Command, Base_Command_Options } from "./base-command";
+import { BaseCommand, BaseCommandOptions } from "./base-command";
 
-const fw_update_command_options: Base_Command_Options = {
+const fwUpdateCommandOptions: BaseCommandOptions = {
   command: "vexcom",
-  args: [
-    "--vexos",
-    "latest"
-  ],
+  args: ["--vexos", "latest"],
   message: "Updating VEXos",
-  requires_pros_project: false
-}
-const fw_update_command: Base_Command = new Base_Command(fw_update_command_options);
+  requiresProsProject: false,
+};
+const fwUpdateCommand: BaseCommand = new BaseCommand(fwUpdateCommandOptions);
 
 export const updateFirmware = async () => {
   try {
-    await fw_update_command.run_command();
+    await fwUpdateCommand.runCommand();
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }

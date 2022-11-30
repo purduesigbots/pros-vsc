@@ -1,8 +1,11 @@
 import * as vscode from "vscode";
 import * as path from "path";
 
-import { Base_Command, Base_Command_Options } from "./base-command";
-import { getCurrentKernelOkapiVersion, getLatestKernelOkapiVersion } from "./command_tools";
+import { BaseCommand, BaseCommandOptions } from "./base-command";
+import {
+  getCurrentKernelOkapiVersion,
+  getLatestKernelOkapiVersion,
+} from "./command_tools";
 
 const userApproval = async (
   kernel: string | undefined,
@@ -30,21 +33,20 @@ const userApproval = async (
 export const upgradeProject = async () => {
   //let {target, curKernel, curOkapi} = await getCurrentKernelOkapiVersion();
   //let {newKernel, newOkapi} = await getLatestKernelOkapiVersion(target);
-  const upgrade_project_command_options: Base_Command_Options = {
+  const upgradeProjectCommandOptions: BaseCommandOptions = {
     command: "pros",
-    args: [
-      "c",
-      "u",
-      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
-    ],
+    args: ["c", "u", ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? [])],
     message: "Upgrading Project",
-    requires_pros_project: true 
-  }
+    requiresProsProject: true,
+  };
 
-  const upgrade_project_command: Base_Command = new Base_Command(upgrade_project_command_options);
+  const upgradeProjectCommand: BaseCommand = new BaseCommand(
+    upgradeProjectCommandOptions
+  );
 
   try {
-    const { target, curKernel, curOkapi } = await getCurrentKernelOkapiVersion();
+    const { target, curKernel, curOkapi } =
+      await getCurrentKernelOkapiVersion();
     const { newKernel, newOkapi } = await getLatestKernelOkapiVersion(target);
     if (curKernel === newKernel && curOkapi === newOkapi) {
       await vscode.window.showInformationMessage("Project is up to date!");
@@ -56,11 +58,10 @@ export const upgradeProject = async () => {
       newOkapi === curOkapi ? undefined : newOkapi
     );
 
-    await upgrade_project_command.run_command();
+    await upgradeProjectCommand.runCommand();
 
     await vscode.window.showInformationMessage("Project updated!");
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
-
 };

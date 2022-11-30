@@ -2,8 +2,6 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
 
-import { removeDirAsync } from "./one-click/install";
-
 export class Logger {
   logUri: vscode.Uri;
   logFolder: string = "";
@@ -103,41 +101,48 @@ export class Logger {
 }
 
 export class BackgroundProgress {
-    title: string;
-    cancellable: boolean;
-    end: boolean = false;
-    progress: number = 0;
-    started_progress: boolean = false;
-    token: vscode.CancellationToken | undefined;
-    constructor(title: string, cancel: boolean = false, autostart: boolean = false) {
-        this.title = title;
-        this.cancellable = cancel;
-        if(autostart) this.start();
+  title: string;
+  cancellable: boolean;
+  end: boolean = false;
+  progress: number = 0;
+  startedProgress: boolean = false;
+  token: vscode.CancellationToken | undefined;
+  constructor(
+    title: string,
+    cancel: boolean = false,
+    autostart: boolean = false
+  ) {
+    this.title = title;
+    this.cancellable = cancel;
+    if (autostart) {
+      this.start();
     }
+  }
 
-    async start () {
-        vscode.window.withProgress({
-                location: vscode.ProgressLocation.Notification,
-                title: this.title,
-                cancellable: this.cancellable
-            },
-            async(progress, token) => {
-                this.token = token;
-                while(!this.end) {
-                    if(this.progress > 0) {
-                        progress.report({increment: this.progress});
-                        this.progress = 0;
-                    }
-                    await new Promise(resolve => setTimeout(resolve, 50));
-                }
-            }
-        );
-    }
+  async start() {
+    vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: this.title,
+        cancellable: this.cancellable,
+      },
+      async (progress, token) => {
+        this.token = token;
+        while (!this.end) {
+          if (this.progress > 0) {
+            progress.report({ increment: this.progress });
+            this.progress = 0;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+      }
+    );
+  }
 
-    stop = async() => {
-        this.end = true;
-    }
-    increment = async(amount: number) => {
-        this.progress += amount;
-    }
+  stop = async () => {
+    this.end = true;
+  };
+  increment = async (amount: number) => {
+    this.progress += amount;
+  };
 }
