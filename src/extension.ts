@@ -32,16 +32,11 @@ import {
   cleanup,
   getOperatingSystem,
 } from "./one-click/install";
-import { getChildProcessPath, getChildProcessProsToolchainPath  } from "./one-click/path";
+import { getChildProcessProsToolchainPath  } from "./one-click/path";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
 
 import { get_cwd_is_pros } from "./workspace";
-import {
-  getChildProcessProsToolchainPath,
-  getIntegratedTerminalPaths,
-} from "./one-click/path";
-
 
 let analytics: Analytics;
 
