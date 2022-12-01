@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import * as os from "os";
 import * as fs from "fs";
 import { promisify } from "util";
+
 import { TreeDataProvider } from "./views/tree-view";
 import {
   getWebviewContent,
@@ -31,12 +31,11 @@ import {
   cleanup,
   getOperatingSystem,
 } from "./one-click/install";
+import { getChildProcessProsToolchainPath } from "./one-click/path";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
-import {
-  getChildProcessProsToolchainPath,
-  getIntegratedTerminalPaths,
-} from "./one-click/path";
+
+import { getCwdIsPros } from "./workspace";
 
 let analytics: Analytics;
 
@@ -47,6 +46,7 @@ export var prosLogger: Logger;
 
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
+
 export const getProsTerminal = async (
   context: vscode.ExtensionContext
 ): Promise<vscode.Terminal> => {
@@ -397,29 +397,9 @@ export function deactivate() {
 }
 
 async function workspaceContainsProjectPros(): Promise<boolean> {
-  const filename = "project.pros";
-
-  if (
-    vscode.workspace.workspaceFolders === undefined ||
-    vscode.workspace.workspaceFolders === null
-  ) {
-    return false;
-  }
-
-  let exists = true;
-  try {
-    // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
-    // of if the workspace is using a physical file system or not.
-    const workspaceUri = vscode.workspace.workspaceFolders[0].uri;
-    const uriString = `${workspaceUri.scheme}:${workspaceUri.path}/${filename}`;
-    const uri = vscode.Uri.parse(uriString);
-    await vscode.workspace.fs.stat(uri);
-  } catch (e) {
-    console.error(e);
-    exists = false;
-  }
-  return exists;
+  return (await getCwdIsPros()) !== null;
 }
+
 //This code calls prosProjects and allows user to choose which pros project to work on
 async function chooseProject() {
   if (
