@@ -6,7 +6,6 @@ import axios from "axios";
 
 import { PREFIX } from "../commands/cli-parsing";
 import { getNonce } from "./nonce";
-import { install } from "../one-click/install";
 import { getChildProcessPath } from "../one-click/path";
 
 var fetch = require("node-fetch");
@@ -50,23 +49,21 @@ export const fetchKernelVersion = async (): Promise<string> => {
 };
 
 export const fetchKernelVersionNonCLIDependent = async (): Promise<string> => {
-  //   const response = await fetch(
-  //     "https://api.github.com/repos/purduesigbots/pros/releases/latest"
-  //   );
-  //   if (!response.ok) {
-  //     console.log(response.url, response.status, response.statusText);
-  //     throw new Error(`Can't fetch kernel release: ${response.statusText}`);
-  //   }
-  //   var v = (await response.json()).tag_name;
-  //   return v;
-  return "0.0.0";
+  const response = await fetch(
+    "https://api.github.com/repos/purduesigbots/pros/releases/latest"
+  );
+  if (!response.ok) {
+    console.log(response.url, response.status, response.statusText);
+    throw new Error(`Can't fetch kernel release: ${response.statusText}`);
+  }
+  var v = (await response.json()).tag_name;
+  return v;
 };
 export const fetchCliVersion = async (): Promise<string> => {
-  return "0.0.0";
-  //   const response = await axios.get(
-  //     "https://purduesigbots.github.io/pros-mainline/stable/UpgradeManifestV1.json"
-  //   );
-  //   return `${response.data.version.major}.${response.data.version.minor}.${response.data.version.patch}`;
+  const response = await axios.get(
+    "https://purduesigbots.github.io/pros-mainline/stable/UpgradeManifestV1.json"
+  );
+  return `${response.data.version.major}.${response.data.version.minor}.${response.data.version.patch}`;
 };
 
 export function getWebviewContent(
