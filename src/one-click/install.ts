@@ -327,7 +327,7 @@ export async function install(context: vscode.ExtensionContext) {
   //if everything works and cli is up to date, do nothing
   if (cliWorking && toolchainWorking && cliUpToDate && vexcomWorking) {
     // tell the user that everything is up to date
-    await vscode.window.showInformationMessage(
+    vscode.window.showInformationMessage(
       "CLI and Toolchain currently working and up to date."
     );
     console.log("Everything is up to date");
