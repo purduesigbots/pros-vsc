@@ -18,7 +18,7 @@ steps:
     displayName: "Build Package"
 
   - script: |
-    npm run test
+      npm run test
     displayName: "Run Test Cases"
 
   - task: PublishPipelineArtifact@1
