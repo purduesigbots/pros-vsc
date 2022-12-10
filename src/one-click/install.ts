@@ -534,18 +534,16 @@ export async function cleanup(
             prosLogger.log("OneClick", e, "ERROR");
           }
         );
-        await prosLogger.log("OneClick", `Configuring environment variables`);
-        await configurePaths(context).catch((e) => {
-          prosLogger.log("OneClick", e, "ERROR");
-        });
+
         await prosLogger.log(
           "OneClick",
           `Verifying that CLI and Toolchain are working`
         );
-
         await chmod(globalPath, system);
-
-        //await configurePaths(context);
+        await prosLogger.log("OneClick", `Configuring environment variables`);
+        await configurePaths(context).catch((e) => {
+          prosLogger.log("OneClick", e, "ERROR");
+        });
 
         // Ensure that toolchain and cli are working
         let cliSuccess =
