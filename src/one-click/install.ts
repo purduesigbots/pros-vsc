@@ -522,7 +522,7 @@ export async function cleanup(
       title: "Verifying Installation",
       cancellable: true,
     },
-    async (progress, token) => {
+    async () => {
       try {
         const globalPath = context.globalStorageUri.fsPath;
         await prosLogger.log(
