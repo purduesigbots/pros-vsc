@@ -18,7 +18,7 @@ suite("Extension Test Suite", () => {
     const ext = vscode.extensions.getExtension("sigbots.pros");
     if (ext) {
       const myExtensionContext = await ext.activate();
-      install(myExtensionContext);
+      await install(myExtensionContext);
       assert.ok(cleanup(myExtensionContext));
     }
   });
