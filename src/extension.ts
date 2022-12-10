@@ -76,7 +76,7 @@ export const getProsTerminal = async (
   });
 };
 
-export async function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext): Promise<vscode.ExtensionContext> {
   analytics = new Analytics(context);
 
   prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");
@@ -390,6 +390,7 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(ProsProjectEditorProvider.register(context));
+  return context;
 }
 
 export function deactivate() {
