@@ -3,7 +3,7 @@ import { BaseCommand, BaseCommandOptions } from "./base-command";
 
 const buildCommandOptions: BaseCommandOptions = {
   command: "pros",
-  args: ["build-compile-commands"],
+  args: ["make"],
   message: "Building Project",
   requiresProsProject: true,
 };
