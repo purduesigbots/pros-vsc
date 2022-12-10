@@ -21,5 +21,5 @@ suite("Extension Test Suite", () => {
       await install(myExtensionContext);
       assert.ok(cleanup(myExtensionContext));
     }
-  });
+  }).timeout(300000);
 });

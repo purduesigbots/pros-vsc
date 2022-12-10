@@ -17,6 +17,10 @@ steps:
       vsce package -o artifacts
     displayName: "Build Package"
 
+  - script: |
+    npm run test
+    displayName: "Run Test Cases"
+
   - task: PublishPipelineArtifact@1
     inputs:
       targetPath: artifacts
