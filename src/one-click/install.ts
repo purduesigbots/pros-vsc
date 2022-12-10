@@ -240,9 +240,12 @@ export async function install(context: vscode.ExtensionContext) {
   var cliName = `pros-cli-${system}.zip`;
   var vexcomName = `vex-vexcom-${system}.zip`;
   // Title of prompt depending on user's installed CLI
+  let [cliExecPath] = getIntegratedTerminalPaths(context);
+  const addQuotes =
+    getOperatingSystem() === "macos" && !os.cpus()[0].model.includes("Apple M");
   var title = await getInstallPromptTitle(
     path.join(
-      `"${path.join(globalPath, "install", `pros-cli-${system}`)}"`,
+      `${addQuotes ? `"` : ""}${cliExecPath}${addQuotes ? `"` : ""}`,
       "pros"
     ),
     releaseVersionNumber ?? 0
