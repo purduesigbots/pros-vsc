@@ -240,9 +240,12 @@ export async function install(context: vscode.ExtensionContext) {
   var cliName = `pros-cli-${system}.zip`;
   var vexcomName = `vex-vexcom-${system}.zip`;
   // Title of prompt depending on user's installed CLI
+  let [cliExecPath] = getIntegratedTerminalPaths(context);
+  const addQuotes =
+    getOperatingSystem() === "macos" && !os.cpus()[0].model.includes("Apple M");
   var title = await getInstallPromptTitle(
     path.join(
-      `"${path.join(globalPath, "install", `pros-cli-${system}`)}"`,
+      `${addQuotes ? `"` : ""}${cliExecPath}${addQuotes ? `"` : ""}`,
       "pros"
     ),
     releaseVersionNumber ?? 0
@@ -519,7 +522,7 @@ export async function cleanup(
       title: "Verifying Installation",
       cancellable: true,
     },
-    async (progress, token) => {
+    async () => {
       try {
         const globalPath = context.globalStorageUri.fsPath;
         await prosLogger.log(
@@ -531,18 +534,16 @@ export async function cleanup(
             prosLogger.log("OneClick", e, "ERROR");
           }
         );
-        await prosLogger.log("OneClick", `Configuring environment variables`);
-        await configurePaths(context).catch((e) => {
-          prosLogger.log("OneClick", e, "ERROR");
-        });
+
         await prosLogger.log(
           "OneClick",
           `Verifying that CLI and Toolchain are working`
         );
-
         await chmod(globalPath, system);
-
-        //await configurePaths(context);
+        await prosLogger.log("OneClick", `Configuring environment variables`);
+        await configurePaths(context).catch((e) => {
+          prosLogger.log("OneClick", e, "ERROR");
+        });
 
         // Ensure that toolchain and cli are working
         let cliSuccess =

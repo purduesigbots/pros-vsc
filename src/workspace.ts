@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as path from "path";
 
 /*!
  * @brief This function returns the current working directory (vscode.Uri) and if it is a pros project (boolean)
@@ -14,19 +15,22 @@ export const getCwdIsPros = async (): Promise<vscode.Uri | null> => {
   //output the 0th workspace folder
 
   let active = vscode.window.activeTextEditor?.document.uri ?? undefined;
-  let activeDir = undefined;
+  let activeDir = null;
 
   const filenameSearch = "project.pros";
+  let prosProjects = await vscode.workspace.findFiles(filenameSearch);
 
-  if (active !== undefined) {
+  if (prosProjects.length === 1) {
+    console.log(`pros project: ${prosProjects[0].path}`);
+    activeDir = vscode.Uri.file(path.dirname(prosProjects[0].fsPath));
+  } else if (active !== undefined) {
     console.log(`active: ${active}`);
-    activeDir = vscode.workspace.getWorkspaceFolder(active)?.uri;
-    console.log(`workspace folder: ${activeDir}`);
-  } else if (
-    vscode.workspace.workspaceFolders !== undefined &&
-    vscode.workspace.workspaceFolders !== null
-  ) {
-    activeDir = vscode.workspace.workspaceFolders[0].uri;
+    let potentialDir = vscode.workspace.getWorkspaceFolder(active);
+    prosProjects.forEach((path) => {
+      if (potentialDir === vscode.workspace.getWorkspaceFolder(path)) {
+        activeDir = potentialDir?.uri;
+      }
+    });
   }
 
   if (activeDir === undefined || activeDir === null) {

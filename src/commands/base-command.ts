@@ -215,7 +215,7 @@ export class BaseCommand {
     liveOutput: string[],
     process: child_process.ChildProcess
   ): Promise<boolean> => {
-    const errorRegex: RegExp = /((Error: )|(ERROR: ))(.+)/;
+    const errorRegex: RegExp = /((Error: )|(ERROR: )|(: error:))(.+)/;
     const yesNoRegex: RegExp = /\[y\/N\]/;
     const promptRegex: RegExp = /\[[A-Za-z0-9|]+\]/;
     // This function will parse the output of the command we ran.

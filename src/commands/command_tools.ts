@@ -130,7 +130,7 @@ export const getLatestKernelOkapiVersion = async (target: string) => {
 export const selectKernelVersion = async (target: string) => {
   // Command to run to fetch all kernel versions
   const kernelVersionCommandOptions: BaseCommandOptions = {
-    command: "prosv5",
+    command: "pros",
     args: [
       "c",
       "ls-templates",
