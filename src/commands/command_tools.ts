@@ -33,6 +33,26 @@ export const selectFileName = async (prompt: string) => {
   return (inputName ? inputName : projectNameOptions.placeHolder) as string;
 };
 
+export const selectTeamNumber = async (prompt: string) => {
+  let inputName: string | undefined;
+  const projectNameOptions: vscode.InputBoxOptions = {
+    prompt: prompt ?? "Input Team Number",
+    placeHolder: "12345A",
+  };
+  inputName = await vscode.window.showInputBox(projectNameOptions);
+  return (inputName ? inputName : projectNameOptions.placeHolder) as string;
+};
+
+export const selectRobotName = async (prompt: string) => {
+  let inputName: string | undefined;
+  const projectNameOptions: vscode.InputBoxOptions = {
+    prompt: prompt ?? "Input Robot Name",
+    placeHolder: "My Robot",
+  };
+  inputName = await vscode.window.showInputBox(projectNameOptions);
+  return (inputName ? inputName : projectNameOptions.placeHolder) as string;
+};
+
 export const selectTarget = async () => {
   const targetOptions: vscode.QuickPickOptions = {
     placeHolder: "v5",

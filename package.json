@@ -154,6 +154,14 @@
       {
         "command": "pros.updatefirmware",
         "title": "PROS: Update VEXos Firmware"
+      },
+      {
+        "command": "pros.teamnumber",
+        "title": "PROS: Set Team Number"
+      },
+      {
+        "command": "pros.robotname",
+        "title": "PROS: Set Robot Name"
       }
     ],
     "keybindings": [
