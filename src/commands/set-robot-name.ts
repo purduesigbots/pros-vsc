@@ -7,7 +7,7 @@ export const setRobotName = async () => {
   let robotName = await selectRobotName("Enter a Robot Name");
   const setRobotNameCommandOptions: BaseCommandOptions = {
     command: "pros",
-    args: ["v5", "set_variable", "robotname.", `${robotName}`],
+    args: ["v5", "set_variable", "robotname", `${robotName}`],
     message: "Setting Robot Name",
     requiresProsProject: false,
   };
