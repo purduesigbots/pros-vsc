@@ -8,9 +8,9 @@ export const selectDirectory = async (prompt: string) => {
   const directoryOptions: vscode.OpenDialogOptions = {
     canSelectMany: false,
     title: prompt ?? "Select a directory",
-    openLabel: "Select file",
+    openLabel: "Select Folder",
     canSelectFolders: true,
-    canSelectFiles: true,
+    canSelectFiles: false,
   };
   const uri: string | undefined = await vscode.window
     .showOpenDialog(directoryOptions)
