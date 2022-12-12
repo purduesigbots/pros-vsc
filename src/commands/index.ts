@@ -11,3 +11,5 @@ export * from "./runmedic";
 export * from "./fw-update";
 export * from "./command_tools";
 export * from "./base-command";
+export * from "./set-team-number";
+export * from "./set-robot-name";
