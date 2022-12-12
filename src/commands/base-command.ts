@@ -11,11 +11,11 @@ import { getCwdIsPros } from "../workspace";
 
     I realize I missed something quite important in the presentation. It's the idea of synchronous v.s. asynchronous functions.
 
-    In short, a synchronous function is one that blocks the execution of the program until it completes. 
+    In short, a synchronous function is one that blocks the execution of the program until it completes.
     An asynchronous function is one that does not block the execution of the program until it completes.
 
     The way this works is that when either function is called, it waits until something is returned to it.
-    However, in the case of an asynchronous function, it will return a promise. 
+    However, in the case of an asynchronous function, it will return a promise.
     This promise is a placeholder for the value that will be returned later.
 
     This is how javascript enables having multiple things happen at once, since by design, javascript is single-threaded.
@@ -215,7 +215,7 @@ export class BaseCommand {
     liveOutput: string[],
     process: child_process.ChildProcess
   ): Promise<boolean> => {
-    const errorRegex: RegExp = /((Error: )|(ERROR: )|(: error:))(.+)/;
+    const errorRegex: RegExp = /((Error: )|(ERROR )|(ERROR: )|(: error:))(.+)/;
     const yesNoRegex: RegExp = /\[y\/N\]/;
     const promptRegex: RegExp = /\[[A-Za-z0-9|]+\]/;
     // This function will parse the output of the command we ran.
