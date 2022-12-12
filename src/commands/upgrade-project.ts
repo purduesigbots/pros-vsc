@@ -20,7 +20,7 @@ const userApproval = async (
   } else {
     title = `Upgrade to kernel ${kernel}? Warning: There may be breaking changes.`;
   }
-  await vscode.window.showQuickPick(
+  const output = await vscode.window.showQuickPick(
     [{ label: "yes", description: "recommended" }, { label: "no" }],
     {
       placeHolder: "yes",
@@ -28,6 +28,9 @@ const userApproval = async (
       title: title,
     }
   );
+  if (output === undefined || output.label === "no") {
+    throw new Error();
+  }
 };
 
 export const upgradeProject = async () => {
