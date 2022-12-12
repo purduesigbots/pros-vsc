@@ -22,7 +22,7 @@ import {
   medic,
   updateFirmware,
   setTeamNumber,
-  setRobotName
+  setRobotName,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -194,7 +194,7 @@ export async function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("robotname");
     await setRobotName();
   });
-  
+
   vscode.commands.registerCommand("pros.capture", async () => {
     analytics.sendAction("capture");
     await capture();

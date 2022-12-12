@@ -1,9 +1,7 @@
 import * as vscode from "vscode";
 import { BaseCommand, BaseCommandOptions } from "./base-command";
 
-import {
-  selectRobotName
-} from "./command_tools";
+import { selectRobotName } from "./command_tools";
 
 export const setRobotName = async () => {
   let robotName = await selectRobotName("Enter a Robot Name");
@@ -13,7 +11,9 @@ export const setRobotName = async () => {
     message: "Setting Robot Name",
     requiresProsProject: false,
   };
-  const setRobotNameCommand: BaseCommand = new BaseCommand(setRobotNameCommandOptions);
+  const setRobotNameCommand: BaseCommand = new BaseCommand(
+    setRobotNameCommandOptions
+  );
   try {
     await setRobotNameCommand.runCommand();
   } catch (err: any) {

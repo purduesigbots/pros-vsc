@@ -1,9 +1,7 @@
 import * as vscode from "vscode";
 import { BaseCommand, BaseCommandOptions } from "./base-command";
 
-import {
-  selectTeamNumber
-} from "./command_tools";
+import { selectTeamNumber } from "./command_tools";
 
 export const setTeamNumber = async () => {
   let teamNumber = await selectTeamNumber("Enter a team number");
@@ -13,7 +11,9 @@ export const setTeamNumber = async () => {
     message: "Setting Team Number",
     requiresProsProject: false,
   };
-  const setTeamNumberCommand: BaseCommand = new BaseCommand(setTeamNumberCommandOptions);
+  const setTeamNumberCommand: BaseCommand = new BaseCommand(
+    setTeamNumberCommandOptions
+  );
   try {
     await setTeamNumberCommand.runCommand();
   } catch (err: any) {
