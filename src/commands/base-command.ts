@@ -218,7 +218,6 @@ export class BaseCommand {
     const errorRegex: RegExp = /((Error: )|(ERROR )|(ERROR: )|(: error:))(.+)/;
     const yesNoRegex: RegExp = /\[y\/N\]/;
     const promptRegex: RegExp = /\[([^\]]+)\]/;
-
     // This function will parse the output of the command we ran.
     // Normally, we use the --machine-output flag to get the output in a json format.
     // This makes it easier to parse the output, as everything is categorized into different levels, such as Warning or error.
