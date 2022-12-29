@@ -34,7 +34,7 @@
     "color": "#D6B872",
     "theme": "dark"
   },
-  "version": "0.4.2",
+  "version": "0.5.0",
   "engines": {
     "vscode": "^1.56.0"
   },
@@ -154,6 +154,14 @@
       {
         "command": "pros.updatefirmware",
         "title": "PROS: Update VEXos Firmware"
+      },
+      {
+        "command": "pros.teamnumber",
+        "title": "PROS: Set Team Number"
+      },
+      {
+        "command": "pros.robotname",
+        "title": "PROS: Set Robot Name"
       }
     ],
     "keybindings": [
@@ -330,8 +338,5 @@
     "tar-fs": "^2.1.1",
     "universal-analytics": "^0.4.23",
     "unzipper": "^0.10.11"
-  },
-  "extensionDependencies": [
-    "llvm-vs-code-extensions.vscode-clangd"
-  ]
+  }
 }

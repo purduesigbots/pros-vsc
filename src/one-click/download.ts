@@ -26,7 +26,11 @@ async function download(
       location: ProgressLocation.Notification,
       title:
         "Downloading: " +
-        (storagePath.includes("cli") ? "PROS CLI" : "PROS Toolchain"),
+        (storagePath.includes("cli")
+          ? "PROS CLI"
+          : storagePath.includes("toolchain")
+          ? "PROS Toolchain"
+          : "VEX Vexcom"),
       cancellable: true,
     },
     async (progress, token) => {
@@ -79,7 +83,11 @@ export async function extract(
       location: ProgressLocation.Notification,
       title:
         "Installing: " +
-        (storagePath.includes("cli") ? "PROS CLI" : "PROS Toolchain"),
+        (storagePath.includes("cli")
+          ? "PROS CLI"
+          : storagePath.includes("toolchain")
+          ? "PROS Toolchain"
+          : "VEX Vexcom"),
       cancellable: true,
     },
     async (progress, token) => {
@@ -330,6 +338,10 @@ export async function chmod(globalPath: string, system: string) {
     ),
     fs.promises.chmod(
       path.join(globalPath, "install", `pros-cli-${system}`, "intercept-cc"),
+      0o751
+    ),
+    fs.promises.chmod(
+      path.join(globalPath, "install", `vex-vexcom-${system}`, "vexcom"),
       0o751
     ),
   ];

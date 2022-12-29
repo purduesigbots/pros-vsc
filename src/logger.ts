@@ -2,8 +2,6 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
 
-import { removeDirAsync } from "./one-click/install";
-
 export class Logger {
   logUri: vscode.Uri;
   logFolder: string = "";
@@ -108,6 +106,7 @@ export class BackgroundProgress {
   end: boolean = false;
   progress: number = 0;
   startedProgress: boolean = false;
+  token: vscode.CancellationToken | undefined;
   constructor(
     title: string,
     cancel: boolean = false,
@@ -128,16 +127,14 @@ export class BackgroundProgress {
         cancellable: this.cancellable,
       },
       async (progress, token) => {
-        const loop = async () => {
-          if (this.end) {
-            return;
-          }
+        this.token = token;
+        while (!this.end) {
           if (this.progress > 0) {
             progress.report({ increment: this.progress });
             this.progress = 0;
           }
-          setTimeout(loop, 50);
-        };
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
       }
     );
   }

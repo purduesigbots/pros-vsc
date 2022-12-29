@@ -2,6 +2,19 @@
 
 Below are our release notes with their release dates corresponding to each version.
 
+## [0.5.0] - 2022-12-12 - Beta Version
+
+### Added
+
+- Set Team Name and Set Robot Name buttons
+- Bugfixes for MacOS
+- Generate Properties File for Microsoft C/C++ Extension
+- Add Vexcom to OneClick
+- Error handling for rate limiting
+- One-Click Bugfixes
+- Rewrite Sidebar Buttons
+- Run and Stop buttons
+
 ## [0.4.2] - 2022-07-27 - Beta Version
 
 ### Added
