@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import axios from 'axios';
+import { CodeLens } from 'vscode';
 var prosJson = {
     "namespace": "pros",
     "url": "https://pros.cs.purdue.edu/v5/index.html",
@@ -88,7 +89,7 @@ export function parseJSON(keyword: string){
     return final_website;
 }
 
-export function ParseJSON(keyword: string){
+export async function ParseJSON(keyword: string){
 
 
   const url = 'https://purduesigbots.github.io/pros-doxygen-docs/api.html'; // URL we're scraping
@@ -97,40 +98,56 @@ export function ParseJSON(keyword: string){
       if (keyword === PROSJSON.namespace){
           final_website = PROSJSON.namespace;
       }
+
       else{
-          var final_obj = PROSJSON.members.filter(prosMember=>{
-              return keyword in prosMember.members ;
-          }
-          );
+
+          var final_obj = PROSJSON.members.filter(prosMember=> prosMember.members.filter(memberFunc=> memberFunc === keyword));
+
+          if (final_obj.length > 0) {
           final_website = final_obj[0].name;
           console.log(final_website);
+          }
+
       }
+  
   const AxiosInstance = axios.create(); // Create a new Axios Instance
   if (final_website === "pros"){
     return url;
   }
+  else if(final_website === ""){
+    return final_website;
+  }
   else{
-    var variable= '';
+    var variable: any;
+    var final_link = "";
     // Send an async HTTP Get request to the url
-    AxiosInstance.get(url)
+    await AxiosInstance.get(url,{timeout: 5000})
       .then( // Once we have data returned ...
         response => {
           const html = response.data; // Get the HTML from the HTTP request
-          
+          console.log(html);
 
       // In other environments:
           const cheerio = require('cheerio');
           const $ = cheerio.load(html);
-          variable = $(final_website+'C++ API</a></li><li><)').attr("href");
-
-          console.log(variable+"Printed");
-        
-      });
+          const links = $('a'); //jquery get all hyperlinks
+          for (var i:number = 0;i <= links.length; i+=1){
+            //console.log($(links[i]).text());
+            if ($(links[i]).text() === final_website+" C++ API"){
+             final_link = $(links[i]).attr("href");
+            }
+          }
+          final_link = url.slice(0,50)+final_link;
+      })
+      .catch(error => {
+        console.log(error.response.data.error);
+     });
       
-    console.log(variable+"Printed");
-    return variable;
+      
+    await console.log(final_link+"Printed");
+    return final_link;
   }
 }
 
  
-ParseJSON("Motors");
+//ParseJSON("Motor");

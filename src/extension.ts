@@ -170,15 +170,18 @@ export async function activate(context: vscode.ExtensionContext) {
         //will be needed for word lookup
         const range = document.getWordRangeAtPosition(position);
         const word = document.getText(range);
-        let linkString: string = parseJSON(word);
-        let linknew: string = ParseJSON("Motor");
-        console.log(linknew);
+        var linkString: string = parseJSON(word);
+        let linknew: Promise<string> = ParseJSON(word);
+        linknew.then(result=>{
+          linkString = result;
+        });
+        console.log(linkString);
         let webstring = `<!DOCTYPE html>
-        <html lang="en">
+        <html lang="en"> 
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Cat Coding</title>
+            <title>"${linkString}$"</title>
         </head>
         <body style = "width: 100%; height: 100%;">
             <iframe src = "${linkString}$" height = 600 width = 600 fullscreen > </iframe>
@@ -188,9 +191,9 @@ export async function activate(context: vscode.ExtensionContext) {
         
         let link = new vscode.MarkdownString(`[Go to Pros Documentation...](${linkString}$)`);
         link.isTrusted = true;
-        let webviewLink = new vscode.MarkdownString(`[Open Documentation...](${linkString}$)`);
-        const panel = vscode.window.createWebviewPanel('doc',word + " docs",vscode.ViewColumn.One,{});
-        panel.webview.html = webstring;
+        // let webviewLink = new vscode.MarkdownString(`[Open Documentation...](${linkString}$)`);
+        // const panel = vscode.window.createWebviewPanel('doc',linkString + " docs",vscode.ViewColumn.One,{});
+        // panel.webview.html = webstring;
 
         let hover: vscode.Hover = {
             contents: [link]
