@@ -38,6 +38,7 @@ import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
 
 import { getCwdIsPros } from "./workspace";
+import { startPortMonitoring } from "./device";
 
 let analytics: Analytics;
 
@@ -101,6 +102,8 @@ export async function activate(context: vscode.ExtensionContext) {
       chooseProject();
     }
   });
+
+  startPortMonitoring(vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0));
 
   if (
     vscode.workspace
