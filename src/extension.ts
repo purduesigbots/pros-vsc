@@ -587,7 +587,8 @@ const modifyJson = async (dirpath: vscode.Uri, json: any, os: string) => {
     dirpath.fsPath,
     "compile_commands.json"
   );
-  json.configurations[0].cppStandard = "gnu++17";
+  json.configurations[0].cStandard = "gnu11";
+  json.configurations[0].cppStandard = "gnu++20";
   json.configurations[0].intelliSenseMode = "gcc-arm";
   if (os === "macos") {
     json.configurations[0].macFrameworkPath = ["/System/Library/Frameworks"];
