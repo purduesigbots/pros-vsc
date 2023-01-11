@@ -58,6 +58,13 @@
           "title": "PROS",
           "icon": "media/pros-tux-white.png"
         }
+      ],
+      "panel": [
+        {
+          "id": "pros-brain-view-container",
+          "title": "PROS",
+          "icon": "media/pros-tux-white.png"
+        }
       ]
     },
     "views": {
@@ -67,6 +74,13 @@
           "name": "PROS",
           "icon": "media/pros-tux-white.png",
           "contextualTitle": "PROS"
+        }
+      ],
+      "pros-brain-view-container": [
+        {
+          "id": "pros.brainView",
+          "name": "Brain View",
+          "type": "webview"
         }
       ]
     },

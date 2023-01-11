@@ -39,6 +39,7 @@ import { Logger } from "./logger";
 
 import { getCwdIsPros } from "./workspace";
 import { startPortMonitoring } from "./device";
+import { BrainViewProvider } from "./views/brain-view";
 
 let analytics: Analytics;
 
@@ -298,6 +299,12 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.window.registerTreeDataProvider(
     "prosTreeview",
     new TreeDataProvider()
+  );
+
+  const brainViewProvider = new BrainViewProvider(context.extensionUri);
+  vscode.window.registerWebviewViewProvider(
+    BrainViewProvider.viewType,
+    brainViewProvider
   );
 
   if (

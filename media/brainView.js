@@ -1,0 +1,3 @@
+(function() {
+    const vscode = acquireVsCodeApi();
+}());
