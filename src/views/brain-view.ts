@@ -54,7 +54,23 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
             </head>
             <body>
                 <div class="body__container">
-                    <p>test</p>
+                    <div class="button_group">
+                        <button>Brain 1</button>
+                        <button>Brain 2</button>
+                        <button>Brain 3</button>
+                    </div>
+                    <div class="button_group">
+                        <button>Slot 1</button>
+                        <button>Slot 2</button>
+                        <button>Slot 3</button>
+                    </div>
+                    <div class="info_group">
+                        <p>Name</p>
+                        <p>Team</p>
+                        <p>vexos</p>
+                        <p>cpu0</p>
+                        <p>cpu1</p>
+                    </div>
                 </div>
                 <script nonce="${nonce}" src="${scriptUri}"></script>
             </body>
