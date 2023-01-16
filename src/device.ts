@@ -8,7 +8,7 @@ import { StatusBarItem } from "vscode";
 /* eslint-disable @typescript-eslint/naming-convention */
 export type DeviceInfo = {
     port: number;
-    type: DeviceType;
+    type: string;
     status: number;
     version: string;
     boot: string;
@@ -56,15 +56,38 @@ export class V5DeviceInfo {
     
     constructor(raw: string) {
         let rawJSON = JSON.parse(raw);
-        this.vexos = rawJSON.v5.brain.vexos;
-        this.cpu0 = rawJSON.v5.brain.cpu0;
-        this.cpu1 = rawJSON.v5.brain.cpu1;
+        this.vexos = formatVersion(rawJSON.v5.brain.vexos);
+        this.cpu0 = formatVersion(rawJSON.v5.brain.cpu0);
+        this.cpu1 = formatVersion(rawJSON.v5.brain.cpu1);
         this.ssn = rawJSON.v5.brain.ssn;
         this.name = rawJSON.v5.brain.name;
         this.team = rawJSON.v5.brain.team;
         this.programs = rawJSON.v5.programs.items;
-        this.devices = rawJSON.v5.devices.items;
+        this.programs.forEach(element => {
+            element.slot = element.slot + 1;
+        });
+        this.devices = [];
+        rawJSON.v5.devices.items.forEach((element: any) => {
+            this.devices.push({
+                port: element.port,
+                type: DeviceType[element.type],
+                status: element.status,
+                version: formatVersion(element.version),
+                boot: formatVersion(element.boot)
+            });
+        });
     }
+};
+
+const formatVersion = (rawVersion: string) : string => {
+    let versionNumber = Number(rawVersion);
+    let firstNumber = versionNumber % 256;
+    versionNumber = Math.floor(versionNumber/256);
+    let secondNumber = versionNumber % 256;
+    versionNumber = Math.floor(versionNumber/256);
+    let thirdNumber = versionNumber % 256;
+    versionNumber = Math.floor(versionNumber/256);
+    return `${versionNumber}.${thirdNumber}.${secondNumber}.${firstNumber}`;
 };
 
 export type PROSDeviceInfo = {
@@ -73,8 +96,13 @@ export type PROSDeviceInfo = {
 };
 
 var currentPort = "";
+var portList: PROSDeviceInfo[] = [];
 
-export const getV5ComPorts = async (): Promise<PROSDeviceInfo[]> => {
+export const getV5ComPorts = (): PROSDeviceInfo[] => {
+    return portList;
+};
+
+const getV5ComPortsInternal = async (): Promise<PROSDeviceInfo[]> => {
     const {stdout, stderr} = await promisify(child_process.exec)("pros lsusb --machine-output", {
         timeout: 5000,
         env: {
@@ -127,7 +155,7 @@ export const getV5DeviceInfo = async (port: string): Promise<V5DeviceInfo> => {
 };
 
 export const resolvePort = async (status: StatusBarItem): Promise<void> => {
-    let v5Ports = await getV5ComPorts();
+    let v5Ports = await getV5ComPortsInternal();
     if (v5Ports.length === 0) {
         currentPort = "";
         status.text = "No V5 ports found!";
@@ -136,13 +164,22 @@ export const resolvePort = async (status: StatusBarItem): Promise<void> => {
         status.text = v5Ports[0].desc;
     } else {
         let currentPortActive = v5Ports.some(port => {
-            return port.device === currentPort;
+            if (port.device === currentPort) {
+                status.text = port.desc;
+                return true;
+            }
+            return false;
         });
         if (!currentPortActive) {
             currentPort = v5Ports[0].device;
             status.text = v5Ports[0].desc;
         }
     }
+    portList = v5Ports;
+};
+
+export const setPort = (port: string) : void => {
+    currentPort = port;
 };
 
 export const getCurrentPort = (): string => {

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { getCurrentPort, getV5ComPorts, getV5DeviceInfo, setPort } from '../device';
 import { getNonce } from './nonce';
 
 export class BrainViewProvider implements vscode.WebviewViewProvider {
@@ -22,6 +23,40 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
         };
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+        webviewView.webview.onDidReceiveMessage(data => {
+            switch(data.type) {
+                case "updateDeviceList":
+                    this.updateDeviceList();
+                    break;
+                case "setPort":
+                    setPort(data.port);
+                    break;
+            }
+        });
+        this.updateDeviceList();
+    }
+
+    public updatePortInfo() {
+        getV5DeviceInfo(getCurrentPort()).then(deviceInfo => {
+            this._view?.webview.postMessage({
+                type: "deviceInfo",
+                deviceInfo: deviceInfo
+            });
+        });
+    }
+
+    public updateDeviceList() {
+        let deviceList = getV5ComPorts();
+        if (this._view) {
+            this._view.webview.postMessage({
+                type: "deviceList",
+                deviceList: deviceList,
+                currentDevice: getCurrentPort()
+            });
+            if (deviceList.length !== 0) {
+                this.updatePortInfo();
+            }
+        }
     }
 
     private _getHtmlForWebview(webview: vscode.Webview): string {
@@ -54,22 +89,20 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
             </head>
             <body>
                 <div class="body__container">
-                    <div class="button_group">
-                        <button>Brain 1</button>
-                        <button>Brain 2</button>
-                        <button>Brain 3</button>
-                    </div>
+                    <select id="brain_list">
+                        <option value="placeholder">placeholder</option>
+                    </select>
                     <div class="button_group">
                         <button>Slot 1</button>
                         <button>Slot 2</button>
                         <button>Slot 3</button>
                     </div>
                     <div class="info_group">
-                        <p>Name</p>
-                        <p>Team</p>
-                        <p>vexos</p>
-                        <p>cpu0</p>
-                        <p>cpu1</p>
+                        <p id="name">Name</p>
+                        <p id="team">Team</p>
+                        <p id="vexos">vexos</p>
+                        <p id="cpu0">cpu0</p>
+                        <p id="cpu1">cpu1</p>
                     </div>
                 </div>
                 <script nonce="${nonce}" src="${scriptUri}"></script>
