@@ -1,15 +1,13 @@
 .body__container {
     margin: 1rem auto;
-    height: 100%;
-    display: flex;
-    justify-content: start;
+    display: grid;
 }
-.button_group {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
+.selection {
+    background-color: rgb(60, 60, 60);
+    color: rgb(240, 240, 240);
+    border-color: rgb(60, 60, 60);
 }
 .info_group {
     display: grid;
-    grid-auto-flow: row;
+    grid-auto-flow: dense;
 }

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getCurrentPort, getV5ComPorts, getV5DeviceInfo, setPort } from '../device';
+import { getCurrentPort, getV5ComPorts, getV5DeviceInfo, setPort, setSlot } from '../device';
 import { getNonce } from './nonce';
 
 export class BrainViewProvider implements vscode.WebviewViewProvider {
@@ -30,6 +30,12 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
                     break;
                 case "setPort":
                     setPort(data.port);
+                    break;
+                case "setSlot":
+                    setSlot(data.slot);
+                    break;
+                case "runCommand":
+                    vscode.commands.executeCommand(data.command);
                     break;
             }
         });
@@ -89,13 +95,17 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
             </head>
             <body>
                 <div class="body__container">
-                    <select id="brain_list">
-                        <option value="placeholder">placeholder</option>
+                    <select id="brain_list" class="selection">
+                    </select>
+                    <select id="slot_list" class="selection">
                     </select>
                     <div class="button_group">
-                        <button>Slot 1</button>
-                        <button>Slot 2</button>
-                        <button>Slot 3</button>
+                        <button id="run_button">Run Program</button>
+                        <button id="stop_button">Stop Program</button>
+                        <button id="team_number">Set Team Number</button>
+                        <button id="robot_name">Set Robot Name</button>
+                        <button id="update_vexos">Update VEXos</button>
+                        <button id="battery_medic">Run Battery Medic</button>
                     </div>
                     <div class="info_group">
                         <p id="name">Name</p>
@@ -103,6 +113,8 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
                         <p id="vexos">vexos</p>
                         <p id="cpu0">cpu0</p>
                         <p id="cpu1">cpu1</p>
+                    </div>
+                    <div id="device_container" class="info_group">
                     </div>
                 </div>
                 <script nonce="${nonce}" src="${scriptUri}"></script>

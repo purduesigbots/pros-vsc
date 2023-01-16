@@ -52,6 +52,7 @@ export class V5DeviceInfo {
     name: string;
     team: string;
     programs: ProgramInfo[];
+    currentSlot: number;
     devices: DeviceInfo[];
     
     constructor(raw: string) {
@@ -63,6 +64,8 @@ export class V5DeviceInfo {
         this.name = rawJSON.v5.brain.name;
         this.team = rawJSON.v5.brain.team;
         this.programs = rawJSON.v5.programs.items;
+        resolveSlot(this.programs);
+        this.currentSlot = currentSlot;
         this.programs.forEach(element => {
             element.slot = element.slot + 1;
         });
@@ -97,6 +100,7 @@ export type PROSDeviceInfo = {
 
 var currentPort = "";
 var portList: PROSDeviceInfo[] = [];
+var currentSlot: number = 0;
 
 export const getV5ComPorts = (): PROSDeviceInfo[] => {
     return portList;
@@ -154,7 +158,7 @@ export const getV5DeviceInfo = async (port: string): Promise<V5DeviceInfo> => {
     return new V5DeviceInfo(stdout);
 };
 
-export const resolvePort = async (status: StatusBarItem): Promise<void> => {
+const resolvePort = async (status: StatusBarItem): Promise<void> => {
     let v5Ports = await getV5ComPortsInternal();
     if (v5Ports.length === 0) {
         currentPort = "";
@@ -178,12 +182,32 @@ export const resolvePort = async (status: StatusBarItem): Promise<void> => {
     portList = v5Ports;
 };
 
-export const setPort = (port: string) : void => {
+const resolveSlot = (programs: ProgramInfo[]): void => {
+    if (programs.length === 0) {
+        currentSlot = 0;
+    } else if (programs.length === 1) {
+        currentSlot = programs[0].slot + 1;
+    } else {
+        if (programs.every(program => Number(program.slot + 1) !== Number(currentSlot))) {
+            currentSlot = programs[0].slot + 1;
+        }
+    }
+};
+
+export const setPort = (port: string): void => {
     currentPort = port;
 };
 
 export const getCurrentPort = (): string => {
     return currentPort;
+};
+
+export const getCurrentSlot = (): number => {
+    return currentSlot;
+};
+
+export const setSlot = (slot: number): void => {
+    currentSlot = slot;
 };
 
 export const startPortMonitoring = (status: StatusBarItem): void => {
