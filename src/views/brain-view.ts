@@ -95,18 +95,10 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
             </head>
             <body>
                 <div class="body__container">
-                    <select id="brain_list" class="selection">
+                    <select id="brain_list" class="selection monaco-select-box">
                     </select>
-                    <select id="slot_list" class="selection">
+                    <select id="slot_list" class="selection monaco-select-box">
                     </select>
-                    <div class="button_group">
-                        <button id="run_button">Run Program</button>
-                        <button id="stop_button">Stop Program</button>
-                        <button id="team_number">Set Team Number</button>
-                        <button id="robot_name">Set Robot Name</button>
-                        <button id="update_vexos">Update VEXos</button>
-                        <button id="battery_medic">Run Battery Medic</button>
-                    </div>
                     <div class="info_group">
                         <p id="name">Name</p>
                         <p id="team">Team</p>

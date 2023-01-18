@@ -9,12 +9,6 @@
     const brainList = document.getElementById("brain_list");
     const programList = document.getElementById("slot_list");
     const deviceContainer = document.getElementById("device_container");
-    const run = document.getElementById("run_button");
-    const stop = document.getElementById("stop_button");
-    const teamNumber = document.getElementById("team_number");
-    const robotName = document.getElementById("robot_name");
-    const updateVexOs = document.getElementById("update_vexos");
-    const batteryMedic = document.getElementById("battery_medic");
 
     window.addEventListener("message", event => {
         const message = event.data;
@@ -36,30 +30,6 @@
     programList.addEventListener("change", event => {
         const selector = event.target;
         vscode.postMessage({type: "setSlot", slot: selector.value});
-    });
-
-    run.addEventListener("click", () => {
-        vscode.postMessage({type: "runCommand", command: "pros.run"});
-    });
-
-    stop.addEventListener("click", () => {
-        vscode.postMessage({type: "runCommand", command: "pros.stop"});
-    });
-
-    teamNumber.addEventListener("click", () => {
-        vscode.postMessage({type: "runCommand", command: "pros.teamnumber"});
-    });
-
-    robotName.addEventListener("click", () => {
-        vscode.postMessage({type: "runCommand", command: "pros.robotname"});
-    });
-
-    updateVexOs.addEventListener("click", () => {
-        vscode.postMessage({type: "runCommand", command: "pros.updatefirmware"});
-    });
-
-    batteryMedic.addEventListener("click", () => {
-        vscode.postMessage({type: "runCommand", command: "pros.batterymedic"});
     });
 
     function updateDeviceInfo(deviceInfo) {
