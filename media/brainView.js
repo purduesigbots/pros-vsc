@@ -1,11 +1,7 @@
 (function() {
     const vscode = acquireVsCodeApi();
 
-    const name = document.getElementById("name");
-    const team = document.getElementById("team");
-    const vexos = document.getElementById("vexos");
-    const cpu0 = document.getElementById("cpu0");
-    const cpu1 = document.getElementById("cpu1");
+    const brainInfo = document.getElementById("brain_info");
     const brainList = document.getElementById("brain_list");
     const programList = document.getElementById("slot_list");
     const deviceContainer = document.getElementById("device_container");
@@ -33,19 +29,22 @@
     });
 
     function updateDeviceInfo(deviceInfo) {
-        name.innerHTML = "Name: " + deviceInfo.name;
-        team.innerHTML = "Team: " + deviceInfo.team;
-        vexos.innerHTML = "VEXos Version: " + deviceInfo.vexos;
-        cpu0.innerHTML = "CPU0 Firmware Version: " + deviceInfo.cpu0;
-        cpu1.innerHTML = "CPU1 SDK Version: " + deviceInfo.cpu1;
+        brainInfo.innerHTML = "Brain Info:<br>";
+        brainInfo.innerHTML += `Name: ${deviceInfo.name}<br>`;
+        brainInfo.innerHTML += `Team: ${deviceInfo.team}<br>`;
+        brainInfo.innerHTML += `VEXos Version: ${deviceInfo.vexos}<br>`;
+        brainInfo.innerHTML += `CPU0 Firmware Version: ${deviceInfo.cpu0}<br>`;
+        brainInfo.innerHTML += `CPU1 SDK Version: ${deviceInfo.cpu1}<br>`;
+        brainInfo.innerHTML += `System ID: ${deviceInfo.ssn}`;
         programList.innerHTML = "";
         deviceInfo.programs.forEach(program => {
             programList.innerHTML += `<option value=${program.slot} ${Number(program.slot) === Number(deviceInfo.currentSlot) ? "selected" : ""}>${program.file}</option>`;
         });
-        deviceContainer.innerHTML = "";
+        deviceContainer.innerHTML = "<p>";
         deviceInfo.devices.forEach(device => {
-            deviceContainer.innerHTML += `<p>Device: ${device.type} | Port: ${device.port}</p>`;
+            deviceContainer.innerHTML += `Port ${device.port}: ${device.type}<br>`;
         });
+        deviceContainer.innerHTML += "</p>";
     }
 
     function updateDeviceList(deviceList, currentDevice) {

@@ -85,11 +85,11 @@ export class V5DeviceInfo {
 const formatVersion = (rawVersion: string) : string => {
     let versionNumber = Number(rawVersion);
     let firstNumber = versionNumber % 256;
-    versionNumber = Math.floor(versionNumber/256);
+    versionNumber = ~~(versionNumber/256);
     let secondNumber = versionNumber % 256;
-    versionNumber = Math.floor(versionNumber/256);
+    versionNumber = ~~(versionNumber/256);
     let thirdNumber = versionNumber % 256;
-    versionNumber = Math.floor(versionNumber/256);
+    versionNumber = ~~(versionNumber/256);
     return `${versionNumber}.${thirdNumber}.${secondNumber}.${firstNumber}`;
 };
 
