@@ -203,26 +203,37 @@ export async function installVision(context: vscode.ExtensionContext) {
   const globalPath = context.globalStorageUri.fsPath;
   const system = getOperatingSystem();
   const windowsVision = "https://github.com/purduesigbots/pros-cli/releases/download/3.4.1/vex_vision_utility-0.2.4-win.zip";
+  const linuxVision = "https://github.com/purduesigbots/pros-cli/releases/download/3.4.1/vision_030_osx64.zip";
 
   // Set the installed file names
   var visionName = `pros-vision-${system}.zip`;
   if(system === "windows") {
-    
+    //add install and download directories
+    const dirs = await createDirs(context.globalStorageUri.fsPath);
+
+    const promises = [
+      downloadextract(context, windowsVision, visionName)
+    ];
+
+    await Promise.all(promises);
+    await cleanup(context, system);
   }
   else if(system === "macos") {
-  
+     //add install and download directories
+     const dirs = await createDirs(context.globalStorageUri.fsPath);
+
+     const promises = [
+       downloadextract(context, linuxVision, visionName)
+     ];
+ 
+     await Promise.all(promises);
+     await cleanup(context, system);
+  }
+  else if(system === "linux"){
+    vscode.window.showInformationMessage("Vision Utility is not supported on Linux");
   }
 
-      //add install and download directories
-      const dirs = await createDirs(context.globalStorageUri.fsPath);
-
-      const promises = [
-        downloadextract(context, windowsVision, visionName)
-      ];
-
-      await Promise.all(promises);
-      await cleanup(context, system);
-
+      
       vscode.workspace
         .getConfiguration("pros")
         .update("showInstallOnStartup", false);
