@@ -137,6 +137,7 @@ const userApproval = async (
   );
 };
 
+
 export const upgradeProject = async () => {
   try {
     const { target, curKernel, curOkapi } = await fetchTarget();
@@ -159,3 +160,4 @@ export const upgradeProject = async () => {
     await vscode.window.showErrorMessage(err.message);
   }
 };
+
