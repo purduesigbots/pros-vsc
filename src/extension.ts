@@ -24,7 +24,10 @@ import {
   configurePaths,
   uninstall,
   updateCLI,
-  cleanup
+  cleanup,
+  installVision,
+  uninstallVision,
+  runVision
 } from "./one-click/install";
 import { TextDecoder, TextEncoder } from "util";
 let analytics: Analytics;
@@ -124,6 +127,22 @@ export function activate(context: vscode.ExtensionContext) {
     analytics.sendAction("build");
     await build();
   });
+  
+  vscode.commands.registerCommand("pros.installVision", async () => {
+    analytics.sendAction("installVision");
+    await installVision(context);
+  });
+
+  vscode.commands.registerCommand("pros.uninstallVision", async () => {
+    analytics.sendAction("uninstallVision");
+    await uninstallVision(context);
+  });
+
+  vscode.commands.registerCommand("pros.runVision", async () => {
+    analytics.sendAction("runVision");
+    await runVision(context);
+  });
+  
 
   vscode.commands.registerCommand("pros.clean", clean);
   vscode.commands.registerCommand("pros.selectProject", chooseProject);

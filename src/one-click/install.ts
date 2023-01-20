@@ -202,7 +202,7 @@ export async function install(context: vscode.ExtensionContext) {
 export async function installVision(context: vscode.ExtensionContext) {
   const globalPath = context.globalStorageUri.fsPath;
   const system = getOperatingSystem();
-  const windowsVision = "https://github.com/purduesigbots/pros-cli/releases/download/3.1.3/vex_vision_utility-0.2.4-win.zip";
+  const windowsVision = "https://github.com/purduesigbots/pros-cli/releases/download/3.4.1/vex_vision_utility-0.2.4-win.zip";
 
   // Set the installed file names
   var visionName = `pros-vision-${system}.zip`;
@@ -226,7 +226,38 @@ export async function installVision(context: vscode.ExtensionContext) {
       vscode.workspace
         .getConfiguration("pros")
         .update("showInstallOnStartup", false);
+
+        vscode.window.showInformationMessage("Vision Utility Installed!");
 }
+
+export async function uninstallVision(context: vscode.ExtensionContext) {
+  const globalPath = context.globalStorageUri.fsPath;
+  const title = "Are you sure you want to uninstall Vision Utlity?";
+  const labelResponse = await vscode.window.showInformationMessage(
+    title,
+    "Uninstall Now!",
+    "No Thanks."
+  );
+  if (labelResponse === "Uninstall Now!") {
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Uninstalling Vsion Utility",
+        cancellable: false,
+      },
+      async (progress, token) => {
+        await removeDirAsync(globalPath, false);
+      }
+    );
+    vscode.window.showInformationMessage("Vision Utility Uninstalled!");
+  }
+
+}
+
+// code for running the vision utility
+export async function runVision(context: vscode.ExtensionContext) {
+ 
+    }
 
 export async function updateCLI(
   context: vscode.ExtensionContext,
