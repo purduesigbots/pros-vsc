@@ -100,7 +100,7 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
                     <select id="slot_list" class="selection monaco-select-box">
                     </select>
                     <p id="brain_info"></p>
-                    <div id="device_container" class="info_group">
+                    <p id="device_container">
                     </div>
                 </div>
                 <script nonce="${nonce}" src="${scriptUri}"></script>

@@ -40,11 +40,10 @@
         deviceInfo.programs.forEach(program => {
             programList.innerHTML += `<option value=${program.slot} ${Number(program.slot) === Number(deviceInfo.currentSlot) ? "selected" : ""}>${program.file}</option>`;
         });
-        deviceContainer.innerHTML = "<p>";
+        deviceContainer.innerHTML = "";
         deviceInfo.devices.forEach(device => {
             deviceContainer.innerHTML += `Port ${device.port}: ${device.type}<br>`;
         });
-        deviceContainer.innerHTML += "</p>";
     }
 
     function updateDeviceList(deviceList, currentDevice) {
