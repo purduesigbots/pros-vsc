@@ -29,13 +29,15 @@ import { getCwdIsPros } from "../workspace";
 
 */
 export type BaseCommandOptions = {
-  command: string;
-  args: string[];
-  message: string;
-  requiresProsProject: boolean;
-  extraOutput?: boolean;
-  successMessage?: string;
+  command: string; // the command to run. most commonly is "pros"
+  args: string[]; // an array of arguments to pass to the command. example: ["v5", "capture"]
+  message: string; // the message to display to the user while the command is running. example: "Capturing screen"
+  requiresProsProject: boolean; // whether or not the command must be run from within a PROS project.
+  extraOutput?: boolean; // normally, the base command will either display an error message or a success message, and not return the actual output of the command. If this is set to true, then the output of the command will be stored in Command.extraOutput
+  successMessage?: string; // the message to display to the user if the command is successful. example: "Screen captured successfully". This is optional, and if it is not set then the command will output "Command completed successfully"
 };
+
+
 export class BaseCommand {
   command: string;
   args: string[];
