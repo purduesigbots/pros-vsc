@@ -288,6 +288,11 @@
           "default": true,
           "description": "Log PROS Extension events into a log file. Will help people provide better tech support if something goes wrong."
         },
+        "pros.logHistoryLimit": {
+          "type": "number",
+          "default": 60,
+          "description": "The number of days that log files will be kept before being removed."
+        },
         "pros.OneClick: CliDownloadURL": {
           "type": "string",
           "default": "default",
