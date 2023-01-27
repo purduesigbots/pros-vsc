@@ -79,13 +79,16 @@ export class Logger {
       return;
     }
 
-    let keep = (vscode.workspace.getConfiguration("pros").get<number>("logHistoryLimit") ?? 60) * 864E5;
+    let keep =
+      (vscode.workspace
+        .getConfiguration("pros")
+        .get<number>("logHistoryLimit") ?? 60) * 864e5;
     let now = Date.now();
 
     let logFiles = await fs.promises.readdir(this.logFolder);
 
     for (let file of logFiles) {
-      let stats = await fs.promises.stat(path.join(this.logFolder,file));
+      let stats = await fs.promises.stat(path.join(this.logFolder, file));
       if (now - stats.birthtimeMs > keep) {
         await fs.promises.unlink(path.join(this.logFolder, file));
       }
