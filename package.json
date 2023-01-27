@@ -76,6 +76,29 @@
         }
       ]
     },
+    "icons": {
+      "pros-v5-brain": {
+        "description": "V5 Brain",
+        "default": {
+          "fontPath": "media/vexicon.woff",
+          "fontCharacter": "\\E00C"
+        }
+      },
+      "pros-v5-controller": {
+        "description": "V5 Controller",
+        "default": {
+          "fontPath": "media/vexicon.woff",
+          "fontCharacter": "\\E00D"
+        }
+      },
+      "pros-v5-unknown": {
+        "description": "Unknown V5 Device",
+        "default": {
+          "fontPath": "media/vexicon.woff",
+          "fontCharacter": "\\E00A"
+        }
+      }
+    },
     "commands": [
       {
         "command": "pros.build&upload",

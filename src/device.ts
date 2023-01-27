@@ -45,40 +45,41 @@ export type ProgramInfo = {
 };
 
 export class V5DeviceInfo {
-    vexos: string;
-    cpu0: string;
-    cpu1: string;
-    ssn: string;
-    name: string;
-    team: string;
-    programs: ProgramInfo[];
-    currentSlot: number;
-    devices: DeviceInfo[];
+    vexos: string = "";
+    cpu0: string = "";
+    cpu1: string = "";
+    ssn: string = "";
+    name: string = "";
+    team: string = "";
+    programs: ProgramInfo[] = [];
+    currentSlot: number = 0;
+    devices: DeviceInfo[] = [];
     
     constructor(raw: string) {
         let rawJSON = JSON.parse(raw);
-        this.vexos = formatVersion(rawJSON.v5.brain.vexos);
-        this.cpu0 = formatVersion(rawJSON.v5.brain.cpu0);
-        this.cpu1 = formatVersion(rawJSON.v5.brain.cpu1);
-        this.ssn = rawJSON.v5.brain.ssn;
-        this.name = rawJSON.v5.brain.name;
-        this.team = rawJSON.v5.brain.team;
-        this.programs = rawJSON.v5.programs.items;
-        resolveSlot(this.programs);
-        this.currentSlot = currentSlot;
-        this.programs.forEach(element => {
-            element.slot = element.slot + 1;
-        });
-        this.devices = [];
-        rawJSON.v5.devices.items.forEach((element: any) => {
-            this.devices.push({
-                port: element.port,
-                type: DeviceType[element.type],
-                status: element.status,
-                version: formatVersion(element.version),
-                boot: formatVersion(element.boot)
+        if (rawJSON.v5.brain) {
+            this.vexos = formatVersion(rawJSON.v5.brain.vexos);
+            this.cpu0 = formatVersion(rawJSON.v5.brain.cpu0);
+            this.cpu1 = formatVersion(rawJSON.v5.brain.cpu1);
+            this.ssn = rawJSON.v5.brain.ssn;
+            this.name = rawJSON.v5.brain.name;
+            this.team = rawJSON.v5.brain.team;
+            this.programs = rawJSON.v5.programs.items;
+            resolveSlot(this.programs);
+            this.currentSlot = currentSlot;
+            this.programs.forEach(element => {
+                element.slot = element.slot + 1;
             });
-        });
+            rawJSON.v5.devices.items.forEach((element: any) => {
+                this.devices.push({
+                    port: element.port,
+                    type: DeviceType[element.type],
+                    status: element.status,
+                    version: formatVersion(element.version),
+                    boot: formatVersion(element.boot)
+                });
+            });
+        }
     }
 };
 
@@ -119,7 +120,7 @@ const getV5ComPortsInternal = async (): Promise<PROSDeviceInfo[]> => {
     if (stderr) {
         await prosLogger.log(
           "OneClick",
-          `VEXCOM verification failed with error ${stderr}`,
+          `pros lsusb failed with error ${stderr}`,
           "error"
         );
         console.log(stderr);
@@ -150,7 +151,7 @@ export const getV5DeviceInfo = async (port: string): Promise<V5DeviceInfo> => {
     if (stderr) {
         await prosLogger.log(
             "OneClick",
-            `VEXCOM verification failed with error ${stderr}`,
+            `VEXCOM failed with error ${stderr}`,
             "error"
         );
         console.log(stderr);
@@ -162,21 +163,21 @@ const resolvePort = async (status: StatusBarItem): Promise<void> => {
     let v5Ports = await getV5ComPortsInternal();
     if (v5Ports.length === 0) {
         currentPort = "";
-        status.text = "No V5 ports found!";
+        status.text = "No V5 Devices Found!";
     } else if (v5Ports.length === 1) {
         currentPort = v5Ports[0].device;
-        status.text = v5Ports[0].desc;
+        status.text = formatDescription(v5Ports[0].desc);
     } else {
         let currentPortActive = v5Ports.some(port => {
             if (port.device === currentPort) {
-                status.text = port.desc;
+                status.text = formatDescription(port.desc);
                 return true;
             }
             return false;
         });
         if (!currentPortActive) {
             currentPort = v5Ports[0].device;
-            status.text = v5Ports[0].desc;
+            status.text = formatDescription(v5Ports[0].desc);
         }
     }
     portList = v5Ports;
@@ -191,6 +192,16 @@ const resolveSlot = (programs: ProgramInfo[]): void => {
         if (programs.every(program => Number(program.slot + 1) !== Number(currentSlot))) {
             currentSlot = programs[0].slot + 1;
         }
+    }
+};
+
+const formatDescription = (description: string): string => {
+    if (description.includes("Communications") || description.includes("Brain")) {
+        return "$(pros-v5-brain) " + description;
+    } else if (description.includes("Controller")) {
+        return "$(pros-v5-controller) " + description;
+    } else {
+        return "$(pros-v5-unknown) " + description;
     }
 };
 
