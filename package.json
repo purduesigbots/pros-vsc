@@ -162,6 +162,10 @@
       {
         "command": "pros.robotname",
         "title": "PROS: Set Robot Name"
+      },
+      {
+        "command": "pros.version",
+        "title": "PROS: Show Version Number"
       }
     ],
     "keybindings": [
