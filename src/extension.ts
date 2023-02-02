@@ -39,6 +39,28 @@ import { Logger } from "./logger";
 
 import { getCwdIsPros } from "./workspace";
 
+export const commands_blocker: { [key: string]: boolean } = {
+};
+
+const setup_command_blocker = async (cmd:string, callback: Function, context?: vscode.ExtensionContext, customAnalytic?: string, useAnalytics?:boolean) => {
+  vscode.commands.registerCommand(cmd, async () => {
+    console.log(commands_blocker);
+    if(commands_blocker[cmd]){
+      return;
+    }
+    if(useAnalytics == undefined || useAnalytics) {
+      analytics.sendAction(customAnalytic ? customAnalytic : cmd.replace("pros.", ""));
+    }
+    commands_blocker[cmd] = true;
+    if(context) {
+      await callback(context);
+    } else {
+      await callback();
+    }
+    commands_blocker[cmd] = false;
+  });
+}
+
 let analytics: Analytics;
 
 export var system: string;
@@ -109,63 +131,32 @@ export async function activate(context: vscode.ExtensionContext) {
   ) {
     vscode.commands.executeCommand("pros.welcome");
   }
-  vscode.commands.registerCommand("pros.install", async () => {
-    analytics.sendAction("install");
-    await install(context);
-  });
-  vscode.commands.registerCommand("pros.uninstall", async () => {
-    analytics.sendAction("uninstall");
-    await uninstall(context);
-  });
-  vscode.commands.registerCommand("pros.verify", async () => {
-    analytics.sendAction("verify");
-    await cleanup(context);
-  });
 
-  vscode.commands.registerCommand("pros.batterymedic", async () => {
-    analytics.sendAction("batterymedic");
-    await medic(context);
-  });
+  setup_command_blocker("pros.install", install, context);
+  setup_command_blocker("pros.uninstall", uninstall, context);
+  setup_command_blocker("pros.verify", cleanup, context);
+  setup_command_blocker("pros.batterymedic", medic, context);
+  setup_command_blocker("pros.updatefirmware", updateFirmware);
 
-  vscode.commands.registerCommand("pros.build&upload", async () => {
-    analytics.sendAction("build&upload");
-    await buildUpload();
-  });
+  setup_command_blocker("pros.build&upload", buildUpload);
+  setup_command_blocker("pros.upload", upload);
+  setup_command_blocker("pros.build", build);
+  setup_command_blocker("pros.run", run);
+  setup_command_blocker("pros.stop", stop);
+  setup_command_blocker("pros.clean", clean);
+  setup_command_blocker("pros.capture", capture);
+  setup_command_blocker("pros.teamnumber", setTeamNumber);
+  setup_command_blocker("pros.robotname", setRobotName);
 
-  vscode.commands.registerCommand("pros.upload", async () => {
-    analytics.sendAction("upload");
-    await upload();
-  });
+  setup_command_blocker("pros.deleteLogs", prosLogger.deleteLogs);
+  setup_command_blocker("pros.openLog", prosLogger.openLog);
 
-  vscode.commands.registerCommand("pros.build", async () => {
-    analytics.sendAction("build");
-    await build();
-  });
+  setup_command_blocker("pros.selectProject", chooseProject, undefined, undefined, false);
+  setup_command_blocker("pros.upgrade", upgradeProject);
+  setup_command_blocker("pros.new", createNewProject);
 
-  vscode.commands.registerCommand("pros.run", async () => {
-    analytics.sendAction("run");
-    await run();
-  });
 
-  vscode.commands.registerCommand("pros.stop", async () => {
-    analytics.sendAction("stop");
-    await stop();
-  });
-
-  vscode.commands.registerCommand("pros.deleteLogs", async () => {
-    analytics.sendAction("deleteLogs");
-    await prosLogger.deleteLogs();
-  });
-
-  vscode.commands.registerCommand("pros.openLog", async () => {
-    analytics.sendAction("openLog");
-    await prosLogger.openLog();
-  });
-
-  vscode.commands.registerCommand("pros.clean", clean);
-  vscode.commands.registerCommand("pros.selectProject", chooseProject);
-  vscode.commands.registerCommand("pros.terminal", async () => {
-    analytics.sendAction("serialterminal");
+  setup_command_blocker("pros.terminal", async () => {
     try {
       const terminal = await getProsTerminal(context);
       terminal.sendText("pros terminal");
@@ -173,9 +164,9 @@ export async function activate(context: vscode.ExtensionContext) {
     } catch (err: any) {
       vscode.window.showErrorMessage(err.message);
     }
-  });
-  vscode.commands.registerCommand("pros.showterminal", async () => {
-    analytics.sendAction("showterminal");
+  }, undefined, "serialterminal");
+
+  setup_command_blocker("pros.showterminal", async () => {
     try {
       const terminal = await getProsTerminal(context);
       terminal.show();
@@ -185,35 +176,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  vscode.commands.registerCommand("pros.teamnumber", async () => {
-    analytics.sendAction("teamnumber");
-    await setTeamNumber();
-  });
 
-  vscode.commands.registerCommand("pros.robotname", async () => {
-    analytics.sendAction("robotname");
-    await setRobotName();
-  });
-
-  vscode.commands.registerCommand("pros.capture", async () => {
-    analytics.sendAction("capture");
-    await capture();
-  });
-
-  vscode.commands.registerCommand("pros.upgrade", () => {
-    analytics.sendAction("upgrade");
-    upgradeProject();
-  });
-
-  vscode.commands.registerCommand("pros.new", () => {
-    analytics.sendAction("projectCreated");
-    createNewProject();
-  });
-
-  vscode.commands.registerCommand("pros.updatefirmware", async () => {
-    analytics.sendAction("updatefirmware");
-    await updateFirmware();
-  });
 
   vscode.commands.registerCommand("pros.welcome", async () => {
     analytics.sendPageview("welcome");
