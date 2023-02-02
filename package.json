@@ -116,6 +116,10 @@
         "title": "PROS: Screenshot V5 Brain"
       },
       {
+        "command": "pros.docview",
+        "title": "PROS: Docview"
+      },
+      {
         "command": "pros.upgrade",
         "title": "PROS: Upgrade Project"
       },
@@ -289,6 +293,11 @@
           "type": "string",
           "default": "default",
           "description": "URL to download PROS Toolchain from. SHOULD NOT BE CHANGED BY MOST USERS!"
+        },
+        "pros.docview: Style": {
+          "type": "string",
+          "default": "default",
+          "description": "Default style to set position of integrated document viewer"
         }
       }
     }

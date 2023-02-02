@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
+import { opendocs } from "./commands/docview";
 import { promisify } from "util";
 
 import { TreeDataProvider } from "./views/tree-view";
@@ -186,6 +187,11 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.capture", async () => {
     analytics.sendAction("capture");
     await capture();
+  });
+
+  vscode.commands.registerCommand("pros.docview", async () => {
+    analytics.sendAction("docview");
+    await opendocs();
   });
 
   vscode.commands.registerCommand("pros.upgrade", () => {
