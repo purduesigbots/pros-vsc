@@ -26,6 +26,7 @@ const userApproval = async (
       placeHolder: "yes",
       canPickMany: false,
       title: title,
+      ignoreFocusOut: true
     }
   );
   if (output === undefined || output.label === "no") {

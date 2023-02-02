@@ -8,8 +8,17 @@ export const capture = async () => {
   let dir = await selectDirectory(
     "Select a directory where the screenshot will be saved"
   );
-  let file = await selectFileName("Enter file name for the screenshot");
+  if (dir === undefined) {
+    vscode.window.showErrorMessage("No directory selected when capturing screenshot");
+    return;
+  }
 
+  let file = await selectFileName("Enter file name for the screenshot");
+  if (file === undefined) {
+    vscode.window.showErrorMessage("No file name selected when capturing screenshot");
+    return;
+  }
+  
   const captureCommandOptions: BaseCommandOptions = {
     command: "pros",
     args: [
