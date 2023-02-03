@@ -10,29 +10,30 @@ import {
 } from "./command_tools";
 
 export const createNewProject = async () => {
-  
   let dir = await selectDirectory(
     "Select a directory to create the project in"
   );
-  if(dir === undefined) {
-    vscode.window.showErrorMessage("No directory selected when creating project");
+  if (dir === undefined) {
+    vscode.window.showErrorMessage(
+      "No directory selected when creating project"
+    );
     return;
   }
 
   let name = await selectFileName("Enter a name for the project");
-  if(name === undefined) {
+  if (name === undefined) {
     vscode.window.showErrorMessage("No name selected when creating project");
     return;
   }
 
   let target = await selectTarget();
-  if(target === undefined) {
+  if (target === undefined) {
     vscode.window.showErrorMessage("No target selected when creating project");
     return;
   }
 
   let kernel = await selectKernelVersion(target);
-  if(kernel === undefined) {
+  if (kernel === undefined) {
     vscode.window.showErrorMessage("No kernel selected when creating project");
     return;
   }

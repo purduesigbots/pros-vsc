@@ -26,7 +26,7 @@ export const selectFileName = async (prompt: string) => {
   const projectNameOptions: vscode.InputBoxOptions = {
     prompt: prompt ?? "Input File Name",
     placeHolder: "my-project",
-    ignoreFocusOut: true
+    ignoreFocusOut: true,
   };
   inputName = await vscode.window.showInputBox(projectNameOptions);
   return (inputName ? inputName : projectNameOptions.placeHolder) as string;
@@ -37,7 +37,7 @@ export const selectTeamNumber = async (prompt: string) => {
   const projectNameOptions: vscode.InputBoxOptions = {
     prompt: prompt ?? "Input Team Number",
     placeHolder: "12345A",
-    ignoreFocusOut: true
+    ignoreFocusOut: true,
   };
   inputName = await vscode.window.showInputBox(projectNameOptions);
   return (inputName ? inputName : projectNameOptions.placeHolder) as string;
@@ -48,7 +48,7 @@ export const selectRobotName = async (prompt: string) => {
   const projectNameOptions: vscode.InputBoxOptions = {
     prompt: prompt ?? "Input Robot Name",
     placeHolder: "My Robot",
-    ignoreFocusOut: true
+    ignoreFocusOut: true,
   };
   inputName = await vscode.window.showInputBox(projectNameOptions);
   return (inputName ? inputName : projectNameOptions.placeHolder) as string;
@@ -58,7 +58,7 @@ export const selectTarget = async () => {
   const targetOptions: vscode.QuickPickOptions = {
     placeHolder: "v5",
     title: "Select the target device",
-    ignoreFocusOut: true
+    ignoreFocusOut: true,
   };
   const target = await vscode.window.showQuickPick(
     ["v5", "cortex"],

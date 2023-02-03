@@ -39,33 +39,43 @@ import { Logger } from "./logger";
 
 import { getCwdIsPros } from "./workspace";
 
-export const commands_blocker: { [key: string]: boolean } = {
-};
+export const commands_blocker: { [key: string]: boolean } = {};
 
-const setup_command_blocker = async (cmd:string, callback: Function, context?: vscode.ExtensionContext, betaFeature?: boolean, customAnalytic?: string|null) => {
+const setup_command_blocker = async (
+  cmd: string,
+  callback: Function,
+  context?: vscode.ExtensionContext,
+  betaFeature?: boolean,
+  customAnalytic?: string | null
+) => {
   vscode.commands.registerCommand(cmd, async () => {
-
-    if(betaFeature && !vscode.workspace.getConfiguration("pros").get("betaFeatures")){
-      vscode.window.showErrorMessage("This feature is currently in beta. To enable it, set the 'pros.betaFeatures' setting in your workspace settings to true.");
+    if (
+      betaFeature &&
+      !vscode.workspace.getConfiguration("pros").get("betaFeatures")
+    ) {
+      vscode.window.showErrorMessage(
+        "This feature is currently in beta. To enable it, set the 'pros.betaFeatures' setting in your workspace settings to true."
+      );
       return;
     }
 
-    console.log(commands_blocker);
-    if(commands_blocker[cmd]){
+    if (commands_blocker[cmd]) {
       return;
     }
-    if(customAnalytic != null) {
-      analytics.sendAction(customAnalytic ? customAnalytic : cmd.replace("pros.", ""));
+    if (customAnalytic != null) {
+      analytics.sendAction(
+        customAnalytic ? customAnalytic : cmd.replace("pros.", "")
+      );
     }
     commands_blocker[cmd] = true;
-    if(context) {
+    if (context) {
       await callback(context);
     } else {
       await callback();
     }
     commands_blocker[cmd] = false;
   });
-}
+};
 
 let analytics: Analytics;
 
@@ -157,19 +167,31 @@ export async function activate(context: vscode.ExtensionContext) {
   setup_command_blocker("pros.deleteLogs", prosLogger.deleteLogs);
   setup_command_blocker("pros.openLog", prosLogger.openLog);
 
-  setup_command_blocker("pros.selectProject", chooseProject, undefined, undefined, null);
+  setup_command_blocker(
+    "pros.selectProject",
+    chooseProject,
+    undefined,
+    undefined,
+    null
+  );
   setup_command_blocker("pros.upgrade", upgradeProject);
   setup_command_blocker("pros.new", createNewProject);
 
-  setup_command_blocker("pros.terminal", async () => {
-    try {
-      const terminal = await getProsTerminal(context);
-      terminal.sendText("pros terminal");
-      terminal.show();
-    } catch (err: any) {
-      vscode.window.showErrorMessage(err.message);
-    }
-  }, undefined, undefined, "serialterminal");
+  setup_command_blocker(
+    "pros.terminal",
+    async () => {
+      try {
+        const terminal = await getProsTerminal(context);
+        terminal.sendText("pros terminal");
+        terminal.show();
+      } catch (err: any) {
+        vscode.window.showErrorMessage(err.message);
+      }
+    },
+    undefined,
+    undefined,
+    "serialterminal"
+  );
 
   setup_command_blocker("pros.showterminal", async () => {
     try {
@@ -180,8 +202,6 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.window.showErrorMessage(err.message);
     }
   });
-
-
 
   vscode.commands.registerCommand("pros.welcome", async () => {
     analytics.sendPageview("welcome");
