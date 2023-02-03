@@ -42,13 +42,19 @@ import { getCwdIsPros } from "./workspace";
 export const commands_blocker: { [key: string]: boolean } = {
 };
 
-const setup_command_blocker = async (cmd:string, callback: Function, context?: vscode.ExtensionContext, customAnalytic?: string, useAnalytics?:boolean) => {
+const setup_command_blocker = async (cmd:string, callback: Function, context?: vscode.ExtensionContext, betaFeature?: boolean, customAnalytic?: string|null) => {
   vscode.commands.registerCommand(cmd, async () => {
+
+    if(betaFeature && !vscode.workspace.getConfiguration("pros").get("betaFeatures")){
+      vscode.window.showErrorMessage("This feature is currently in beta. To enable it, set the 'pros.betaFeatures' setting in your workspace settings to true.");
+      return;
+    }
+
     console.log(commands_blocker);
     if(commands_blocker[cmd]){
       return;
     }
-    if(useAnalytics == undefined || useAnalytics) {
+    if(customAnalytic != null) {
       analytics.sendAction(customAnalytic ? customAnalytic : cmd.replace("pros.", ""));
     }
     commands_blocker[cmd] = true;
@@ -151,10 +157,9 @@ export async function activate(context: vscode.ExtensionContext) {
   setup_command_blocker("pros.deleteLogs", prosLogger.deleteLogs);
   setup_command_blocker("pros.openLog", prosLogger.openLog);
 
-  setup_command_blocker("pros.selectProject", chooseProject, undefined, undefined, false);
+  setup_command_blocker("pros.selectProject", chooseProject, undefined, undefined, null);
   setup_command_blocker("pros.upgrade", upgradeProject);
   setup_command_blocker("pros.new", createNewProject);
-
 
   setup_command_blocker("pros.terminal", async () => {
     try {
@@ -164,7 +169,7 @@ export async function activate(context: vscode.ExtensionContext) {
     } catch (err: any) {
       vscode.window.showErrorMessage(err.message);
     }
-  }, undefined, "serialterminal");
+  }, undefined, undefined, "serialterminal");
 
   setup_command_blocker("pros.showterminal", async () => {
     try {

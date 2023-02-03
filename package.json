@@ -302,6 +302,11 @@
           "type": "string",
           "default": "default",
           "description": "URL to download PROS Toolchain from. SHOULD NOT BE CHANGED BY MOST USERS!"
+        },
+        "pros.Beta: Enable Experimental Features": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable experimental features. These features are not guaranteed to work and may be removed at any time."
         }
       }
     }
