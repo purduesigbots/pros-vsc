@@ -1,6 +1,9 @@
 import * as cheerio from 'cheerio';
 import axios from 'axios';
 import { CodeLens } from 'vscode';
+import internal = require('stream');
+import { linkSync } from 'fs';
+import { Range } from 'semver';
 var prosJson = {
     "namespace": "pros",
     "url": "https://pros.cs.purdue.edu/v5/index.html",
@@ -11,29 +14,8 @@ var prosJson = {
         "name": "Motor",
         "url": "https://pros.cs.purdue.edu/v5/api/cpp/motors.html"
       },
-      {
-        "name": "ADI",
-        "url": "https://pros.cs.purdue.edu/v5/api/cpp/adi.html"
-      },
-      {
-        "name": "optical",
-        "url": "https://pros.cs.purdue.edu/v5/api/cpp/optical.html"
-      },
-      {
-        "name": "rotation",
-        "url": "https://pros.cs.purdue.edu/v5/api/cpp/rotation.html"
-      },
-      {
-        "name": "Controller",
-        "url": "https://pros.cs.purdue.edu/v5/api/cpp/misc.html#pros-controller"
-      }
+
     ],
-    "names":[
-        "Motor",
-        "ADI",
-        "optical",
-        "rotation"
-    ]
 },
 "lang2":{
     "name": "C",
@@ -69,7 +51,13 @@ var PROSJSON = {
     }
   ]
 };
-
+var json ={"name:": "pros",
+          "name": "",
+          "members": [{
+            "name": "",
+              "members": [{}],
+              "url": ""
+          }]};
 
 function find_file(keyword: string,json:any){
     return json.name === keyword;
@@ -109,45 +97,138 @@ export async function ParseJSON(keyword: string){
           }
 
       }
-  
-  const AxiosInstance = axios.create(); // Create a new Axios Instance
-  if (final_website === "pros"){
-    return url;
-  }
-  else if(final_website === ""){
-    return final_website;
-  }
-  else{
-    var variable: any;
-    var final_link = "";
-    // Send an async HTTP Get request to the url
-    await AxiosInstance.get(url,{timeout: 5000})
-      .then( // Once we have data returned ...
-        response => {
-          const html = response.data; // Get the HTML from the HTTP request
-          console.log(html);
-
-      // In other environments:
-          const cheerio = require('cheerio');
-          const $ = cheerio.load(html);
-          const links = $('a'); //jquery get all hyperlinks
-          for (var i:number = 0;i <= links.length; i+=1){
-            //console.log($(links[i]).text());
-            if ($(links[i]).text() === final_website+" C++ API"){
-             final_link = $(links[i]).attr("href");
-            }
-          }
-          final_link = url.slice(0,50)+final_link;
-      })
-      .catch(error => {
-        console.log(error.response.data.error);
-     });
-      
-      
-    await console.log(final_link+"Printed");
-    return final_link;
-  }
 }
 
+async function loadJsonOld(){
+  var base_url = "https://pros.cs.purdue.edu/v5/api/cpp/";
+}
+
+
+async function loadJSON(){
+  var final_websites = "";
+  const AxiosInstance = axios.create(); // Create a new Axios Instance
  
+  const url = 'https://purduesigbots.github.io/pros-doxygen-docs/api.html'; // PROS Doxygen url
+  const pros_base_url = "https://purduesigbots.github.io/pros-doxygen-docs/";
+  var variable: any;
+  var final_link = "";
+  // go to and scrape api link
+  // Send an async HTTP Get request to the url
+  await AxiosInstance.get(url,{timeout: 5000})
+    .then( // Once we have data returned ...
+      response => {
+        const html = response.data; // Get the HTML from the HTTP request
+        console.log(html);
+        
+        const link_regex: RegExp = RegExp('<a href="(.+)" class="(.+)">(.+)</a>');
+        const sublink_regex: RegExp = RegExp('<a href="(.+)" class="m-doc-self">(.+)</a>');
+      
+
+
+    // In other environments:
+        const cheerio = require('cheerio');
+        const $ = cheerio.load('ul',html);
+        const link_html = $('<ul>');
+        const links = $('li'); //jquery get all hyperlinks
+        const links_c = $(links[0]).attr('href');
+        const links_cpp = $(links[1]).attr('href'); 
+
+        //load all initial hyperlinks into JSON
+        for (var i:number = 0;i <= links.length; i+=1){
+            var link:String  = $(links[i]).attr("href");
+  
+            json.members.push({name: String($(links[i]).text()),members: [{}], url: $(links[i]).attr("href")});
+        }
+        console.log(json);
+    })
+    .catch(error => {
+      console.log(error.response.data.error);
+    });
+    //travel to each link and scrape function links from link
+    for (var i: number = 0;i<=json.members.length; i+=1 ){
+      var subgroup_url = pros_base_url+ json.members[i].url;
+      if(subgroup_url.length > 8+pros_base_url.length){
+      console.log(subgroup_url);
+      await AxiosInstance.get(subgroup_url,{timeout: 5000})
+    .then( // Once we have data returned ...
+      response => {
+        const html = response.data; // Get the HTML from the HTTP request
+        console.log(html);
+
+    // In other environments:
+        const cheerio = require('cheerio');
+        const $ = cheerio.load(html);
+        const sub_links = $('a'); //jquery get all hyperlinks
+        //load all initial hyperlinks into JSON
+        for (var i:number = 0;i <= sub_links.length; i+=1){
+            json.members[i].members.push({"name:":  $(sub_links[i]).text(),"url": subgroup_url+$(sub_links[i]).attr('href')});
+        }
+        console.log(json);
+    });
+    }
+  }
+    
+  console.log(final_link+"Printed");
+  
+ }
+// most recent json loading function
+// needed for either website
+// uses regex to parse html
+ async function loadJsonNew(){
+  var final_websites = "";
+  const AxiosInstance = axios.create(); // Create a new Axios Instance
+ 
+  const url = 'https://purduesigbots.github.io/pros-doxygen-docs/api.html'; // PROS Doxygen url
+  const pros_base_url = "https://purduesigbots.github.io/pros-doxygen-docs/";
+  var variable: any;
+  var final_link = "";
+  const link_regex: RegExp = RegExp('<a href="(.{0,30})" class="m-doc">(.{0,35})<\/a>');
+  const sublink_regex: RegExp = RegExp('<a href="(.{0,30})" class="m-doc-self">(.{0,30})<\/a>');
+  var main_links = [];
+  var function_links = [];
+  //go to and scrape api homepage
+  // Send an async HTTP Get request to the url
+  await AxiosInstance.get(url,{timeout: 5000})
+    .then( // Once we have data returned ...
+      response => {
+        const html = response.data; // Get the HTML from the HTTP request
+        console.log(html);
+        
+        
+        var links = [];
+        var m;
+        do {
+          m = link_regex.exec(html);
+          if (m) {
+              console.log(m[0], m[1], m[2]);
+              main_links.push(m[1]); 
+          }
+      } while (m);
+      });
+      // Go to class links and scrape functions from each link
+        for (var i: number = 0; i < main_links.length; i+= 1){
+          await AxiosInstance.get(url,{timeout: 5000})
+    .then( // Once we have data returned ...
+      response => {
+        const html = response.data; // Get the HTML from the HTTP request
+        console.log(html);
+        
+        
+        var m;
+
+        do {
+            m = sublink_regex.exec(html);
+            if (m) {
+                console.log(m[0], m[1], m[2]);
+                prosJson.language.members.push({"name":m[2], "url": m[0]});
+            }
+        } while (m);
+      });
+
+        }
+}
+
 //ParseJSON("Motor");
+loadJsonNew();
+console.log(json);
+console.log("Done");

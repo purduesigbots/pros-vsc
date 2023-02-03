@@ -171,10 +171,10 @@ export async function activate(context: vscode.ExtensionContext) {
         const range = document.getWordRangeAtPosition(position);
         const word = document.getText(range);
         var linkString: string = parseJSON(word);
-        let linknew: Promise<string> = ParseJSON(word);
-        linknew.then(result=>{
-          linkString = result;
-        });
+        // //let linknew: Promise<string> = ParseJSON(word);
+        // linknew.then(result=>{
+        //   linkString = result;
+        // });
         console.log(linkString);
         let webstring = `<!DOCTYPE html>
         <html lang="en"> 
