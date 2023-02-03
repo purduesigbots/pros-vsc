@@ -39,9 +39,9 @@ import { Logger } from "./logger";
 
 import { getCwdIsPros } from "./workspace";
 
-export const commands_blocker: { [key: string]: boolean } = {};
+export const commandsBlocker: { [key: string]: boolean } = {};
 
-const setup_command_blocker = async (
+const setupCommandBlocker = async (
   cmd: string,
   callback: Function,
   context?: vscode.ExtensionContext,
@@ -59,21 +59,21 @@ const setup_command_blocker = async (
       return;
     }
 
-    if (commands_blocker[cmd]) {
+    if (commandsBlocker[cmd]) {
       return;
     }
-    if (customAnalytic != null) {
+    if (customAnalytic !== null) {
       analytics.sendAction(
         customAnalytic ? customAnalytic : cmd.replace("pros.", "")
       );
     }
-    commands_blocker[cmd] = true;
+    commandsBlocker[cmd] = true;
     if (context) {
       await callback(context);
     } else {
       await callback();
     }
-    commands_blocker[cmd] = false;
+    commandsBlocker[cmd] = false;
   });
 };
 
@@ -148,36 +148,36 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand("pros.welcome");
   }
 
-  setup_command_blocker("pros.install", install, context);
-  setup_command_blocker("pros.uninstall", uninstall, context);
-  setup_command_blocker("pros.verify", cleanup, context);
-  setup_command_blocker("pros.batterymedic", medic, context);
-  setup_command_blocker("pros.updatefirmware", updateFirmware);
+  setupCommandBlocker("pros.install", install, context);
+  setupCommandBlocker("pros.uninstall", uninstall, context);
+  setupCommandBlocker("pros.verify", cleanup, context);
+  setupCommandBlocker("pros.batterymedic", medic, context);
+  setupCommandBlocker("pros.updatefirmware", updateFirmware);
 
-  setup_command_blocker("pros.build&upload", buildUpload);
-  setup_command_blocker("pros.upload", upload);
-  setup_command_blocker("pros.build", build);
-  setup_command_blocker("pros.run", run);
-  setup_command_blocker("pros.stop", stop);
-  setup_command_blocker("pros.clean", clean);
-  setup_command_blocker("pros.capture", capture);
-  setup_command_blocker("pros.teamnumber", setTeamNumber);
-  setup_command_blocker("pros.robotname", setRobotName);
+  setupCommandBlocker("pros.build&upload", buildUpload);
+  setupCommandBlocker("pros.upload", upload);
+  setupCommandBlocker("pros.build", build);
+  setupCommandBlocker("pros.run", run);
+  setupCommandBlocker("pros.stop", stop);
+  setupCommandBlocker("pros.clean", clean);
+  setupCommandBlocker("pros.capture", capture);
+  setupCommandBlocker("pros.teamnumber", setTeamNumber);
+  setupCommandBlocker("pros.robotname", setRobotName);
 
-  setup_command_blocker("pros.deleteLogs", prosLogger.deleteLogs);
-  setup_command_blocker("pros.openLog", prosLogger.openLog);
+  setupCommandBlocker("pros.deleteLogs", prosLogger.deleteLogs);
+  setupCommandBlocker("pros.openLog", prosLogger.openLog);
 
-  setup_command_blocker(
+  setupCommandBlocker(
     "pros.selectProject",
     chooseProject,
     undefined,
     undefined,
     null
   );
-  setup_command_blocker("pros.upgrade", upgradeProject);
-  setup_command_blocker("pros.new", createNewProject);
+  setupCommandBlocker("pros.upgrade", upgradeProject);
+  setupCommandBlocker("pros.new", createNewProject);
 
-  setup_command_blocker(
+  setupCommandBlocker(
     "pros.terminal",
     async () => {
       try {
@@ -193,7 +193,7 @@ export async function activate(context: vscode.ExtensionContext) {
     "serialterminal"
   );
 
-  setup_command_blocker("pros.showterminal", async () => {
+  setupCommandBlocker("pros.showterminal", async () => {
     try {
       const terminal = await getProsTerminal(context);
       terminal.show();
