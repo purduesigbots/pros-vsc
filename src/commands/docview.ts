@@ -1,14 +1,15 @@
 import * as vscode from "vscode";
 import * as path from "path";
 
-let currConfig = vscode.workspace.getConfiguration("pros").get<option
 
 export async function opendocs()
 {
+    let currConfig = getStyle();
     const panel = vscode.window.createWebviewPanel(
         'prosDocView', // Identifies the type of the webview. Used internally
         'PROS Documentation View', // Title of the panel displayed to the user
-        vscode.ViewColumn.Beside, // Editor column to show the new webview panel in.
+        currConfig === "right" ? vscode.ViewColumn.Beside : vscode.ViewColumn.Active
+        //vscode.ViewColumn.Beside, // Editor column to show the new webview panel in.
         // Webview options. More on these later.
     );
 
@@ -33,6 +34,6 @@ function getWebviewContent() {
     </html>`;
 }
 
-function setStyle() {
-    let currConfig = vscode.workspace.getConfiguration("pros").get<option type: int, boolean
+function getStyle() {
+    return vscode.workspace.getConfiguration("pros").get<string>("Style");
 }

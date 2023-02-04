@@ -296,7 +296,12 @@
         },
         "pros.docview: Style": {
           "type": "string",
-          "default": "default",
+          "default": "right",
+          "enum": ["right", "full"],
+          "enumDescriptions": [
+            "Dock the viewer to the right half of the screen",
+            "Make the viewer fullscreen"
+          ],
           "description": "Default style to set position of integrated document viewer"
         }
       }
