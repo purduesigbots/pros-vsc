@@ -104,7 +104,9 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  startPortMonitoring(vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0));
+  startPortMonitoring(
+    vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
+  );
 
   if (
     vscode.workspace

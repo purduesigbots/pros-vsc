@@ -42,7 +42,10 @@ export const getIntegratedTerminalPaths = (
 // integrated terminal.
 export const getChildProcessPath = (): string | undefined => {
   let path = process.env["PATH"];
-  if (getOperatingSystem() === "macos" && !os.cpus()[0].model.includes("Apple M")) {
+  if (
+    getOperatingSystem() === "macos" &&
+    !os.cpus()[0].model.includes("Apple M")
+  ) {
     path = `"${path?.replace(/\\/g, "")}"`;
   }
   return path;
