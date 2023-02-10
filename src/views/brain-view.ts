@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getCurrentPort, getV5ComPorts, getV5DeviceInfo, setPort } from '../device';
+import { getCurrentPort, getV5ComPorts, getV5DeviceInfo, setName, setPort, setTeam } from '../device';
 import { getNonce } from './nonce';
 
 export class BrainViewProvider implements vscode.WebviewViewProvider {
@@ -31,8 +31,11 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
                 case "setPort":
                     setPort(data.port);
                     break;
-                case "runCommand":
-                    vscode.commands.executeCommand(data.command);
+                case "setName":
+                    setName(data.name);
+                    break;
+                case "setTeam":
+                    setTeam(data.team);
                     break;
             }
         });
@@ -94,9 +97,13 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
                 <div class="body__container">
                     <select id="brain_list" class="selection monaco-select-box">
                     </select>
-                    <p id="programs"></p>
-                    <p id="brain_info"></p>
-                    <p id="device_container"></p>
+                    <p>Name:</p>
+                    <input id="name">
+                    <p>Team:</p>
+                    <input id="team">
+                    <p id="programs">
+                    <p id="brain_info">
+                    <p id="device_container">
                     </div>
                 </div>
                 <script nonce="${nonce}" src="${scriptUri}"></script>

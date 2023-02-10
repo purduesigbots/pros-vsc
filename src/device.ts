@@ -4,6 +4,7 @@ import { getChildProcessPath } from "./one-click/path";
 import { prosLogger } from "./extension";
 import { PREFIX } from "./commands/cli-parsing";
 import { StatusBarItem, window, workspace } from "vscode";
+import { BaseCommand } from "./commands";
 
 /* eslint-disable @typescript-eslint/naming-convention */
 export type DeviceInfo = {
@@ -215,6 +216,36 @@ export const setPort = (port: string): void => {
 
 export const getCurrentPort = (): string => {
     return currentPort;
+};
+
+export const setName = async (name: string): Promise<void> => {
+    const setRobotNameCommand: BaseCommand = new BaseCommand({
+        command: "vexcom",
+        args: ["--robot", name, currentPort],
+        message: "Setting Robot Name",
+        requiresProsProject: false,
+    });
+
+    try {
+        await setRobotNameCommand.runCommand();
+    } catch (err: any) {
+        await window.showErrorMessage(err.message);
+    }
+};
+
+export const setTeam = async (team: string): Promise<void> => {
+    const setTeamNameCommand: BaseCommand = new BaseCommand({
+        command: "vexcom",
+        args: ["--team", team, currentPort],
+        message: "Setting Team Name",
+        requiresProsProject: false,
+    });
+
+    try {
+        await setTeamNameCommand.runCommand();
+    } catch (err: any) {
+        await window.showErrorMessage(err.message);
+    }
 };
 
 export const startPortMonitoring = (status: StatusBarItem): void => {

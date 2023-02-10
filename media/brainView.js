@@ -5,6 +5,8 @@
     const brainList = document.getElementById("brain_list");
     const programList = document.getElementById("programs");
     const deviceContainer = document.getElementById("device_container");
+    const nameInput = document.getElementById("name");
+    const teamInput = document.getElementById("team");
 
     window.addEventListener("message", event => {
         const message = event.data;
@@ -23,11 +25,33 @@
         vscode.postMessage({type: "setPort", port: selector.value});
     });
 
+    var editingName = false;
+    nameInput.addEventListener("keydown", event => {
+        editingName = true;
+        if (event.key === "Enter") {
+            vscode.postMessage({type: "setName", name: event.target.value});
+        }
+        setInterval(() => editingName = false, 3000);
+    });
+
+    var editingTeam = false;
+    teamInput.addEventListener("keydown", event => {
+        editingTeam = true;
+        if (event.key === "Enter") {
+            vscode.postMessage({type: "setTeam", team: event.target.value});
+        }
+        setInterval(() => editingTeam = false, 3000);
+    });
+
     function updateDeviceInfo(deviceInfo) {
         if (deviceInfo.ssn) {
+            if (!editingName) {
+                nameInput.value = deviceInfo.name;
+            }
+            if (!editingTeam) {
+                teamInput.value = deviceInfo.team;
+            }
             brainInfo.innerHTML = "Brain Info:<br>";
-            brainInfo.innerHTML += `Name: ${deviceInfo.name}<br>`;
-            brainInfo.innerHTML += `Team: ${deviceInfo.team}<br>`;
             brainInfo.innerHTML += `VEXos Version: ${deviceInfo.vexos}<br>`;
             brainInfo.innerHTML += `CPU0 Firmware Version: ${deviceInfo.cpu0}<br>`;
             brainInfo.innerHTML += `CPU1 SDK Version: ${deviceInfo.cpu1}<br>`;
