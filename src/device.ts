@@ -3,7 +3,7 @@ import * as child_process from "child_process";
 import { getChildProcessPath } from "./one-click/path";
 import { prosLogger } from "./extension";
 import { PREFIX } from "./commands/cli-parsing";
-import { StatusBarItem } from "vscode";
+import { StatusBarItem, window, workspace } from "vscode";
 
 /* eslint-disable @typescript-eslint/naming-convention */
 export type DeviceInfo = {
@@ -52,7 +52,6 @@ export class V5DeviceInfo {
     name: string = "";
     team: string = "";
     programs: ProgramInfo[] = [];
-    currentSlot: number = 0;
     devices: DeviceInfo[] = [];
     
     constructor(raw: string) {
@@ -65,8 +64,6 @@ export class V5DeviceInfo {
             this.name = rawJSON.v5.brain.name;
             this.team = rawJSON.v5.brain.team;
             this.programs = rawJSON.v5.programs.items;
-            resolveSlot(this.programs);
-            this.currentSlot = currentSlot;
             this.programs.forEach(element => {
                 element.slot = element.slot + 1;
             });
@@ -101,7 +98,6 @@ export type PROSDeviceInfo = {
 
 var currentPort = "";
 var portList: PROSDeviceInfo[] = [];
-var currentSlot: number = 0;
 
 export const getV5ComPorts = (): PROSDeviceInfo[] => {
     return portList;
@@ -161,6 +157,26 @@ export const getV5DeviceInfo = async (port: string): Promise<V5DeviceInfo> => {
 
 const resolvePort = async (status: StatusBarItem): Promise<void> => {
     let v5Ports = await getV5ComPortsInternal();
+
+    let showNotifications = workspace.getConfiguration("pros").get<boolean>("pros.showDeviceConnectNotifications") ?? true;
+
+    if (showNotifications) {
+        // detect changes in device list
+        let oldDevices = portList.map(portInfo => portInfo.desc);
+        let newDevices = v5Ports.map(portInfo => portInfo.desc);
+
+        oldDevices.forEach(device => {
+            if (!newDevices.includes(device)) {
+                window.showInformationMessage(`Device ${device} has disconnected!`);
+            }
+        });
+        newDevices.forEach(device => {
+            if (!oldDevices.includes(device)) {
+                window.showInformationMessage(`Device ${device} has connected!`);
+            }
+        });
+    }
+
     if (v5Ports.length === 0) {
         currentPort = "";
         status.text = "No V5 Devices Found!";
@@ -183,18 +199,6 @@ const resolvePort = async (status: StatusBarItem): Promise<void> => {
     portList = v5Ports;
 };
 
-const resolveSlot = (programs: ProgramInfo[]): void => {
-    if (programs.length === 0) {
-        currentSlot = 0;
-    } else if (programs.length === 1) {
-        currentSlot = programs[0].slot + 1;
-    } else {
-        if (programs.every(program => Number(program.slot + 1) !== Number(currentSlot))) {
-            currentSlot = programs[0].slot + 1;
-        }
-    }
-};
-
 const formatDescription = (description: string): string => {
     if (description.includes("Communications") || description.includes("Brain")) {
         return "$(pros-v5-brain) " + description;
@@ -211,14 +215,6 @@ export const setPort = (port: string): void => {
 
 export const getCurrentPort = (): string => {
     return currentPort;
-};
-
-export const getCurrentSlot = (): number => {
-    return currentSlot;
-};
-
-export const setSlot = (slot: number): void => {
-    currentSlot = slot;
 };
 
 export const startPortMonitoring = (status: StatusBarItem): void => {
