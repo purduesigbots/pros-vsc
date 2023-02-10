@@ -25,31 +25,33 @@
         vscode.postMessage({type: "setPort", port: selector.value});
     });
 
-    var editingName = false;
+    var oldName = "";
     nameInput.addEventListener("keydown", event => {
-        editingName = true;
         if (event.key === "Enter") {
             vscode.postMessage({type: "setName", name: event.target.value});
+        } else if (event.key === "Escape") {
+            nameInput.value = oldName;
         }
-        setInterval(() => editingName = false, 3000);
     });
 
-    var editingTeam = false;
+    var oldTeam = "";
     teamInput.addEventListener("keydown", event => {
-        editingTeam = true;
         if (event.key === "Enter") {
             vscode.postMessage({type: "setTeam", team: event.target.value});
+        } else if (event.key === "Escape") {
+            teamInput.value = oldTeam;
         }
-        setInterval(() => editingTeam = false, 3000);
     });
 
     function updateDeviceInfo(deviceInfo) {
         if (deviceInfo.ssn) {
-            if (!editingName) {
+            if (deviceInfo.name !== oldName) {
                 nameInput.value = deviceInfo.name;
+                oldName = deviceInfo.name;
             }
-            if (!editingTeam) {
+            if (deviceInfo.team !== oldTeam) {
                 teamInput.value = deviceInfo.team;
+                oldTeam = deviceInfo.team;
             }
             brainInfo.innerHTML = "Brain Info:<br>";
             brainInfo.innerHTML += `VEXos Version: ${deviceInfo.vexos}<br>`;
