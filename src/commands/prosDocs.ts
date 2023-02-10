@@ -1,34 +1,33 @@
 import * as cheerio from 'cheerio';
+import * as vscode from "vscode";
 import axios from 'axios';
-import { CodeLens } from 'vscode';
-import internal = require('stream');
-import { linkSync } from 'fs';
-import { Range } from 'semver';
+
+
+//api names must be legal variable names
 var prosJson = {
     "namespace": "pros",
-    "url": "https://pros.cs.purdue.edu/v5/index.html",
-    "language": {
-    "name": "C++",
+    "url": "https://purduesigbots.github.io/pros-doxygen-docs/api.html",
+    "apis": {
+   "cpp": {
     "members": [
       {
         "name": "Motor",
-        "url": "https://pros.cs.purdue.edu/v5/api/cpp/motors.html"
-      },
-
-    ],
-},
-"lang2":{
-    "name": "C",
-    "members": [
+        "url": "https://purduesigbots.github.io/pros-doxygen-docs/group__cpp-motors.html",
+        "functions": [{"name" : "move", "url" : ""}]
+      }
+      ],
+    },
+    "c": {
+      "members": [
         {
-        "name": "Motor",
-        "url": ""
-        },
-        {
-        "name": "ADI",
-        "url": ""
+          "name": "Motor",
+          "url": "https://purduesigbots.github.io/pros-doxygen-docs/group__c-motors.html",
+          "functions": [{"name" : "move", "url" : ""}]
         }
-    ]
+      ]
+    }
+  
+
 }
 };
 
@@ -62,18 +61,31 @@ var json ={"name:": "pros",
 function find_file(keyword: string,json:any){
     return json.name === keyword;
 }
+//needs to be update to use new json
 export function parseJSON(keyword: string){
     var final_website = "";
     if (keyword === prosJson.namespace){
         final_website = prosJson.url;
     }
     else{
-        var final_obj = prosJson.language.members.filter(prosMember=>{
+      var api_members;
+      if(vscode.workspace.getConfiguration("pros").get<string>("integratedDocsLanguage") === "cpp"){
+        var r = vscode.workspace.getConfiguration("pros").get<string>("integratedDocsLanguage");
+        api_members = prosJson.apis.cpp.members;
+      }
+      else{
+        api_members = prosJson.apis.c.members;
+      }
+      for(var i: number = 0; i < prosJson.apis.cpp.members.length; i += 1 ){
+        var final_obj = api_members[i].functions.filter(prosMember=>{
             return prosMember.name === keyword;
         }
         );
-        final_website = final_obj[0].url;
+        if(final_obj.length !== 0 ){
+          final_website = final_obj[0].url;
+        }
     }
+  }
     return final_website;
 }
 
@@ -129,38 +141,50 @@ var loadJsonFinished = false;
         
         
         var links = [];
-        var m;
+        var regex_result;
         
         do {
-          m = link_regex.exec(html);
-          if (m) {
+          regex_result = link_regex.exec(html);
+          if (regex_result) {
               //console.log(m[0], m[1], m[2],m[-1]);
-              main_links.push(m[1]); 
+              //checks if link is in c or cpp
+              if( regex_result[1].indexOf("group__cpp") !== -1){
+                prosJson.apis.cpp.members.push({"name": regex_result[2],"url": pros_base_url + regex_result[1], "functions": []});
+              }
+              else{
+                prosJson.apis.c.members.push({"name": regex_result[2],"url": pros_base_url + regex_result[1],"functions": []});
+              }
+              main_links.push(regex_result[1]);
+              
+              
           }
-      } while (m);
+      } while (regex_result);
+      //deletes the temporary placeholder motor json in members so it isn't processed.
+      prosJson.apis.c.members.shift();
+      prosJson.apis.cpp.members.shift();
       });
       // Go to class links and scrape functions from each link
-        for (var i: number = 0; i < main_links.length; i+= 1){
-          var sublink_html=pros_base_url+main_links[i]
-          await AxiosInstance.get(sublink_html,{timeout: 5000})
-    .then( // Once we have data returned ...
+    for (var i: number = 0; i < prosJson.apis.cpp.members.length; i+= 1){
+
+      var sublink_html = prosJson.apis.cpp.members[i].url;
+      await AxiosInstance.get(sublink_html,{timeout: 5000})
+    .then( 
       response => {
-        const html = response.data; // Get the HTML from the HTTP request
+        const html = response.data; // Gets HTML from individual member webpage
         //console.log(html);
         
-        
-        var m;
-
+        var regex_result;
+        //finds each link using sublink regex and stores it to member functions list
         do {
-            m = sublink_regex.exec(html);
-            if (m) {
+            regex_result = sublink_regex.exec(html);
+            if (regex_result) {
                 //console.log(m[0], m[1], m[2]);
-                prosJson.language.members.push({"name":m[3], "url": sublink_html + m[1]});
+                prosJson.apis.cpp.members[i].functions.push({"name": regex_result[3],"url": sublink_html + regex_result[1]});
             }
-        } while (m);
+        } while (regex_result);
       });
 
-        }
+      }
 }
 
 //ParseJSON("Motor");

@@ -297,6 +297,11 @@
           "type": "string",
           "default": "default",
           "description": "URL to download PROS Toolchain from. SHOULD NOT BE CHANGED BY MOST USERS!"
+        },
+        "pros.integratedDocsLanguage": {
+          "type": "string",
+          "default": "cpp",
+          "description": "Desired language for Integrated Documentation. Options are 'c' or 'cpp'."
         }
       }
     }

@@ -181,15 +181,15 @@ export async function activate(context: vscode.ExtensionContext) {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>"${linkString}$"</title>
+            <title>"${linkString}"</title>
         </head>
         <body style = "width: 100%; height: 100%;">
-            <iframe src = "${linkString}$" height = 600 width = 600 fullscreen > </iframe>
+            <iframe src = "${linkString}" height = 600 width = 600 fullscreen > </iframe>
         </body>
         </html>`;
 
         
-        let link = new vscode.MarkdownString(`[Go to Pros Documentation...](${linkString}$)`);
+        let link = new vscode.MarkdownString(`[Go to Pros Documentation...](${linkString})`);
         link.isTrusted = true;
         // let webviewLink = new vscode.MarkdownString(`[Open Documentation...](${linkString}$)`);
         // const panel = vscode.window.createWebviewPanel('doc',linkString + " docs",vscode.ViewColumn.One,{});
