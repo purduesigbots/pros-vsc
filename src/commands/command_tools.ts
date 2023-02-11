@@ -29,7 +29,7 @@ export const selectFileName = async (prompt: string) => {
     ignoreFocusOut: true,
   };
   inputName = await vscode.window.showInputBox(projectNameOptions);
-  return (inputName ? inputName : projectNameOptions.placeHolder) as string;
+  return  inputName as string;
 };
 
 export const selectTeamNumber = async (prompt: string) => {
