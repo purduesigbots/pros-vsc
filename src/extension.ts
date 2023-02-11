@@ -167,6 +167,29 @@ export async function activate(context: vscode.ExtensionContext) {
   setupCommandBlocker("pros.deleteLogs", prosLogger.deleteLogs);
   setupCommandBlocker("pros.openLog", prosLogger.openLog);
 
+  setupCommandBlocker("pros.manage", async() => {
+    // quickpick of Install PROS, Uninstall PROS, and Manage PROS Installation
+    const options = ["Install PROS", "Uninstall PROS", "Manage PROS Installation"];
+
+    //dictionary from options to command
+    let commandMap: { [key: string]: string } = {
+      "Install PROS": "pros.install",
+      "Uninstall PROS": "pros.uninstall",
+      "Manage PROS Installation": "pros.verify",
+    };
+
+    const selection = await vscode.window.showQuickPick(options, {
+      placeHolder: "Select an operation",
+      ignoreFocusOut: true,
+      title: "Manage PROS"
+    });
+
+    if (selection !== undefined) {
+      vscode.commands.executeCommand(commandMap[selection]);
+    }
+
+  });
+
   setupCommandBlocker(
     "pros.selectProject",
     chooseProject,

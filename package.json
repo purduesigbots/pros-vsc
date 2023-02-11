@@ -140,6 +140,10 @@
         "title": "PROS: Verify PROS Installation"
       },
       {
+        "command": "pros.manage",
+        "title": "PROS: Manage PROS Installation"
+      },
+      {
         "command": "pros.selectProject",
         "title": "PROS: Select PROS Project"
       },

@@ -13,23 +13,26 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
         new TreeItem("Build", undefined, "pros.build"),
         new TreeItem("Clean", undefined, "pros.clean"),
         new TreeItem("Run", undefined, "pros.run"),
-        new TreeItem("Stop", undefined, "pros.stop"),
         new TreeItem("Brain Terminal", undefined, "pros.terminal"),
         new TreeItem("Integrated Terminal", undefined, "pros.showterminal"),
-        new TreeItem("Capture Image", undefined, "pros.capture"),
-        new TreeItem("Set Team Number", undefined, "pros.teamnumber"),
-        new TreeItem("Set Robot Name", undefined, "pros.robotname"),
       ]),
       new TreeItem("Conductor", [
         new TreeItem("Upgrade Project", undefined, "pros.upgrade"),
         new TreeItem("Create Project", undefined, "pros.new"),
+        new TreeItem("Run Project", undefined, "pros.run"),
+        new TreeItem("Stop Project", undefined, "pros.stop"),
       ]),
-      new TreeItem("Other", [
+      new TreeItem("Manage PROS", [
         new TreeItem("Install PROS", undefined, "pros.install"),
         new TreeItem("Uninstall PROS", undefined, "pros.uninstall"),
         new TreeItem("Verify PROS Installation", undefined, "pros.verify"),
+      ]),
+      new TreeItem("Mangage V5 Brain", [
         new TreeItem("Update VEXos", undefined, "pros.updatefirmware"),
         new TreeItem("Battery Medic", undefined, "pros.batterymedic"),
+        new TreeItem("Set Team Number", undefined, "pros.teamnumber"),
+        new TreeItem("Set Robot Name", undefined, "pros.robotname"),
+        new TreeItem("Capture Image", undefined, "pros.capture"),
       ]),
     ];
   }
