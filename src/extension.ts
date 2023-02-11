@@ -38,6 +38,8 @@ import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
 
 import { getCwdIsPros } from "./workspace";
+import { startPortMonitoring } from "./device";
+import { BrainViewProvider } from "./views/brain-view";
 
 export const commandsBlocker: { [key: string]: boolean } = {};
 
@@ -139,6 +141,10 @@ export async function activate(context: vscode.ExtensionContext) {
       chooseProject();
     }
   });
+
+  startPortMonitoring(
+    vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
+  );
 
   if (
     vscode.workspace
@@ -306,6 +312,12 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.window.registerTreeDataProvider(
     "prosTreeview",
     new TreeDataProvider()
+  );
+
+  const brainViewProvider = new BrainViewProvider(context.extensionUri);
+  vscode.window.registerWebviewViewProvider(
+    BrainViewProvider.viewType,
+    brainViewProvider
   );
 
   if (
