@@ -442,6 +442,7 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(ProsProjectEditorProvider.register(context));
+  prosLogger.deleteOldLogs();
 }
 
 export function deactivate() {
