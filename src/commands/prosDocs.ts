@@ -3,7 +3,8 @@ import * as vscode from "vscode";
 import axios from 'axios';
 
 
-//api names must be legal variable names
+//JSON object storing urls for different class methods
+//Sorts by api (C and C++)
 var prosJson = {
     "namespace": "pros",
     "url": "https://purduesigbots.github.io/pros-doxygen-docs/api.html",
@@ -31,109 +32,56 @@ var prosJson = {
 }
 };
 
-var PROSJSON = {
-  "namespace": 'pros',
-  "members": [
-    {
-      "name": "Motors",
-      "members": [
-        "Motor",
-        "move_velocity",
-        "move_voltage",
-        "move",
-        "move_absolute",
-        "move_relative",
-        "brake",
-        "modify_profiled_velocity",
-        "get_target_position"
-      ]
-    }
-  ]
-};
-var json ={"name:": "pros",
-          "name": "",
-          "members": [{
-            "name": "",
-              "members": [{}],
-              "url": ""
-          }]};
 
-function find_file(keyword: string,json:any){
-    return json.name === keyword;
-}
-//needs to be update to use new json
+//Parses JSON object to return website for different keywords.
+//Does not take class type into account, it only evaluates by name
+//Will currently return duplicate methods and might direct user to wrong class API page
 export function parseJSON(keyword: string){
-    var final_website = "";
+    var finalWebsite = "";
     if (keyword === prosJson.namespace){
-        final_website = prosJson.url;
+        finalWebsite = prosJson.url;
     }
     else{
-      var api_members;
+      var apiMembers;
       if(vscode.workspace.getConfiguration("pros").get<string>("integratedDocsLanguage") === "cpp"){
-        var r = vscode.workspace.getConfiguration("pros").get<string>("integratedDocsLanguage");
-        api_members = prosJson.apis.cpp.members;
+        apiMembers = prosJson.apis.cpp.members;
       }
       else{
-        api_members = prosJson.apis.c.members;
+        apiMembers = prosJson.apis.c.members;
       }
       for(var i: number = 0; i < prosJson.apis.cpp.members.length; i += 1 ){
-        var final_obj = api_members[i].functions.filter(prosMember=>{
+        var finalObj = apiMembers[i].functions.filter(prosMember=>{
             return prosMember.name === keyword;
         }
         );
-        if(final_obj.length !== 0 ){
-          final_website = final_obj[0].url;
+        if(finalObj.length !== 0 ){
+          finalWebsite = finalObj[0].url;
         }
     }
   }
-    return final_website;
-}
-
-export async function ParseJSON(keyword: string){
-
-
-  const url = 'https://purduesigbots.github.io/pros-doxygen-docs/api.html'; // URL we're scraping
-  //find keywords for initial webpage of keyword.
-  var final_website = "";
-      if (keyword === PROSJSON.namespace){
-          final_website = PROSJSON.namespace;
-      }
-
-      else{
-
-          var final_obj = PROSJSON.members.filter(prosMember=> prosMember.members.filter(memberFunc=> memberFunc === keyword));
-
-          if (final_obj.length > 0) {
-          final_website = final_obj[0].name;
-          console.log(final_website);
-          }
-
-      }
+    return finalWebsite;
 }
 
 
 
-
-var loadJsonFinished = false;
 // most recent json loading function
 // needed for either website
 // uses regex to parse html
- async function loadJsonNew(){
-  var final_websites = "";
-  const AxiosInstance = axios.create(); // Create a new Axios Instance
+ async function loadJson(){
+  const axiosInstance = axios.create(); // Create a new Axios Instance
  
   const url = 'https://purduesigbots.github.io/pros-doxygen-docs/api.html'; // PROS Doxygen url
-  const pros_base_url = "https://purduesigbots.github.io/pros-doxygen-docs/";
+  const prosBaseUrl = "https://purduesigbots.github.io/pros-doxygen-docs/";
   var variable: any;
-  var final_link = "";
-  const link_regex = /<a href="(.{0,30})" class="m-doc">(.{0,35})<\/a>/g;
-  const sublink_regex = /<a href="(#.{0,60})" class="(m-doc-self|m-doc)">(.{0,30})<\/a>/g;
-  var main_links: [string]= [""];
-  main_links.pop();
-  var function_links = [];
+  var finalLink = "";
+  const linkRegex = /<a href="(.{0,30})" class="m-doc">(.{0,35})<\/a>/g;
+  const sublinkRegex = /<a href="(#.{0,60})" class="(m-doc-self|m-doc)">(.{0,30})<\/a>/g;
+  var mainLinks: [string]= [""];
+  mainLinks.pop();
+  var functionLinks = [];
   //go to and scrape api homepage
   // Send an async HTTP Get request to the url
-  await AxiosInstance.get(url,{timeout: 5000})
+  await axiosInstance.get(url,{timeout: 5000})
     .then( // Once we have data returned ...
       response => {
         const html = response.data; // Get the HTML from the HTTP request
@@ -141,24 +89,24 @@ var loadJsonFinished = false;
         
         
         var links = [];
-        var regex_result;
+        var regexResult;
         
         do {
-          regex_result = link_regex.exec(html);
-          if (regex_result) {
+          regexResult = linkRegex.exec(html);
+          if (regexResult) {
               //console.log(m[0], m[1], m[2],m[-1]);
               //checks if link is in c or cpp
-              if( regex_result[1].indexOf("group__cpp") !== -1){
-                prosJson.apis.cpp.members.push({"name": regex_result[2],"url": pros_base_url + regex_result[1], "functions": []});
+              if( regexResult[1].indexOf("group__cpp") !== -1){
+                prosJson.apis.cpp.members.push({"name": regexResult[2],"url": prosBaseUrl + regexResult[1], "functions": []});
               }
               else{
-                prosJson.apis.c.members.push({"name": regex_result[2],"url": pros_base_url + regex_result[1],"functions": []});
+                prosJson.apis.c.members.push({"name": regexResult[2],"url": prosBaseUrl + regexResult[1],"functions": []});
               }
-              main_links.push(regex_result[1]);
+              mainLinks.push(regexResult[1]);
               
               
           }
-      } while (regex_result);
+      } while (regexResult);
       //deletes the temporary placeholder motor json in members so it isn't processed.
       prosJson.apis.c.members.shift();
       prosJson.apis.cpp.members.shift();
@@ -166,31 +114,30 @@ var loadJsonFinished = false;
       // Go to class links and scrape functions from each link
     for (var i: number = 0; i < prosJson.apis.cpp.members.length; i+= 1){
 
-      var sublink_html = prosJson.apis.cpp.members[i].url;
-      await AxiosInstance.get(sublink_html,{timeout: 5000})
+      var sublinkHtml = prosJson.apis.cpp.members[i].url;
+      await axiosInstance.get(sublinkHtml,{timeout: 5000})
     .then( 
       response => {
         const html = response.data; // Gets HTML from individual member webpage
         //console.log(html);
         
-        var regex_result;
+        var regexResult;
         //finds each link using sublink regex and stores it to member functions list
         do {
-            regex_result = sublink_regex.exec(html);
-            if (regex_result) {
+            regexResult = sublinkRegex.exec(html);
+            if (regexResult) {
                 //console.log(m[0], m[1], m[2]);
-                prosJson.apis.cpp.members[i].functions.push({"name": regex_result[3],"url": sublink_html + regex_result[1]});
+                prosJson.apis.cpp.members[i].functions.push({"name": regexResult[3],"url": sublinkHtml + regexResult[1]});
             }
-        } while (regex_result);
+        } while (regexResult);
       });
 
       }
 }
 
-//ParseJSON("Motor");
-loadJsonNew().then(() => {
-  parseJSON("move_absolute");
-});
+//Loads JSON for user
+//Does not take no wifi into account
+loadJson();
 
 
 

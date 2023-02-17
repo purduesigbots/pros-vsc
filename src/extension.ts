@@ -22,7 +22,6 @@ import {
   medic,
   updateFirmware,
   parseJSON,
-  ParseJSON,
   setTeamNumber,
   setRobotName,
 } from "./commands";
