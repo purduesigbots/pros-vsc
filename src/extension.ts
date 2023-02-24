@@ -176,9 +176,9 @@ export async function activate(context: vscode.ExtensionContext) {
   setupCommandBlocker("pros.deleteLogs", prosLogger.deleteLogs);
   setupCommandBlocker("pros.openLog", prosLogger.openLog);
 
-  setupCommandBlocker("pros.installVision", installVision);
-  setupCommandBlocker("pros.uninstallVision", uninstallVision);
-  setupCommandBlocker("pros.runVision", runVision);
+  setupCommandBlocker("pros.installVision", installVision, context);
+  setupCommandBlocker("pros.uninstallVision", uninstallVision, context);
+  setupCommandBlocker("pros.runVision", runVision, context);
 
   setupCommandBlocker(
     "pros.selectProject",

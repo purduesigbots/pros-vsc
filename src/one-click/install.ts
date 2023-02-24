@@ -763,17 +763,18 @@ async function verifyVexcom() {
 export async function installVision(context: vscode.ExtensionContext) {
   const globalPath = context.globalStorageUri.fsPath;
   const system = getOperatingSystem();
-  const windowsVision = "https://github.com/purduesigbots/pros-cli/releases/download/3.4.1/vex_vision_utility-0.2.4-win.zip";
+  const windowsVision = "https://github.com/purduesigbots/pros-cli/releases/download/3.4.1/vision_030_win32.zip";
   const macosVision = "https://github.com/purduesigbots/pros-cli/releases/download/3.4.1/vision_030_osx64.zip";
 
   // Set the installed file names
   var visionName = `pros-vision-${system}.zip`;
   if(system === "windows") {
+    console.log("vision utility on windows");
     //add install and download directories
     const dirs = await createDirs(context.globalStorageUri.fsPath);
 
     const promises = [
-      downloadextract(context, windowsVision, visionName)
+      downloadextract(context, windowsVision, visionName, "Vision Utility")
     ];
 
     await Promise.all(promises);
@@ -827,5 +828,5 @@ export async function uninstallVision(context: vscode.ExtensionContext) {
 
 // code for running the vision utility
 export async function runVision(context: vscode.ExtensionContext) {
- 
-    }
+  
+}
