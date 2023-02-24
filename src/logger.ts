@@ -74,6 +74,27 @@ export class Logger {
     }
   }
 
+  async deleteOldLogs() {
+    if (!this.ready) {
+      return;
+    }
+
+    let keep =
+      (vscode.workspace
+        .getConfiguration("pros")
+        .get<number>("logHistoryLimit") ?? 60) * 864e5;
+    let now = Date.now();
+
+    let logFiles = await fs.promises.readdir(this.logFolder);
+
+    for (let file of logFiles) {
+      let stats = await fs.promises.stat(path.join(this.logFolder, file));
+      if (now - stats.birthtimeMs > keep) {
+        await fs.promises.unlink(path.join(this.logFolder, file));
+      }
+    }
+  }
+
   async openLog() {
     // get a list of logs in the log folder
     if (!this.ready) {
