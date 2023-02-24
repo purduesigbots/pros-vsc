@@ -826,7 +826,3 @@ export async function uninstallVision(context: vscode.ExtensionContext) {
 
 }
 
-// code for running the vision utility
-export async function runVision(context: vscode.ExtensionContext) {
-  
-}

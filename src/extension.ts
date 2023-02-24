@@ -23,6 +23,7 @@ import {
   updateFirmware,
   setTeamNumber,
   setRobotName,
+  runVision
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -33,7 +34,6 @@ import {
   cleanup,
   installVision,
   uninstallVision,
-  runVision,
   getOperatingSystem,
 } from "./one-click/install";
 import { getChildProcessProsToolchainPath } from "./one-click/path";
