@@ -116,6 +116,10 @@
         "title": "PROS: Screenshot V5 Brain"
       },
       {
+        "command": "pros.docview",
+        "title": "PROS: Docview"
+      },
+      {
         "command": "pros.upgrade",
         "title": "PROS: Upgrade Project"
       },
@@ -307,6 +311,16 @@
           "type": "string",
           "default": "cpp",
           "description": "Desired language for Integrated Documentation. Options are 'c' or 'cpp'."
+        },
+        "pros.docview: Style": {
+          "type": "string",
+          "default": "right",
+          "enum": ["right", "full"],
+          "enumDescriptions": [
+            "Dock the viewer to the right half of the screen",
+            "Make the viewer fullscreen"
+          ],
+          "description": "Default style to set position of integrated document viewer"
         }
       }
     }
