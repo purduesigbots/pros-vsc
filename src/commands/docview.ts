@@ -17,6 +17,21 @@ export async function opendocs()
         panel.webview.html = getWebviewContent();
     };
 
+    vscode.languages.registerHoverProvider('typescript', {
+        provideHover(document, position, token) {
+            const range = document.getWordRangeAtPosition(position);
+            const word = document.getText(range);
+
+            // TODO: add function call to validate word and replace value with updated value
+            if (word == "word") {
+                return new vscode.Hover({
+                    language: "PROS",
+                    value: "Docs"
+                });
+            }
+        }
+    });
+
     updateWebview();
 };
 
