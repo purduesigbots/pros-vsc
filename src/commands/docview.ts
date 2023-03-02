@@ -8,7 +8,7 @@ export async function opendocs()
     const panel = vscode.window.createWebviewPanel(
         'prosDocView', // Identifies the type of the webview. Used internally
         'PROS Documentation View', // Title of the panel displayed to the user
-        currConfig === "right" ? vscode.ViewColumn.Beside : vscode.ViewColumn.Active
+        currConfig === "right" ? vscode.ViewColumn.Two : vscode.ViewColumn.Two
         //vscode.ViewColumn.Beside, // Editor column to show the new webview panel in.
         // Webview options. More on these later.
     );
@@ -16,6 +16,21 @@ export async function opendocs()
     const updateWebview = () => {
         panel.webview.html = getWebviewContent();
     };
+
+    vscode.languages.registerHoverProvider('typescript', {
+        provideHover(document, position, token) {
+            const range = document.getWordRangeAtPosition(position);
+            const word = document.getText(range);
+
+            // TODO: add function call to validate word and replace value with updated value
+            if (word == "word") {
+                return new vscode.Hover({
+                    language: "PROS",
+                    value: "Hello"
+                });
+            }
+        }
+    });
 
     updateWebview();
 };
@@ -35,5 +50,5 @@ function getWebviewContent() {
 }
 
 function getStyle() {
-    return vscode.workspace.getConfiguration("pros").get<string>("Style");
+    return vscode.workspace.getConfiguration("pros.docview").get<string>("Style");
 }
