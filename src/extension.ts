@@ -47,6 +47,7 @@ export var system: string;
 export const output = vscode.window.createOutputChannel("PROS Output");
 
 export var prosLogger: Logger;
+export var currentUrl: string;
 
 
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
@@ -130,6 +131,10 @@ export async function activate(context: vscode.ExtensionContext) {
     await medic(context);
   });
 
+vscode.commands.registerCommand('pros.opendocs', () => {
+    opendocs(currentUrl);
+});
+
   vscode.commands.registerCommand("pros.build&upload", async () => {
     analytics.sendAction("build&upload");
     await buildUpload();
@@ -171,25 +176,16 @@ export async function activate(context: vscode.ExtensionContext) {
         const range = document.getWordRangeAtPosition(position);
         const word = document.getText(range);
         var linkString: string = parseJSON(word);
+        currentUrl = linkString;
         // //let linknew: Promise<string> = ParseJSON(word);
         // linknew.then(result=>{
         //   linkString = result;
         // });
         console.log(linkString);
-        let webstring = `<!DOCTYPE html>
-        <html lang="en"> 
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>"${linkString}"</title>
-        </head>
-        <body style = "width: 100%; height: 100%;">
-            <iframe src = "${linkString}" height = 600 width = 600 fullscreen > </iframe>
-        </body>
-        </html>`;
-
         
-        let link = new vscode.MarkdownString(`[Go to Pros Documentation...](${linkString})`);
+
+        const commentCommandUri = vscode.Uri.parse(`command:pros.opendocs`);
+        let link = new vscode.MarkdownString(`[Go to Pros Documentation...](${commentCommandUri})`);
         link.isTrusted = true;
         // let webviewLink = new vscode.MarkdownString(`[Open Documentation...](${linkString}$)`);
         // const panel = vscode.window.createWebviewPanel('doc',linkString + " docs",vscode.ViewColumn.One,{});
@@ -243,7 +239,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   vscode.commands.registerCommand("pros.docview", async () => {
     analytics.sendAction("docview");
-    await opendocs();
+    await opendocs(currentUrl);
   });
 
   vscode.commands.registerCommand("pros.upgrade", () => {

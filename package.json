@@ -166,6 +166,10 @@
       {
         "command": "pros.robotname",
         "title": "PROS: Set Robot Name"
+      },
+      {
+        "command": "pros.opendocs",
+        "title": "Open Docs"
       }
     ],
     "keybindings": [
