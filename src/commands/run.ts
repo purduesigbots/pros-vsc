@@ -31,7 +31,9 @@ const findSlotFromProjectPros = async (): Promise<Number> => {
 
   if (prosProjects.length === 1) {
     const decoder = new StringDecoder();
-    const buffer = Buffer.from(await vscode.workspace.fs.readFile(prosProjects[0]));
+    const buffer = Buffer.from(
+      await vscode.workspace.fs.readFile(prosProjects[0])
+    );
     const text = decoder.write(buffer);
     const json = JSON.parse(text);
     if (json["py/state"]["upload_options"]?.slot) {
