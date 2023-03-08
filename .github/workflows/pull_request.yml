@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Check formatting with Prettier
-        uses: creyD/prettier_action@v4.2
+        uses: creyD/prettier_action@v4.3
         with:
           prettier_options: --check **/*.{js,ts,jsx,tsx,md,css,html}
   eslint_check:
