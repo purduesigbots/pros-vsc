@@ -67,8 +67,37 @@
           "name": "PROS",
           "icon": "media/pros-tux-white.png",
           "contextualTitle": "PROS"
+        },
+        {
+          "id": "pros.brainView",
+          "name": "Brain View",
+          "type": "webview",
+          "contextualTitle": "Brain View"
         }
       ]
+    },
+    "icons": {
+      "pros-v5-brain": {
+        "description": "V5 Brain",
+        "default": {
+          "fontPath": "media/vexicon.woff",
+          "fontCharacter": "\\E00C"
+        }
+      },
+      "pros-v5-controller": {
+        "description": "V5 Controller",
+        "default": {
+          "fontPath": "media/vexicon.woff",
+          "fontCharacter": "\\E00D"
+        }
+      },
+      "pros-v5-unknown": {
+        "description": "Unknown V5 Device",
+        "default": {
+          "fontPath": "media/vexicon.woff",
+          "fontCharacter": "\\E00A"
+        }
+      }
     },
     "commands": [
       {
@@ -291,6 +320,11 @@
           "default": true,
           "description": "Prompt for PROS CLI install on startup."
         },
+        "pros.showDeviceConnectNotifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show notifications for device connects and disconnects."
+        },
         "pros.useLogger": {
           "type": "boolean",
           "default": true,
@@ -310,6 +344,11 @@
           "type": "string",
           "default": "default",
           "description": "URL to download PROS Toolchain from. SHOULD NOT BE CHANGED BY MOST USERS!"
+        },
+        "pros.Beta: Enable Experimental Features": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable experimental features. These features are not guaranteed to work and may be removed at any time."
         },
         "pros.integratedDocsLanguage": {
           "type": "string",
