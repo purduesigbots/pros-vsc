@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import { opendocs } from "./commands/docview";
+import { opendocs } from "./views/docview";
 import { promisify } from "util";
 
 import { TreeDataProvider } from "./views/tree-view";
@@ -173,14 +173,8 @@ export async function activate(context: vscode.ExtensionContext) {
   setupCommandBlocker("pros.capture", capture);
   setupCommandBlocker("pros.teamnumber", setTeamNumber);
   setupCommandBlocker("pros.robotname", setRobotName);
-vscode.commands.registerCommand('pros.opendocs', () => {
-    opendocs(currentUrl);
-});
-
-  vscode.commands.registerCommand("pros.build&upload", async () => {
-    analytics.sendAction("build&upload");
-    await buildUpload();
-  });
+  
+  setupCommandBlocker('pros.opendocs', ()=>{opendocs(currentUrl);}, undefined, true);
 
   setupCommandBlocker("pros.deleteLogs", prosLogger.deleteLogs);
   setupCommandBlocker("pros.openLog", prosLogger.openLog);
