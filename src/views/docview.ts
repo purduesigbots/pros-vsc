@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { parseJSON } from "./prosDocs";
+import { parseJSON } from "./docs-webscrape";
 
 
 export async function opendocs(link: string)
@@ -17,21 +17,6 @@ export async function opendocs(link: string)
     const updateWebview = () => {
         panel.webview.html = getWebviewContent(link);
     };
-/*
-    vscode.languages.registerHoverProvider('typescript', {
-        provideHover(document, position, token) {
-            const range = document.getWordRangeAtPosition(position);
-            const word = document.getText(range);
-
-            // TODO: add function call to validate word and replace value with updated value
-            if (parseJSON(word)) {
-                return {
-                    contents: ["Word"]
-                };
-            }
-        }
-    });
-    */
 
     updateWebview();
 };

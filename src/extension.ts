@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import { opendocs } from "./commands/docview";
+import { opendocs } from "./views/docview";
 import { promisify } from "util";
 
 import { TreeDataProvider } from "./views/tree-view";
@@ -40,6 +40,46 @@ import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
 
 import { getCwdIsPros } from "./workspace";
+import { startPortMonitoring } from "./device";
+import { BrainViewProvider } from "./views/brain-view";
+
+export const commandsBlocker: { [key: string]: boolean } = {};
+
+const setupCommandBlocker = async (
+  cmd: string,
+  callback: Function,
+  context?: vscode.ExtensionContext,
+  betaFeature?: boolean,
+  customAnalytic?: string | null
+) => {
+  vscode.commands.registerCommand(cmd, async () => {
+    if (
+      betaFeature &&
+      !vscode.workspace.getConfiguration("pros").get("betaFeatures")
+    ) {
+      vscode.window.showErrorMessage(
+        "This feature is currently in beta. To enable it, set the 'pros.betaFeatures' setting in your workspace settings to true."
+      );
+      return;
+    }
+
+    if (commandsBlocker[cmd]) {
+      return;
+    }
+    if (customAnalytic !== null) {
+      analytics.sendAction(
+        customAnalytic ? customAnalytic : cmd.replace("pros.", "")
+      );
+    }
+    commandsBlocker[cmd] = true;
+    if (context) {
+      await callback(context);
+    } else {
+      await callback();
+    }
+    commandsBlocker[cmd] = false;
+  });
+};
 
 let analytics: Analytics;
 
@@ -106,6 +146,10 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  startPortMonitoring(
+    vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
+  );
+
   if (
     vscode.workspace
       .getConfiguration("pros")
@@ -113,47 +157,53 @@ export async function activate(context: vscode.ExtensionContext) {
   ) {
     vscode.commands.executeCommand("pros.welcome");
   }
-  vscode.commands.registerCommand("pros.install", async () => {
-    analytics.sendAction("install");
-    await install(context);
-  });
-  vscode.commands.registerCommand("pros.uninstall", async () => {
-    analytics.sendAction("uninstall");
-    await uninstall(context);
-  });
-  vscode.commands.registerCommand("pros.verify", async () => {
-    analytics.sendAction("verify");
-    await cleanup(context);
-  });
 
-  vscode.commands.registerCommand("pros.batterymedic", async () => {
-    analytics.sendAction("batterymedic");
-    await medic(context);
-  });
+  setupCommandBlocker("pros.install", install, context);
+  setupCommandBlocker("pros.uninstall", uninstall, context);
+  setupCommandBlocker("pros.verify", cleanup, context);
+  setupCommandBlocker("pros.batterymedic", medic, context);
+  setupCommandBlocker("pros.updatefirmware", updateFirmware);
 
-vscode.commands.registerCommand('pros.opendocs', () => {
-    opendocs(currentUrl);
-});
+  setupCommandBlocker("pros.build&upload", buildUpload);
+  setupCommandBlocker("pros.upload", upload);
+  setupCommandBlocker("pros.build", build);
+  setupCommandBlocker("pros.run", run);
+  setupCommandBlocker("pros.stop", stop);
+  setupCommandBlocker("pros.clean", clean);
+  setupCommandBlocker("pros.capture", capture);
+  setupCommandBlocker("pros.teamnumber", setTeamNumber);
+  setupCommandBlocker("pros.robotname", setRobotName);
+  
+  setupCommandBlocker('pros.opendocs', ()=>{opendocs(currentUrl);}, undefined, true);
 
-  vscode.commands.registerCommand("pros.build&upload", async () => {
-    analytics.sendAction("build&upload");
-    await buildUpload();
-  });
+  setupCommandBlocker("pros.deleteLogs", prosLogger.deleteLogs);
+  setupCommandBlocker("pros.openLog", prosLogger.openLog);
 
-  vscode.commands.registerCommand("pros.upload", async () => {
-    analytics.sendAction("upload");
-    await upload();
-  });
+  setupCommandBlocker(
+    "pros.selectProject",
+    chooseProject,
+    undefined,
+    undefined,
+    null
+  );
+  setupCommandBlocker("pros.upgrade", upgradeProject);
+  setupCommandBlocker("pros.new", createNewProject);
 
-  vscode.commands.registerCommand("pros.build", async () => {
-    analytics.sendAction("build");
-    await build();
-  });
-
-  vscode.commands.registerCommand("pros.run", async () => {
-    analytics.sendAction("run");
-    await run();
-  });
+  setupCommandBlocker(
+    "pros.terminal",
+    async () => {
+      try {
+        const terminal = await getProsTerminal(context);
+        terminal.sendText("pros terminal");
+        terminal.show();
+      } catch (err: any) {
+        vscode.window.showErrorMessage(err.message);
+      }
+    },
+    undefined,
+    undefined,
+    "serialterminal"
+  );
 
   vscode.commands.registerCommand("pros.stop", async () => {
     analytics.sendAction("stop");
@@ -170,49 +220,10 @@ vscode.commands.registerCommand('pros.opendocs', () => {
     await prosLogger.openLog();
   });
 
-  vscode.languages.registerHoverProvider('*', {
-    provideHover(document, position, token) {
-        //will be needed for word lookup
-        const range = document.getWordRangeAtPosition(position);
-        const word = document.getText(range);
-        var linkString: string = parseJSON(word);
-        currentUrl = linkString;
-        // //let linknew: Promise<string> = ParseJSON(word);
-        // linknew.then(result=>{
-        //   linkString = result;
-        // });
-        console.log(linkString);
-        
-
-        const commentCommandUri = vscode.Uri.parse(`command:pros.opendocs`);
-        let link = new vscode.MarkdownString(`[Go to Pros Documentation...](${commentCommandUri})`);
-        link.isTrusted = true;
-        // let webviewLink = new vscode.MarkdownString(`[Open Documentation...](${linkString}$)`);
-        // const panel = vscode.window.createWebviewPanel('doc',linkString + " docs",vscode.ViewColumn.One,{});
-        // panel.webview.html = webstring;
-
-        let hover: vscode.Hover = {
-            contents: [link]
-        };
-        return hover;
-
-    }
-  });
-
   vscode.commands.registerCommand("pros.clean", clean);
   vscode.commands.registerCommand("pros.selectProject", chooseProject);
   vscode.commands.registerCommand("pros.terminal", async () => {
     analytics.sendAction("serialterminal");
-    try {
-      const terminal = await getProsTerminal(context);
-      terminal.sendText("pros terminal");
-      terminal.show();
-    } catch (err: any) {
-      vscode.window.showErrorMessage(err.message);
-    }
-  });
-  vscode.commands.registerCommand("pros.showterminal", async () => {
-    analytics.sendAction("showterminal");
     try {
       const terminal = await getProsTerminal(context);
       terminal.show();
@@ -235,11 +246,6 @@ vscode.commands.registerCommand('pros.opendocs', () => {
   vscode.commands.registerCommand("pros.capture", async () => {
     analytics.sendAction("capture");
     await capture();
-  });
-
-  vscode.commands.registerCommand("pros.docview", async () => {
-    analytics.sendAction("docview");
-    await opendocs(currentUrl);
   });
 
   vscode.commands.registerCommand("pros.upgrade", () => {
@@ -337,6 +343,12 @@ vscode.commands.registerCommand('pros.opendocs', () => {
   vscode.window.registerTreeDataProvider(
     "prosTreeview",
     new TreeDataProvider()
+  );
+
+  const brainViewProvider = new BrainViewProvider(context.extensionUri);
+  vscode.window.registerWebviewViewProvider(
+    BrainViewProvider.viewType,
+    brainViewProvider
   );
 
   if (
