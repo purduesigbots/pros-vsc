@@ -87,7 +87,7 @@ function getChatBotWebviewContent() {
       <title>Cat Coding</title>
   </head>
   <body>
-  <iframe id="myIframe" src="https://pros-docs.herokuapp.com/" width="100%" height="1000px">
+  <iframe id="myIframe" src="https://pros-docs.herokuapp.com/" width="100%" height="1000px" frameBorder="0">
   </iframe>
   <script>
     function triggerClickInsideIframe() {
