@@ -78,6 +78,26 @@ export const getProsTerminal = async (
   });
 };
 
+function getChatBotWebviewContent() {
+  return `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Cat Coding</title>
+  </head>
+  <body>
+  <iframe id="myIframe" src="https://pros-docs.herokuapp.com/" width="100%" height="1000px">
+  </iframe>
+  <script>
+    function triggerClickInsideIframe() {
+        document.getElementById("myIframe").contentWindow.document.getElementById("send").click();
+    }
+  </script>
+  </body>
+  </html>`;
+}
+
 export async function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
@@ -213,6 +233,20 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.updatefirmware", async () => {
     analytics.sendAction("updatefirmware");
     await updateFirmware();
+  });
+
+  vscode.commands.registerCommand("pros.chatBot", async () => {
+    // Create and show a new webview
+    const chatBotPanel = vscode.window.createWebviewPanel(
+      "chatBot", // Identifies the type of the webview. Used internally
+      "Docs Chat Bot", // Title of the panel displayed to the user
+      vscode.ViewColumn.Two, // Editor column to show the new webview panel in.
+      {
+        enableScripts: true,
+      } // Webview options. More on these later.
+    );
+
+    chatBotPanel.webview.html = getChatBotWebviewContent();
   });
 
   vscode.commands.registerCommand("pros.welcome", async () => {

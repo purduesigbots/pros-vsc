@@ -72,6 +72,10 @@
     },
     "commands": [
       {
+        "command": "pros.chatBot",
+        "title": "PROS: Chat Bot"
+      },
+      {
         "command": "pros.build&upload",
         "title": "Build & Upload",
         "icon": {
