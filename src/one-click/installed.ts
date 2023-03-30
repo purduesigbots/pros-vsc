@@ -20,7 +20,9 @@ export async function getCurrentReleaseVersion(url: string) {
   return vString;
 }
 
-export async function getCurrentVersion(oneClickPath: string): Promise<[number, boolean]> {
+export async function getCurrentVersion(
+  oneClickPath: string
+): Promise<[number, boolean]> {
   try {
     console.log(oneClickPath);
     prosLogger.log(

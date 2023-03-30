@@ -53,11 +53,12 @@ const setupCommandBlocker = async (
   customAnalytic?: string | null
 ) => {
   vscode.commands.registerCommand(cmd, async () => {
-    let betaEnabled = vscode.workspace.getConfiguration("pros").get<boolean>("Beta: Enable Experimental Features") ?? false;
+    let betaEnabled =
+      vscode.workspace
+        .getConfiguration("pros")
+        .get<boolean>("Beta: Enable Experimental Features") ?? false;
     console.log("BetaEnabled: " + betaEnabled + "");
-    if (
-      betaFeature && !betaEnabled
-    ) {
+    if (betaFeature && !betaEnabled) {
       vscode.window.showErrorMessage(
         "This feature is currently in beta. To enable it, set the 'pros.betaFeatures' setting in your workspace settings to true."
       );
@@ -88,9 +89,9 @@ export var system: string;
 export const output = vscode.window.createOutputChannel("PROS Output");
 
 export var prosLogger: Logger;
-export var mainPage: string = "https://purduesigbots.github.io/pros-doxygen-docs/api.html#autotoc_md1"
+export var mainPage: string =
+  "https://purduesigbots.github.io/pros-doxygen-docs/api.html#autotoc_md1";
 export var currentUrl: string = "https://";
-
 
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
@@ -175,13 +176,18 @@ export async function activate(context: vscode.ExtensionContext) {
   setupCommandBlocker("pros.capture", capture);
   setupCommandBlocker("pros.teamnumber", setTeamNumber);
   setupCommandBlocker("pros.robotname", setRobotName);
-  
-  setupCommandBlocker('pros.opendocs', ()=>{
-    if(currentUrl == "NONE") {
-      currentUrl = mainPage;
-    }
-    opendocs(currentUrl);
-  }, undefined, true);
+
+  setupCommandBlocker(
+    "pros.opendocs",
+    () => {
+      if (currentUrl === "NONE") {
+        currentUrl = mainPage;
+      }
+      opendocs(currentUrl);
+    },
+    undefined,
+    true
+  );
 
   setupCommandBlocker("pros.deleteLogs", prosLogger.deleteLogs);
   setupCommandBlocker("pros.openLog", prosLogger.openLog);
@@ -212,7 +218,6 @@ export async function activate(context: vscode.ExtensionContext) {
     "serialterminal"
   );
 
-
   vscode.commands.registerCommand("pros.welcome", async () => {
     analytics.sendPageview("welcome");
     const panel = vscode.window.createWebviewPanel(
@@ -223,7 +228,7 @@ export async function activate(context: vscode.ExtensionContext) {
         enableScripts: true,
       }
     );
-    
+
     panel.iconPath = vscode.Uri.file(
       path.join(context.extensionPath, "media", "pros-color-icon.png")
     );
@@ -290,10 +295,12 @@ export async function activate(context: vscode.ExtensionContext) {
     });
   });
 
-  const usingbeta = vscode.workspace.getConfiguration("pros").get<boolean>("Beta: Enable Experimental Features") ?? false;
-  if(usingbeta) {
-      
-    vscode.languages.registerHoverProvider('*', {
+  const usingbeta =
+    vscode.workspace
+      .getConfiguration("pros")
+      .get<boolean>("Beta: Enable Experimental Features") ?? false;
+  if (usingbeta) {
+    vscode.languages.registerHoverProvider("*", {
       provideHover(document, position, token) {
         //will be needed for word lookup
         const range = document.getWordRangeAtPosition(position);
@@ -301,23 +308,24 @@ export async function activate(context: vscode.ExtensionContext) {
         var linkString: string = parseJSON(word);
         console.log(linkString);
 
-        if(!linkString.includes("purduesigbots.github.io")) {
+        if (!linkString.includes("purduesigbots.github.io")) {
           currentUrl = "NONE";
           return;
         }
 
         currentUrl = linkString;
-        
+
         const commentCommandUri = vscode.Uri.parse(`command:pros.opendocs`);
-        let link = new vscode.MarkdownString(`[Go to Pros Documentation...](${commentCommandUri})`);
+        let link = new vscode.MarkdownString(
+          `[Go to Pros Documentation...](${commentCommandUri})`
+        );
         link.isTrusted = true;
 
         let hover: vscode.Hover = {
-          contents: [link]
+          contents: [link],
         };
         return hover;
-
-      }
+      },
     });
   }
 
