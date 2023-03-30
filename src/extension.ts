@@ -53,9 +53,10 @@ const setupCommandBlocker = async (
   customAnalytic?: string | null
 ) => {
   vscode.commands.registerCommand(cmd, async () => {
+    let betaEnabled = vscode.workspace.getConfiguration("pros").get<boolean>("Beta: Enable Experimental Features") ?? false;
+    console.log("BetaEnabled: " + betaEnabled + "");
     if (
-      betaFeature &&
-      !vscode.workspace.getConfiguration("pros").get("betaFeatures")
+      betaFeature && !betaEnabled
     ) {
       vscode.window.showErrorMessage(
         "This feature is currently in beta. To enable it, set the 'pros.betaFeatures' setting in your workspace settings to true."
@@ -87,7 +88,8 @@ export var system: string;
 export const output = vscode.window.createOutputChannel("PROS Output");
 
 export var prosLogger: Logger;
-export var currentUrl: string;
+export var mainPage: string = "https://purduesigbots.github.io/pros-doxygen-docs/api.html#autotoc_md1"
+export var currentUrl: string = "https://";
 
 
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
@@ -174,7 +176,12 @@ export async function activate(context: vscode.ExtensionContext) {
   setupCommandBlocker("pros.teamnumber", setTeamNumber);
   setupCommandBlocker("pros.robotname", setRobotName);
   
-  setupCommandBlocker('pros.opendocs', ()=>{opendocs(currentUrl);}, undefined, true);
+  setupCommandBlocker('pros.opendocs', ()=>{
+    if(currentUrl == "NONE") {
+      currentUrl = mainPage;
+    }
+    opendocs(currentUrl);
+  }, undefined, true);
 
   setupCommandBlocker("pros.deleteLogs", prosLogger.deleteLogs);
   setupCommandBlocker("pros.openLog", prosLogger.openLog);
@@ -205,63 +212,6 @@ export async function activate(context: vscode.ExtensionContext) {
     "serialterminal"
   );
 
-  vscode.commands.registerCommand("pros.stop", async () => {
-    analytics.sendAction("stop");
-    await stop();
-  });
-
-  vscode.commands.registerCommand("pros.deleteLogs", async () => {
-    analytics.sendAction("deleteLogs");
-    await prosLogger.deleteLogs();
-  });
-
-  vscode.commands.registerCommand("pros.openLog", async () => {
-    analytics.sendAction("openLog");
-    await prosLogger.openLog();
-  });
-
-  vscode.commands.registerCommand("pros.clean", clean);
-  vscode.commands.registerCommand("pros.selectProject", chooseProject);
-  vscode.commands.registerCommand("pros.terminal", async () => {
-    analytics.sendAction("serialterminal");
-    try {
-      const terminal = await getProsTerminal(context);
-      terminal.show();
-      vscode.window.showInformationMessage("PROS Terminal started!");
-    } catch (err: any) {
-      vscode.window.showErrorMessage(err.message);
-    }
-  });
-
-  vscode.commands.registerCommand("pros.teamnumber", async () => {
-    analytics.sendAction("teamnumber");
-    await setTeamNumber();
-  });
-
-  vscode.commands.registerCommand("pros.robotname", async () => {
-    analytics.sendAction("robotname");
-    await setRobotName();
-  });
-
-  vscode.commands.registerCommand("pros.capture", async () => {
-    analytics.sendAction("capture");
-    await capture();
-  });
-
-  vscode.commands.registerCommand("pros.upgrade", () => {
-    analytics.sendAction("upgrade");
-    upgradeProject();
-  });
-
-  vscode.commands.registerCommand("pros.new", () => {
-    analytics.sendAction("projectCreated");
-    createNewProject();
-  });
-
-  vscode.commands.registerCommand("pros.updatefirmware", async () => {
-    analytics.sendAction("updatefirmware");
-    await updateFirmware();
-  });
 
   vscode.commands.registerCommand("pros.welcome", async () => {
     analytics.sendPageview("welcome");
@@ -339,6 +289,38 @@ export async function activate(context: vscode.ExtensionContext) {
         .update(message.command, message.value, true);
     });
   });
+
+  const usingbeta = vscode.workspace.getConfiguration("pros").get<boolean>("Beta: Enable Experimental Features") ?? false;
+  if(usingbeta) {
+      
+    vscode.languages.registerHoverProvider('*', {
+      provideHover(document, position, token) {
+        console.log("eeeeeeeee---------___)(((()(");
+        //will be needed for word lookup
+        const range = document.getWordRangeAtPosition(position);
+        const word = document.getText(range);
+        var linkString: string = parseJSON(word);
+        console.log(linkString);
+
+        if(!linkString.includes("purduesigbots.github.io")) {
+          currentUrl = "NONE";
+          return;
+        }
+
+        currentUrl = linkString;
+        
+        const commentCommandUri = vscode.Uri.parse(`command:pros.opendocs`);
+        let link = new vscode.MarkdownString(`[Go to Pros Documentation...](${commentCommandUri})`);
+        link.isTrusted = true;
+
+        let hover: vscode.Hover = {
+          contents: [link]
+        };
+        return hover;
+
+      }
+    });
+  }
 
   vscode.window.registerTreeDataProvider(
     "prosTreeview",

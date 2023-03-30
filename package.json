@@ -145,10 +145,6 @@
         "title": "PROS: Screenshot V5 Brain"
       },
       {
-        "command": "pros.docview",
-        "title": "PROS: Docview"
-      },
-      {
         "command": "pros.upgrade",
         "title": "PROS: Upgrade Project"
       },
@@ -198,7 +194,7 @@
       },
       {
         "command": "pros.opendocs",
-        "title": "Open Docs"
+        "title": "PROS: Open Docs"
       }
     ],
     "keybindings": [
