@@ -195,9 +195,9 @@
     ],
     "keybindings": [
       {
-        "key": "ctrl+shift+i",
+        "key": "ctrl+shift+o",
         "command": "pros.showterminal",
-        "mac": "cmd+shift+i"
+        "mac": "cmd+shift+o"
       },
       {
         "key": "ctrl+shift+b",
