@@ -295,7 +295,6 @@ export async function activate(context: vscode.ExtensionContext) {
       
     vscode.languages.registerHoverProvider('*', {
       provideHover(document, position, token) {
-        console.log("eeeeeeeee---------___)(((()(");
         //will be needed for word lookup
         const range = document.getWordRangeAtPosition(position);
         const word = document.getText(range);

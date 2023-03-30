@@ -315,8 +315,6 @@ export async function install(context: vscode.ExtensionContext) {
   let promises: Promise<any>[] = [];
   let targetedPortion: string = "";
 
-  console.log("eeeee");
-
   console.log(
     "cliUpToDate: " +
       cliUpToDate +

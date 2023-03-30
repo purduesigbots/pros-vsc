@@ -196,9 +196,7 @@ export class BaseCommand {
       this.exited = true;
       console.log("Exited");
     });
-    console.log("eeee starting wait");
     await this.waitForExit();
-    console.log("eeee done waiting");
 
     if (this.successMessage === "hidden") {
       return;
