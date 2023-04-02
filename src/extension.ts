@@ -317,7 +317,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
         const commentCommandUri = vscode.Uri.parse(`command:pros.opendocs`);
         let link = new vscode.MarkdownString(
-          `[Go to Pros Documentation...](${commentCommandUri})`
+          `[Go to PROS Documentation...](${commentCommandUri})`
         );
         link.isTrusted = true;
 
