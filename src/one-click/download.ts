@@ -23,18 +23,18 @@ async function download(
   await prosLogger.log("OneClick", `Downloading ${downloadURL}`);
   await prosLogger.log("OneClick", `Storage Path: ${storagePath}`);
 
-  downloadName = "Downloading: " + downloadName ?? 
-  (storagePath.includes("cli")
-    ? "PROS CLI"
-    : storagePath.includes("toolchain")
-    ? "PROS Toolchain"
-    : "VEX Vexcom");
+  downloadName =
+    "Downloading: " + downloadName ??
+    (storagePath.includes("cli")
+      ? "PROS CLI"
+      : storagePath.includes("toolchain")
+      ? "PROS Toolchain"
+      : "VEX Vexcom");
 
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title:
-      downloadName,
+      title: downloadName,
       cancellable: true,
     },
     async (progress, token) => {
@@ -83,17 +83,17 @@ export async function extract(
   extractName?: string
 ) {
   await prosLogger.log("OneClick", `Extracting ${storagePath}`);
-  extractName = "Installing: " + extractName ??
-  (storagePath.includes("cli")
-          ? "PROS CLI"
-          : storagePath.includes("toolchain")
-          ? "PROS Toolchain"
-          : "VEX Vexcom")
+  extractName =
+    "Installing: " + extractName ??
+    (storagePath.includes("cli")
+      ? "PROS CLI"
+      : storagePath.includes("toolchain")
+      ? "PROS Toolchain"
+      : "VEX Vexcom");
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title:
-      extractName,
+      title: extractName,
       cancellable: true,
     },
     async (progress, token) => {
@@ -321,10 +321,16 @@ export async function downloadextract(
   name?: string
 ) {
   const globalPath = context.globalStorageUri.fsPath;
-  const bz2 = await download(globalPath, downloadURL, storagePath, name ?? undefined);
+  const bz2 = await download(
+    globalPath,
+    downloadURL,
+    storagePath,
+    name ?? undefined
+  );
+  console.log("download done");
   await extract(globalPath, storagePath, bz2, name ?? undefined);
   console.log(`Finished Installing ${storagePath}`);
-  window.showInformationMessage(`Finished Installing ${storagePath}`);
+  window.showInformationMessage(`Finished Installing ${name ?? ""}`);
   return true;
 }
 

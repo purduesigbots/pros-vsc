@@ -21,32 +21,32 @@ export const runVision = async (context: vscode.ExtensionContext) => {
     return;
   }
 
-  if(os === "windows") {
+  if (os === "windows") {
     visionCommandOptions.command = path.join(
       installPath,
       "install",
       `pros-vision-${os}`,
+      "win32",
       `Vision Utility.exe`
     );
-
   } else {
-    vscode.window.showInformationMessage("Vision Utility is currently not supported on MacOS. We are currently working on fixing this.");
+    vscode.window.showInformationMessage(
+      "Vision Utility is currently not supported on MacOS. We are currently working on fixing this."
+    );
     return;
     visionCommandOptions.command = "open";
     visionCommandOptions.args = [
       "-a",
-      `"${
-        path.join(
-          installPath,
-          "install",
-          `pros-vision-${os}`,
-          "osx64",
-          `Vision Utility.app`
-        )
-      }"`
+      `"${path.join(
+        installPath,
+        "install",
+        `pros-vision-${os}`,
+        "osx64",
+        `Vision Utility.app`
+      )}"`,
     ];
   }
-  
+
   console.log(visionCommandOptions.command);
 
   const visionCommand: BaseCommand = new BaseCommand(visionCommandOptions);
