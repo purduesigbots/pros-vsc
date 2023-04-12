@@ -34,7 +34,6 @@ const userApproval = async (
   }
 };
 
-
 export const upgradeProject = async () => {
   //let {target, curKernel, curOkapi} = await getCurrentKernelOkapiVersion();
   //let {newKernel, newOkapi} = await getLatestKernelOkapiVersion(target);
@@ -70,4 +69,3 @@ export const upgradeProject = async () => {
     await vscode.window.showErrorMessage(err.message);
   }
 };
-

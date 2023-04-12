@@ -23,7 +23,7 @@ import {
   updateFirmware,
   setTeamNumber,
   setRobotName,
-  runVision
+  runVision,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";

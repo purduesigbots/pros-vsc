@@ -19,7 +19,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
         new TreeItem("Capture Image", undefined, "pros.capture"),
         new TreeItem("Set Team Number", undefined, "pros.teamnumber"),
         new TreeItem("Set Robot Name", undefined, "pros.robotname"),
-        new TreeItem('Run Vision Utility', undefined, 'pros.runVision'),
+        new TreeItem("Run Vision Utility", undefined, "pros.runVision"),
       ]),
       new TreeItem("Conductor", [
         new TreeItem("Upgrade Project", undefined, "pros.upgrade"),
@@ -29,8 +29,12 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
         new TreeItem("Install PROS", undefined, "pros.install"),
         new TreeItem("Uninstall PROS", undefined, "pros.uninstall"),
         new TreeItem("Verify PROS Installation", undefined, "pros.verify"),
-        new TreeItem('Install Vision Utility', undefined, 'pros.installVision'), 
-        new TreeItem('Uninstall Vision Utility', undefined, 'pros.uninstallVision'),
+        new TreeItem("Install Vision Utility", undefined, "pros.installVision"),
+        new TreeItem(
+          "Uninstall Vision Utility",
+          undefined,
+          "pros.uninstallVision"
+        ),
         new TreeItem("Update VEXos", undefined, "pros.updatefirmware"),
         new TreeItem("Battery Medic", undefined, "pros.batterymedic"),
       ]),
