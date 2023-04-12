@@ -316,7 +316,6 @@ export async function install(context: vscode.ExtensionContext) {
   let promises: Promise<any>[] = [];
   let targetedPortion: string = "";
 
-  console.log("eeeee");
 
   console.log(
     "cliUpToDate: " +
@@ -781,14 +780,30 @@ export async function installVision(context: vscode.ExtensionContext) {
     await cleanup(context, system);
   }
   else if(system === "macos") {
-     //add install and download directories
-     const dirs = await createDirs(context.globalStorageUri.fsPath);
+    vscode.window.showInformationMessage("Vision Utility is currently not supported on MacOS. We are currently working on fixing this.");
+    return;
+    //add install and download directories
+    const dirs = await createDirs(context.globalStorageUri.fsPath);
 
-     const promises = [
-       downloadextract(context, macosVision, visionName)
-     ];
+    const promises = [
+      downloadextract(context, macosVision, visionName, "Vision Utility")
+    ];
  
-     await Promise.all(promises);
+    await Promise.all(promises);
+    await fs.promises.chmod(
+      `${
+        path.join(
+         globalPath, 
+         "install", 
+         `pros-vision-${system}`, 
+         "osx64", 
+         "Vision Utility.app",
+         "Contents",
+         "MacOS",
+         "nwjs"
+        )}`,
+      0o751
+    ),
      await cleanup(context, system);
   }
   else if(system === "linux"){
@@ -818,7 +833,7 @@ export async function uninstallVision(context: vscode.ExtensionContext) {
         cancellable: false,
       },
       async (progress, token) => {
-        await removeDirAsync(globalPath, false);
+        await removeDirAsync(path.join(globalPath, `pros-vision-${getOperatingSystem()}`), false);
       }
     );
     vscode.window.showInformationMessage("Vision Utility Uninstalled!");

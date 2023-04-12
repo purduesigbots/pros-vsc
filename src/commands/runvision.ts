@@ -6,25 +6,47 @@ import { getOperatingSystem } from "../one-click/install";
 //run vision command
 const visionCommandOptions: BaseCommandOptions = {
   command: "",
-  args: ["--vision"],
+  args: [""],
   message: "Running Vision Utility",
   requiresProsProject: false,
 };
 
 //check if vision is installed and run it
 export const runVision = async (context: vscode.ExtensionContext) => {
-  if (getOperatingSystem() === "linux") {
-    vscode.window.showErrorMessage("Vision Sensor is not supported on Linux");
+  const installPath = context.globalStorageUri.fsPath;
+  const os = getOperatingSystem();
+
+  if (os === "linux") {
+    vscode.window.showErrorMessage("Vision Utility is not supported on Linux");
     return;
   }
 
-  const installPath = context.globalStorageUri.fsPath;
-  visionCommandOptions.command = path.join(
-    installPath,
-    "install",
-    `pros-vision-${getOperatingSystem()}`,
-    "Vision Utility" + (getOperatingSystem() === "windows" ? ".exe" : "")
-  );
+  if(os === "windows") {
+    visionCommandOptions.command = path.join(
+      installPath,
+      "install",
+      `pros-vision-${os}`,
+      `Vision Utility.exe`
+    );
+
+  } else {
+    vscode.window.showInformationMessage("Vision Utility is currently not supported on MacOS. We are currently working on fixing this.");
+    return;
+    visionCommandOptions.command = "open";
+    visionCommandOptions.args = [
+      "-a",
+      `"${
+        path.join(
+          installPath,
+          "install",
+          `pros-vision-${os}`,
+          "osx64",
+          `Vision Utility.app`
+        )
+      }"`
+    ];
+  }
+  
   console.log(visionCommandOptions.command);
 
   const visionCommand: BaseCommand = new BaseCommand(visionCommandOptions);
