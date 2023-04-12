@@ -182,7 +182,7 @@
       },
       {
         "command": "pros.runVision",
-        "title": "PROS: Run PROS Vision" 
+        "title": "PROS: Run PROS Vision"
       },
       {
         "command": "pros.deleteLogs",
