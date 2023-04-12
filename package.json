@@ -195,29 +195,29 @@
     ],
     "keybindings": [
       {
-        "key": "ctrl+shift+i",
+        "key": "ctrl+alt+o",
         "command": "pros.showterminal",
-        "mac": "cmd+shift+i"
+        "mac": "cmd+alt+o"
       },
       {
-        "key": "ctrl+shift+b",
+        "key": "ctrl+alt+b",
         "command": "pros.build",
-        "mac": "cmd+shift+b"
+        "mac": "cmd+alt+b"
       },
       {
-        "key": "ctrl+shift+u",
+        "key": "ctrl+alt+u",
         "command": "pros.upload",
-        "mac": "cmd+shift+u"
+        "mac": "cmd+alt+u"
       },
       {
-        "key": "ctrl+shift+m",
+        "key": "ctrl+alt+m",
         "command": "pros.build&upload",
-        "mac": "cmd+shift+m"
+        "mac": "cmd+alt+m"
       },
       {
-        "key": "ctrl+shift+t",
+        "key": "ctrl+alt+t",
         "command": "pros.terminal",
-        "mac": "cmd+shift+t"
+        "mac": "cmd+alt+t"
       }
     ],
     "menus": {
