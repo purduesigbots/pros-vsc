@@ -62,19 +62,18 @@ export function parseJSON(keyword: string) {
 // most recent json loading function
 // needed for either website
 // uses regex to parse html
-async function loadJson() {
+export async function populateDocsJSON() {
   const axiosInstance = axios.create(); // Create a new Axios Instance
 
   const url = "https://purduesigbots.github.io/pros3-doxygen-docs/api.html"; // PROS Doxygen url
   const prosBaseUrl = "https://purduesigbots.github.io/pros3-doxygen-docs/";
-  var variable: any;
-  var finalLink = "";
+
   const linkRegex = /<a href="(.{0,30})" class="m-doc">(.{0,35})<\/a>/g;
+
   const sublinkRegex =
     /<a href="(#.{0,60})" class="(m-doc-self|m-doc)">(.{0,30})<\/a>/g;
-  var mainLinks: [string] = [""];
-  mainLinks.pop();
-  var functionLinks = [];
+
+  var mainLinks: string[] = [];
   //go to and scrape api homepage
   // Send an async HTTP Get request to the url
   await axiosInstance.get(url, { timeout: 5000 }).then(
@@ -82,8 +81,6 @@ async function loadJson() {
     (response) => {
       const html = response.data; // Get the HTML from the HTTP request
       //console.log(html);
-
-      var links = [];
       var regexResult;
 
       do {
@@ -135,6 +132,6 @@ async function loadJson() {
   }
 }
 
-//Loads JSON for user
-//Does not take no wifi into account
-loadJson();
+export const debugDocsJson = () => {
+  console.log(prosJson);
+};

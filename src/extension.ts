@@ -42,6 +42,7 @@ import { Logger } from "./logger";
 import { getCwdIsPros } from "./workspace";
 import { startPortMonitoring } from "./device";
 import { BrainViewProvider } from "./views/brain-view";
+import { populateDocsJSON, debugDocsJson } from "./views/docs-webscrape";
 
 export const commandsBlocker: { [key: string]: boolean } = {};
 
@@ -130,6 +131,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
   prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");
 
+  const usingbeta =
+    vscode.workspace
+      .getConfiguration("pros")
+      .get<boolean>("Beta: Enable Experimental Features") ?? false;
+
   await configurePaths(context);
 
   workspaceContainsProjectPros().then((isProsProject) => {
@@ -180,6 +186,7 @@ export async function activate(context: vscode.ExtensionContext) {
   setupCommandBlocker(
     "pros.opendocs",
     () => {
+      debugDocsJson();
       if (currentUrl === "NONE") {
         currentUrl = mainPage;
       }
@@ -199,6 +206,7 @@ export async function activate(context: vscode.ExtensionContext) {
     undefined,
     null
   );
+
   setupCommandBlocker("pros.upgrade", upgradeProject);
   setupCommandBlocker("pros.new", createNewProject);
 
@@ -295,11 +303,8 @@ export async function activate(context: vscode.ExtensionContext) {
     });
   });
 
-  const usingbeta =
-    vscode.workspace
-      .getConfiguration("pros")
-      .get<boolean>("Beta: Enable Experimental Features") ?? false;
   if (usingbeta) {
+    populateDocsJSON();
     vscode.languages.registerHoverProvider("*", {
       provideHover(document, position, token) {
         //will be needed for word lookup
