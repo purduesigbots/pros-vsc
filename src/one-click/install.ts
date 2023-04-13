@@ -709,7 +709,12 @@ async function verifyToolchain() {
 
   await prosLogger.log("OneClick", `Using toolchain path ${toolchainPath}`);
 
-  let command = "arm-none-eabi-g++ --version";
+  let command = `"${path.join(
+    toolchainPath,
+    "bin",
+    "arm-none-eabi-g++"
+  )}" --version`;
+  console.log(command);
   await prosLogger.log(
     "OneClick",
     `Verifying TOOLCHAIN with command ${command}`
