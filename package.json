@@ -173,6 +173,18 @@
         "title": "PROS: Select PROS Project"
       },
       {
+        "command": "pros.installVision",
+        "title": "PROS: Install PROS Vision"
+      },
+      {
+        "command": "pros.uninstallVision",
+        "title": "PROS: Uninstall PROS Vision"
+      },
+      {
+        "command": "pros.runVision",
+        "title": "PROS: Run PROS Vision"
+      },
+      {
         "command": "pros.deleteLogs",
         "title": "PROS: Delete Logs"
       },

@@ -14,23 +14,27 @@ import { prosLogger } from "../extension";
 async function download(
   globalPath: string,
   downloadURL: string,
-  storagePath: string
+  storagePath: string,
+  downloadName?: string
 ) {
   // Check if file type is .tar.bz or .zip
 
   const bz2 = downloadURL.includes(".bz2");
   await prosLogger.log("OneClick", `Downloading ${downloadURL}`);
   await prosLogger.log("OneClick", `Storage Path: ${storagePath}`);
+
+  downloadName =
+    "Downloading: " + downloadName ??
+    (storagePath.includes("cli")
+      ? "PROS CLI"
+      : storagePath.includes("toolchain")
+      ? "PROS Toolchain"
+      : "VEX Vexcom");
+
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title:
-        "Downloading: " +
-        (storagePath.includes("cli")
-          ? "PROS CLI"
-          : storagePath.includes("toolchain")
-          ? "PROS Toolchain"
-          : "VEX Vexcom"),
+      title: downloadName,
       cancellable: true,
     },
     async (progress, token) => {
@@ -75,19 +79,21 @@ async function download(
 export async function extract(
   globalPath: string,
   storagePath: string,
-  bz2: boolean
+  bz2: boolean,
+  extractName?: string
 ) {
   await prosLogger.log("OneClick", `Extracting ${storagePath}`);
+  extractName =
+    "Installing: " + extractName ??
+    (storagePath.includes("cli")
+      ? "PROS CLI"
+      : storagePath.includes("toolchain")
+      ? "PROS Toolchain"
+      : "VEX Vexcom");
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title:
-        "Installing: " +
-        (storagePath.includes("cli")
-          ? "PROS CLI"
-          : storagePath.includes("toolchain")
-          ? "PROS Toolchain"
-          : "VEX Vexcom"),
+      title: extractName,
       cancellable: true,
     },
     async (progress, token) => {
@@ -311,13 +317,20 @@ export async function extract(
 export async function downloadextract(
   context: vscode.ExtensionContext,
   downloadURL: string,
-  storagePath: string
+  storagePath: string,
+  name?: string
 ) {
   const globalPath = context.globalStorageUri.fsPath;
-  const bz2 = await download(globalPath, downloadURL, storagePath);
-  await extract(globalPath, storagePath, bz2);
+  const bz2 = await download(
+    globalPath,
+    downloadURL,
+    storagePath,
+    name ?? undefined
+  );
+  console.log("download done");
+  await extract(globalPath, storagePath, bz2, name ?? undefined);
   console.log(`Finished Installing ${storagePath}`);
-  window.showInformationMessage(`Finished Installing ${storagePath}`);
+  window.showInformationMessage(`Finished Installing ${name ?? ""}`);
   return true;
 }
 

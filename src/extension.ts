@@ -23,6 +23,7 @@ import {
   updateFirmware,
   setTeamNumber,
   setRobotName,
+  runVision,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -31,6 +32,8 @@ import {
   configurePaths,
   uninstall,
   cleanup,
+  installVision,
+  uninstallVision,
   getOperatingSystem,
 } from "./one-click/install";
 import { getChildProcessProsToolchainPath } from "./one-click/path";
@@ -172,6 +175,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
   setupCommandBlocker("pros.deleteLogs", prosLogger.deleteLogs);
   setupCommandBlocker("pros.openLog", prosLogger.openLog);
+
+  setupCommandBlocker("pros.installVision", installVision, context);
+  setupCommandBlocker("pros.uninstallVision", uninstallVision, context);
+  setupCommandBlocker("pros.runVision", runVision, context);
 
   setupCommandBlocker(
     "pros.selectProject",
