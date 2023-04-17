@@ -14,7 +14,12 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
 
   private _view?: vscode.WebviewView;
 
-  constructor(private readonly _extensionUri: vscode.Uri) {}
+  constructor(
+    private readonly _extensionUri: vscode.Uri,
+    private readonly _disabled: boolean = false
+  ) {
+    console.log("BrainViewProvider constructor: " + _disabled);
+  }
 
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
@@ -71,6 +76,22 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview): string {
+    if (this._disabled) {
+      return `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Brain View</title>
+      </head>
+      <body>
+          <h1>This is an Expiremental Feature</h1>
+          <p>It is currently disabled. To enable it, enable "Pros: Beta: Enable Experimental Features" in your VSCode settings and restart VSCode.</p>
+      </body>
+      </html>
+      `;
+    }
+
     // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, "media", "brainView.js")
