@@ -56,7 +56,9 @@ const setupCommandBlocker = async (
   vscode.commands.registerCommand(cmd, async () => {
     if (
       betaFeature &&
-      !vscode.workspace.getConfiguration("pros").get("betaFeatures")
+      !vscode.workspace
+        .getConfiguration("pros")
+        .get("Beta: Enable Experimental Features")
     ) {
       vscode.window.showErrorMessage(
         "This feature is currently in beta. To enable it, set the 'pros.betaFeatures' setting in your workspace settings to true."
@@ -298,7 +300,12 @@ export async function activate(context: vscode.ExtensionContext) {
     new TreeDataProvider()
   );
 
-  const brainViewProvider = new BrainViewProvider(context.extensionUri);
+  const brainViewProvider = new BrainViewProvider(
+    context.extensionUri,
+    !vscode.workspace
+      .getConfiguration("pros")
+      .get("Beta: Enable Experimental Features")
+  );
   vscode.window.registerWebviewViewProvider(
     BrainViewProvider.viewType,
     brainViewProvider
