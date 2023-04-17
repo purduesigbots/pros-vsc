@@ -2,6 +2,19 @@
 
 Below are our release notes with their release dates corresponding to each version.
 
+## [0.6.0] - 2023-04-17 - Beta Version
+
+### Added
+
+- Add Experimental Features option
+- Add progress bar for uploading
+- Automatically Delete old PROS Logs
+- Prevent same commands from being run multiple times concurrently
+- Detect project slot for run command
+- Improve toolchain verification
+- [Experimental] Vision Utility installation for windows
+- [Experimental] V5 Brain View
+
 ## [0.5.0] - 2022-12-12 - Beta Version
 
 ### Added
