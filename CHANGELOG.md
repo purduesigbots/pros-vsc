@@ -1,4 +1,4 @@
-# PROS Editor Change Log
+# PROS VSCode Extension Change Log
 
 Below are our release notes with their release dates corresponding to each version.
 
