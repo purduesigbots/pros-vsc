@@ -1,16 +1,10 @@
 import * as vscode from "vscode";
-import { BaseCommand, BaseCommandOptions } from "./base-command";
-
-const uploadCommandOptions: BaseCommandOptions = {
-  command: "pros",
-  args: ["upload"],
-  message: "Uploading Project",
-  requiresProsProject: true,
-};
-const uploadCommand: BaseCommand = new BaseCommand(uploadCommandOptions);
+import { BaseCommand } from "./base-command";
+import { UploadCommand } from "./upload-command";
 
 export const upload = async () => {
   try {
+    const uploadCommand: BaseCommand = new UploadCommand();
     await uploadCommand.runCommand();
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);

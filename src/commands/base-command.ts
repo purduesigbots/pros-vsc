@@ -45,6 +45,7 @@ export class BaseCommand {
   requiresProsProject: boolean;
   exited: boolean = false;
   extraOutput?: string[];
+  progressWindow: BackgroundProgress;
 
   constructor(options: BaseCommandOptions) {
     // the constructor is what is called whenever a new instance of the class is created
@@ -79,6 +80,7 @@ export class BaseCommand {
     this.requiresProsProject = options.requiresProsProject;
     this.extraOutput = options.extraOutput ? [] : undefined;
     this.successMessage = options.successMessage;
+    this.progressWindow = new BackgroundProgress(this.message, true, false);
     // As far as implementing this onto each command, there are two ways you can do this.
     // The first way is to do it how I layed it out above, where in each command file we make a json object and then pass it into the constructor.
     // The second method is to change the above to become an abstract class, and then make a new class for each command which inherits from this class.
@@ -135,8 +137,10 @@ export class BaseCommand {
     // The arguments to pass to the command are the arguments we stored in the constructor.
     // The options to pass to the command are the options we stored in the constructor.
 
-    const progressWindow = new BackgroundProgress(this.message, true, true);
+    this.progressWindow.start();
 
+    console.log("Running command: " + this.command);
+    console.log("Args: " + this.args);
     const child = child_process.spawn(this.command, this.args, {
       cwd: this.cwd,
       env: {
@@ -184,19 +188,18 @@ export class BaseCommand {
       });
     });
 
-    progressWindow.token?.onCancellationRequested(() => {
+    this.progressWindow.token?.onCancellationRequested(() => {
       choiceExit = true;
       child.kill();
     });
 
     child.on("exit", () => {
-      progressWindow.stop();
+      this.progressWindow.stop();
       this.exited = true;
       console.log("Exited");
     });
-    console.log("eeee starting wait");
+
     await this.waitForExit();
-    console.log("eeee done waiting");
 
     if (this.successMessage === "hidden") {
       return;
@@ -256,7 +259,7 @@ export class BaseCommand {
         vscode.window
           .showWarningMessage(
             line,
-            ...prompt[0].replace(/[\[\]]/, "").split(/\|/)
+            ...prompt[0].replace(/[\[\]]/g, "").split(/\|/)
           )
           .then((response) => {
             if (response) {

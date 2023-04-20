@@ -194,6 +194,7 @@ export async function install(context: vscode.ExtensionContext) {
   const globalPath = context.globalStorageUri.fsPath;
   await prosLogger.log("OneClick", "Fetching Operating System....");
   const system = getOperatingSystem();
+
   await prosLogger.log("OneClick", `Operating System Detected: ${system}`);
 
   await prosLogger.log("OneClick", "Fetching Latest CLI Version....");
@@ -315,8 +316,6 @@ export async function install(context: vscode.ExtensionContext) {
   let promises: Promise<any>[] = [];
   let targetedPortion: string = "";
 
-  console.log("eeeee");
-
   console.log(
     "cliUpToDate: " +
       cliUpToDate +
@@ -419,8 +418,8 @@ export async function install(context: vscode.ExtensionContext) {
         "CLI is not working. Installing just the CLI"
       );
       promises = [
-        downloadextract(context, downloadCli, cliName),
-        downloadextract(context, downloadVexcom, vexcomName),
+        downloadextract(context, downloadCli, cliName, "PROS CLI"),
+        downloadextract(context, downloadVexcom, vexcomName, "VEXcom"),
       ];
     } else {
       await prosLogger.log(
@@ -463,9 +462,14 @@ export async function install(context: vscode.ExtensionContext) {
       );
       console.log("installing just the cli and toolchain");
       promises = [
-        downloadextract(context, downloadCli, cliName),
-        downloadextract(context, downloadToolchain, toolchainName),
-        downloadextract(context, downloadVexcom, vexcomName),
+        downloadextract(context, downloadCli, cliName, "PROS CLI"),
+        downloadextract(
+          context,
+          downloadToolchain,
+          toolchainName,
+          "PROS Toolchain"
+        ),
+        downloadextract(context, downloadVexcom, vexcomName, "VEXcom"),
       ];
     } else {
       await prosLogger.log(
@@ -709,7 +713,12 @@ async function verifyToolchain() {
 
   await prosLogger.log("OneClick", `Using toolchain path ${toolchainPath}`);
 
-  let command = "arm-none-eabi-g++ --version";
+  let command = `"${path.join(
+    toolchainPath,
+    "bin",
+    "arm-none-eabi-g++"
+  )}" --version`;
+  console.log(command);
   await prosLogger.log(
     "OneClick",
     `Verifying TOOLCHAIN with command ${command}`
@@ -756,4 +765,95 @@ async function verifyVexcom() {
     console.log(stderr);
   }
   return stdout.replace(".exe", "").startsWith("vexcom: version");
+}
+
+export async function installVision(context: vscode.ExtensionContext) {
+  const globalPath = context.globalStorageUri.fsPath;
+  const system = getOperatingSystem();
+  const windowsVision =
+    "https://github.com/purduesigbots/pros-cli/releases/download/3.4.1/vision_030_win32.zip";
+  const macosVision =
+    "https://github.com/purduesigbots/pros-cli/releases/download/3.4.1/vision_030_osx64.zip";
+
+  // Set the installed file names
+  var visionName = `pros-vision-${system}.zip`;
+  if (system === "windows") {
+    console.log("vision utility on windows");
+    //add install and download directories
+    const dirs = await createDirs(context.globalStorageUri.fsPath);
+
+    const promises = [
+      downloadextract(context, windowsVision, visionName, "Vision Utility"),
+    ];
+
+    await Promise.all(promises);
+    console.log("cleanup time");
+    await cleanup(context, system);
+  } else if (system === "macos") {
+    vscode.window.showInformationMessage(
+      "Vision Utility is currently not supported on MacOS. We are currently working on fixing this."
+    );
+    return;
+    //add install and download directories
+    const dirs = await createDirs(context.globalStorageUri.fsPath);
+
+    const promises = [
+      downloadextract(context, macosVision, visionName, "Vision Utility"),
+    ];
+
+    await Promise.all(promises);
+    await fs.promises.chmod(
+      `${path.join(
+        globalPath,
+        "install",
+        `pros-vision-${system}`,
+        "osx64",
+        "Vision Utility.app",
+        "Contents",
+        "MacOS",
+        "nwjs"
+      )}`,
+      0o751
+    ),
+      await cleanup(context, system);
+  } else if (system === "linux") {
+    vscode.window.showInformationMessage(
+      "Vision Utility is not supported on Linux"
+    );
+    return;
+  }
+  vscode.workspace
+    .getConfiguration("pros")
+    .update("showInstallOnStartup", false);
+
+  vscode.window.showInformationMessage("Vision Utility Installed!");
+}
+
+export async function uninstallVision(context: vscode.ExtensionContext) {
+  const globalPath = context.globalStorageUri.fsPath;
+  const title = "Are you sure you want to uninstall the Vision Utlity?";
+  const labelResponse = await vscode.window.showInformationMessage(
+    title,
+    "Uninstall Now!",
+    "No Thanks."
+  );
+  if (labelResponse === "Uninstall Now!") {
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Uninstalling Vision Utility",
+        cancellable: false,
+      },
+      async (progress, token) => {
+        const removePath = path.join(
+          globalPath,
+          "install",
+          `pros-vision-${getOperatingSystem()}`
+        );
+        console.log(removePath);
+        await removeDirAsync(removePath, false);
+      }
+    );
+    vscode.window.showInformationMessage("Vision Utility Uninstalled!");
+  }
 }
