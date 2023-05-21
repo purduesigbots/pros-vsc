@@ -99,6 +99,7 @@ export type PROSDeviceInfo = {
 
 var currentPort = "";
 var portList: PROSDeviceInfo[] = [];
+var suspended = false;
 
 export const getV5ComPorts = (): PROSDeviceInfo[] => {
   return portList;
@@ -160,6 +161,9 @@ export const getV5DeviceInfo = async (port: string): Promise<V5DeviceInfo> => {
 };
 
 const resolvePort = async (status: StatusBarItem): Promise<void> => {
+  if (suspended) {
+    return;
+  }
   let v5Ports = await getV5ComPortsInternal();
 
   let showNotifications =
@@ -218,6 +222,14 @@ const formatDescription = (description: string): string => {
 
 export const setPort = (port: string): void => {
   currentPort = port;
+};
+
+export const suspend = (): void => {
+  suspended = true;
+};
+
+export const unsuspend = (): void => {
+  suspended = false;
 };
 
 export const getCurrentPort = (): string => {
