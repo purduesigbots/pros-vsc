@@ -5,6 +5,7 @@ import { prosLogger } from "./extension";
 import { PREFIX } from "./commands/cli-parsing";
 import { StatusBarItem, window, workspace } from "vscode";
 import { BaseCommand } from "./commands";
+import { usb } from "usb";
 
 /* eslint-disable @typescript-eslint/naming-convention */
 export type DeviceInfo = {
@@ -106,7 +107,7 @@ export const getV5ComPorts = (): PROSDeviceInfo[] => {
 
 const getV5ComPortsInternal = async (): Promise<PROSDeviceInfo[]> => {
   const { stdout, stderr } = await promisify(child_process.exec)(
-    "pros lsusb --machine-output",
+    "pros lsusb --machine-output --no-analytics",
     {
       timeout: 5000,
       env: {
@@ -256,5 +257,11 @@ export const setTeam = async (team: string): Promise<void> => {
 
 export const startPortMonitoring = (status: StatusBarItem): void => {
   status.show();
-  setInterval(resolvePort, 500, status);
+  usb.addListener("attach", () => {
+    resolvePort(status);
+  });
+  usb.addListener("detach", () => {
+    resolvePort(status);
+  });
+  resolvePort(status);
 };
