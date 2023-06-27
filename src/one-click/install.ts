@@ -19,6 +19,7 @@ import {
 } from "./path";
 import { prosLogger } from "../extension";
 import { BackgroundProgress } from "../logger";
+import * as device from "../device";
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
 export var CLI_EXEC_PATH: string;
@@ -367,7 +368,14 @@ export async function install(context: vscode.ExtensionContext) {
         "OneClick",
         "Toolchain is not working. Installing just the toolchain"
       );
-      promises = [downloadextract(context, downloadToolchain, toolchainName)];
+      promises = [
+        downloadextract(
+          context,
+          downloadToolchain,
+          toolchainName,
+          "PROS Toolchain"
+        ),
+      ];
     } else {
       await prosLogger.log(
         "OneClick",
@@ -393,7 +401,8 @@ export async function install(context: vscode.ExtensionContext) {
     console.log("sent : " + prompttitle);
     preparingInstall.stop();
     if (labelResponse === option1) {
-      targetedPortion = path.join("install", `pros-cli-${system}}`);
+      device.suspend();
+      targetedPortion = path.join("install", `pros-cli-${system}`);
       let deleteDir = path.join(
         context.globalStorageUri.fsPath,
         targetedPortion
@@ -442,6 +451,7 @@ export async function install(context: vscode.ExtensionContext) {
     console.log("sent : " + prompttitle);
     preparingInstall.stop();
     if (labelResponse === "Install Now!") {
+      device.suspend();
       await prosLogger.log("OneClick", "Removing Old CLI and Toolchain");
       console.log("removing old cli and toolchain");
       await removeDirAsync(
@@ -495,6 +505,7 @@ export async function install(context: vscode.ExtensionContext) {
   console.log("Cleanup and Verification");
   await prosLogger.log("OneClick", "Cleaning up after installation");
   await vscode.commands.executeCommand("pros.verify");
+  device.unsuspend();
 
   // Do we want to auto disable install on startup? This will remove the auto update portion of the extension right?
   /*
