@@ -28,7 +28,7 @@ function getWebviewContent(link: string) {
         <title>PROS Documentation View</title>
     </head>
     <body>
-        <iframe src="${link}" width="100%" height="10000px" frameBorder="0"></iframe>
+        <iframe src="${link}" style="position: absolute; height: 100%; width: 100%; border: none"></iframe>
     </body>
     </html>`;
 }
