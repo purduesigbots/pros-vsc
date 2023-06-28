@@ -1,12 +1,15 @@
 import * as vscode from "vscode";
 import { BaseCommand, BaseCommandOptions } from "./base-command";
+import { StringDecoder } from "string_decoder";
 
 export const run = async () => {
+  const slot = await findSlotFromProjectPros();
   const runCommandOptions: BaseCommandOptions = {
     command: "pros",
     args: [
       "v5",
       "run",
+      slot.toString(),
       ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
     ],
     message: "Running Project",
@@ -20,6 +23,24 @@ export const run = async () => {
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
+};
+
+const findSlotFromProjectPros = async (): Promise<Number> => {
+  const filenameSearch = "project.pros";
+  let prosProjects = await vscode.workspace.findFiles(filenameSearch);
+
+  if (prosProjects.length === 1) {
+    const decoder = new StringDecoder();
+    const buffer = Buffer.from(
+      await vscode.workspace.fs.readFile(prosProjects[0])
+    );
+    const text = decoder.write(buffer);
+    const json = JSON.parse(text);
+    if (json["py/state"]["upload_options"]?.slot) {
+      return json["py/state"]["upload_options"]["slot"];
+    }
+  }
+  return 1;
 };
 
 /**

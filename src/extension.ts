@@ -25,6 +25,7 @@ import {
   parseJSON,
   setTeamNumber,
   setRobotName,
+  runVision,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -33,6 +34,8 @@ import {
   configurePaths,
   uninstall,
   cleanup,
+  installVision,
+  uninstallVision,
   getOperatingSystem,
 } from "./one-click/install";
 import { getChildProcessProsToolchainPath } from "./one-click/path";
@@ -54,14 +57,14 @@ const setupCommandBlocker = async (
   customAnalytic?: string | null
 ) => {
   vscode.commands.registerCommand(cmd, async () => {
-    let betaEnabled =
-      vscode.workspace
+    if (
+      betaFeature &&
+      !vscode.workspace
         .getConfiguration("pros")
-        .get<boolean>("Beta: Enable Experimental Features") ?? false;
-    console.log("BetaEnabled: " + betaEnabled + "");
-    if (betaFeature && !betaEnabled) {
+        .get("Beta: Enable Experimental Features")
+    ) {
       vscode.window.showErrorMessage(
-        "This feature is currently in beta. To enable it, set the 'pros.betaFeatures' setting in your workspace settings to true."
+        "This feature is currently in beta. To enable it, set the 'pros.Beta: Enable Experimental Feature' setting in your workspace settings to true."
       );
       return;
     }
@@ -198,6 +201,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
   setupCommandBlocker("pros.deleteLogs", prosLogger.deleteLogs);
   setupCommandBlocker("pros.openLog", prosLogger.openLog);
+
+  setupCommandBlocker("pros.installVision", installVision, context, true);
+  setupCommandBlocker("pros.uninstallVision", uninstallVision, context, true);
+  setupCommandBlocker("pros.runVision", runVision, context, true);
 
   setupCommandBlocker(
     "pros.selectProject",
@@ -339,7 +346,12 @@ export async function activate(context: vscode.ExtensionContext) {
     new TreeDataProvider()
   );
 
-  const brainViewProvider = new BrainViewProvider(context.extensionUri);
+  const brainViewProvider = new BrainViewProvider(
+    context.extensionUri,
+    !vscode.workspace
+      .getConfiguration("pros")
+      .get("Beta: Enable Experimental Features")
+  );
   vscode.window.registerWebviewViewProvider(
     BrainViewProvider.viewType,
     brainViewProvider

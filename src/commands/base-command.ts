@@ -139,6 +139,8 @@ export class BaseCommand {
 
     this.progressWindow.start();
 
+    console.log("Running command: " + this.command);
+    console.log("Args: " + this.args);
     const child = child_process.spawn(this.command, this.args, {
       cwd: this.cwd,
       env: {
@@ -196,6 +198,7 @@ export class BaseCommand {
       this.exited = true;
       console.log("Exited");
     });
+
     await this.waitForExit();
 
     if (this.successMessage === "hidden") {
