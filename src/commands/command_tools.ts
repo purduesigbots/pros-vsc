@@ -97,7 +97,7 @@ export const getCurrentKernelOkapiVersion = async () => {
         ).version;
         const curOkapi = jdata.data.project.templates.find(
           (t: any) => t.name === "okapilib"
-        ).version;
+        )?.version;
         return { target, curKernel, curOkapi };
       }
     }
