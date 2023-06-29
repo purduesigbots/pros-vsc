@@ -1,13 +1,14 @@
 import * as vscode from "vscode";
-import * as path from "path";
-import { parseJSON } from "./docs-webscrape";
 
 export async function opendocs(link: string) {
   let currConfig = getStyle();
   const panel = vscode.window.createWebviewPanel(
     "prosDocView", // Identifies the type of the webview. Used internally
     "PROS Documentation View", // Title of the panel displayed to the user
-    currConfig === "right" ? vscode.ViewColumn.Beside : vscode.ViewColumn.Beside
+    currConfig === "beside"
+      ? vscode.ViewColumn.Beside
+      : vscode.ViewColumn.Active
+
     //vscode.ViewColumn.Beside, // Editor column to show the new webview panel in.
     // Webview options. More on these later.
   );
@@ -34,5 +35,7 @@ function getWebviewContent(link: string) {
 }
 
 function getStyle() {
-  return vscode.workspace.getConfiguration("pros").get<string>("Style");
+  return vscode.workspace
+    .getConfiguration("pros")
+    .get<string>("Integrated Docs Style");
 }

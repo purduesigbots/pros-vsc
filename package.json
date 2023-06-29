@@ -313,42 +313,42 @@
     "configuration": {
       "title": "PROS",
       "properties": {
-        "pros.useGoogleAnalytics": {
+        "pros.Enable Analytics": {
           "type": "boolean",
           "default": true,
           "description": "Send anonymous usage statistics."
         },
-        "pros.showWelcomeOnStartup": {
+        "pros.Show Welcome On Startup": {
           "type": "boolean",
           "default": true,
           "description": "Show welcome page on startup."
         },
-        "pros.showInstallOnStartup": {
+        "pros.Enable Auto Updates": {
           "type": "boolean",
           "default": true,
-          "description": "Prompt for PROS CLI install on startup."
+          "description": "Automatically update the PROS CLI."
         },
-        "pros.showDeviceConnectNotifications": {
+        "pros.show Device Connect Notifications": {
           "type": "boolean",
           "default": true,
           "description": "Show notifications for device connects and disconnects."
         },
-        "pros.useLogger": {
+        "pros.Use Logger": {
           "type": "boolean",
           "default": true,
           "description": "Log PROS Extension events into a log file. Will help people provide better tech support if something goes wrong."
         },
-        "pros.logHistoryLimit": {
+        "pros.Log History Limit": {
           "type": "number",
           "default": 60,
           "description": "The number of days that log files will be kept before being removed."
         },
-        "pros.OneClick: CliDownloadURL": {
+        "pros.OneClick: CLI Download URL": {
           "type": "string",
           "default": "default",
           "description": "URL to download PROS CLI from. SHOULD NOT BE CHANGED BY MOST USERS!"
         },
-        "pros.OneClick: ToolchainDownloadURL": {
+        "pros.OneClick: Toolchain Download URL": {
           "type": "string",
           "default": "default",
           "description": "URL to download PROS Toolchain from. SHOULD NOT BE CHANGED BY MOST USERS!"
@@ -358,7 +358,7 @@
           "default": false,
           "description": "Enable experimental features. These features are not guaranteed to work and may be removed at any time."
         },
-        "pros.integratedDocsLanguage": {
+        "pros.Integrated Docs Language": {
           "type": "string",
           "default": "cpp",
           "description": "Desired language for Integrated Documentation. Options are 'c' or 'cpp'.",
@@ -367,16 +367,16 @@
             "cpp"
           ]
         },
-        "pros.docview: Style": {
+        "pros.Integrated Docs Style": {
           "type": "string",
-          "default": "right",
+          "default": "beside",
           "enum": [
-            "right",
-            "full"
+            "beside",
+            "active"
           ],
           "enumDescriptions": [
-            "Dock the viewer to the right half of the screen",
-            "Make the viewer fullscreen"
+            "Open the docs beside the active editor",
+            "Open the docs in the active editor"
           ],
           "description": "Default style to set position of integrated document viewer"
         }

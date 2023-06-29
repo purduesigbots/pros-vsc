@@ -41,7 +41,7 @@ export function parseJSON(keyword: string) {
     if (
       vscode.workspace
         .getConfiguration("pros")
-        .get<string>("integratedDocsLanguage") === "cpp"
+        .get<string>("Integrated Docs Language") === "cpp"
     ) {
       apiMembers = prosJson.apis.cpp.members;
     } else {

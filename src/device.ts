@@ -169,7 +169,7 @@ const resolvePort = async (status: StatusBarItem): Promise<void> => {
   let showNotifications =
     workspace
       .getConfiguration("pros")
-      .get<boolean>("pros.showDeviceConnectNotifications") ?? true;
+      .get<boolean>("pros.show Device Connect Notifications") ?? true;
 
   if (showNotifications) {
     // detect changes in device list

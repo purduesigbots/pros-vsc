@@ -82,7 +82,7 @@ export class Logger {
     let keep =
       (vscode.workspace
         .getConfiguration("pros")
-        .get<number>("logHistoryLimit") ?? 60) * 864e5;
+        .get<number>("Log History Limit") ?? 60) * 864e5;
     let now = Date.now();
 
     let logFiles = await fs.promises.readdir(this.logFolder);

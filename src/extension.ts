@@ -133,7 +133,7 @@ export const getProsTerminal = async (
 export async function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
-  prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");
+  prosLogger = new Logger(context, "PROS_Extension_log", true, "Use Logger");
 
   const usingbeta =
     vscode.workspace
@@ -169,7 +169,7 @@ export async function activate(context: vscode.ExtensionContext) {
   if (
     vscode.workspace
       .getConfiguration("pros")
-      .get<boolean>("showWelcomeOnStartup")
+      .get<boolean>("Show Welcome On Startup")
   ) {
     vscode.commands.executeCommand("pros.welcome");
   }
@@ -287,11 +287,11 @@ export async function activate(context: vscode.ExtensionContext) {
     const useGoogleAnalytics =
       vscode.workspace
         .getConfiguration("pros")
-        .get<boolean>("useGoogleAnalytics") ?? false;
+        .get<boolean>("Enable Analytics") ?? false;
     const showWelcomeOnStartup =
       vscode.workspace
         .getConfiguration("pros")
-        .get<boolean>("showWelcomeOnStartup") ?? false;
+        .get<boolean>("Show Welcome On Startup") ?? false;
 
     panel.webview.html = getWebviewContent(
       cssPath,
@@ -371,7 +371,7 @@ export async function activate(context: vscode.ExtensionContext) {
   if (
     vscode.workspace
       .getConfiguration("pros")
-      .get<boolean>("showInstallOnStartup")
+      .get<boolean>("Enable Auto Updates")
   ) {
     vscode.commands.executeCommand("pros.install");
   }
