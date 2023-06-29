@@ -12,7 +12,7 @@ var prosJson = {
       members: [
         {
           name: "Motor",
-          url: "https://purduesigbots.github.io/pros3-doxygen-docs/group__cpp-motors.html",
+          url: "https://purduesigbots.github.io/pros-doxygen-docs/group__cpp-motors.html",
           functions: [{ name: "move", url: "" }],
         },
       ],
@@ -21,7 +21,7 @@ var prosJson = {
       members: [
         {
           name: "Motor",
-          url: "https://purduesigbots.github.io/pros3-doxygen-docs/group__c-motors.html",
+          url: "https://purduesigbots.github.io/pros-doxygen-docs/group__c-motors.html",
           functions: [{ name: "move", url: "" }],
         },
       ],
@@ -65,8 +65,8 @@ export function parseJSON(keyword: string) {
 export async function populateDocsJSON() {
   const axiosInstance = axios.create(); // Create a new Axios Instance
 
-  const url = "https://purduesigbots.github.io/pros3-doxygen-docs/api.html"; // PROS Doxygen url
-  const prosBaseUrl = "https://purduesigbots.github.io/pros3-doxygen-docs/";
+  const url = "https://purduesigbots.github.io/pros-doxygen-docs/api.html"; // PROS Doxygen url
+  const prosBaseUrl = "https://purduesigbots.github.io/pros-doxygen-docs/";
 
   const linkRegex = /<a href="(.{0,30})" class="m-doc">(.{0,35})<\/a>/g;
 
