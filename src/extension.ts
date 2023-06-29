@@ -26,6 +26,7 @@ import {
   setTeamNumber,
   setRobotName,
   runVision,
+  getCurrentKernelOkapiVersion,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -141,22 +142,25 @@ export async function activate(context: vscode.ExtensionContext) {
 
   await configurePaths(context);
 
-  workspaceContainsProjectPros().then((isProsProject) => {
+  await workspaceContainsProjectPros().then((isProsProject) => {
     vscode.commands.executeCommand(
       "setContext",
       "pros.isPROSProject",
       isProsProject
     );
-    //This checks if user is currently working on a project, if not it allows user to select one
+
     if (isProsProject) {
       getProsTerminal(context).then((terminal) => {
-        terminal.sendText("pros build-compile-commands");
+        terminal.sendText("pros build-compile-commands --no-analytics");
       });
       generateCCppFiles();
     } else {
       chooseProject();
     }
   });
+
+  const projectVersions = await getCurrentKernelOkapiVersion();
+  const projectKernelVersion = projectVersions?.curKernel;
 
   startPortMonitoring(
     vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
@@ -310,7 +314,14 @@ export async function activate(context: vscode.ExtensionContext) {
     });
   });
 
-  if (usingbeta) {
+  // if we are using beta and it is a pros 4 project
+
+  console.log("current kernel version: " + projectKernelVersion ?? "undefined");
+  if (
+    usingbeta &&
+    projectKernelVersion !== undefined &&
+    projectKernelVersion.startsWith("4")
+  ) {
     populateDocsJSON();
     vscode.languages.registerHoverProvider("*", {
       provideHover(document, position, token) {
