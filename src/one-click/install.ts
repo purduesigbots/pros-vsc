@@ -666,11 +666,7 @@ export async function configurePaths(
   await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   // Make PROS_TOOCLHAIN variable
   await prosLogger.log("OneClick", "Setting PROS_TOOLCHAIN");
-  if (!process.env["PROS_TOOLCHAIN"]?.includes(TOOLCHAIN)) {
-    process.env.PROS_TOOLCHAIN = `${addQuotes ? `"` : ""}${TOOLCHAIN}${
-      addQuotes ? `"` : ""
-    }`;
-  }
+  process.env.PROS_TOOLCHAIN = TOOLCHAIN;
 
   process.env.LC_ALL = "en_US.utf-8";
   if (repeat) {
@@ -713,11 +709,11 @@ async function verifyToolchain() {
 
   await prosLogger.log("OneClick", `Using toolchain path ${toolchainPath}`);
 
-  let command = `${path.join(
+  let command = `"${path.join(
     toolchainPath,
     "bin",
     "arm-none-eabi-g++"
-  )} --version`;
+  )}" --version`;
   console.log(command);
   await prosLogger.log(
     "OneClick",
