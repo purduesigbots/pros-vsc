@@ -670,18 +670,14 @@ export async function configurePaths(
   process.env.PATH = `${process.env.PATH}`; // bypass compile errors
   await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   process.env.PATH =
-    `${addQuotes ? `"` : ""}` +
     `${cliExecPath}${PATH_SEP}` +
     `${path.join(toolchainPath, "bin")}${PATH_SEP}` +
     `${vexcomPath}${PATH_SEP}` +
-    `${process.env.PATH.replace(/\"/g, "")}` +
-    `${addQuotes ? `"` : ""}`;
+    `${process.env.PATH.replace(/\"/g, "")}`;
   await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   // Make PROS_TOOCLHAIN variable
   await prosLogger.log("OneClick", "Setting PROS_TOOLCHAIN");
-  process.env.PROS_TOOLCHAIN = `${addQuotes ? `"` : ""}${TOOLCHAIN}${
-    addQuotes ? `"` : ""
-  }`;
+  process.env.PROS_TOOLCHAIN = TOOLCHAIN;
 
   process.env.LC_ALL = "en_US.utf-8";
   if (repeat) {
