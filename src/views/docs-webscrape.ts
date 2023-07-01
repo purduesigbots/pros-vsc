@@ -68,7 +68,7 @@ export async function populateDocsJSON() {
   const url = "https://purduesigbots.github.io/pros-doxygen-docs/api.html"; // PROS Doxygen url
   const prosBaseUrl = "https://purduesigbots.github.io/pros-doxygen-docs/";
 
-  const linkRegex = /<a href="(.{0,30})" class="m-doc">(.{0,35})<\/a>/g;
+  const linkRegex = /<a href="(.{0,30})" class="m-doc">(.{0,40})<\/a>/g;
 
   const sublinkRegex =
     /<a href="(#.{0,60})" class="(m-doc-self|m-doc)">(.{0,30})<\/a>/g;
