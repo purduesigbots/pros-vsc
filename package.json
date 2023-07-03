@@ -393,6 +393,7 @@
     "semver": "^7.3.5",
     "tar-fs": "^2.1.1",
     "universal-analytics": "^0.4.23",
-    "unzipper": "^0.10.11"
+    "unzipper": "^0.10.11",
+    "usb": "^2.9.0"
   }
 }
