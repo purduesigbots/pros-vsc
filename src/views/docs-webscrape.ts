@@ -64,6 +64,7 @@ export function parseJSON(
 
       if (namespace.includes(".")) {
         apiMembers = apiMembers.filter((m) => !namespaceOnly.includes(m.name));
+        namespace = "";
       } else {
         console.log("namespace: " + namespace);
         apiMembers = apiMembers.filter((m) =>
