@@ -326,9 +326,22 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.languages.registerHoverProvider("*", {
       provideHover(document, position, token) {
         //will be needed for word lookup
+        const line = document.lineAt(position);
         const range = document.getWordRangeAtPosition(position);
         const word = document.getText(range);
-        var linkString: string = parseJSON(word);
+
+        // given our line, we need to check the namespace of what is being hovered:
+        // split line.text by word
+
+        const text = line.text;
+        let namespace = text.split(word)[0].trim();
+
+        // remove all :: from namespace and pros
+        namespace = namespace.replace(/::/g, "");
+        namespace = namespace.replace(/pros/g, "");
+
+        console.log("Hover stuff: " + word + " " + namespace);
+        var linkString: string = parseJSON(word, namespace);
         console.log(linkString);
 
         if (!linkString.includes("purduesigbots.github.io")) {

@@ -29,11 +29,22 @@ var prosJson = {
   },
 };
 
+const namespaceOnly = [
+  "C++ API for the V5 Screen",
+  "C++ API for LLEMU (Legacy Lcd EMUlator)",
+  "C++ API for Color Values",
+];
+
 //Parses JSON object to return website for different keywords.
 //Does not take class type into account, it only evaluates by name
 //Will currently return duplicate methods and might direct user to wrong class API page
-export function parseJSON(keyword: string) {
-  var finalWebsite = "";
+export function parseJSON(
+  keyword: string,
+  namespace: string | undefined = undefined
+) {
+  // we need to map the "namespace" that appears in the code to it's actual namespace name in the docs
+  // eg "lcd" -> "PROS LLEMU"
+  var finalWebsite: string = "";
   if (keyword === prosJson.namespace) {
     finalWebsite = prosJson.url;
   } else {
@@ -47,14 +58,42 @@ export function parseJSON(keyword: string) {
     } else {
       apiMembers = prosJson.apis.c.members;
     }
-    for (var i: number = 0; i < prosJson.apis.cpp.members.length; i += 1) {
-      var finalObj = apiMembers[i].functions.filter((prosMember) => {
-        return prosMember.name === keyword;
-      });
-      if (finalObj.length !== 0) {
-        finalWebsite = finalObj[0].url;
+
+    if (namespace !== undefined && namespace !== "") {
+      // if there is a . in namespace, we need to remove the namespaceOnly items from apiMembers
+
+      if (namespace.includes(".")) {
+        apiMembers = apiMembers.filter((m) => !namespaceOnly.includes(m.name));
+      } else {
+        console.log("namespace: " + namespace);
+        apiMembers = apiMembers.filter((m) =>
+          m.name.toLowerCase().replace(/\s/g, "").includes(namespace)
+        );
       }
     }
+
+    for (let apiMember of apiMembers) {
+      // check if keyword is == api member name or if keyword is in api member functions
+      if (keyword === apiMember.name) {
+        finalWebsite = apiMember.url;
+        break;
+      }
+
+      for (let func of apiMember.functions) {
+        if (keyword === func.name) {
+          finalWebsite = func.url;
+          break;
+        }
+      }
+
+      if (finalWebsite !== "") {
+        break;
+      }
+    }
+  }
+
+  if (finalWebsite === "" && namespace !== undefined && namespace !== "") {
+    finalWebsite = parseJSON(keyword);
   }
   return finalWebsite;
 }
@@ -130,6 +169,8 @@ export async function populateDocsJSON() {
       } while (regexResult);
     });
   }
+
+  console.log(prosJson);
 }
 
 export const debugDocsJson = () => {
