@@ -20,21 +20,22 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
         new TreeItem("Upload", undefined, "pros.upload"),
         new TreeItem("Build", undefined, "pros.build"),
         new TreeItem("Clean", undefined, "pros.clean"),
-        new TreeItem("Run", undefined, "pros.run"),
-        new TreeItem("Stop", undefined, "pros.stop"),
-        new TreeItem("Brain Terminal", undefined, "pros.terminal"),
         new TreeItem("Integrated Terminal", undefined, "pros.showterminal"),
+      ]),
+      new TreeItem("V5 Brain", [
+        new TreeItem("Brain Terminal", undefined, "pros.terminal"),
         new TreeItem("Capture Image", undefined, "pros.capture"),
         new TreeItem("Set Team Number", undefined, "pros.teamnumber"),
         new TreeItem("Set Robot Name", undefined, "pros.robotname"),
-        new TreeItem("Run Vision Utility", undefined, "pros.runVision"),
+        new TreeItem("Battery Medic", undefined, "pros.batterymedic"),
+        new TreeItem("Update VEXos", undefined, "pros.updatefirmware"),
       ]),
       new TreeItem("Conductor", [
         new TreeItem("Upgrade Project", undefined, "pros.upgrade"),
         new TreeItem("Create Project", undefined, "pros.new"),
         // open branchline will go here in the future
       ]),
-      new TreeItem("Other", [
+      new TreeItem("Manage Installations", [
         new TreeButtonMultiSelect("Manage PROS", "pros.manageInstallation", [
           [
             "Install PROS",
@@ -69,8 +70,6 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
             "Runs the VEX Vision Utility",
           ],
         ]),
-        new TreeItem("Update VEXos", undefined, "pros.updatefirmware"),
-        new TreeItem("Battery Medic", undefined, "pros.batterymedic"),
       ]),
     ];
   }

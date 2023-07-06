@@ -69,6 +69,7 @@
           "contextualTitle": "PROS"
         },
         {
+          "when": "false",
           "id": "pros.brainView",
           "name": "Brain View",
           "type": "webview",
@@ -118,11 +119,19 @@
       },
       {
         "command": "pros.run",
-        "title": "PROS: Run"
+        "title": "PROS: Run",
+        "icon": {
+          "light": "media/run-tux-white.png",
+          "dark": "media/run-tux-white.png"
+        }
       },
       {
         "command": "pros.stop",
-        "title": "PROS: Stop"
+        "title": "PROS: Stop",
+        "icon": {
+          "light": "media/stop-tux-white.png",
+          "dark": "media/stop-tux-white.png"
+        }
       },
       {
         "command": "pros.clean",
@@ -237,6 +246,16 @@
         {
           "when": "true",
           "command": "pros.build&upload",
+          "group": "navigation@1"
+        },
+        {
+          "when": "true",
+          "command": "pros.run",
+          "group": "navigation@1"
+        },
+        {
+          "when": "true",
+          "command": "pros.stop",
           "group": "navigation@1"
         }
       ],
