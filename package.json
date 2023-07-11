@@ -388,7 +388,7 @@
     "@types/semver": "^7.3.6",
     "@types/universal-analytics": "^0.4.4",
     "axios": "^0.21.1",
-    "node-fetch": "^2.6.5",
+    "node-fetch": "^2.6.7",
     "seek-bzip": "^2.0.0",
     "semver": "^7.3.5",
     "tar-fs": "^2.1.1",
