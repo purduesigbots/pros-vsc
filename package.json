@@ -392,7 +392,7 @@
     "seek-bzip": "^2.0.0",
     "semver": "^7.3.5",
     "tar-fs": "^2.1.1",
-    "universal-analytics": "^0.4.23",
+    "universal-analytics": "^0.5.3",
     "unzipper": "^0.10.11",
     "usb": "^2.9.0"
   }
