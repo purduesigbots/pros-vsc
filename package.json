@@ -390,7 +390,7 @@
     "axios": "^0.21.1",
     "node-fetch": "^2.6.7",
     "seek-bzip": "^2.0.0",
-    "semver": "^7.3.5",
+    "semver": "^7.5.2",
     "tar-fs": "^2.1.1",
     "universal-analytics": "^0.5.3",
     "unzipper": "^0.10.11",
