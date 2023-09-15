@@ -140,6 +140,10 @@
         "title": "PROS: Verify PROS Installation"
       },
       {
+        "command": "pros.version",
+        "title": "PROS: Get CLI Version"
+      },
+      {
         "command": "pros.selectProject",
         "title": "PROS: Select PROS Project"
       },
@@ -219,6 +223,10 @@
         {
           "when": "pros.isPROSProject",
           "command": "pros.upload"
+        },
+        {
+          "when": "pros.isPROSProject",
+          "command": "pros.version"
         },
         {
           "when": "pros.isPROSProject",
@@ -315,16 +323,16 @@
     "@types/glob": "^7.1.3",
     "@types/mocha": "^8.0.4",
     "@types/node": "^12.11.7",
-    "@types/vscode": "^1.56.0",
+    "@types/vscode": "^1.82.0",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",
     "eslint": "^7.19.0",
     "glob": "^7.1.6",
-    "mocha": "^8.2.1",
+    "mocha": "^10.2.0",
     "prettier": "^2.7.1",
     "prettier-plugin-sort-json": "^0.0.2",
     "typescript": "^4.1.3",
-    "vsce": "^1.93.0",
+    "vsce": "^2.15.0",
     "vscode-test": "^1.5.0"
   },
   "dependencies": {
@@ -336,7 +344,7 @@
     "seek-bzip": "^2.0.0",
     "semver": "^7.3.5",
     "tar-fs": "^2.1.1",
-    "universal-analytics": "^0.4.23",
+    "universal-analytics": "^0.5.3",
     "unzipper": "^0.10.11"
   }
 }
