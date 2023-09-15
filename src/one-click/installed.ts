@@ -10,7 +10,9 @@ export async function getCurrentReleaseVersion(url: string) {
   const response = await fetch(url);
   if (!response.ok) {
     console.log(response.url, response.status, response.statusText);
-    vscode.window.showErrorMessage("Could not get current release version");
+    vscode.window.showErrorMessage(
+      "Could not fetch the current release version"
+    );
 
     return 0;
   }
