@@ -9,6 +9,7 @@ const visionCommandOptions: BaseCommandOptions = {
   args: [""],
   message: "Running Vision Utility",
   requiresProsProject: false,
+  successMessage: "Vision Utility Started", 
 };
 
 //check if vision is installed and run it
