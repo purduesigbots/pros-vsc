@@ -9,6 +9,7 @@ jobs:
         uses: creyD/prettier_action@v4.3
         with:
           prettier_options: --check **/*.{js,ts,jsx,tsx,md,css,html}
+          prettier_version: 2.8.8
   eslint_check:
     runs-on: ubuntu-latest
     steps:
