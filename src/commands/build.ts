@@ -6,6 +6,7 @@ const buildCommandOptions: BaseCommandOptions = {
   args: ["make"],
   message: "Building Project",
   requiresProsProject: true,
+  successMessage: "Project Built Successfully",
 };
 const buildCommand: BaseCommand = new BaseCommand(buildCommandOptions);
 

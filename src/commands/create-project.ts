@@ -51,6 +51,7 @@ export const createNewProject = async () => {
     ],
     message: "Creating Project",
     requiresProsProject: false,
+    successMessage: "Project Created Successfully",
   };
 
   const createProjectCommand: BaseCommand = new BaseCommand(

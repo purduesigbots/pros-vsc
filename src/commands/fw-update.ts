@@ -6,6 +6,7 @@ const fwUpdateCommandOptions: BaseCommandOptions = {
   args: ["--vexos", "latest"],
   message: "Updating VEXos",
   requiresProsProject: false,
+  successMessage: "VEXos Updated Successfully",
 };
 const fwUpdateCommand: BaseCommand = new BaseCommand(fwUpdateCommandOptions);
 

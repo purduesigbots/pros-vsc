@@ -10,6 +10,7 @@ export const setRobotName = async () => {
     args: ["v5", "set_variable", "robotname", `${robotName}`],
     message: "Setting Robot Name",
     requiresProsProject: false,
+    successMessage: "Robot Name Set Successfully",
   };
   const setRobotNameCommand: BaseCommand = new BaseCommand(
     setRobotNameCommandOptions

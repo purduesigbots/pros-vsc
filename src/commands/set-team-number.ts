@@ -10,6 +10,7 @@ export const setTeamNumber = async () => {
     args: ["v5", "set_variable", "teamnumber", `${teamNumber}`],
     message: "Setting Team Number",
     requiresProsProject: false,
+    successMessage: "Team Number Set Successfully",
   };
   const setTeamNumberCommand: BaseCommand = new BaseCommand(
     setTeamNumberCommandOptions

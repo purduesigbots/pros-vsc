@@ -6,6 +6,7 @@ const medicCommandOptions: BaseCommandOptions = {
   args: ["--medic"],
   message: "Running Battery Medic on V5 Brain",
   requiresProsProject: false,
+  successMessage: "hidden", // I don't think we need an explicit success message here, they'll see if it's running or not on the brain
 };
 
 const medicCommand: BaseCommand = new BaseCommand(medicCommandOptions);
