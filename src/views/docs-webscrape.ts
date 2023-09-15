@@ -49,26 +49,22 @@ export function parseJSON(
     finalWebsite = prosJson.url;
   } else {
     var apiMembers;
-    if (
-      vscode.workspace
-        .getConfiguration("pros")
-        .get<string>("Integrated Docs Language") === "cpp"
-    ) {
-      apiMembers = prosJson.apis.cpp.members;
-    } else {
+
+    if (namespace === "c") {
       apiMembers = prosJson.apis.c.members;
+    } else {
+      apiMembers = prosJson.apis.cpp.members;
     }
 
-    if (namespace !== undefined && namespace !== "") {
+    if (namespace !== undefined && namespace !== null && namespace !== "") {
       // if there is a . in namespace, we need to remove the namespaceOnly items from apiMembers
 
       if (namespace.includes(".")) {
         apiMembers = apiMembers.filter((m) => !namespaceOnly.includes(m.name));
         namespace = "";
       } else {
-        console.log("namespace: " + namespace);
         apiMembers = apiMembers.filter((m) =>
-          m.name.toLowerCase().replace(/\s/g, "").includes(namespace)
+          m.name.toLowerCase().replace(/\s/g, "").includes(namespace!)
         );
       }
     }
@@ -171,7 +167,27 @@ export async function populateDocsJSON() {
     });
   }
 
-  console.log(prosJson);
+  // Do the same for the C api
+  for (var i: number = 0; i < prosJson.apis.c.members.length; i += 1) {
+    var sublinkHtml = prosJson.apis.c.members[i].url;
+    await axiosInstance.get(sublinkHtml, { timeout: 5000 }).then((response) => {
+      const html = response.data; // Gets HTML from individual member webpage
+      //console.log(html);
+
+      var regexResult;
+      //finds each link using sublink regex and stores it to member functions list
+      do {
+        regexResult = sublinkRegex.exec(html);
+        if (regexResult) {
+          //console.log(m[0], m[1], m[2]);
+          prosJson.apis.c.members[i].functions.push({
+            name: regexResult[3],
+            url: sublinkHtml + regexResult[1],
+          });
+        }
+      } while (regexResult);
+    });
+  }
 }
 
 export const debugDocsJson = () => {

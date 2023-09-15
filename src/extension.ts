@@ -340,9 +340,7 @@ export async function activate(context: vscode.ExtensionContext) {
         namespace = namespace.replace(/::/g, "");
         namespace = namespace.replace(/pros/g, "");
 
-        console.log("Hover stuff: " + word + " " + namespace);
         var linkString: string = parseJSON(word, namespace);
-        console.log(linkString);
 
         if (!linkString.includes("purduesigbots.github.io")) {
           currentUrl = "NONE";
@@ -617,7 +615,6 @@ const generateCCppFiles = async () => {
     const os = getOperatingSystem();
     let json;
     //check if the properties file exists
-    console.log("checking if it exists");
     try {
       // check if the file exists
       let response = await vscode.workspace.fs.stat(cCppPropertiesUri);
