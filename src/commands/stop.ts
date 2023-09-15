@@ -11,6 +11,7 @@ export const stop = async () => {
     ],
     message: "Stopping Project",
     requiresProsProject: true,
+    successMessage: "Project Stopped Successfully",
   };
 
   const stopCommand: BaseCommand = new BaseCommand(stopCommandOptions);
