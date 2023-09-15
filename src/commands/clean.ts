@@ -7,6 +7,7 @@ const runClean = async () => {
     args: ["make", "clean", ...`${process.env.PROS_VSCODE_FLAGS}`.split(" ")],
     message: "Cleaning Project",
     requiresProsProject: true,
+    successMessage: "Project Cleaned Successfully",
   });
   await cleanCommand.runCommand();
 };

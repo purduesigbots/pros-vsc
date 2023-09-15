@@ -12,6 +12,7 @@ export class UploadCommand extends BaseCommand {
       args: ["upload", "--machine-output"],
       message: "Uploading Project",
       requiresProsProject: true,
+      successMessage: "Project Uploaded Successfully",
     });
     if (process.env.PROS_VSCODE_FLAGS) {
       this.args.push(...`${process.env.PROS_VSCODE_FLAGS}`.split(" "));

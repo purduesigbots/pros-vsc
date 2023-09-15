@@ -42,6 +42,7 @@ export const upgradeProject = async () => {
     args: ["c", "u", ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? [])],
     message: "Upgrading Project",
     requiresProsProject: true,
+    successMessage: "Project Upgraded Successfully",
   };
 
   const upgradeProjectCommand: BaseCommand = new BaseCommand(
