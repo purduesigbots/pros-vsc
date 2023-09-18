@@ -40,7 +40,7 @@ import { getChildProcessProsToolchainPath } from "./one-click/path";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
 
-import { getCwdIsPros } from "./workspace";
+import { findFile, prosProjects } from "./workspace_utils";
 import { startPortMonitoring } from "./device";
 import { BrainViewProvider } from "./views/brain-view";
 
@@ -424,7 +424,7 @@ export function deactivate() {
 }
 
 async function workspaceContainsProjectPros(): Promise<boolean> {
-  return (await getCwdIsPros()) !== null;
+  return (await findFile("project.pros", "root")) !== null;
 }
 
 //This code calls prosProjects and allows user to choose which pros project to work on
@@ -466,47 +466,7 @@ async function chooseProject() {
   );
 }
 
-//This function will return an array full of folder names containing pros project file
-async function prosProjects() {
-  //Specify type for any later
-  var array: any = [];
-  if (
-    vscode.workspace.workspaceFolders === undefined ||
-    vscode.workspace.workspaceFolders === null
-  ) {
-    console.log(vscode.workspace.workspaceFolders);
-    return array;
-  }
-  console.log(vscode.workspace.workspaceFolders);
 
-  for (const workspace of vscode.workspace.workspaceFolders) {
-    const currentDir = workspace.uri;
-    const folders = await vscode.workspace.fs.readDirectory(currentDir);
-    for (const folder of folders) {
-      var exists = true;
-      try {
-        // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
-        // of if the workspace is using a physical file system or not.
-        const workspaceUri = vscode.Uri.file(
-          path.join(currentDir.fsPath, folder[0])
-        );
-        const uriString = `${workspaceUri.scheme}:${
-          workspaceUri.path
-        }/${"project.pros"}`;
-        const uri = vscode.Uri.parse(uriString);
-        await vscode.workspace.fs.stat(uri);
-      } catch (e) {
-        console.error(e);
-        exists = false;
-      }
-      if (exists) {
-        array.push(folder);
-      }
-    }
-  }
-  console.log(array);
-  return array;
-}
 
 const generateCCppFiles = async () => {
   if (!workspaceContainsProjectPros() || !vscode.workspace.workspaceFolders) {

@@ -6,7 +6,7 @@ import {
   getChildProcessPath,
   getChildProcessProsToolchainPath,
 } from "../one-click/path";
-import { getCwdIsPros } from "../workspace";
+import { getCwdIsPros } from "../workspace_utils";
 /*
 
     I realize I missed something quite important in the presentation. It's the idea of synchronous v.s. asynchronous functions.
