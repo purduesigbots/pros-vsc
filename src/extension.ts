@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
 import { promisify } from "util";
-
 import { TreeDataProvider } from "./views/tree-view";
 import {
   getWebviewContent,
@@ -39,8 +38,10 @@ import {
 import { getChildProcessProsToolchainPath } from "./one-click/path";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
-
-import { findFile, prosProjects } from "./workspace_utils";
+import { 
+  findProsProjectFolders, 
+  workspaceContainsProsProject 
+} from "./workspace_utils";
 import { startPortMonitoring } from "./device";
 import { BrainViewProvider } from "./views/brain-view";
 
@@ -130,7 +131,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   await configurePaths(context);
 
-  workspaceContainsProjectPros().then((isProsProject) => {
+  workspaceContainsProsProject(true).then((isProsProject) => {
     vscode.commands.executeCommand(
       "setContext",
       "pros.isPROSProject",
@@ -323,7 +324,7 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidCreateFiles(async (event) => {
     // terminate early if there's no pros project or workspace folder open
     if (
-      !(await workspaceContainsProjectPros()) ||
+      !(await workspaceContainsProsProject(true)) ||
       !vscode.workspace.workspaceFolders
     ) {
       return;
@@ -423,10 +424,6 @@ export function deactivate() {
   analytics.endSession();
 }
 
-async function workspaceContainsProjectPros(): Promise<boolean> {
-  return (await findFile("project.pros", "root")) !== null;
-}
-
 //This code calls prosProjects and allows user to choose which pros project to work on
 async function chooseProject() {
   if (
@@ -435,7 +432,7 @@ async function chooseProject() {
   ) {
     return;
   }
-  var array = await prosProjects();
+  var array = await findProsProjectFolders();
   if (array.length === 0) {
     vscode.window.showInformationMessage(
       "No PROS Projects found in current directory!"
@@ -469,7 +466,9 @@ async function chooseProject() {
 
 
 const generateCCppFiles = async () => {
-  if (!workspaceContainsProjectPros() || !vscode.workspace.workspaceFolders) {
+
+  if (await workspaceContainsProsProject(true) === false || !vscode.workspace.workspaceFolders) {
+    // If the workspace doesn't contain a pros project, then we don't need to do anything
     return;
   }
 

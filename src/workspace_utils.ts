@@ -1,54 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
 
-/** 
- * @brief This function returns the current working directory (vscode.Uri) and if it is a pros project (boolean)
- * @return [vscode.Uri, boolean]
- *
- * @details This function firstly looks at the workspace for the active text editor. If there is no active text editor, it will use the 0th index of the workspace folders.
- * If there are no workspace folders, it will throw an error. If the workspace folder is a pros project, it will return the workspace folder and true.
- * If the workspace folder is not a pros project, it will return the workspace folder and false.
- *
- */
-
-export const getCwdIsPros = async (): Promise<vscode.Uri | null> => {
-  //output the 0th workspace folder
-
-  let active = vscode.window.activeTextEditor?.document.uri ?? undefined;
-  let activeDir = null;
-
-  const filenameSearch = "project.pros";
-  let prosProjects = await vscode.workspace.findFiles(filenameSearch);
-
-  if (prosProjects.length === 1) {
-    console.log(`pros project: ${prosProjects[0].path}`);
-    activeDir = vscode.Uri.file(path.dirname(prosProjects[0].fsPath));
-  } else if (active !== undefined) {
-    console.log(`active: ${active}`);
-    let potentialDir = vscode.workspace.getWorkspaceFolder(active);
-    prosProjects.forEach((path) => {
-      if (potentialDir === vscode.workspace.getWorkspaceFolder(path)) {
-        activeDir = potentialDir?.uri;
-      }
-    });
-  }
-
-  if (activeDir === undefined || activeDir === null) {
-    return null;
-  }
-
-  // use fs to check if the active directory contains a project.pros file
-  try {
-    await vscode.workspace.fs.stat(
-      vscode.Uri.joinPath(activeDir, filenameSearch)
-    );
-  } catch (err) {
-    return null;
-  }
-  return activeDir;
-};
-
-
 /**
  * This function searches a directory of the workspace for a file with the given name
  * 
@@ -59,12 +11,10 @@ export const getCwdIsPros = async (): Promise<vscode.Uri | null> => {
  */
 export const findFile = async (filename: string, dir: string, debug: boolean = false): Promise<vscode.Uri | null> => {
 
-  let rootUri = vscode.window.activeTextEditor?.document.uri ?? undefined;
   const debugMsg = "While searching for " + filename + " in " + dir + ": ";
 
-  // Return null if there is no active text editor or either string or dir is undefined or null
+  // Return null if either string or dir is undefined or null
   if (
-    rootUri === undefined || 
     filename === undefined || 
     dir === undefined || 
     filename === null || 
@@ -72,7 +22,7 @@ export const findFile = async (filename: string, dir: string, debug: boolean = f
     ) {
     if(debug) {
       // Log message if in debug mode
-      console.log(debugMsg + "invalid input of some kind!");
+      console.log(debugMsg + "invalid input of some kind! ");
     }
     return null;
   }
@@ -123,7 +73,7 @@ export const findFile = async (filename: string, dir: string, debug: boolean = f
  * 
  * @returns An array of folder names containing every folder which houses a project.pros file in the workspace. Returns an empty array if none found.
  */
-export async function prosProjects(debug: boolean = false) {
+export async function findProsProjectFolders(debug: boolean = false) {
 
   // Type is any for js reasons. Doesn't really matter, will end up being a string array.
   const debugMsg = "While searching for pros project folder names: ";
@@ -141,34 +91,66 @@ export async function prosProjects(debug: boolean = false) {
   }
 
   if(debug) {
-    console.log(vscode.workspace.workspaceFolders);
+    // Log list of found folders in workspace if in debug mode
+    console.log(debugMsg + " candidate folders found: " + vscode.workspace.workspaceFolders);
   }
 
   for (const workspace of vscode.workspace.workspaceFolders) {
-    const currentDir = workspace.uri;
-    const folders = await vscode.workspace.fs.readDirectory(currentDir);
+    // Loop through each workspace folder and check if it contains a project.pros file in any of its subfolders (or at root level)
+    const currentDir = workspace.uri; // uri to top workspace folder 
+    const folders = await vscode.workspace.fs.readDirectory(currentDir); // all subfolders, subfiles of top workspace folder
     for (const folder of folders) {
-      var exists = true;
+      // Loop through each subfolder and check if it contains a project.pros file
+      var exists = true; // assume it exists until proven otherwise
+
       try {
         // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
         // of if the workspace is using a physical file system or not.
-        const workspaceUri = vscode.Uri.file(
-          path.join(currentDir.fsPath, folder[0])
-        );
-        const uriString = `${workspaceUri.scheme}:${
-          workspaceUri.path
-        }/${"project.pros"}`;
+        const workspaceUri = vscode.Uri.file(path.join(currentDir.fsPath, folder[0])); // uri to subfolder
+        const uriString = `${workspaceUri.scheme}:${workspaceUri.path}/${"project.pros"}`; // uri path to project.pros file in subfolder (candidate)
         const uri = vscode.Uri.parse(uriString);
+        
+        // Check if candidate path actually leads to a project.pros file
         await vscode.workspace.fs.stat(uri);
       } catch (e) {
+        // If not, set exists to false
         console.error(e);
         exists = false;
       }
       if (exists) {
+        // We have confirmed that the candidate path leads to a project.pros file. Add this folder name to the array.
         array.push(folder);
       }
     }
   }
-  console.log(array);
-  return array;
-}
+  
+  if (debug) {
+    // Log list of found folders in workspace if in debug mode
+    console.log(debugMsg + " final list of folders found: " + array);
+  }
+
+  return array; // return array of folder names
+};
+
+/**
+ * This function is a convinient wrapper for findFile. It searches the entire workspace for a project.pros file.
+ * 
+ * @returns A boolean indicating whether or not the current workspace contains a pros project
+ */
+export const workspaceContainsProsProject = async(debug: boolean = false): Promise<boolean> => {
+  return (await findFile("project.pros", "root", debug)) !== null;
+};
+
+/**
+ * This function is a convinient wrapper for findFile. It searches the entire workspace for a project.pros file.
+ * 
+ * @returns A vscode.Uri pointing to the directory containing the project.pros file, or null if no project.pros file found
+ */
+export const getProjectFileDir = async(debug: boolean = false): Promise<vscode.Uri | null> => {
+  let fullUri =  await findFile("project.pros", "root", debug); // get uri of project.pros file
+  if(fullUri === null) {
+    // return null if no project.pros file found
+    return null;
+  }
+  return vscode.Uri.file(path.dirname(fullUri.fsPath)); // return uri of directory containing project.pros file
+};
