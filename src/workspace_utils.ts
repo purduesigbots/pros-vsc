@@ -1,5 +1,10 @@
 import * as vscode from "vscode";
 import * as path from "path";
+import * as fs from "fs";
+import { promisify } from "util";
+import { getOperatingSystem } from "./install";
+import { getChildProcessProsToolchainPath } from "./install";
+
 
 /**
  * This function searches a directory of the workspace for a file with the given name
@@ -68,10 +73,10 @@ export const findFile = async (filename: string, dir: string, debug: boolean = f
 };
 
 /**
- * This function searches the workspace for all instances of a project.pros file. It then returns the names of the folders containing those files. 
+ * This function searches the workspace for all instances of a project.pros file. It then returns the folders containing those files. 
  * It is used to offer the user a choice of which pros project to work on in the event there are multiple in the current workspace.
  * 
- * @returns An array of folder names containing every folder which houses a project.pros file in the workspace. Returns an empty array if none found.
+ * @returns An array of every folder which houses a project.pros file in the workspace. Returns an empty array if none found.
  */
 export async function findProsProjectFolders(debug: boolean = false) {
 
@@ -118,7 +123,7 @@ export async function findProsProjectFolders(debug: boolean = false) {
         exists = false;
       }
       if (exists) {
-        // We have confirmed that the candidate path leads to a project.pros file. Add this folder name to the array.
+        // We have confirmed that the candidate path leads to a project.pros file. Add this folder to the array.
         array.push(folder);
       }
     }
@@ -129,7 +134,7 @@ export async function findProsProjectFolders(debug: boolean = false) {
     console.log(debugMsg + " final list of folders found: " + array);
   }
 
-  return array; // return array of folder names
+  return array; // return array of folders
 };
 
 /**
@@ -154,3 +159,246 @@ export const getProjectFileDir = async(debug: boolean = false): Promise<vscode.U
   }
   return vscode.Uri.file(path.dirname(fullUri.fsPath)); // return uri of directory containing project.pros file
 };
+
+/**
+ * This function creates or gets a reference to an existing vscode terminal named "PROS Terminal".
+ * It also configures the path of the terminal to include the pros-cli.
+ * It also cleans up any duplicate terminals named "PROS Terminal" that may exist.
+ * 
+ * @param context The vscode extension context
+ * @returns A reference to the PROS terminal
+ */
+export const getProsTerminal = async (context: vscode.ExtensionContext): Promise<vscode.Terminal> => {
+  
+  // First, check if one or more terminals labeled "PROS Terminal" already exist.
+  const prosTerminals = vscode.window.terminals.filter((t) => t.name === "PROS Terminal"); // Get all terminals named "PROS Terminal"
+  
+  if (prosTerminals.length > 1) {
+    // Clean up duplicate terminals
+    prosTerminals.slice(1).forEach((t) => t.dispose());
+  }
+
+  // If there is already a terminal named "PROS Terminal" and it has the correct path, return it.
+  if (prosTerminals.length) {
+    const options: Readonly<vscode.TerminalOptions> =
+      prosTerminals[0].creationOptions;
+    if (options?.env?.PATH?.includes("pros-cli")) {
+      // Only keep the existing terminal if it has the correct path
+      return prosTerminals[0];
+    }
+  }
+
+  // If there is not already a terminal named "PROS Terminal" or it does not have the correct path, create a new one.
+  await configurePaths(context); // Configure the paths (see install.ts) so that everything runs properly when you click a button
+
+  // Create a new terminal with the correct path, return it.
+  return vscode.window.createTerminal({
+    name: "PROS Terminal",
+    env: process.env,
+  });
+};
+
+/**
+ * This function allows the user to choose which pros project to work on in the event there are multiple in the current workspace.
+ * It also warns the user if there is no pros project in the current workspace.
+ * 
+ * @returns Nothing
+ */
+async function chooseProject() {
+  
+  // First, check if the current workspace exists correctly
+  if (
+    vscode.workspace.workspaceFolders === undefined ||
+    vscode.workspace.workspaceFolders === null
+  ) {
+    return; // return if no workspace folders
+  }
+
+  // Second, check if the current workspace contains a pros project
+  var array = await findProsProjectFolders(); // get list of folders which contain pros projects
+  // If no pros projects found, warn user and return
+  if (array.length === 0) {
+    vscode.window.showInformationMessage(
+      "No PROS Projects found in current directory!"
+    );
+    return;
+  }
+
+  // Third, prompt user to choose which pros project to work on
+  const targetOptions: vscode.QuickPickOptions = {
+    placeHolder: array[0].name,
+    title: "Select the PROS project to work on",
+  };
+  var folderNames: Array<vscode.QuickPickItem> = [];
+  for (const f of array) {
+    folderNames.push({ label: f[0], description: "" });
+  }
+  // Display the options to users
+  const target = await vscode.window.showQuickPick(folderNames, targetOptions);
+  if (target === undefined) {
+    throw new Error();
+  }
+  //This will open the folder the user selects
+  await vscode.commands.executeCommand(
+    "vscode.openFolder",
+    vscode.Uri.file(
+      path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, target.label)
+    )
+  );
+};
+
+/**
+ * This function modifies the c_cpp_properties.json file which is used by the C/C++ extension to provide intellisense. 
+ * This allows it to "understand" pros.
+ * 
+ * @param dirpath directory path to the c_cpp_properties.json file
+ * @param json json object
+ * @param os user's OS (for pathing)
+ */
+const modifyJson = async (dirpath: vscode.Uri, json: JSON, os: string, debug: boolean = false) => {
+
+  // First, check if json configurations setting contains include section, if not, add it
+  let include = path.join(dirpath.fsPath, "include");
+  if (!json.configurations[0].includePath.includes(include)) {
+    json.configurations[0].includePath.push(include);
+  }
+
+  // Secibdm setup compile_commands.json filepath
+  json.configurations[0].compileCommands = path.join(
+    dirpath.fsPath,
+    "compile_commands.json"
+  );
+
+  // Third, setup cStandard, cppStandard, and intelliSenseMode
+  json.configurations[0].cStandard = "gnu11";
+  json.configurations[0].cppStandard = "gnu++20";
+  json.configurations[0].intelliSenseMode = "gcc-arm";
+
+  // Fourth, account for mac users with different framework filepath
+  if (os === "macos") {
+    json.configurations[0].macFrameworkPath = ["/System/Library/Frameworks"];
+  }
+
+  //Fifth, setup browse section
+  json.configurations[0].browse = {
+    path: [dirpath.fsPath],
+    limitSymbolsToIncludedHeaders: true,
+    databaseFilename: "",
+  };
+
+  // Sixth, setup toolchain path
+  let toolchain = getChildProcessProsToolchainPath();
+  if (toolchain !== undefined) {
+    json.configurations[0].compilerPath = path.join(
+      toolchain.replace(/"/g, ""),
+      "bin",
+      "arm-none-eabi-g++"
+    );
+  }
+
+  // Seventh, make sure at least an empty file exists at the filepath
+  try {
+    fs.statSync(path.join(dirpath.fsPath, ".vscode"));
+  } catch (error) {
+    await promisify(fs.mkdir)(path.join(dirpath.fsPath, ".vscode"));
+  }
+
+  // Eighth, write/overwrite the file
+  await promisify(fs.writeFile)(
+    path.join(dirpath.fsPath, ".vscode", "c_cpp_properties.json"),
+    JSON.stringify(json, null, 2)
+  );
+
+  if(debug) {
+    // Log message if in debug mode
+    console.log("While checking on the c_cpp_properties.json file: c_cpp_properties.json file succesfully updated.");
+  }
+};
+
+/**
+ * This function generates and/or modifies the c_cpp_properties.json file which is used by the C/C++ extension to provide intellisense.
+ * 
+ * @param debug This is a boolean that determines whether or not to log all potential matches + other debug messages
+ * @returns Nothing
+ */
+export const generateCCppFiles = async (debug: boolean = false) => {
+
+  const debugMsg = "While checking on the c_cpp_properties.json file: ";
+
+  // First, check if the current workspace contains a pros project and exists
+  if (await workspaceContainsProsProject(true) === false || !vscode.workspace.workspaceFolders) {
+    // If the workspace doesn't contain a pros project, then we don't need to do anything
+    if(debug) {
+      // Log message if in debug mode
+      console.log(debugMsg + "no pros project found in workspace!");
+    }
+    return;
+  }
+
+  // Second, create references to URIs we will need later, create other variables
+  const workspaceRootUri = vscode.workspace.workspaceFolders[0].uri; // uri to top workspace folder
+  const cCppPropertiesUri = vscode.Uri.joinPath(
+    workspaceRootUri,
+    ".vscode",
+    "c_cpp_properties.json"
+  ); // uri to c_cpp_properties.json file
+  const os = getOperatingSystem(); // get user's OS
+  let json; // json object to be populated shortly
+
+  // Third, check if the c_cpp_properties.json file exists
+  try {
+    // Assume the file already exists, and modify it as needed:
+    let response = await vscode.workspace.fs.stat(cCppPropertiesUri);
+    let filedata = await promisify(fs.readFile)(
+      cCppPropertiesUri.fsPath,
+      "utf8"
+    ); // read the file
+    if(debug) {
+      // Log message if in debug mode
+      console.log(debugMsg + "file found.");
+    }
+    json = JSON.parse(filedata); // parse the file into a JSON object=
+    await modifyJson(workspaceRootUri, json, os, debug); // modify the file
+    if(debug) {
+      // Log message if in debug mode
+      console.log(debugMsg + "file modified.");
+    }
+  } catch (e) {
+    // The file does not exist. Create it and then modify it as needed:
+    if(debug) {
+      // Log message if in debug mode
+      console.log(debugMsg + "file not found. Creating file...");
+    }
+    
+    // Default file contents
+    const defaultJSON = `{
+      "configurations": [
+          {
+              "name": "PROS Project",
+              "includePath": [
+                  "\${workspaceFolder}/**"
+              ],
+              "defines": [
+                  "_DEBUG",
+                  "UNICODE",
+                  "_UNICODE"
+              ],
+              "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe",
+              "cStandard": "c17",
+              "cppStandard": "c++17",
+              "intelliSenseMode": "windows-msvc-x64"
+          }
+      ],
+      "version": 4
+    }`;
+
+    // Convert into json object
+    json = JSON.parse(defaultJSON);
+    if(debug) { 
+      // Log message if in debug mode
+      console.log(debugMsg + "file created."); //Technically this is a lie since the next line of code contains the write function, but this makes the print statements make sense.
+    }
+    await modifyJson(workspaceRootUri, json, os, debug); // create + modify the file.
+  }
+};
+

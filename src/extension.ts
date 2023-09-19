@@ -1,3 +1,6 @@
+/**
+ * IMPORTS SECTION
+ */
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
@@ -40,90 +43,71 @@ import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
 import { 
   findProsProjectFolders, 
-  workspaceContainsProsProject 
+  workspaceContainsProsProject,
+  getProsTerminal,
+  chooseProject,
+  generateCCppFiles 
 } from "./workspace_utils";
 import { startPortMonitoring } from "./device";
 import { BrainViewProvider } from "./views/brain-view";
 
+/**
+ * COMMAND BLOCKER SECTION
+ */
+
+// This is a map of commands to booleans. It is used to flag and block beta features.
 export const commandsBlocker: { [key: string]: boolean } = {};
 
+// This function is used to setup commands to be blocked. It is used to block beta features.
 const setupCommandBlocker = async (
-  cmd: string,
-  callback: Function,
-  context?: vscode.ExtensionContext,
-  betaFeature?: boolean,
-  customAnalytic?: string | null
+  cmd: string, // The command to block
+  callback: Function, // The callback to run when the command is called
+  context?: vscode.ExtensionContext, // The context to pass to the callback
+  betaFeature?: boolean, // Whether or not the command is a beta feature
+  customAnalytic?: string | null // The custom analytic to send when the command is called
 ) => {
   vscode.commands.registerCommand(cmd, async () => {
     if (
-      betaFeature &&
-      !vscode.workspace
+      betaFeature && // If the command is a beta feature
+      !vscode.workspace 
         .getConfiguration("pros")
-        .get("Beta: Enable Experimental Features")
+        .get("Beta: Enable Experimental Features") // And the user has not enabled beta features
     ) {
       vscode.window.showErrorMessage(
         "This feature is currently in beta. To enable it, set the 'pros.Beta: Enable Experimental Feature' setting in your workspace settings to true."
-      );
+      ); // Show an error message asking them to enable beta features to use the requested feature
       return;
     }
 
     if (commandsBlocker[cmd]) {
-      return;
+      return; // If the command is already running, return
     }
     if (customAnalytic !== null) {
       analytics.sendAction(
         customAnalytic ? customAnalytic : cmd.replace("pros.", "")
-      );
+      ); // Send the custom analytic if it exists, otherwise send the command name (without "pros." prefix)
     }
-    commandsBlocker[cmd] = true;
+    commandsBlocker[cmd] = true; // Set the command to run
     if (context) {
-      await callback(context);
+      await callback(context); // Run the callback
     } else {
-      await callback();
+      await callback(); // Run the callback
     }
-    commandsBlocker[cmd] = false;
+    commandsBlocker[cmd] = false; // Set the command to not running
   });
 };
 
-let analytics: Analytics;
+/**
+ * GLOBAL VARIABLES SECTION
+ */
+let analytics: Analytics; // The analytics object
+export var system: string; // The system the extension is running on 
+export const output = vscode.window.createOutputChannel("PROS Output"); // The output channel used for PROS commands
+export var prosLogger: Logger; // The logger object (imported from logger.ts)
 
-export var system: string;
-export const output = vscode.window.createOutputChannel("PROS Output");
-
-export var prosLogger: Logger;
-
-/// Get a reference to the "PROS Terminal" VSCode terminal used for running
-/// commands.
-
-export const getProsTerminal = async (
-  context: vscode.ExtensionContext
-): Promise<vscode.Terminal> => {
-  const prosTerminals = vscode.window.terminals.filter(
-    (t) => t.name === "PROS Terminal"
-  );
-  if (prosTerminals.length > 1) {
-    // Clean up duplicate terminals
-    prosTerminals.slice(1).forEach((t) => t.dispose());
-  }
-
-  // Create a new PROS Terminal if one doesn't exist
-  if (prosTerminals.length) {
-    const options: Readonly<vscode.TerminalOptions> =
-      prosTerminals[0].creationOptions;
-    if (options?.env?.PATH?.includes("pros-cli")) {
-      // Only keep the existing terminal if it has the correct path
-      return prosTerminals[0];
-    }
-  }
-
-  await configurePaths(context);
-
-  return vscode.window.createTerminal({
-    name: "PROS Terminal",
-    env: process.env,
-  });
-};
-
+/**
+ * EXTENSION ACTIVATION FUNCTION (VERY IMPORTANT)
+ */
 export async function activate(context: vscode.ExtensionContext) {
   analytics = new Analytics(context);
 
@@ -418,179 +402,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(ProsProjectEditorProvider.register(context));
   prosLogger.deleteOldLogs();
-}
-
-export function deactivate() {
-  analytics.endSession();
-}
-
-//This code calls prosProjects and allows user to choose which pros project to work on
-async function chooseProject() {
-  if (
-    vscode.workspace.workspaceFolders === undefined ||
-    vscode.workspace.workspaceFolders === null
-  ) {
-    return;
-  }
-  var array = await findProsProjectFolders();
-  if (array.length === 0) {
-    vscode.window.showInformationMessage(
-      "No PROS Projects found in current directory!"
-    );
-    return;
-  }
-  const targetOptions: vscode.QuickPickOptions = {
-    placeHolder: array[0].name,
-    title: "Select the PROS project to work on",
-  };
-  var folderNames: Array<vscode.QuickPickItem> = [];
-  //Specify type for any
-  for (const f of array) {
-    folderNames.push({ label: f[0], description: "" });
-  }
-
-  // Display the options to users
-  const target = await vscode.window.showQuickPick(folderNames, targetOptions);
-  if (target === undefined) {
-    throw new Error();
-  }
-  //This will open the folder the user selects
-  await vscode.commands.executeCommand(
-    "vscode.openFolder",
-    vscode.Uri.file(
-      path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, target.label)
-    )
-  );
-}
-
-
-
-const generateCCppFiles = async () => {
-
-  if (await workspaceContainsProsProject(true) === false || !vscode.workspace.workspaceFolders) {
-    // If the workspace doesn't contain a pros project, then we don't need to do anything
-    return;
-  }
-
-  // We will need to update this part with the new code in #110 once this all gets merged into develop. We can do a quick cleanup branch or something
-
-  const workspaceRootUri = vscode.workspace.workspaceFolders[0].uri;
-
-  const cCppPropertiesUri = vscode.Uri.joinPath(
-    workspaceRootUri,
-    ".vscode",
-    "c_cpp_properties.json"
-  );
-
-  const os = getOperatingSystem();
-
-  // if we are in a pros project
-
-  let exists = true;
-  console.log("does project.pros exist: " + exists);
-  try {
-    // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
-    // of if the workspace is using a physical file system or not.
-    const workspaceUri = workspaceRootUri;
-    const uriString = `${workspaceUri.scheme}:${
-      workspaceUri.path
-    }/${"project.pros"}`;
-    const uri = vscode.Uri.parse(uriString);
-    await vscode.workspace.fs.stat(uri);
-  } catch (e) {
-    console.error(e);
-    exists = false;
-  }
-
-  if (exists || true) {
-    const os = getOperatingSystem();
-    let json;
-    //check if the properties file exists
-    console.log("checking if it exists");
-    try {
-      // check if the file exists
-      let response = await vscode.workspace.fs.stat(cCppPropertiesUri);
-      // do nothing
-      let filedata = await promisify(fs.readFile)(
-        cCppPropertiesUri.fsPath,
-        "utf8"
-      );
-      json = JSON.parse(filedata);
-
-      await modifyJson(workspaceRootUri, json, os);
-    } catch (e) {
-      // make the file
-      console.log("generating file");
-
-      const defaultJSON = `{
-        "configurations": [
-            {
-                "name": "PROS Project",
-                "includePath": [
-                    "\${workspaceFolder}/**"
-                ],
-                "defines": [
-                    "_DEBUG",
-                    "UNICODE",
-                    "_UNICODE"
-                ],
-                "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe",
-                "cStandard": "c17",
-                "cppStandard": "c++17",
-                "intelliSenseMode": "windows-msvc-x64"
-            }
-        ],
-        "version": 4
-    }`;
-
-      json = JSON.parse(defaultJSON);
-      await modifyJson(workspaceRootUri, json, os);
-    }
-  }
 };
 
-const modifyJson = async (dirpath: vscode.Uri, json: any, os: string) => {
-  //modify the json file then save it
-
-  // if include is not already in the array
-  let include = path.join(dirpath.fsPath, "include");
-  if (!json.configurations[0].includePath.includes(include)) {
-    json.configurations[0].includePath.push(include);
-  }
-  json.configurations[0].compileCommands = path.join(
-    dirpath.fsPath,
-    "compile_commands.json"
-  );
-  json.configurations[0].cStandard = "gnu11";
-  json.configurations[0].cppStandard = "gnu++20";
-  json.configurations[0].intelliSenseMode = "gcc-arm";
-  if (os === "macos") {
-    json.configurations[0].macFrameworkPath = ["/System/Library/Frameworks"];
-  }
-
-  json.configurations[0].browse = {
-    path: [dirpath.fsPath],
-    limitSymbolsToIncludedHeaders: true,
-    databaseFilename: "",
-  };
-
-  let toolchain = getChildProcessProsToolchainPath();
-  if (toolchain !== undefined) {
-    json.configurations[0].compilerPath = path.join(
-      toolchain.replace(/"/g, ""),
-      "bin",
-      "arm-none-eabi-g++"
-    );
-  }
-
-  try {
-    fs.statSync(path.join(dirpath.fsPath, ".vscode"));
-  } catch (error) {
-    await promisify(fs.mkdir)(path.join(dirpath.fsPath, ".vscode"));
-  }
-
-  await promisify(fs.writeFile)(
-    path.join(dirpath.fsPath, ".vscode", "c_cpp_properties.json"),
-    JSON.stringify(json, null, 2)
-  );
+/**
+ * EXTENSION DEACTIVATION FUNCTION
+ */
+export function deactivate() {
+  analytics.endSession();
 };

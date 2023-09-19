@@ -407,6 +407,7 @@
     "@types/semver": "^7.3.6",
     "@types/universal-analytics": "^0.4.4",
     "axios": "^0.21.1",
+    "dotenv": "^16.3.1",
     "node-fetch": "^2.6.7",
     "seek-bzip": "^2.0.0",
     "semver": "^7.5.2",
