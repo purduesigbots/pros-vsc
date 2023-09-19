@@ -2,8 +2,9 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
 import { promisify } from "util";
-import { getOperatingSystem } from "./install";
-import { getChildProcessProsToolchainPath } from "./install";
+import { getOperatingSystem } from "./one-click/install";
+import { getChildProcessProsToolchainPath } from "./one-click/path";
+import { configurePaths } from "./one-click/install";
 
 
 /**
