@@ -96,7 +96,7 @@ export async function extract(
       title: extractName,
       cancellable: true,
     },
-    async (progress, token) => {
+    async (_progress, token) => {
       var read: fs.ReadStream;
       var extract: fs.WriteStream;
       token.onCancellationRequested((token) => {

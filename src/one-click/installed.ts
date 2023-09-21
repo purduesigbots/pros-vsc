@@ -31,7 +31,7 @@ export async function getCurrentVersion(
       "OneClick",
       "Executing PROS with One-Click Install directory: " + oneClickPath
     );
-    const { stdout, stderr } = await promisify(child_process.exec)(
+    const { stdout } = await promisify(child_process.exec)(
       `"${oneClickPath}" --version`,
       {
         env: {
@@ -47,7 +47,7 @@ export async function getCurrentVersion(
     return [versionint, true];
   } catch {
     try {
-      const { stdout, stderr } = await promisify(child_process.exec)(
+      const { stdout } = await promisify(child_process.exec)(
         `pros --version`,
         {
           env: {
