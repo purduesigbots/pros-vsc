@@ -205,7 +205,7 @@ export const getProsTerminal = async (context: vscode.ExtensionContext): Promise
  * 
  * @returns Nothing
  */
-async function chooseProject() {
+export async function chooseProject() {
   
   // First, check if the current workspace exists correctly
   if (
@@ -256,7 +256,7 @@ async function chooseProject() {
  * @param json json object
  * @param os user's OS (for pathing)
  */
-const modifyCCppJson = async (dirpath: vscode.Uri, json: JSON, os: string, debug: boolean = false) => {
+const modifyCCppJson = async (dirpath: vscode.Uri, json: any, os: string, debug: boolean = false) => {
 
   // First, check if json configurations setting contains include section, if not, add it
   let include = path.join(dirpath.fsPath, "include");
