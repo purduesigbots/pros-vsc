@@ -252,11 +252,11 @@ async function chooseProject() {
  * This function modifies the c_cpp_properties.json file which is used by the C/C++ extension to provide intellisense. 
  * This allows it to "understand" pros.
  * 
- * @param dirpath directory path to the c_cpp_properties.json file
+ * @param dirpath the path to the c_cpp_properties.json file
  * @param json json object
  * @param os user's OS (for pathing)
  */
-const modifyJson = async (dirpath: vscode.Uri, json: JSON, os: string, debug: boolean = false) => {
+const modifyCCppJson = async (dirpath: vscode.Uri, json: JSON, os: string, debug: boolean = false) => {
 
   // First, check if json configurations setting contains include section, if not, add it
   let include = path.join(dirpath.fsPath, "include");
@@ -359,7 +359,7 @@ export const generateCCppFiles = async (debug: boolean = false) => {
       console.log(debugMsg + "file found.");
     }
     json = JSON.parse(filedata); // parse the file into a JSON object=
-    await modifyJson(workspaceRootUri, json, os, debug); // modify the file
+    await modifyCCppJson(workspaceRootUri, json, os, debug); // modify the file
     if(debug) {
       // Log message if in debug mode
       console.log(debugMsg + "file modified.");
@@ -399,7 +399,7 @@ export const generateCCppFiles = async (debug: boolean = false) => {
       // Log message if in debug mode
       console.log(debugMsg + "file created."); //Technically this is a lie since the next line of code contains the write function, but this makes the print statements make sense.
     }
-    await modifyJson(workspaceRootUri, json, os, debug); // create + modify the file.
+    await modifyCCppJson(workspaceRootUri, json, os, debug); // create + modify the file.
   }
 };
 
