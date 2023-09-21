@@ -133,11 +133,11 @@ async function getUrls(
   const customCli =
     vscode.workspace
       .getConfiguration("pros")
-      .get<string>("OneClick: CliDownloadURL") ?? "default";
+      .get<string>("OneClick: CLI Download URL") ?? "default";
   const customToolchain =
     vscode.workspace
       .getConfiguration("pros")
-      .get<string>("OneClick: ToolchainDownloadURL") ?? "default";
+      .get<string>("OneClick: Toolchain Download URL") ?? "default";
   await prosLogger.log("OneClick", `Checking for custom installation URLs`);
   console.log(`Custom URLS: ${customCli} | ${customToolchain}`);
   if (customCli !== "default") {
@@ -506,13 +506,6 @@ export async function install(context: vscode.ExtensionContext) {
   await prosLogger.log("OneClick", "Cleaning up after installation");
   await vscode.commands.executeCommand("pros.verify");
   device.unsuspend();
-
-  // Do we want to auto disable install on startup? This will remove the auto update portion of the extension right?
-  /*
-  vscode.workspace
-    .getConfiguration("pros")
-    .update("showInstallOnStartup", false);
-    */
 }
 
 async function createDirs(storagePath: string) {
@@ -829,9 +822,6 @@ export async function installVision(context: vscode.ExtensionContext) {
     );
     return;
   }
-  vscode.workspace
-    .getConfiguration("pros")
-    .update("showInstallOnStartup", false);
 
   vscode.window.showInformationMessage("Vision Utility Installed!");
 }

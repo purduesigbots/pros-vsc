@@ -4,6 +4,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
+import { opendocs } from "./views/docview";
 import { promisify } from "util";
 import { TreeDataProvider } from "./views/tree-view";
 import {
@@ -23,9 +24,11 @@ import {
   capture,
   medic,
   updateFirmware,
+  parseJSON,
   setTeamNumber,
   setRobotName,
   runVision,
+  getCurrentKernelOkapiVersion,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -50,6 +53,7 @@ import {
 } from "./workspace_utils";
 import { startPortMonitoring } from "./device";
 import { BrainViewProvider } from "./views/brain-view";
+import { populateDocsJSON, debugDocsJson } from "./views/docs-webscrape";
 
 /**
  * COMMAND BLOCKER SECTION
@@ -102,7 +106,49 @@ const setupCommandBlocker = async (
     } else {
       await callback(); // Run the callback
     }
-    commandsBlocker[cmd] = false; // Note that the command has finished running in the map so that it can be run again
+    commandsBlocker[cmd] = false;
+  });
+};
+
+let analytics: Analytics;
+
+export var system: string;
+export const output = vscode.window.createOutputChannel("PROS Output");
+
+export var prosLogger: Logger;
+export var mainPage: string =
+  "https://purduesigbots.github.io/pros-doxygen-docs/api.html#autotoc_md1";
+export var currentUrl: string = "https://";
+
+/// Get a reference to the "PROS Terminal" VSCode terminal used for running
+/// commands.
+
+export const getProsTerminal = async (
+  context: vscode.ExtensionContext
+): Promise<vscode.Terminal> => {
+  const prosTerminals = vscode.window.terminals.filter(
+    (t) => t.name === "PROS Terminal"
+  );
+  if (prosTerminals.length > 1) {
+    // Clean up duplicate terminals
+    prosTerminals.slice(1).forEach((t) => t.dispose());
+  }
+
+  // Create a new PROS Terminal if one doesn't exist
+  if (prosTerminals.length) {
+    const options: Readonly<vscode.TerminalOptions> =
+      prosTerminals[0].creationOptions;
+    if (options?.env?.PATH?.includes("pros-cli")) {
+      // Only keep the existing terminal if it has the correct path
+      return prosTerminals[0];
+    }
+  }
+
+  await configurePaths(context);
+
+  return vscode.window.createTerminal({
+    name: "PROS Terminal",
+    env: process.env,
   });
 };
 
@@ -120,22 +166,30 @@ export var prosLogger: Logger; // The logger object (imported from logger.ts)
 export async function activate(context: vscode.ExtensionContext) {
   // Init analytics and logger
   analytics = new Analytics(context);
-  prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");
+
+  prosLogger = new Logger(context, "PROS_Extension_log", true, "Use Logger");
+
+  const usingbeta =
+    vscode.workspace
+      .getConfiguration("pros")
+      .get<boolean>("Beta: Enable Experimental Features") ?? false;
+
 
   // Sets up paths for integrated terminal (context is the vscode extension context)
   await configurePaths(context);
 
   // If we are in a pros project, set the variable which tracks that to true and set everything up
   workspaceContainsProsProject(true).then((isProsProject) => {
+
     vscode.commands.executeCommand(
       "setContext",
       "pros.isPROSProject",
       isProsProject
     );
-    //This checks if user is currently working on a project, if not it allows user to select one
+
     if (isProsProject) {
       getProsTerminal(context).then((terminal) => {
-        terminal.sendText("pros build-compile-commands");
+        terminal.sendText("pros build-compile-commands --no-analytics");
       });
       generateCCppFiles();
     } else {
@@ -143,7 +197,11 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  // Monitors for USB devices (i.e. brain or controller) and updates the status bar accordingly
+  
+  const projectVersions = await getCurrentKernelOkapiVersion();
+  const projectKernelVersion = projectVersions?.curKernel;
+
+
   startPortMonitoring(
     vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
   );
@@ -152,7 +210,7 @@ export async function activate(context: vscode.ExtensionContext) {
   if (
     vscode.workspace
       .getConfiguration("pros")
-      .get<boolean>("showWelcomeOnStartup")
+      .get<boolean>("Show Welcome On Startup")
   ) {
     vscode.commands.executeCommand("pros.welcome");
   }
@@ -173,6 +231,20 @@ export async function activate(context: vscode.ExtensionContext) {
   setupCommandBlocker("pros.capture", capture);
   setupCommandBlocker("pros.teamnumber", setTeamNumber);
   setupCommandBlocker("pros.robotname", setRobotName);
+
+  setupCommandBlocker(
+    "pros.opendocs",
+    () => {
+      debugDocsJson();
+      if (currentUrl === "NONE") {
+        currentUrl = mainPage;
+      }
+      opendocs(currentUrl);
+    },
+    undefined,
+    true
+  );
+
   setupCommandBlocker("pros.deleteLogs", prosLogger.deleteLogs);
   setupCommandBlocker("pros.openLog", prosLogger.openLog);
   setupCommandBlocker(
@@ -181,7 +253,8 @@ export async function activate(context: vscode.ExtensionContext) {
     undefined,
     undefined,
     null
-  ); // This command is not tracked by analytics
+  );
+
   setupCommandBlocker("pros.upgrade", upgradeProject);
   setupCommandBlocker("pros.new", createNewProject);
 
@@ -210,6 +283,7 @@ export async function activate(context: vscode.ExtensionContext) {
     "serialterminal" // This is the custom analytic, which is "serialterminal" so as to be more specific than "terminal"
   );
 
+
   // PROS Terminal opener command:
   setupCommandBlocker(
     "pros.showterminal", // Name of command to execute
@@ -226,6 +300,55 @@ export async function activate(context: vscode.ExtensionContext) {
       }
     }
   );
+  
+  // if we are using beta and it is a pros 4 project
+
+  console.log("current kernel version: " + projectKernelVersion ?? "undefined");
+  if (
+    usingbeta &&
+    projectKernelVersion !== undefined &&
+    projectKernelVersion.startsWith("4")
+  ) {
+    populateDocsJSON();
+    vscode.languages.registerHoverProvider("*", {
+      provideHover(document, position, token) {
+        //will be needed for word lookup
+        const line = document.lineAt(position);
+        const range = document.getWordRangeAtPosition(position);
+        const word = document.getText(range);
+
+        // given our line, we need to check the namespace of what is being hovered:
+        // split line.text by word
+
+        const text = line.text;
+        let namespace = text.split(word)[0].trim();
+
+        // remove all :: from namespace and pros
+        namespace = namespace.replace(/::/g, "");
+        namespace = namespace.replace(/pros/g, "");
+
+        var linkString: string = parseJSON(word, namespace);
+
+        if (!linkString.includes("purduesigbots.github.io")) {
+          currentUrl = "NONE";
+          return;
+        }
+
+        currentUrl = linkString;
+
+        const commentCommandUri = vscode.Uri.parse(`command:pros.opendocs`);
+        let link = new vscode.MarkdownString(
+          `[Go to PROS Documentation...](${commentCommandUri})`
+        );
+        link.isTrusted = true;
+
+        let hover: vscode.Hover = {
+          contents: [link],
+        };
+        return hover;
+      },
+    });
+  }
 
   // PROS Welcome page command:
   vscode.commands.registerCommand(
@@ -258,6 +381,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
       // Converts the stylesheet path to a URI
       const cssPath = panel.webview.asWebviewUri(onDiskPath);
+
 
       // These are the paths to the images for the welcome page
       const imgHeaderPath = panel.webview.asWebviewUri(
@@ -329,6 +453,7 @@ export async function activate(context: vscode.ExtensionContext) {
   // TREE VIEW SETUP:
 
   // Register the tree view provider (calls TreeView constructor)
+
   vscode.window.registerTreeDataProvider(
     "prosTreeview",
     new TreeDataProvider() // This is the tree view provider (see tree-view.ts)
@@ -350,7 +475,7 @@ export async function activate(context: vscode.ExtensionContext) {
   if (
     vscode.workspace
       .getConfiguration("pros")
-      .get<boolean>("showInstallOnStartup")
+      .get<boolean>("Enable Auto Updates")
   ) {
     vscode.commands.executeCommand("pros.install");
   }

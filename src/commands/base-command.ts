@@ -31,7 +31,7 @@ import { getProjectFileDir } from "../workspace_utils";
 export type BaseCommandOptions = {
   command: string;
   args: string[];
-  message: string;
+  message: string | undefined;
   requiresProsProject: boolean;
   extraOutput?: boolean;
   successMessage?: string;
@@ -39,7 +39,7 @@ export type BaseCommandOptions = {
 export class BaseCommand {
   command: string;
   args: string[];
-  message: string;
+  message: string | undefined;
   successMessage: string | undefined;
   cwd: string;
   requiresProsProject: boolean;
@@ -80,6 +80,7 @@ export class BaseCommand {
     this.requiresProsProject = options.requiresProsProject;
     this.extraOutput = options.extraOutput ? [] : undefined;
     this.successMessage = options.successMessage;
+
     this.progressWindow = new BackgroundProgress(this.message, true, false);
     // As far as implementing this onto each command, there are two ways you can do this.
     // The first way is to do it how I layed it out above, where in each command file we make a json object and then pass it into the constructor.
