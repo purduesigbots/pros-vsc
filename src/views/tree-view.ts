@@ -21,6 +21,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
         new TreeItem("Build", undefined, "pros.build"),
         new TreeItem("Clean", undefined, "pros.clean"),
         new TreeItem("Integrated Terminal", undefined, "pros.showterminal"),
+        new TreeItem("Robot Congifurator", undefined, "pros.robotconfig"),
       ]),
       new TreeItem("V5 Brain", [
         new TreeItem("Brain Terminal", undefined, "pros.terminal"),

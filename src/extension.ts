@@ -54,6 +54,10 @@ import {
 import { startPortMonitoring } from "./device";
 import { BrainViewProvider } from "./views/brain-view";
 import { populateDocsJSON, debugDocsJson } from "./views/docs-webscrape";
+import { 
+  robotConfig,
+  setupRobotConfigCommandBlocker,
+ } from "./commands/robot-config";
 
 /**
  * COMMAND BLOCKER SECTION
@@ -349,6 +353,15 @@ export async function activate(context: vscode.ExtensionContext) {
       },
     });
   }
+
+  //Robot configurator command:
+  setupRobotConfigCommandBlocker(
+    context, // This is the vscode extension context
+    analytics, // This is the analytics object
+    true, // This is the beta feature flag, which is true because this is a beta feature
+    null, // Disables analytics for this feature for now
+    true // This is the debug flag
+  );
 
   // PROS Welcome page command:
   vscode.commands.registerCommand(
