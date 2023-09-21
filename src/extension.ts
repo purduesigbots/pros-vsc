@@ -41,12 +41,12 @@ import {
 import { getChildProcessProsToolchainPath } from "./one-click/path";
 import { TextDecoder, TextEncoder } from "util";
 import { Logger } from "./logger";
-import { 
-  findProsProjectFolders, 
+import {
+  findProsProjectFolders,
   workspaceContainsProsProject,
   getProsTerminal,
   chooseProject,
-  generateCCppFiles 
+  generateCCppFiles,
 } from "./workspace_utils";
 import { startPortMonitoring } from "./device";
 import { BrainViewProvider } from "./views/brain-view";
@@ -69,7 +69,7 @@ const setupCommandBlocker = async (
   vscode.commands.registerCommand(cmd, async () => {
     if (
       betaFeature && // If the command is a beta feature
-      !vscode.workspace 
+      !vscode.workspace
         .getConfiguration("pros")
         .get("Beta: Enable Experimental Features") // And the user has not enabled beta features
     ) {
@@ -101,7 +101,7 @@ const setupCommandBlocker = async (
  * GLOBAL VARIABLES SECTION
  */
 let analytics: Analytics; // The analytics object
-export var system: string; // The system the extension is running on 
+export var system: string; // The system the extension is running on
 export const output = vscode.window.createOutputChannel("PROS Output"); // The output channel used for PROS commands
 export var prosLogger: Logger; // The logger object (imported from logger.ts)
 
@@ -402,11 +402,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(ProsProjectEditorProvider.register(context));
   prosLogger.deleteOldLogs();
-};
+}
 
 /**
  * EXTENSION DEACTIVATION FUNCTION
  */
 export function deactivate() {
   analytics.endSession();
-};
+}
