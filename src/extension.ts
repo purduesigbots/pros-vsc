@@ -110,47 +110,12 @@ const setupCommandBlocker = async (
   });
 };
 
-let analytics: Analytics;
-
-export var system: string;
-export const output = vscode.window.createOutputChannel("PROS Output");
-
-export var prosLogger: Logger;
 export var mainPage: string =
   "https://purduesigbots.github.io/pros-doxygen-docs/api.html#autotoc_md1";
 export var currentUrl: string = "https://";
 
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
-
-export const getProsTerminal = async (
-  context: vscode.ExtensionContext
-): Promise<vscode.Terminal> => {
-  const prosTerminals = vscode.window.terminals.filter(
-    (t) => t.name === "PROS Terminal"
-  );
-  if (prosTerminals.length > 1) {
-    // Clean up duplicate terminals
-    prosTerminals.slice(1).forEach((t) => t.dispose());
-  }
-
-  // Create a new PROS Terminal if one doesn't exist
-  if (prosTerminals.length) {
-    const options: Readonly<vscode.TerminalOptions> =
-      prosTerminals[0].creationOptions;
-    if (options?.env?.PATH?.includes("pros-cli")) {
-      // Only keep the existing terminal if it has the correct path
-      return prosTerminals[0];
-    }
-  }
-
-  await configurePaths(context);
-
-  return vscode.window.createTerminal({
-    name: "PROS Terminal",
-    env: process.env,
-  });
-};
 
 /**
  * GLOBAL VARIABLES SECTION
@@ -174,13 +139,11 @@ export async function activate(context: vscode.ExtensionContext) {
       .getConfiguration("pros")
       .get<boolean>("Beta: Enable Experimental Features") ?? false;
 
-
   // Sets up paths for integrated terminal (context is the vscode extension context)
   await configurePaths(context);
 
   // If we are in a pros project, set the variable which tracks that to true and set everything up
   workspaceContainsProsProject(true).then((isProsProject) => {
-
     vscode.commands.executeCommand(
       "setContext",
       "pros.isPROSProject",
@@ -197,10 +160,8 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  
   const projectVersions = await getCurrentKernelOkapiVersion();
   const projectKernelVersion = projectVersions?.curKernel;
-
 
   startPortMonitoring(
     vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
@@ -283,7 +244,6 @@ export async function activate(context: vscode.ExtensionContext) {
     "serialterminal" // This is the custom analytic, which is "serialterminal" so as to be more specific than "terminal"
   );
 
-
   // PROS Terminal opener command:
   setupCommandBlocker(
     "pros.showterminal", // Name of command to execute
@@ -300,7 +260,7 @@ export async function activate(context: vscode.ExtensionContext) {
       }
     }
   );
-  
+
   // if we are using beta and it is a pros 4 project
 
   console.log("current kernel version: " + projectKernelVersion ?? "undefined");
@@ -381,7 +341,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
       // Converts the stylesheet path to a URI
       const cssPath = panel.webview.asWebviewUri(onDiskPath);
-
 
       // These are the paths to the images for the welcome page
       const imgHeaderPath = panel.webview.asWebviewUri(
