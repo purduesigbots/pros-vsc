@@ -6,7 +6,7 @@ import {
   getChildProcessPath,
   getChildProcessProsToolchainPath,
 } from "../one-click/path";
-import { getCwdIsPros } from "../workspace";
+import { getProjectFileDir } from "../workspace_utils";
 /*
 
     I realize I missed something quite important in the presentation. It's the idea of synchronous v.s. asynchronous functions.
@@ -90,7 +90,7 @@ export class BaseCommand {
   }
 
   validateProsProject = async (): Promise<boolean> => {
-    const projectDir = await getCwdIsPros();
+    const projectDir = await getProjectFileDir();
     if (projectDir) {
       this.cwd = projectDir.fsPath;
     }
