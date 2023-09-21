@@ -181,7 +181,7 @@ async function getUrls(
 
 export async function install(context: vscode.ExtensionContext) {
   const preparingInstall = new BackgroundProgress(
-    "Preparing to install PROS",
+    "Verifying Current PROS Installation",
     false,
     true
   );
@@ -582,7 +582,7 @@ export async function cleanup(
           );
         }
       } catch (err: any) {
-        vscode.window.showInformationMessage("ERROR DURING VERIFICATION");
+        vscode.window.showInformationMessage("FATAL ERROR DURING VERIFICATION");
         prosLogger.log("OneClick", err, "ERROR");
       }
     }
