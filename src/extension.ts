@@ -55,14 +55,23 @@ import { BrainViewProvider } from "./views/brain-view";
  * COMMAND BLOCKER SECTION
  */
 
-// This is a map of commands to booleans. It is used to flag and block beta features.
+// This is a map of command names to a boolean representing whether or not the command is currently running
 export const commandsBlocker: { [key: string]: boolean } = {};
 
-// This function is used to setup commands to be blocked. It is used to block beta features.
+/**
+ * This function is used to ensure safe running of commands. It prevents simultaneous execution of the same command,
+ * and prevents execution of beta features if the user has not enabled beta features. Additionally, it sets up analytics.
+ *
+ * @param cmd The command to setup
+ * @param callback The callback to run when the command is called
+ * @param context Vscode extension context (optional, provide if the callback requires it)
+ * @param betaFeature Whether or not this feature is in beta (optional, defaults to not beta)
+ * @param customAnalytic Message to send to analytics. Defaults to the command name without "pros." in it. Pass null to disable analytics.
+ */
 const setupCommandBlocker = async (
-  cmd: string, // The command to block
+  cmd: string, // The command to setup
   callback: Function, // The callback to run when the command is called
-  context?: vscode.ExtensionContext, // The context to pass to the callback
+  context?: vscode.ExtensionContext, // The extension context to pass to the callback
   betaFeature?: boolean, // Whether or not the command is a beta feature
   customAnalytic?: string | null // The custom analytic to send when the command is called
 ) => {
@@ -80,20 +89,20 @@ const setupCommandBlocker = async (
     }
 
     if (commandsBlocker[cmd]) {
-      return; // If the command is already running, return
+      return; // If the map says the command is already running, don't run it again
     }
     if (customAnalytic !== null) {
       analytics.sendAction(
         customAnalytic ? customAnalytic : cmd.replace("pros.", "")
-      ); // Send the custom analytic if it exists, otherwise send the command name (without "pros." prefix)
+      ); // Send analytics unless disabled. Default to command name (minus the pros. prefix), if there is a custom analytic provided, use it.
     }
-    commandsBlocker[cmd] = true; // Set the command to run
+    commandsBlocker[cmd] = true; // Note that the command is going to run in the map
     if (context) {
       await callback(context); // Run the callback
     } else {
       await callback(); // Run the callback
     }
-    commandsBlocker[cmd] = false; // Set the command to not running
+    commandsBlocker[cmd] = false; // Note that the command has finished running in the map so that it can be run again
   });
 };
 
@@ -109,12 +118,14 @@ export var prosLogger: Logger; // The logger object (imported from logger.ts)
  * EXTENSION ACTIVATION FUNCTION (VERY IMPORTANT)
  */
 export async function activate(context: vscode.ExtensionContext) {
+  // Init analytics and logger
   analytics = new Analytics(context);
-
   prosLogger = new Logger(context, "PROS_Extension_log", true, "useLogger");
 
+  // Sets up paths for integrated terminal (context is the vscode extension context)
   await configurePaths(context);
 
+  // If we are in a pros project, set the variable which tracks that to true and set everything up
   workspaceContainsProsProject(true).then((isProsProject) => {
     vscode.commands.executeCommand(
       "setContext",
@@ -132,10 +143,12 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  // Monitors for USB devices (i.e. brain or controller) and updates the status bar accordingly
   startPortMonitoring(
     vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
   );
 
+  // Display PROS welcome page if that setting is enabled
   if (
     vscode.workspace
       .getConfiguration("pros")
@@ -144,12 +157,13 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand("pros.welcome");
   }
 
+  // Set up all commands to run with the command blocker (see near the top of this file to understand what it does)
+  // Commands with basic/default options:
   setupCommandBlocker("pros.install", install, context);
   setupCommandBlocker("pros.uninstall", uninstall, context);
   setupCommandBlocker("pros.verify", cleanup, context);
   setupCommandBlocker("pros.batterymedic", medic, context);
   setupCommandBlocker("pros.updatefirmware", updateFirmware);
-
   setupCommandBlocker("pros.build&upload", buildUpload);
   setupCommandBlocker("pros.upload", upload);
   setupCommandBlocker("pros.build", build);
@@ -159,132 +173,168 @@ export async function activate(context: vscode.ExtensionContext) {
   setupCommandBlocker("pros.capture", capture);
   setupCommandBlocker("pros.teamnumber", setTeamNumber);
   setupCommandBlocker("pros.robotname", setRobotName);
-
   setupCommandBlocker("pros.deleteLogs", prosLogger.deleteLogs);
   setupCommandBlocker("pros.openLog", prosLogger.openLog);
-
-  setupCommandBlocker("pros.installVision", installVision, context, true);
-  setupCommandBlocker("pros.uninstallVision", uninstallVision, context, true);
-  setupCommandBlocker("pros.runVision", runVision, context, true);
-
   setupCommandBlocker(
     "pros.selectProject",
     chooseProject,
     undefined,
     undefined,
     null
-  );
+  ); // This command is not tracked by analytics
   setupCommandBlocker("pros.upgrade", upgradeProject);
   setupCommandBlocker("pros.new", createNewProject);
 
+  // Beta commands (notice the fourth argument is set to true for these)
+  setupCommandBlocker("pros.installVision", installVision, context, true);
+  setupCommandBlocker("pros.uninstallVision", uninstallVision, context, true);
+  setupCommandBlocker("pros.runVision", runVision, context, true);
+
+  // PROS Terminal setup command:
   setupCommandBlocker(
-    "pros.terminal",
+    "pros.terminal", // Name of command to execute
     async () => {
+      // This is the callback function.
       try {
+        // Try to setup pros terminal
         const terminal = await getProsTerminal(context);
         terminal.sendText("pros terminal");
         terminal.show();
       } catch (err: any) {
+        // If there is an error, show an error message
         vscode.window.showErrorMessage(err.message);
       }
     },
-    undefined,
-    undefined,
-    "serialterminal"
+    undefined, // This is the context, which is undefined because we don't need it
+    undefined, // This is the beta feature flag, which is undefined because this is not a beta feature
+    "serialterminal" // This is the custom analytic, which is "serialterminal" so as to be more specific than "terminal"
   );
 
-  setupCommandBlocker("pros.showterminal", async () => {
-    try {
-      const terminal = await getProsTerminal(context);
-      terminal.show();
-      vscode.window.showInformationMessage("PROS Terminal started!");
-    } catch (err: any) {
-      vscode.window.showErrorMessage(err.message);
-    }
-  });
-
-  vscode.commands.registerCommand("pros.welcome", async () => {
-    analytics.sendPageview("welcome");
-    const panel = vscode.window.createWebviewPanel(
-      "welcome",
-      "Welcome",
-      vscode.ViewColumn.One,
-      {
-        enableScripts: true,
+  // PROS Terminal opener command:
+  setupCommandBlocker(
+    "pros.showterminal", // Name of command to execute
+    async () => {
+      // This is the callback function.
+      try {
+        // Try to show pros terminal
+        const terminal = await getProsTerminal(context);
+        terminal.show();
+        vscode.window.showInformationMessage("PROS Terminal started!");
+      } catch (err: any) {
+        // If there is an error, show an error message
+        vscode.window.showErrorMessage(err.message);
       }
-    );
+    }
+  );
 
-    panel.iconPath = vscode.Uri.file(
-      path.join(context.extensionPath, "media", "pros-color-icon.png")
-    );
+  // PROS Welcome page command:
+  vscode.commands.registerCommand(
+    "pros.welcome", // Name of command to execute
+    async () => {
+      // This is the callback function.
+      // Send analytics pageview (what is this lol)
+      analytics.sendPageview("welcome");
+      const panel = vscode.window.createWebviewPanel(
+        // Creates the welcome page object
+        "welcome",
+        "Welcome",
+        vscode.ViewColumn.One,
+        {
+          enableScripts: true,
+        }
+      );
 
-    const onDiskPath = vscode.Uri.file(
-      path.join(context.extensionPath, "media", "welcome.css")
-    );
+      // SETUP ALL IMAGES AND STYLESHEETS AND SCRIPTS FOR THE WELCOME PAGE:
 
-    const cssPath = panel.webview.asWebviewUri(onDiskPath);
-    const imgHeaderPath = panel.webview.asWebviewUri(
-      vscode.Uri.file(
-        path.join(context.extensionPath, "media", "pros-horiz-white.png")
-      )
-    );
-    const imgIconPath = panel.webview.asWebviewUri(
-      vscode.Uri.file(
-        path.join(context.extensionPath, "media", "tree-view.png")
-      )
-    );
-    const imgActionPath = panel.webview.asWebviewUri(
-      vscode.Uri.file(
-        path.join(context.extensionPath, "media", "quick-action.png")
-      )
-    );
-    const imgProjectProsPath = panel.webview.asWebviewUri(
-      vscode.Uri.file(
-        path.join(context.extensionPath, "media", "project-view.png")
-      )
-    );
-    const jsPath = panel.webview.asWebviewUri(
-      vscode.Uri.file(path.join(context.extensionPath, "media", "welcome.js"))
-    );
+      // This is the path to the icon for the welcome page
+      panel.iconPath = vscode.Uri.file(
+        path.join(context.extensionPath, "media", "pros-color-icon.png")
+      );
 
-    const newKernel = await fetchKernelVersionNonCLIDependent();
-    const newCli = await fetchCliVersion();
+      // This is the path to the stylesheet for the welcome page
+      const onDiskPath = vscode.Uri.file(
+        path.join(context.extensionPath, "media", "welcome.css")
+      );
 
-    const useGoogleAnalytics =
-      vscode.workspace
-        .getConfiguration("pros")
-        .get<boolean>("useGoogleAnalytics") ?? false;
-    const showWelcomeOnStartup =
-      vscode.workspace
-        .getConfiguration("pros")
-        .get<boolean>("showWelcomeOnStartup") ?? false;
+      // Converts the stylesheet path to a URI
+      const cssPath = panel.webview.asWebviewUri(onDiskPath);
 
-    panel.webview.html = getWebviewContent(
-      cssPath,
-      jsPath,
-      imgHeaderPath,
-      imgIconPath,
-      imgActionPath,
-      imgProjectProsPath,
-      newKernel,
-      newCli,
-      useGoogleAnalytics,
-      showWelcomeOnStartup,
-      context
-    );
+      // These are the paths to the images for the welcome page
+      const imgHeaderPath = panel.webview.asWebviewUri(
+        vscode.Uri.file(
+          path.join(context.extensionPath, "media", "pros-horiz-white.png")
+        )
+      );
+      const imgIconPath = panel.webview.asWebviewUri(
+        vscode.Uri.file(
+          path.join(context.extensionPath, "media", "tree-view.png")
+        )
+      );
+      const imgActionPath = panel.webview.asWebviewUri(
+        vscode.Uri.file(
+          path.join(context.extensionPath, "media", "quick-action.png")
+        )
+      );
+      const imgProjectProsPath = panel.webview.asWebviewUri(
+        vscode.Uri.file(
+          path.join(context.extensionPath, "media", "project-view.png")
+        )
+      );
 
-    panel.webview.onDidReceiveMessage(async (message) => {
-      await vscode.workspace
-        .getConfiguration("pros")
-        .update(message.command, message.value, true);
-    });
-  });
+      // This is the path to the javascript file for the welcome page
+      const jsPath = panel.webview.asWebviewUri(
+        vscode.Uri.file(path.join(context.extensionPath, "media", "welcome.js"))
+      );
 
+      // This gets the kernel version so we can display it on the welcome page
+      const newKernel = await fetchKernelVersionNonCLIDependent();
+      // This gets the CLI version so we can display it on the welcome page
+      const newCli = await fetchCliVersion();
+
+      // Setup google analytics preference and welcome page display preference
+      const useGoogleAnalytics =
+        vscode.workspace
+          .getConfiguration("pros")
+          .get<boolean>("useGoogleAnalytics") ?? false;
+      const showWelcomeOnStartup =
+        vscode.workspace
+          .getConfiguration("pros")
+          .get<boolean>("showWelcomeOnStartup") ?? false;
+
+      // Set the welcome page's html content
+      panel.webview.html = getWebviewContent(
+        // This function (in welcome-view.ts) injects all of the paths we just got into the welcome page html
+        cssPath,
+        jsPath,
+        imgHeaderPath,
+        imgIconPath,
+        imgActionPath,
+        imgProjectProsPath,
+        newKernel,
+        newCli,
+        useGoogleAnalytics,
+        showWelcomeOnStartup,
+        context
+      );
+
+      // This is the message handler for the welcome page
+      panel.webview.onDidReceiveMessage(async (message) => {
+        await vscode.workspace
+          .getConfiguration("pros")
+          .update(message.command, message.value, true);
+      });
+    } // End of callback function for welcome page
+  ); // End of command registration for welcome page
+
+  // TREE VIEW SETUP:
+
+  // Register the tree view provider (calls TreeView constructor)
   vscode.window.registerTreeDataProvider(
     "prosTreeview",
-    new TreeDataProvider()
+    new TreeDataProvider() // This is the tree view provider (see tree-view.ts)
   );
 
+  // Brain viewer stuff
   const brainViewProvider = new BrainViewProvider(
     context.extensionUri,
     !vscode.workspace
@@ -296,6 +346,7 @@ export async function activate(context: vscode.ExtensionContext) {
     brainViewProvider
   );
 
+  // If user settings say to run pros.install on startup, do so
   if (
     vscode.workspace
       .getConfiguration("pros")
