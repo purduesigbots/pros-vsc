@@ -253,7 +253,7 @@ export async function chooseProject() {
   }
   folderNames.push({
     label: "PROS: Cancel Selection",
-    description: "Do not open a project",
+    description: "Do not open a PROS project",
   });
   // Display the options to users
   const target = await vscode.window.showQuickPick(folderNames, targetOptions);
