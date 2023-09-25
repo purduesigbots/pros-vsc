@@ -245,15 +245,23 @@ export async function chooseProject() {
   const targetOptions: vscode.QuickPickOptions = {
     placeHolder: array[0].name,
     title: "Select the PROS project to work on",
+    ignoreFocusOut: true,
   };
   var folderNames: Array<vscode.QuickPickItem> = [];
   for (const f of array) {
     folderNames.push({ label: f[0], description: "" });
   }
+  folderNames.push({
+    label: "PROS: Cancel Selection",
+    description: "Do not open a PROS project",
+  });
   // Display the options to users
   const target = await vscode.window.showQuickPick(folderNames, targetOptions);
   if (target === undefined) {
     throw new Error();
+  }
+  if (target.label === "PROS: Cancel Selection") {
+    return;
   }
   //This will open the folder the user selects
   await vscode.commands.executeCommand(
