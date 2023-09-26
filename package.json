@@ -324,7 +324,7 @@
         "displayName": "PROS Project",
         "selector": [
           {
-            "filenamePattern": "*.pros"
+            "filenamePattern": "project.pros"
           }
         ]
       }
