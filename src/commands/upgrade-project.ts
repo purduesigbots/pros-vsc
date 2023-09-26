@@ -39,7 +39,7 @@ export const upgradeProject = async () => {
   //let {newKernel, newOkapi} = await getLatestKernelOkapiVersion(target);
   const upgradeProjectCommandOptions: BaseCommandOptions = {
     command: "pros",
-    args: ["c", "u", ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? [])],
+    args: ["c", "u"],
     message: "Upgrading Project",
     requiresProsProject: true,
     successMessage: "Project Upgraded Successfully",

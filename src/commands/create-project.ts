@@ -9,6 +9,8 @@ import {
   selectKernelVersion,
 } from "./command_tools";
 
+import { betaFeaturesEnabled } from "../extension";
+
 export const createNewProject = async () => {
   let dir = await selectDirectory(
     "Select a directory to create the project in"
@@ -47,8 +49,8 @@ export const createNewProject = async () => {
       `${target}`,
       `${kernel}`,
       "--build-cache",
-      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
     ],
+    optionalArgs: [betaFeaturesEnabled ? "--beta" : undefined],
     message: "Creating Project",
     requiresProsProject: false,
     successMessage: "Project Created Successfully",
