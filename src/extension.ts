@@ -160,9 +160,6 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  const projectVersions = await getCurrentKernelOkapiVersion();
-  const projectKernelVersion = projectVersions?.curKernel;
-
   startPortMonitoring(
     vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
   );
@@ -261,14 +258,8 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // if we are using beta and it is a pros 4 project
-
-  console.log("current kernel version: " + projectKernelVersion ?? "undefined");
-  if (
-    usingbeta &&
-    projectKernelVersion !== undefined &&
-    projectKernelVersion.startsWith("4")
-  ) {
+  // if we are using beta
+  if (usingbeta) {
     populateDocsJSON();
     vscode.languages.registerHoverProvider("*", {
       provideHover(document, position, token) {
