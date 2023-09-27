@@ -68,7 +68,13 @@ class V5Device{
         this.mouse = _mouse;
     }
 
-    getImgUri(){
+    /**
+     * Returns a vscode URI to the image of the device
+     *
+     * @param {import("vscode").ExtensionContext} context The extension context
+     * @returns {vscode.Uri} URI to the image of the device
+     */
+    getImgUri(context){
         throw new Error("Method not implemented.");
     }
 
@@ -135,17 +141,20 @@ class V5Motor extends V5Device{
     }
 }
 
-class V5MotorGroup{
+class V5MotorGroup extends V5Device{
     motors = [];
-    name = "";
-    type = "Motor Group";
 
     /**
      * Constructs and initializes a new V5MotorGroup
-     * 
-     * @param {Array<V5Motor>} _motors the motors in the group 
+     *
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {Number} _port Device port number, 1-21
+     * @param {Array<V5Motor>} _motors the motors in the group
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
      */
-    constructor(_motors){
+    constructor(_name, _port, _motors, _self, _mouse){
+        super("Motor Group", _name, null, _self, _mouse);
         this.motors = _motors;
     }
 
@@ -173,7 +182,6 @@ class V5MotorGroup{
 
 class V5RotationSensor extends V5Device{
     reversed = false;
-    type="Rotation Sensor";
 
     /**
      * Constructs and initializes a new V5RotationSensor
@@ -185,7 +193,7 @@ class V5RotationSensor extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _reversed, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("Rotation Sensor", _name, _port, _self, _mouse);
         this.reversed = _reversed;
     }
 
@@ -204,7 +212,6 @@ class V5RotationSensor extends V5Device{
 }
 
 class V5Imu extends V5Device{
-    type="IMU";
 
     /**
      * Constructs and initializes a new V5Imu
@@ -215,7 +222,7 @@ class V5Imu extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("IMU", _name, _port, _self, _mouse);
     }
 
     getImgUri(){
@@ -232,7 +239,6 @@ class V5Imu extends V5Device{
 }
 
 class V5Piston extends V5Device{
-    type="Piston";
     reversed = false;
 
     /**
@@ -245,7 +251,7 @@ class V5Piston extends V5Device{
      * @param {Mouse} _mouse Mouse object
      */
     constructor(_name, _port, _reversed, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("Piston", _name, _port, _self, _mouse);
         this.reversed = _reversed;
     }
 
@@ -264,7 +270,6 @@ class V5Piston extends V5Device{
 }
 
 class V5OpticalSensor extends V5Device{
-    type="Optical Sensor";
 
     /**
      * Constructs and initializes a new V5OpticalSensor
@@ -275,7 +280,7 @@ class V5OpticalSensor extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("Optical Sensor", _name, _port, _self, _mouse);
     }
 
     getImgUri(){
@@ -303,7 +308,7 @@ class V5VisionSensor extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("Vision Sensor", _name, _port, _self, _mouse);
     }
 
     getImgUri(){
@@ -320,7 +325,6 @@ class V5VisionSensor extends V5Device{
 }
 
 class V5DistanceSensor extends V5Device{
-    type="Distance Sensor";
 
     /**
      * Constructs and initializes a new V5DistanceSensor
@@ -331,7 +335,7 @@ class V5DistanceSensor extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("Distance Sensor", _name, _port, _self, _mouse);
     }
 
     getImgUri(){
@@ -348,7 +352,6 @@ class V5DistanceSensor extends V5Device{
 }
 
 class V5GpsSensor extends V5Device{
-    type="GPS Sensor";
     xOff;
     yOff;
 
@@ -363,7 +366,7 @@ class V5GpsSensor extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _xOff, _yOff, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("GPS Sensor", _name, _port, _self, _mouse);
         this.xOff = _xOff;
         this.yOff = _yOff;
     }
@@ -385,7 +388,6 @@ class V5GpsSensor extends V5Device{
 
 class V5AdiExpander extends V5Device{
     #adiDevices = [V5Device];
-    type="ADI Expander";
 
     /**
      * Constructs and initializes a new V5AdiExpander
@@ -397,7 +399,7 @@ class V5AdiExpander extends V5Device{
      * @param {Mouse} _mouse Mouse object
      */
     constructor(_name, _port, _devices, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("ADI Expander", _name, _port, _self, _mouse);
         this.#adiDevices = _devices;
     }
 
@@ -488,7 +490,6 @@ class V5AdiExpander extends V5Device{
 }
 
 class V5AdiPot extends V5Device{
-    type="ADI Potentiometer";
     version;
 
     /**
@@ -501,7 +502,7 @@ class V5AdiPot extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _version, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("ADI Potentiometer", _name, _port, _self, _mouse);
         this.version = _version;
     }
 
@@ -528,7 +529,6 @@ class V5AdiPot extends V5Device{
 }
 
 class V5AdiAnalogIn extends V5Device{
-    type="ADI Analog In";
 
     /**
      * Constructs and initializes a new V5AdiAnalogIn
@@ -539,7 +539,7 @@ class V5AdiAnalogIn extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("ADI Analog In", _name, _port, _self, _mouse);
     }
 
     getImgUri(){
@@ -556,7 +556,6 @@ class V5AdiAnalogIn extends V5Device{
 }
 
 class V5AdiDigitalIn extends V5Device{
-    type="ADI Digital In";
 
     /**
      * Constructs and initializes a new V5AdiDigitalIn
@@ -567,7 +566,7 @@ class V5AdiDigitalIn extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("ADI Digital In", _name, _port, _self, _mouse);
     }
 
     getImgUri(){
@@ -584,7 +583,6 @@ class V5AdiDigitalIn extends V5Device{
 }
 
 class V5AdiLineSensor extends V5Device{
-    type="ADI Line Sensor";
 
     /**
      * Constructs and initializes a new V5AdiLineSensor
@@ -595,7 +593,7 @@ class V5AdiLineSensor extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("ADI Line Sensor", _name, _port, _self, _mouse);
     }
 
     getImgUri(){
@@ -612,7 +610,6 @@ class V5AdiLineSensor extends V5Device{
 }
 
 class V5AdiEncoder extends V5Device{
-    type="ADI Encoder";
     reversed = false;
 
     /**
@@ -629,7 +626,7 @@ class V5AdiEncoder extends V5Device{
         if(_port.charAt(1) !== "A" && _port.charAt(1) !== "C" && _port.charAt(1) !== "E" && _port.charAt(1) !== "G"){
             throw new Error("Invalid ADI Encoder port: " + _port + ". Must be an odd letter (A, C, E, G)");
         }
-        super(this.type, _name, _port, _self, _mouse);
+        super("ADI Encoder", _name, _port, _self, _mouse);
         this.reversed = _reversed;
     }
 
@@ -671,7 +668,6 @@ class V5AdiEncoder extends V5Device{
 }
 
 class V5AdiUs extends V5Device{
-    type="ADI Ultrasonic";
     
     /**
      * Constructs and initializes a new V5AdiUs
@@ -686,7 +682,7 @@ class V5AdiUs extends V5Device{
         if(_port.charAt(1) !== "A" && _port.charAt(1) !== "C" && _port.charAt(1) !== "E" && _port.charAt(1) !== "G"){
             throw new Error("Invalid ADI US Sensor port: " + _port + ". Must be an odd letter (A, C, E, G)");
         }
-        super(this.type, _name, _port, _self, _mouse);
+        super("ADI Ultrasonic", _name, _port, _self, _mouse);
     }
 
     getImgUri(){
@@ -724,7 +720,6 @@ class V5AdiUs extends V5Device{
 }
 
 class V5AdiLed extends V5Device{
-    type="ADI LED";
     length;
     
     /**
@@ -737,7 +732,7 @@ class V5AdiLed extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _length, _self, _mouse){
-        super(this.type, _name, _port, _self, _mouse);
+        super("ADI LED", _name, _port, _self, _mouse);
         this.length = _length;
     }
 
@@ -792,15 +787,24 @@ class V5Port{
 }
 
 class V5Robot{
-    ports = [];
+    ports = [V5Device];
 
     /**
      * Constructs and initializes a new V5Robot
      **/
     constructor(){
-        for(var i = 0; i < 21; i++){
-            this.ports.push(new V5Port(i+1));
+        for(var i = 0, port; port = this.ports[i]; i++){
+            port = new V5Port(i+1);
         }
+    }
+
+    /**
+     * Adds a motor group to the robot
+     *
+     * @param {V5MotorGroup} motorGroup the motor group to add
+     */
+    addMotorGroup(motorGroup){
+        this.ports.push(motorGroup);
     }
 
     toPros(){
@@ -817,6 +821,8 @@ class V5Robot{
         return str;
     }
 }
+
+dev1 = new V5Motor("dev1", 1, false, 11, 200, null, null);
 
 // HTML elements for adding generic listeners
 const deviceTable = document.getElementById("device-table");

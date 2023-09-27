@@ -5,4 +5,5 @@ node_modules
 .DS_Store
 .eslintcache
 .prettierrc
-
+./idea/*
+.idea*
