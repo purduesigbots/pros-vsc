@@ -25,12 +25,7 @@ export const capture = async () => {
 
   const captureCommandOptions: BaseCommandOptions = {
     command: "pros",
-    args: [
-      "v5",
-      "capture",
-      `${path.join(dir, file)}`,
-      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
-    ],
+    args: ["v5", "capture", `${path.join(dir, file)}`],
     message: "Capturing Screenshot",
     requiresProsProject: true,
   };

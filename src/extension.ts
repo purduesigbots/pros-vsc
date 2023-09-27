@@ -114,6 +114,7 @@ export var mainPage: string =
   "https://purduesigbots.github.io/pros-doxygen-docs/api.html#autotoc_md1";
 export var currentUrl: string = "https://";
 
+export var betaFeaturesEnabled: boolean = false;
 /// Get a reference to the "PROS Terminal" VSCode terminal used for running
 /// commands.
 
@@ -134,7 +135,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
   prosLogger = new Logger(context, "PROS_Extension_log", true, "Use Logger");
 
-  const usingbeta =
+  // Check if beta features are enabled
+  betaFeaturesEnabled =
     vscode.workspace
       .getConfiguration("pros")
       .get<boolean>("Beta: Enable Experimental Features") ?? false;
@@ -259,7 +261,7 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   // if we are using beta
-  if (usingbeta) {
+  if (betaFeaturesEnabled) {
     populateDocsJSON();
     vscode.languages.registerHoverProvider("*", {
       provideHover(document, position, token) {

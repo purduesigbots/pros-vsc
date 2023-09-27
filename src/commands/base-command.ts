@@ -35,6 +35,7 @@ export type BaseCommandOptions = {
   requiresProsProject: boolean;
   extraOutput?: boolean;
   successMessage?: string;
+  optionalArgs?: (string | undefined)[];
 };
 export class BaseCommand {
   command: string;
@@ -74,6 +75,12 @@ export class BaseCommand {
 
     this.command = options.command;
     this.args = options.args;
+    // for each element in optionalArgs, if the element is not undefined, add it to args
+    for (let arg of options.optionalArgs ?? []) {
+      if (arg !== undefined) {
+        this.args.push(arg);
+      }
+    }
     this.args.push(...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []));
     this.message = options.message;
     this.cwd = process.cwd();
