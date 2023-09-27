@@ -135,6 +135,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   prosLogger = new Logger(context, "PROS_Extension_log", true, "Use Logger");
 
+  // Check if beta features are enabled
   betaFeaturesEnabled =
     vscode.workspace
       .getConfiguration("pros")
