@@ -141,6 +141,12 @@ export async function activate(context: vscode.ExtensionContext) {
       .getConfiguration("pros")
       .get<boolean>("Beta: Enable Experimental Features") ?? false;
 
+  vscode.commands.executeCommand(
+    "setContext",
+    "pros.betaFeaturesEnabled",
+    betaFeaturesEnabled
+  );
+
   // Sets up paths for integrated terminal (context is the vscode extension context)
   await configurePaths(context);
 

@@ -69,7 +69,7 @@
           "contextualTitle": "PROS"
         },
         {
-          "when": "false",
+          "when": "pros.betaFeaturesEnabled",
           "id": "pros.brainView",
           "name": "Brain View",
           "type": "webview",
