@@ -7,6 +7,9 @@ class Mouse{
     middleDown = false;
     dragging = false;
     
+    /**
+     * Constructs and initializes a new Mouse
+     **/
     constructor(){
         this.x = 0;
         this.y = 0;
@@ -25,15 +28,15 @@ class Mouse{
     /**
      * Returns whether or not the mouse is hovering over a V5Device
      * 
-     * @param v5Device The V5Device to check
+     * @param {V5Device} v5Device The V5Device to check
      */
     hover(v5Device){
         return !dragging && 
             (
-                this.x >= v5Device.getHtmlX() && 
-                this.x <= v5Device.getHtmlX() + v5Device.self.clientWidth && 
-                this.y >= v5Device.getHtmlY() && 
-                this.y <= v5Device.getHtmlY() + v5Device.self.clientHeight
+                this.x >= v5Device.self.getBoundingClientRect().x && 
+                this.x <= v5Device.self.getBoundingClientRect().x + v5Device.self.clientWidth && 
+                this.y >= v5Device.self.getBoundingClientRect().y && 
+                this.y <= v5Device.self.getBoundingClientRect().y + v5Device.self.clientHeight
             );
     }
 }
@@ -50,7 +53,7 @@ class V5Device{
      * 
      * @param {String} _type Device type name e.g. "Rotation Sensor"
      * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
-     * @param {number | String} _port Integer port number, 1-21
+     * @param {number | String} _port Integer port number, 1-21, or port letter, A-H inclusive (INCLUDE THE QUOTES, e.g. 'A')
      * @param {HTMLElement} _self HTML element of the device
      * @param {Mouse} _mouse Mouse object
      */
@@ -102,7 +105,7 @@ class V5Motor extends V5Device{
      * Constructs and initializes a new V5Motor
      * 
      * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
-     * @param {String} _port Device port number, 1-21; or port letter, A-H inclusive, or port pair, e.g. {{1, 'A'}}
+     * @param {Number} _port Device port number, 1-21
      * @param {Boolean} _reversed Whether or not the motor is reversed
      * @param {number} _wattage How many watts the motor is (11W or 5.5W)
      * @param {number} _rpm How many RPM the motor goes at (what cartridge it is) (100, 200, 600)
@@ -123,7 +126,7 @@ class V5Motor extends V5Device{
     }
 
     toPros(){
-        return "pros::Motor " 
+        return "extern pros::Motor " 
         + this.name + " (" 
         + this.port.toString() 
         + ", pros::E_MOTOR_GEARSET_" + this.rpm 
@@ -157,9 +160,9 @@ class V5MotorGroup{
     toPros(){
         var str = "";
         for(var i = 0, motor; motor = this.motors[i]; i++){
-            str += motor.toPros();
+            str += motor.toPros().remove("extern ");
         }
-        str += "pros::MotorGroup " + this.name + "({";
+        str += "extern pros::MotorGroup " + this.name + "({";
         for(var i = 0, motor; motor = this.motors[i]; i++){
             str += motor.name + ", ";
         }
@@ -172,6 +175,15 @@ class V5RotationSensor extends V5Device{
     reversed = false;
     type="Rotation Sensor";
 
+    /**
+     * Constructs and initializes a new V5RotationSensor
+     * 
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {Number} _port Device port number, 1-21
+     * @param {Boolean} _reversed Whether or not the sensor is reversed
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
+     **/
     constructor(_name, _port, _reversed, _self, _mouse){
         super(this.type, _name, _port, _self, _mouse);
         this.reversed = _reversed;
@@ -183,7 +195,7 @@ class V5RotationSensor extends V5Device{
     }
 
     toPros(){
-        return "pros::RotationSensor "
+        return "extern pros::RotationSensor "
         + this.name + " ("
         + this.port.toString()
         + ", " + (this.reversed? "true" : "false")
@@ -194,6 +206,14 @@ class V5RotationSensor extends V5Device{
 class V5Imu extends V5Device{
     type="IMU";
 
+    /**
+     * Constructs and initializes a new V5Imu
+     * 
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {Number} _port Device port number, 1-21
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
+     **/
     constructor(_name, _port, _self, _mouse){
         super(this.type, _name, _port, _self, _mouse);
     }
@@ -204,7 +224,7 @@ class V5Imu extends V5Device{
     }
 
     toPros(){
-        return "pros::Imu "
+        return "extern pros::Imu "
         + this.name + " ("
         + this.port.toString()
         + ");\n";
@@ -216,6 +236,7 @@ class V5Piston extends V5Device{
     reversed = false;
 
     /**
+     * Constructs and initializes a new V5Piston
      * 
      * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
      * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'
@@ -234,7 +255,7 @@ class V5Piston extends V5Device{
     }
 
     toPros(){
-        return "pros::ADIDigitalOut "
+        return "extern pros::ADIDigitalOut "
         + this.name + " (\'"
         + this.port.toString()
         + "\', " + (this.reversed? "true" : "false")
@@ -245,6 +266,14 @@ class V5Piston extends V5Device{
 class V5OpticalSensor extends V5Device{
     type="Optical Sensor";
 
+    /**
+     * Constructs and initializes a new V5OpticalSensor
+     * 
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {Number} _port Device port number, 1-21
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
+     **/
     constructor(_name, _port, _self, _mouse){
         super(this.type, _name, _port, _self, _mouse);
     }
@@ -255,7 +284,7 @@ class V5OpticalSensor extends V5Device{
     }
 
     toPros(){
-        return "pros::Optical "
+        return "extern pros::Optical "
         + this.name + " ("
         + this.port.toString()
         + ");\n";
@@ -265,6 +294,14 @@ class V5OpticalSensor extends V5Device{
 class V5VisionSensor extends V5Device{
     type="Vision Sensor";
 
+    /**
+     * Constructs and initializes a new V5VisionSensor
+     * 
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {Number} _port Device port number, 1-21
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
+     **/
     constructor(_name, _port, _self, _mouse){
         super(this.type, _name, _port, _self, _mouse);
     }
@@ -275,7 +312,7 @@ class V5VisionSensor extends V5Device{
     }
 
     toPros(){
-        return "pros::Vision "
+        return "extern pros::Vision "
         + this.name + " ("
         + this.port.toString()
         + ");\n";
@@ -285,6 +322,14 @@ class V5VisionSensor extends V5Device{
 class V5DistanceSensor extends V5Device{
     type="Distance Sensor";
 
+    /**
+     * Constructs and initializes a new V5DistanceSensor
+     * 
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {Number} _port Device port number, 1-21
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
+     **/
     constructor(_name, _port, _self, _mouse){
         super(this.type, _name, _port, _self, _mouse);
     }
@@ -295,7 +340,7 @@ class V5DistanceSensor extends V5Device{
     }
 
     toPros(){
-        return "pros::Distance "
+        return "extern pros::Distance "
         + this.name + " ("
         + this.port.toString()
         + ");\n";
@@ -307,6 +352,16 @@ class V5GpsSensor extends V5Device{
     xOff;
     yOff;
 
+    /**
+     * Constructs and initializes a new V5GpsSensor
+     * 
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {Number} _port Device port number, 1-21
+     * @param {Number} _xOff X offset from center of robot
+     * @param {Number} _yOff Y offset from center of robot
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
+     **/
     constructor(_name, _port, _xOff, _yOff, _self, _mouse){
         super(this.type, _name, _port, _self, _mouse);
         this.xOff = _xOff;
@@ -319,7 +374,7 @@ class V5GpsSensor extends V5Device{
     }
 
     toPros(){
-        return "pros::Gps "
+        return "extern pros::Gps "
         + this.name + " ("
         + this.port.toString()
         + ", " + this.xOff.toString()
@@ -464,7 +519,7 @@ class V5AdiPot extends V5Device{
     }
 
     toPros(){
-        return "pros::ADIPotentiometer "
+        return "extern pros::ADIPotentiometer "
         + this.name + " ("
         + this.port.toString()
         + ", pros::E_ADI_POT_" + this.version
@@ -475,6 +530,14 @@ class V5AdiPot extends V5Device{
 class V5AdiAnalogIn extends V5Device{
     type="ADI Analog In";
 
+    /**
+     * Constructs and initializes a new V5AdiAnalogIn
+     * 
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
+     **/
     constructor(_name, _port, _self, _mouse){
         super(this.type, _name, _port, _self, _mouse);
     }
@@ -485,7 +548,7 @@ class V5AdiAnalogIn extends V5Device{
     }
 
     toPros(){
-        return "pros::ADIAnalogIn "
+        return "extern pros::ADIAnalogIn "
         + this.name + " ("
         + this.port.toString()
         + ");\n";
@@ -495,6 +558,14 @@ class V5AdiAnalogIn extends V5Device{
 class V5AdiDigitalIn extends V5Device{
     type="ADI Digital In";
 
+    /**
+     * Constructs and initializes a new V5AdiDigitalIn
+     * 
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
+     **/
     constructor(_name, _port, _self, _mouse){
         super(this.type, _name, _port, _self, _mouse);
     }
@@ -505,7 +576,7 @@ class V5AdiDigitalIn extends V5Device{
     }
 
     toPros(){
-        return "pros::ADIDigitalIn "
+        return "extern pros::ADIDigitalIn "
         + this.name + " ("
         + this.port.toString()
         + ");\n";
@@ -515,6 +586,14 @@ class V5AdiDigitalIn extends V5Device{
 class V5AdiLineSensor extends V5Device{
     type="ADI Line Sensor";
 
+    /**
+     * Constructs and initializes a new V5AdiLineSensor
+     * 
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
+     **/
     constructor(_name, _port, _self, _mouse){
         super(this.type, _name, _port, _self, _mouse);
     }
@@ -525,7 +604,7 @@ class V5AdiLineSensor extends V5Device{
     }
 
     toPros(){
-        return "pros::ADIAnalogIn"
+        return "extern pros::ADIAnalogIn"
         + this.name + " ("
         + this.port.toString()
         + ");\n";
@@ -536,6 +615,15 @@ class V5AdiEncoder extends V5Device{
     type="ADI Encoder";
     reversed = false;
 
+    /**
+     * Constructs and initializes a new V5AdiEncoder
+     * 
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'. Must be an odd letter (A, C, E, G)
+     * @param {Boolean} _reversed Whether or not the encoder is reversed
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
+     **/
     constructor(_name, _port, _reversed, _self, _mouse){
         // Ensure that the port is an odd letter (A, C, E, G)
         if(_port.charAt(1) !== "A" && _port.charAt(1) !== "C" && _port.charAt(1) !== "E" && _port.charAt(1) !== "G"){
@@ -562,7 +650,7 @@ class V5AdiEncoder extends V5Device{
             // Generate port tuple (specific to this device)
             this.port = "{{" + portNum + ", \'" + topPort + "\' , \'" + bottomPort + "\'}}";
 
-            return "pros::ADIAnalogIn"
+            return "extern pros::ADIAnalogIn"
             + this.name + " ("
             + this.port.toString()
             + ", " + (this.reversed? "true" : "false")
@@ -573,7 +661,7 @@ class V5AdiEncoder extends V5Device{
         var topPort = this.port.split("\'")[1].trim();
         // Lettered bottom port (one letter higher than port)
         var bottomPort = String.fromCharCode(topPort.charCodeAt(0) + 1);
-        return "pros::ADIAnalogIn"
+        return "extern pros::ADIAnalogIn"
         + this.name + " (\'"
         + this.topPort.toString()
         + "\', \'" + bottomPort.toString() + "\', "
@@ -585,6 +673,14 @@ class V5AdiEncoder extends V5Device{
 class V5AdiUs extends V5Device{
     type="ADI Ultrasonic";
     
+    /**
+     * Constructs and initializes a new V5AdiUs
+     * 
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'. Must be an odd letter (A, C, E, G)
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
+     **/
     constructor(_name, _port, _self, _mouse){
         // Ensure that the port is an odd letter (A, C, E, G)
         if(_port.charAt(1) !== "A" && _port.charAt(1) !== "C" && _port.charAt(1) !== "E" && _port.charAt(1) !== "G"){
@@ -610,7 +706,7 @@ class V5AdiUs extends V5Device{
             // Generate port tuple (specific to this device)
             this.port = "{{" + portNum + ", \'" + topPort + "\' , \'" + bottomPort + "\'}}";
 
-            return "pros::ADIUltrasonic"
+            return "extern pros::ADIUltrasonic"
             + this.name + " ("
             + this.port.toString()
             + ");\n";
@@ -620,7 +716,7 @@ class V5AdiUs extends V5Device{
         var topPort = this.port.split("\'")[1].trim();
         // Lettered bottom port (one letter higher than port)
         var bottomPort = String.fromCharCode(topPort.charCodeAt(0) + 1);
-        return "pros::ADIUltrasonic"
+        return "extern pros::ADIUltrasonic"
         + this.name + " (\'"
         + this.topPort.toString()
         + "\', \'" + bottomPort.toString() + "\');\n";
@@ -631,6 +727,15 @@ class V5AdiLed extends V5Device{
     type="ADI LED";
     length;
     
+    /**
+     * Constructs and initializes a new V5AdiLed
+     * 
+     * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
+     * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'
+     * @param {Number} _length Length of the LED strip in LEDs
+     * @param {HTMLElement} _self HTML element of the device
+     * @param {Mouse} _mouse Mouse object
+     **/
     constructor(_name, _port, _length, _self, _mouse){
         super(this.type, _name, _port, _self, _mouse);
         this.length = _length;
@@ -642,15 +747,13 @@ class V5AdiLed extends V5Device{
     }
 
     toPros(){
-        return "pros::ADILed "
+        return "extern pros::ADILed "
         + this.name + " ("
         + this.port.toString()
         + ", " + this.length.toString()
         + ");\n";
     }
 }
-
-
 
 class V5Port{
     port;
@@ -687,7 +790,6 @@ class V5Port{
         return this.device.toPros();
     }
 }
-
 
 class V5Robot{
     ports = [];
