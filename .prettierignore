@@ -4,5 +4,5 @@ node_modules
 *.vsix
 .DS_Store
 .eslintcache
-.prettierrc
-
+**/out/*
+**/node_modules/*
