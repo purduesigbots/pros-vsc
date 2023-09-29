@@ -211,8 +211,12 @@ export async function activate(context: vscode.ExtensionContext) {
     true
   );
 
-  setupCommandBlocker("pros.deleteLogs", prosLogger.deleteLogs);
-  setupCommandBlocker("pros.openLog", prosLogger.openLog);
+  setupCommandBlocker("pros.deleteLogs", () => {
+    prosLogger.deleteLogs();
+  });
+  setupCommandBlocker("pros.openLog", () => {
+    prosLogger.openLog();
+  });
   setupCommandBlocker(
     "pros.selectProject",
     chooseProject,
