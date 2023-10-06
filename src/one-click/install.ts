@@ -6,7 +6,6 @@ import { downloadextract, chmod } from "./download";
 import {
   getCurrentVersion,
   getCurrentReleaseVersion,
-  getInstallPromptTitle,
 } from "./installed";
 import * as fs from "fs";
 import { promisify } from "util";
@@ -313,7 +312,6 @@ export async function install(context: vscode.ExtensionContext) {
   // Last step for this that is unknown is determining if the toolchain is up to date or not.
   // I think that toolchain upates are rare enough where it's not worth the effort to check.
   let promises: Promise<any>[] = [];
-  let targetedPortion: string = "";
 
   console.log(
     "cliUpToDate: " +
@@ -325,177 +323,52 @@ export async function install(context: vscode.ExtensionContext) {
       " | vexcomWorking: " +
       vexcomWorking
   );
+
+  let userResponse = await promptInstall(cliWorking, cliUpToDate, toolchainWorking, vexcomWorking);
+  await preparingInstall.stop();
+
   //if everything works and cli is up to date, do nothing
   if (cliWorking && toolchainWorking && cliUpToDate && vexcomWorking) {
-    // tell the user that everything is up to date
-    vscode.window.showInformationMessage(
-      "CLI and Toolchain currently working and up to date."
-    );
-    console.log("Everything is up to date");
-    preparingInstall.stop();
-    await prosLogger.log(
-      "OneClick",
-      "CLI and Toolchain currently working and up to date. Nothing else must be done"
-    );
     return;
   }
 
-  // if CLI is up to date but toolchain is not working, install just the toolchain
-  else if (cliUpToDate && cliWorking && vexcomWorking && !toolchainWorking) {
-    let prompttitle = "PROS Toolchain is not working. Install now?";
-    console.log(prompttitle);
-    let labelResponse = await vscode.window.showInformationMessage(
-      prompttitle,
-      "Install Now!",
-      "No Thanks."
-    );
-    console.log("sent : " + prompttitle);
-    await preparingInstall.stop();
-    if (labelResponse === "Install Now!") {
-      targetedPortion = path.join("install", `pros-toolchain-${system}`);
-      let deleteDir = path.join(
-        context.globalStorageUri.fsPath,
-        targetedPortion
-      );
-      console.log("removing directory " + deleteDir);
-      await prosLogger.log("OneClick", "removing directory " + deleteDir);
-      await removeDirAsync(deleteDir, false).catch((e) => {
-        console.log(e);
-      });
-      await prosLogger.log(
-        "OneClick",
-        "Toolchain is not working. Installing just the toolchain"
-      );
-      promises = [
-        downloadextract(
-          context,
-          downloadToolchain,
-          toolchainName,
-          "PROS Toolchain"
-        ),
-      ];
-    } else {
-      await prosLogger.log(
-        "OneClick",
-        "Toolchain is not working. User refused prompt to install toolchain"
-      );
-      return;
-    }
-    // if the toolchain is working but the cli is not working or out of date, install just the cli
-  } else if (
-    toolchainWorking &&
-    !(cliWorking && cliUpToDate && vexcomWorking)
-  ) {
-    const prompttitle = `PROS CLI is ${
-      cliWorking ? "out of date. Update" : "not working. Install"
-    } now?`;
-    const option1 = `${cliWorking ? "Update" : "Install"} Now!`;
-    console.log(prompttitle);
-    const labelResponse = await vscode.window.showInformationMessage(
-      prompttitle,
-      option1,
-      "No Thanks."
-    );
-    console.log("sent : " + prompttitle);
-    preparingInstall.stop();
-    if (labelResponse === option1) {
-      device.suspend();
-      targetedPortion = path.join("install", `pros-cli-${system}`);
-      let deleteDir = path.join(
-        context.globalStorageUri.fsPath,
-        targetedPortion
-      );
-      console.log("removing directory " + deleteDir);
-      await prosLogger.log("OneClick", "removing directory " + deleteDir);
-      await removeDirAsync(deleteDir, false).catch((e) => {
-        console.log(e);
-      });
-      await removeDirAsync(
-        path.join(
-          context.globalStorageUri.fsPath,
-          "install",
-          "`vex-vexcom-${system}`"
-        ),
-        false
-      ).catch((e) => {
-        console.log(e);
-      });
-      await prosLogger.log(
-        "OneClick",
-        "CLI is not working. Installing just the CLI"
-      );
-      promises = [
-        downloadextract(context, downloadCli, cliName, "PROS CLI"),
-        downloadextract(context, downloadVexcom, vexcomName, "VEXcom"),
-      ];
-    } else {
-      await prosLogger.log(
-        "OneClick",
-        "CLI is not working. User refused prompt to install CLI"
-      );
-      return;
-    }
-
-    // if neither the cli or toolchain is working
-  } else {
-    const prompttitle =
-      "PROS CLI and Toolchain are out of date or not working. Install now?";
-    console.log(prompttitle);
-    const labelResponse = await vscode.window.showInformationMessage(
-      prompttitle,
-      "Install Now!",
-      "No Thanks."
-    );
-    console.log("sent : " + prompttitle);
-    preparingInstall.stop();
-    if (labelResponse === "Install Now!") {
-      device.suspend();
-      await prosLogger.log("OneClick", "Removing Old CLI and Toolchain");
-      console.log("removing old cli and toolchain");
-      await removeDirAsync(
-        path.join(context.globalStorageUri.fsPath, "install"),
-        false
-      ).catch((e) => {
-        console.log(e);
-      });
-      await removeDirAsync(
-        path.join(context.globalStorageUri.fsPath, "download"),
-        false
-      ).catch((e) => {
-        console.log(e);
-      });
-      await prosLogger.log(
-        "OneClick",
-        "CLI and Toolchain are not working. Installing just the CLI and Toolchain"
-      );
-      console.log("installing just the cli and toolchain");
-      promises = [
-        downloadextract(context, downloadCli, cliName, "PROS CLI"),
-        downloadextract(
-          context,
-          downloadToolchain,
-          toolchainName,
-          "PROS Toolchain"
-        ),
-        downloadextract(context, downloadVexcom, vexcomName, "VEXcom"),
-      ];
-    } else {
-      await prosLogger.log(
-        "OneClick",
-        "CLI and Toolchain are not working. User refused prompt to install CLI and Toolchain"
-      );
-      return;
-    }
+  // if user rejected install prompt, do nothing
+  if (!userResponse) {
+    await prosLogger.log("OneClick", "User refused prompt to install.");
+    return;
   }
 
-  let deleteDir = path.join(context.globalStorageUri.fsPath, targetedPortion);
-  console.log("removing directory " + deleteDir);
+  device.suspend();
+  // if CLI is our of date or not working, install the CLI
+  if (!cliUpToDate || !cliWorking) {
+    let cliDir = vscode.Uri.joinPath(context.globalStorageUri, "install", `pros-cli-${system}`);
+    console.log("removing directory " + cliDir.toString());
+    await prosLogger.log("OneClick", "removing directory " + cliDir.toString());
+    await vscode.workspace.fs.delete(cliDir, {recursive: true});
+    promises.push(downloadextract(context, downloadCli, cliName, "PROS CLI"));
+  }
+
+  if (!toolchainWorking) {
+    let toolchainDir = vscode.Uri.joinPath(context.globalStorageUri, "install", `pros-toolchain-${system}`);
+    console.log("removing directory " + toolchainDir.toString());
+    await prosLogger.log("OneClick", "removing directory " + toolchainDir.toString());
+    await vscode.workspace.fs.delete(toolchainDir, {recursive: true});
+    promises.push(downloadextract(context, downloadToolchain, toolchainName, "PROS CLI"));
+  }
+
+  if (!vexcomWorking) {
+    let vexcomDir = vscode.Uri.joinPath(context.globalStorageUri, "install", `vex-vexcom-${system}`);
+    console.log("removing directory " + vexcomDir.toString());
+    await prosLogger.log("OneClick", "removing directory " + vexcomDir.toString());
+    await vscode.workspace.fs.delete(vexcomDir, {recursive: true});
+    promises.push(downloadextract(context, downloadVexcom, vexcomName, "PROS CLI"));
+  }
 
   //await removeDirAsync(deleteDir, false).catch((e) => {console.log(e);});
   //add install and download directories
   await prosLogger.log("OneClick", "Adding install and download directories");
   console.log("adding install and download directories");
-  const dirs = await createDirs(context.globalStorageUri.fsPath);
+  await createDirs(context.globalStorageUri.fsPath);
 
   await prosLogger.log("OneClick", "Downloading and extracting files");
   console.log("Beginning Downloads");
@@ -516,14 +389,14 @@ export async function install(context: vscode.ExtensionContext) {
 async function promptInstall(cliWorking: boolean, cliUpToDate: boolean, toolchainWorking: boolean, vexcomWorking: boolean) {
   if (cliWorking && cliUpToDate && toolchainWorking && vexcomWorking) {
     vscode.window.showInformationMessage(
-      "CLI and Toolchain currently working and up to date."
+      "Everything is currently working and up to date."
     );
     console.log("Everything is up to date");
     await prosLogger.log(
       "OneClick",
-      "CLI and Toolchain currently working and up to date. Nothing else must be done"
+      "Everything is currently working and up to date. Nothing else must be done"
     );
-    return;
+    return false;
   }
   let installRequired: string[] = [];
   if (!cliWorking) {
@@ -535,20 +408,29 @@ async function promptInstall(cliWorking: boolean, cliUpToDate: boolean, toolchai
   if (!vexcomWorking) {
     installRequired.push("Vexcom");
   }
-  const prompttitle = `${(!cliUpToDate && cliWorking) ? "PROS CLI is out of date" : ""}`
-                  + `${installRequired.join(" and ")} ${installRequired.length === 0 ? "" : installRequired.length > 1 ? "are" : "is"}`
-                  + " Install now?";
+  console.log(installRequired.length);
+  let prompttitle: string = "";
+  if (!cliUpToDate) {
+    prompttitle = "PROS CLI is out of date";
+    if (installRequired.length === 0) {
+      prompttitle += ". Update now?";
+    }
+  }
+  if (installRequired.length !== 0) {
+    if (!cliUpToDate) {
+      prompttitle += " and ";
+    }
+    prompttitle += installRequired.join(" and ");
+    prompttitle += `${installRequired.length === 1 ? " is" : " are"} not working. Install now?`;
+  }
   console.log("Prompting user with: " + prompttitle);
+  const affirmative = `${installRequired.length === 0 ? "Update" : "Install"} now!`;
   const labelResponse = await vscode.window.showInformationMessage(
     prompttitle,
-    "Install Now!",
+    affirmative,
     "No Thanks."
   );
-  if (labelResponse === "Install Now!") {
-
-  } else {
-    await prosLogger.log("OneClick", "User refused prompt to install");
-  }
+  return labelResponse === affirmative;
 }
 
 async function createDirs(storagePath: string) {
