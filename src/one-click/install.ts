@@ -256,11 +256,11 @@ export async function install(context: vscode.ExtensionContext) {
   const cliWorking = version !== -1;
   const toolchainWorking =
     (await verifyToolchain().catch((err) => {
-      console.log(err);
+      console.error(err);
     })) ?? false;
   const vexcomWorking =
     (await verifyVexcom().catch((err) => {
-      console.log(err);
+      console.error(err);
     })) ?? false;
 
   //log the result of cli and toolchain working
@@ -344,7 +344,12 @@ export async function install(context: vscode.ExtensionContext) {
     let cliDir = vscode.Uri.joinPath(context.globalStorageUri, "install", `pros-cli-${system}`);
     console.log("removing directory " + cliDir.toString());
     await prosLogger.log("OneClick", "removing directory " + cliDir.toString());
-    await vscode.workspace.fs.delete(cliDir, {recursive: true});
+    try {
+      await vscode.workspace.fs.delete(cliDir, {recursive: true});
+    } catch (err: any) {
+      await prosLogger.log("OneClick", err, "ERROR");
+      console.error(err);
+    }
     promises.push(downloadextract(context, downloadCli, cliName, "PROS CLI"));
   }
 
@@ -352,23 +357,33 @@ export async function install(context: vscode.ExtensionContext) {
     let toolchainDir = vscode.Uri.joinPath(context.globalStorageUri, "install", `pros-toolchain-${system}`);
     console.log("removing directory " + toolchainDir.toString());
     await prosLogger.log("OneClick", "removing directory " + toolchainDir.toString());
-    await vscode.workspace.fs.delete(toolchainDir, {recursive: true});
-    promises.push(downloadextract(context, downloadToolchain, toolchainName, "PROS CLI"));
+    try {
+      await vscode.workspace.fs.delete(toolchainDir, {recursive: true});
+    } catch (err: any) {
+      await prosLogger.log("OneClick", err, "ERROR");
+      console.error(err);
+    }
+    promises.push(downloadextract(context, downloadToolchain, toolchainName, "PROS Toolchain"));
   }
 
   if (!vexcomWorking) {
     let vexcomDir = vscode.Uri.joinPath(context.globalStorageUri, "install", `vex-vexcom-${system}`);
     console.log("removing directory " + vexcomDir.toString());
     await prosLogger.log("OneClick", "removing directory " + vexcomDir.toString());
-    await vscode.workspace.fs.delete(vexcomDir, {recursive: true});
-    promises.push(downloadextract(context, downloadVexcom, vexcomName, "PROS CLI"));
+    try {
+      await vscode.workspace.fs.delete(vexcomDir, {recursive: true});
+    } catch (err: any) {
+      await prosLogger.log("OneClick", err, "ERROR");
+      console.error(err);
+    }
+    promises.push(downloadextract(context, downloadVexcom, vexcomName, "Vexcom"));
   }
 
   //await removeDirAsync(deleteDir, false).catch((e) => {console.log(e);});
   //add install and download directories
   await prosLogger.log("OneClick", "Adding install and download directories");
   console.log("adding install and download directories");
-  await createDirs(context.globalStorageUri.fsPath);
+  await createDirs(context.globalStorageUri);
 
   await prosLogger.log("OneClick", "Downloading and extracting files");
   console.log("Beginning Downloads");
@@ -433,13 +448,13 @@ async function promptInstall(cliWorking: boolean, cliUpToDate: boolean, toolchai
   return labelResponse === affirmative;
 }
 
-async function createDirs(storagePath: string) {
+async function createDirs(storagePath: vscode.Uri) {
   // Create the download and install subdirectories
-  const install = path.join(storagePath, "install");
-  const download = path.join(storagePath, "download");
+  const install = vscode.Uri.joinPath(storagePath, "install");
+  const download = vscode.Uri.joinPath(storagePath, "download");
   for (const dir of [install, download]) {
     await prosLogger.log("OneClick", `Recursively creating directory ${dir}`);
-    await fs.promises.mkdir(dir, { recursive: true });
+    await vscode.workspace.fs.createDirectory(dir);
   }
   // Return the two created directories
   return { install: install, download: download };
@@ -457,22 +472,23 @@ export async function cleanup(
     },
     async () => {
       try {
-        const globalPath = context.globalStorageUri.fsPath;
+        const globalPath = context.globalStorageUri;
         await prosLogger.log(
           "OneClick",
           `Removing temporary download directory`
         );
-        await removeDirAsync(path.join(globalPath, "download"), false).catch(
-          (e) => {
-            prosLogger.log("OneClick", e, "ERROR");
-          }
-        );
+        try {
+          await vscode.workspace.fs.delete(vscode.Uri.joinPath(globalPath, "download"), {recursive: true});
+        } catch (err: any) {
+          await prosLogger.log("OneClick", err, "ERROR");
+          console.error(err);
+        }
 
         await prosLogger.log(
           "OneClick",
           `Verifying that CLI and Toolchain are working`
         );
-        await chmod(globalPath, system);
+        await chmod(globalPath.fsPath, system);
         await prosLogger.log("OneClick", `Configuring environment variables`);
         await configurePaths(context).catch((e) => {
           prosLogger.log("OneClick", e, "ERROR");
@@ -620,7 +636,7 @@ async function verifyCli() {
       `CLI verification failed with error ${stderr}`,
       "error"
     );
-    console.log(stderr);
+    console.error(stderr);
   }
   return stdout.includes(
     `Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version:`
@@ -663,7 +679,7 @@ async function verifyToolchain() {
       `TOOLCHAIN verification failed with error ${stderr}`,
       "error"
     );
-    console.log(stderr);
+    console.error(stderr);
   }
   return stdout.replace(".exe", "").startsWith(`arm-none-eabi-g++ (G`);
 }
@@ -687,7 +703,7 @@ async function verifyVexcom() {
       `VEXCOM verification failed with error ${stderr}`,
       "error"
     );
-    console.log(stderr);
+    console.error(stderr);
   }
   return stdout.replace(".exe", "").startsWith("vexcom: version");
 }
@@ -705,7 +721,7 @@ export async function installVision(context: vscode.ExtensionContext) {
   if (system === "windows") {
     console.log("vision utility on windows");
     //add install and download directories
-    const dirs = await createDirs(context.globalStorageUri.fsPath);
+    const dirs = await createDirs(context.globalStorageUri);
 
     const promises = [
       downloadextract(context, windowsVision, visionName, "Vision Utility"),
@@ -720,7 +736,7 @@ export async function installVision(context: vscode.ExtensionContext) {
     );
     return;
     //add install and download directories
-    const dirs = await createDirs(context.globalStorageUri.fsPath);
+    const dirs = await createDirs(context.globalStorageUri);
 
     const promises = [
       downloadextract(context, macosVision, visionName, "Vision Utility"),
