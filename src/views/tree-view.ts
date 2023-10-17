@@ -127,7 +127,7 @@ export class TreeButtonMultiSelect extends TreeItem {
         )
         .then((option) => {
           if (option !== undefined) {
-            options.forEach(([name, command])=> {
+            options.forEach(([name, command]) => {
               if (option.label === name) {
                 vscode.commands.executeCommand(command);
               }
