@@ -218,6 +218,7 @@ export async function install(context: vscode.ExtensionContext) {
   let vexcomVersion = "1_0_0_23";
 
   if (cliVersion === undefined || toolchainVersion === undefined) {
+    preparingInstall.stop();
     throw new Error("Failed to access version number");
   }
 

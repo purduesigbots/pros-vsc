@@ -81,7 +81,9 @@ export class BaseCommand {
         this.args.push(arg);
       }
     }
-    this.args.push(...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []));
+    if (this.command === "pros" && process.env.PROS_VSCODE_FLAGS) {
+      this.args.push(...`${process.env.PROS_VSCODE_FLAGS}`.split(" "));
+    }
     this.message = options.message;
     this.cwd = process.cwd();
     this.requiresProsProject = options.requiresProsProject;

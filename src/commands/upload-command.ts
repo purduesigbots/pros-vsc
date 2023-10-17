@@ -14,9 +14,6 @@ export class UploadCommand extends BaseCommand {
       requiresProsProject: true,
       successMessage: "Project Uploaded Successfully",
     });
-    if (process.env.PROS_VSCODE_FLAGS) {
-      this.args.push(...`${process.env.PROS_VSCODE_FLAGS}`.split(" "));
-    }
   }
 
   parseOutput = async (
