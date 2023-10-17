@@ -62,18 +62,13 @@ export class UploadCommand extends BaseCommand {
       } else if (line.startsWith("Multiple") && prompt) {
         let ports = prompt[0].replace(/[\[\]]/g, "").split(/\|/);
         // only time prompt is used is when there are mutltiple ports
-        window
-          .showWarningMessage(
-            line,
-            ...ports
-          )
-          .then((response) => {
-            if (response) {
-              process.stdin?.write(response + "\n");
-            } else {
-              process.kill();
-            }
-          });
+        window.showWarningMessage(line, ...ports).then((response) => {
+          if (response) {
+            process.stdin?.write(response + "\n");
+          } else {
+            process.kill();
+          }
+        });
       }
 
       return false;
