@@ -20,7 +20,7 @@ export class UploadCommand extends BaseCommand {
     liveOutput: string[],
     process: ChildProcess
   ): Promise<boolean> => {
-    const promptRegex: RegExp = /\[[A-Za-z0-9|]+\]/;
+    const promptRegex: RegExp = /\[[\s\S]+\]/g;
 
     var errorMsg: string = "";
     var hasError = liveOutput.some((line) => {
@@ -60,11 +60,12 @@ export class UploadCommand extends BaseCommand {
           this.lastProgress = progress;
         }
       } else if (line.startsWith("Multiple") && prompt) {
+        let ports = prompt[0].replace(/[\[\]]/g, "").split(/\|/);
         // only time prompt is used is when there are mutltiple ports
         window
           .showWarningMessage(
             line,
-            ...prompt[0].replace(/[\[\]]/g, "").split(/\|/)
+            ...ports
           )
           .then((response) => {
             if (response) {

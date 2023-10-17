@@ -74,6 +74,7 @@ export const getCurrentKernelOkapiVersion = async () => {
     command: "pros",
     args: ["c", "info-project", "--machine-output"],
     message: "Fetching Project Info",
+    successMessage: "hidden",
     requiresProsProject: true,
     extraOutput: true,
   };
@@ -106,6 +107,7 @@ export const getLatestKernelOkapiVersion = async (target: string) => {
     command: "pros",
     args: ["c", "ls-templates", "--target", target, "--machine-output"],
     message: "Getting latest kernel and okapi versions",
+    successMessage: "hidden",
     requiresProsProject: true,
     extraOutput: true,
   };
