@@ -32,6 +32,9 @@ export class UploadCommand extends BaseCommand {
           output.appendLine(jdata.simpleMessage);
           if (jdata.level === "ERROR") {
             errorMsg = jdata.simpleMessage;
+            if (errorMsg.length > 103) {
+              errorMsg = errorMsg.substring(0, 100) + "...";
+            }
             return true;
           }
         } else if (jdata.type === "input/interactive" && jdata.can_confirm) {

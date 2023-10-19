@@ -254,6 +254,9 @@ export class BaseCommand {
       var prompt = promptRegex.exec(line);
       if (error) {
         errorMsg = line;
+        if (errorMsg.length > 103) {
+          errorMsg = errorMsg.substring(0, 100) + "...";
+        }
         return true;
       } else if (yesNo) {
         // handle confirm dialogs
