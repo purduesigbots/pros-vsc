@@ -108,7 +108,7 @@ export const getV5ComPorts = (): PROSDeviceInfo[] => {
 
 const getV5ComPortsInternal = async (): Promise<PROSDeviceInfo[]> => {
   const { stdout, stderr } = await promisify(child_process.exec)(
-    "pros lsusb --machine-output --no-analytics",
+    `pros lsusb --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`,
     {
       timeout: 5000,
       env: {

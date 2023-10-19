@@ -81,7 +81,9 @@ export class BaseCommand {
         this.args.push(arg);
       }
     }
-    this.args.push(...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []));
+    if (this.command === "pros" && process.env.PROS_VSCODE_FLAGS) {
+      this.args.push(...`${process.env.PROS_VSCODE_FLAGS}`.split(" "));
+    }
     this.message = options.message;
     this.cwd = process.cwd();
     this.requiresProsProject = options.requiresProsProject;
@@ -228,7 +230,7 @@ export class BaseCommand {
   ): Promise<boolean> => {
     const errorRegex: RegExp = /((Error: )|(ERROR )|(ERROR: )|(: error:))(.+)/;
     const yesNoRegex: RegExp = /\[y\/N\]/;
-    const promptRegex: RegExp = /\[[A-Za-z0-9|]+\]/;
+    const promptRegex: RegExp = /\[[\s\S]+\]/;
     // This function will parse the output of the command we ran.
     // Normally, we use the --machine-output flag to get the output in a json format.
     // This makes it easier to parse the output, as everything is categorized into different levels, such as Warning or error.
@@ -252,6 +254,9 @@ export class BaseCommand {
       var prompt = promptRegex.exec(line);
       if (error) {
         errorMsg = line;
+        if (errorMsg.length > 103) {
+          errorMsg = errorMsg.substring(0, 100) + "...";
+        }
         return true;
       } else if (yesNo) {
         // handle confirm dialogs

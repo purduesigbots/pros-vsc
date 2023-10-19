@@ -4,7 +4,7 @@ import { BaseCommand } from "./base-command";
 const runClean = async () => {
   const cleanCommand = new BaseCommand({
     command: "pros",
-    args: ["make", "clean", ...`${process.env.PROS_VSCODE_FLAGS}`.split(" ")],
+    args: ["make", "clean"],
     message: "Cleaning Project",
     requiresProsProject: true,
     successMessage: "Project Cleaned Successfully",
