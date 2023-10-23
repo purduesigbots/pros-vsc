@@ -79,7 +79,7 @@ async function robotConfig(
     const nonce = getNonce();
     const htmlPath = path.join(context.extensionPath, "src", "robot-config-gui", "robot_config.html"); 
     var html = fs.readFileSync(htmlPath, "utf-8");
-    const scriptPath = panel.webview.asWebviewUri(vscode.Uri.file(path.join(context.extensionPath, "src", "robot-config-gui", "robot_config.ts")));
+    const scriptPath = panel.webview.asWebviewUri(vscode.Uri.file(path.join(context.extensionPath, "src", "robot-config-gui", "robot_config.js")));
     const cssPath = panel.webview.asWebviewUri(vscode.Uri.file(path.join(context.extensionPath, "src", "robot-config-gui", "robot_config.css")));
     const resizeScriptPath = panel.webview.asWebviewUri(vscode.Uri.file(path.join(context.extensionPath, "src", "robot-config-gui", "resize_tables.js")));
     const nonce2 = getNonce();

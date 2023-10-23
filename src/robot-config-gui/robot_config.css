@@ -4,13 +4,11 @@ table{
     padding: 0;
     table-layout: fixed;
     width: 100%;
+    border: 1px solid #ffffff;
 }
 
-tr{
-    border: 1px solid #ddd;
-}
 table .device-row{
-    border: 1px solid #ddd;
+
     text-align: center;
     vertical-align: middle;
     padding: 0;
@@ -18,12 +16,11 @@ table .device-row{
     height: 100px;
 }
 table .device-col{
-    border: 1px solid #ddd;
+
     width: 100px;
 }
 table .port-row{
-    border: 2px solid #ddd;
-    border-radius:2px;
+
     text-align: center;
     vertical-align: middle;
     padding: 0;
@@ -31,7 +28,11 @@ table .port-row{
     height: 100px;
 }
 table .port_col{
-    border: 2px;
-    border-radius:2px;
+
     width: 100px;
+}
+td{
+    padding: 0px;
+    border: 1px;
+    border-radius: 2px;
 }
