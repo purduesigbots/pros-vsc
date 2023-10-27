@@ -111,7 +111,7 @@ async function getUrls(
     await prosLogger.log("OneClick", `Windows detected, using Windows URLS`);
     // Set system, path seperator, and downloads to windows version
     downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-win-64bit.zip`;
-    downloadToolchain = `https://github.com/purduesigbots/toolchain/releases/download/${toolchainVersion}/pros-toolchain-windows.zip`;
+    downloadToolchain = `https://github.com/purduesigbots/toolchain/releases/download/${toolchainVersion}/pros-toolchain-windows-formatted.zip`;
     downloadVexcom = `https://pros.cs.purdue.edu/v5/_static/releases/vexcom_${vexcomVersion}-win32.zip`;
   } else if (getOperatingSystem() === "macos") {
     await prosLogger.log("OneClick", `MacOS detected, using MacOS URLS`);
