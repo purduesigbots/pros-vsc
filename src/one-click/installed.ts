@@ -63,28 +63,8 @@ export async function getCurrentVersion(
       return [versionint, false];
     } catch (err) {
       console.log(`Error fetching PROS CLI version: ${err}`);
+      prosLogger.log("OneClick", `Error fetching PROS CLI version: ${err}`, "ERROR");
       return [-1, false];
     }
-  }
-}
-
-export async function getInstallPromptTitle(
-  oneClickPath: string,
-  recent: number
-) {
-  const [version, oneClicked] = await getCurrentVersion(oneClickPath);
-  console.log("Version" + version);
-  console.log("Recent" + recent);
-  console.log("OneClicked" + oneClicked);
-  if (!oneClicked && version === -1) {
-    return "You do not have the PROS CLI installed. Install it now? (Recommended).";
-  } else if (oneClicked && version >= recent) {
-    return "PROS is up to date!";
-  } else if (oneClicked && version < recent) {
-    return "There is an update available! Would you like to update now?";
-  } else if (version >= recent) {
-    return "PROS detected but not installed with VSCode. Would you like to install using VSCode? (Recommended).";
-  } else {
-    return "An outdated version of PROS was detected on your system, not installed through VS Code. Would you like to install the update with VS Code?";
   }
 }

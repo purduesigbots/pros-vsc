@@ -256,10 +256,12 @@ export async function install(context: vscode.ExtensionContext) {
   const cliWorking = version !== -1;
   const toolchainWorking =
     (await verifyToolchain().catch((err) => {
+      prosLogger.log("OneClick", `TOOLCHAIN verification failed with error ${err}`, "ERROR");
       console.error(err);
     })) ?? false;
   const vexcomWorking =
     (await verifyVexcom().catch((err) => {
+      prosLogger.log("OneClick", `VEXCOM verification failed with error ${err}`, "ERROR");
       console.error(err);
     })) ?? false;
 
@@ -425,14 +427,14 @@ async function promptInstall(cliWorking: boolean, cliUpToDate: boolean, toolchai
   }
   console.log(installRequired.length);
   let prompttitle: string = "";
-  if (!cliUpToDate) {
+  if (!cliUpToDate && cliWorking) {
     prompttitle = "PROS CLI is out of date";
     if (installRequired.length === 0) {
       prompttitle += ". Update now?";
     }
   }
   if (installRequired.length !== 0) {
-    if (!cliUpToDate) {
+    if (!cliUpToDate && cliWorking) {
       prompttitle += " and ";
     }
     prompttitle += installRequired.join(" and ");
@@ -600,7 +602,6 @@ export async function configurePaths(
   // Prepend CLI and TOOLCHAIN to path
   await prosLogger.log("OneClick", "Appending CLI and TOOLCHAIN to PATH");
   await prosLogger.log("OneClick", `CLI Executable Path: ${cliExecPath}`);
-  await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   process.env.PATH = `${process.env.PATH}`; // bypass compile errors
   await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   process.env.PATH =
@@ -612,6 +613,7 @@ export async function configurePaths(
   // Make PROS_TOOCLHAIN variable
   await prosLogger.log("OneClick", "Setting PROS_TOOLCHAIN");
   process.env.PROS_TOOLCHAIN = TOOLCHAIN;
+  await prosLogger.log("OneClick", `PROS_TOOLCHAIN: ${process.env.PROS_TOOCLHAIN}`, "INFO");
 
   process.env.LC_ALL = "en_US.utf-8";
   if (repeat) {
