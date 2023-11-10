@@ -53,14 +53,14 @@ export const upgradeProject = async () => {
     const { target, curKernel, curOkapi } =
       await getCurrentKernelOkapiVersion();
     const { newKernel, newOkapi } = await getLatestKernelOkapiVersion(target);
-    if (curKernel === newKernel && curOkapi === newOkapi) {
+    if (curKernel === newKernel && (curOkapi === newOkapi || curOkapi === undefined)) {
       await vscode.window.showInformationMessage("Project is up to date!");
       return;
     }
 
     await userApproval(
       newKernel === curKernel ? undefined : newKernel,
-      newOkapi === curOkapi ? undefined : newOkapi
+      (newOkapi === curOkapi || curOkapi === undefined) ? undefined : newOkapi
     );
 
     await upgradeProjectCommand.runCommand();
