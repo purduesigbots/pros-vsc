@@ -251,26 +251,8 @@ export async function install(context: vscode.ExtensionContext) {
     )
   );
   const cliWorking = version !== -1;
-  const toolchainWorking =
-    (await verifyToolchain().catch((err) => {
-      prosLogger.log(
-        "OneClick",
-        `TOOLCHAIN verification failed with error ${err}`,
-        "ERROR"
-      );
-      console.error(err);
-      return false;
-    })) ?? false;
-  const vexcomWorking =
-    (await verifyVexcom().catch((err) => {
-      prosLogger.log(
-        "OneClick",
-        `VEXCOM verification failed with error ${err}`,
-        "ERROR"
-      );
-      console.error(err);
-      return false;
-    })) ?? false;
+  const toolchainWorking = await verifyToolchain();
+  const vexcomWorking = await verifyVexcom();
 
   //log the result of cli and toolchain working
   await prosLogger.log(
@@ -552,18 +534,9 @@ export async function cleanup(
         });
 
         // Ensure that toolchain and cli are working
-        let cliSuccess =
-          (await verifyCli().catch((err) => {
-            prosLogger.log("OneClick", err, "ERROR");
-          })) ?? false;
-        let toolchainSuccess =
-          (await verifyToolchain().catch((err) => {
-            prosLogger.log("OneClick", err, "ERROR");
-          })) ?? false;
-        let vexcomSuccess =
-          (await verifyVexcom().catch((err) => {
-            prosLogger.log("OneClick", err, "ERROR");
-          })) ?? false;
+        let cliSuccess = await verifyCli();
+        let toolchainSuccess = await verifyToolchain();
+        let vexcomSuccess = await verifyVexcom();
         if (cliSuccess && toolchainSuccess && vexcomSuccess) {
           vscode.window.showInformationMessage(
             "CLI and Toolchain are working!"
@@ -683,25 +656,35 @@ export async function configurePaths(
 async function verifyCli() {
   var command = `pros c --help --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
   await prosLogger.log("OneClick", `Verifying CLI with command ${command}`);
-  const { stdout, stderr } = await promisify(child_process.exec)(command, {
-    timeout: 30000,
-    env: {
-      ...process.env,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      PATH: getChildProcessPath(),
-    },
-  });
-  if (stderr) {
-    await prosLogger.log(
-      "OneClick",
-      `CLI verification failed with error ${stderr}`,
-      "error"
+  try {
+    const { stdout, stderr } = await promisify(child_process.exec)(command, {
+      timeout: 30000,
+      env: {
+        ...process.env,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        PATH: getChildProcessPath(),
+      },
+    });
+    if (stderr) {
+      await prosLogger.log(
+        "OneClick",
+        `CLI verification failed with error ${stderr}`,
+        "ERROR"
+      );
+      console.error(stderr);
+    }
+    return stdout.includes(
+      `Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version:`
     );
-    console.error(stderr);
+  } catch(err) {
+    prosLogger.log(
+      "OneClick",
+      `CLI verification failed with error ${err}`,
+      "ERROR"
+    );
+    console.error(err);
+    return false;
   }
-  return stdout.includes(
-    `Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version:`
-  );
 }
 
 async function verifyToolchain() {
@@ -726,47 +709,67 @@ async function verifyToolchain() {
     `Verifying TOOLCHAIN with command ${command}`
   );
 
-  const { stdout, stderr } = await promisify(child_process.exec)(command, {
-    timeout: 5000,
-    env: {
-      ...process.env,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      PATH: getChildProcessPath(),
-    },
-  });
-  if (stderr) {
-    await prosLogger.log(
+  try {
+    const { stdout, stderr } = await promisify(child_process.exec)(command, {
+      timeout: 5000,
+      env: {
+        ...process.env,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        PATH: getChildProcessPath(),
+      },
+    });
+    if (stderr) {
+      await prosLogger.log(
+        "OneClick",
+        `TOOLCHAIN verification failed with error ${stderr}`,
+        "error"
+      );
+      console.error(stderr);
+    }
+    return stdout.replace(".exe", "").startsWith(`arm-none-eabi-g++ (G`);
+  } catch (err) {
+    prosLogger.log(
       "OneClick",
-      `TOOLCHAIN verification failed with error ${stderr}`,
-      "error"
+      `TOOLCHAIN verification failed with error ${err}`,
+      "ERROR"
     );
-    console.error(stderr);
+    console.error(err);
+    return false;
   }
-  return stdout.replace(".exe", "").startsWith(`arm-none-eabi-g++ (G`);
 }
 
 async function verifyVexcom() {
   await prosLogger.log("OneClick", "Verifying VEXCOM");
   var command = "vexcom --version";
 
-  const { stdout, stderr } = await promisify(child_process.exec)(command, {
-    timeout: 5000,
-    env: {
-      ...process.env,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      PATH: getChildProcessPath(),
-    },
-  });
+  try {
+    const { stdout, stderr } = await promisify(child_process.exec)(command, {
+      timeout: 5000,
+      env: {
+        ...process.env,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        PATH: getChildProcessPath(),
+      },
+    });
 
-  if (stderr) {
-    await prosLogger.log(
+    if (stderr) {
+      await prosLogger.log(
+        "OneClick",
+        `VEXCOM verification failed with error ${stderr}`,
+        "error"
+      );
+      console.error(stderr);
+    }
+    return stdout.replace(".exe", "").startsWith("vexcom: version");
+  } catch (err) {
+    prosLogger.log(
       "OneClick",
-      `VEXCOM verification failed with error ${stderr}`,
-      "error"
+      `VEXCOM verification failed with error ${err}`,
+      "ERROR"
     );
-    console.error(stderr);
+    console.error(err);
+    return false;
   }
-  return stdout.replace(".exe", "").startsWith("vexcom: version");
 }
 
 export async function installVision(context: vscode.ExtensionContext) {
