@@ -610,10 +610,10 @@ export async function configurePaths(
     `${vexcomPath}${PATH_SEP}` +
     `${process.env.PATH.replace(/\"/g, "")}`;
   await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
-  // Make PROS_TOOCLHAIN variable
+  // Make PROS_TOOLCHAIN variable
   await prosLogger.log("OneClick", "Setting PROS_TOOLCHAIN");
   process.env.PROS_TOOLCHAIN = TOOLCHAIN;
-  await prosLogger.log("OneClick", `PROS_TOOLCHAIN: ${process.env.PROS_TOOCLHAIN}`, "INFO");
+  await prosLogger.log("OneClick", "PROS_TOOLCHAIN: " + process.env.PROS_TOOLCHAIN, "INFO");
 
   process.env.LC_ALL = "en_US.utf-8";
   if (repeat) {
