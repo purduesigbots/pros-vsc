@@ -81,12 +81,18 @@ export async function uninstall(context: vscode.ExtensionContext) {
       },
       async () => {
         try {
-          await vscode.workspace.fs.delete(vscode.Uri.joinPath(globalPath, "install"), {recursive: true});
+          await vscode.workspace.fs.delete(
+            vscode.Uri.joinPath(globalPath, "install"),
+            { recursive: true }
+          );
         } catch (err) {
           console.error(err);
         }
         try {
-          await vscode.workspace.fs.delete(vscode.Uri.joinPath(globalPath, "download"), {recursive: true});
+          await vscode.workspace.fs.delete(
+            vscode.Uri.joinPath(globalPath, "download"),
+            { recursive: true }
+          );
         } catch (err) {
           console.error(err);
         }
