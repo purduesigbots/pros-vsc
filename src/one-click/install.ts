@@ -65,7 +65,7 @@ export async function removeDirAsync(directory: string, begin: boolean) {
 }
 
 export async function uninstall(context: vscode.ExtensionContext) {
-  const globalPath = context.globalStorageUri.fsPath;
+  const globalPath = context.globalStorageUri;
   const title = "Are you sure you want to uninstall PROS?";
   const labelResponse = await vscode.window.showInformationMessage(
     title,
@@ -80,10 +80,16 @@ export async function uninstall(context: vscode.ExtensionContext) {
         cancellable: false,
       },
       async () => {
-        let promises: Promise<any>[] = [];
-        promises.push(removeDirAsync(path.join(globalPath, "install"), false));
-        promises.push(removeDirAsync(path.join(globalPath, "download"), false));
-        await Promise.all(promises);
+        try {
+          await vscode.workspace.fs.delete(vscode.Uri.joinPath(globalPath, "install"), {recursive: true});
+        } catch (err) {
+          console.error(err);
+        }
+        try {
+          await vscode.workspace.fs.delete(vscode.Uri.joinPath(globalPath, "download"), {recursive: true});
+        } catch (err) {
+          console.error(err);
+        }
       }
     );
     vscode.window.showInformationMessage("PROS Uninstalled!");
