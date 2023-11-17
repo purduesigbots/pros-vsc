@@ -676,7 +676,7 @@ async function verifyCli() {
     return stdout.includes(
       `Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version:`
     );
-  } catch(err) {
+  } catch (err) {
     prosLogger.log(
       "OneClick",
       `CLI verification failed with error ${err}`,
