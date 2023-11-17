@@ -259,6 +259,7 @@ export async function install(context: vscode.ExtensionContext) {
         "ERROR"
       );
       console.error(err);
+      return false;
     })) ?? false;
   const vexcomWorking =
     (await verifyVexcom().catch((err) => {
@@ -268,6 +269,7 @@ export async function install(context: vscode.ExtensionContext) {
         "ERROR"
       );
       console.error(err);
+      return false;
     })) ?? false;
 
   //log the result of cli and toolchain working
