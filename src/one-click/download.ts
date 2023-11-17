@@ -214,6 +214,11 @@ export async function extract(
           "OneClick",
           `Extracting ${readPath} to ${writePath}`
         );
+        if (storagePath.includes("pros-toolchain-windows")) {
+          await fs.promises.mkdir(
+            path.join(globalPath, "install", "pros-toolchain-windows", "tmp")
+          );
+        }
       } // not bz2
     }
   );
