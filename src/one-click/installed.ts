@@ -47,23 +47,24 @@ export async function getCurrentVersion(
     return [versionint, true];
   } catch {
     try {
-      const { stdout } = await promisify(child_process.exec)(
-        `pros --version`,
-        {
-          env: {
-            ...process.env,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            PATH: getChildProcessPath(),
-          },
-        }
-      );
+      const { stdout } = await promisify(child_process.exec)(`pros --version`, {
+        env: {
+          ...process.env,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          PATH: getChildProcessPath(),
+        },
+      });
       const versionint = +stdout
         .replace("pros, version ", "")
         .replace(/\./gi, "");
       return [versionint, false];
     } catch (err) {
       console.log(`Error fetching PROS CLI version: ${err}`);
-      prosLogger.log("OneClick", `Error fetching PROS CLI version: ${err}`, "ERROR");
+      prosLogger.log(
+        "OneClick",
+        `Error fetching PROS CLI version: ${err}`,
+        "ERROR"
+      );
       return [-1, false];
     }
   }
