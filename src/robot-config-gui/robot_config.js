@@ -1,5 +1,3 @@
-const internal = require("stream");
-
 class Mouse{
     x;
     y;
@@ -693,9 +691,17 @@ class V5AdiEncoder extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _reversed, _self, _mouse){
-        // Ensure that the port is an odd letter (A, C, E, G)
-        if(_port.charAt(1) !== "A" && _port.charAt(1) !== "C" && _port.charAt(1) !== "E" && _port.charAt(1) !== "G"){
-            throw new Error("Invalid ADI Encoder port: " + _port + ". Must be an odd letter (A, C, E, G)");
+        //Check if port pair
+        var topPort;
+        if(_port.charAt(0) === "{"){
+            // Get the port letter for top port
+            topPort = _port.split("\'")[1].trim();
+        } else {
+            topPort = _port;
+        }
+        // Ensure that the top port is an odd letter (A, C, E, G)
+        if(topPort.charAt(0) !== 'A' && topPort.charAt(0) !== 'C' && topPort.charAt(0) !== 'E' && topPort.charAt(0) !== 'G'){
+            throw new Error("Invalid ADI Encoder port letter: " + topPort + ". Must be an odd letter (A, C, E, G)");
         }
         super("ADI Encoder", _name, _port, _self, _mouse);
         this.reversed = _reversed;
@@ -749,9 +755,17 @@ class V5AdiUs extends V5Device{
      * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _self, _mouse){
-        // Ensure that the port is an odd letter (A, C, E, G)
-        if(_port.charAt(1) !== "A" && _port.charAt(1) !== "C" && _port.charAt(1) !== "E" && _port.charAt(1) !== "G"){
-            throw new Error("Invalid ADI US Sensor port: " + _port + ". Must be an odd letter (A, C, E, G)");
+        //Check if port pair
+        var adiPort;
+        if(_port.charAt(0) === "{"){
+            // Get the port letter for top port
+            adiPort = _port.split("\'")[1].trim();
+        } else {
+            adiPort = _port;
+        }
+        // Ensure that the top port is an odd letter (A, C, E, G)
+        if(adiPort.charAt(0) !== 'A' && adiPort.charAt(0) !== 'C' && adiPort.charAt(0) !== 'E' && adiPort.charAt(0) !== 'G'){
+            throw new Error("Invalid ADI Encoder port letter: " + adiPort + ". Must be an odd letter (A, C, E, G)");
         }
         super("ADI Ultrasonic", _name, _port, _self, _mouse);
     }
@@ -922,24 +936,7 @@ for(var i = 0, port; i < 21; i++){
 }
 
 var devices = [V5Device];
-devices.push(new V5Motor("11W MOTOR", -1, false, 11, null, null, null));
-devices.push(new V5Motor("5.5W MOTOR", -1, false, 5.5, null, null, null));
-devices.push(new V5MotorGroup("MOTOR GROUP", -1, false, null, null, null, null));
-devices.push(new V5RotationSensor("ROTATION SENSOR", 4, false, null, null));
-devices.push(new V5Imu("IMU", -1, null, null));
-devices.push(new V5Piston("PISTON", -1, false, null, null));
-devices.push(new V5OpticalSensor("OPTICAL SENSOR", -1, null, null));
-devices.push(new V5VisionSensor("VISION SENSOR", -1, null, null));
-devices.push(new V5DistanceSensor("DISTANCE SENSOR", -1, null, null));
-devices.push(new V5GpsSensor("GPS SENSOR", -1, 0, 0, null, null));
-devices.push(new V5AdiExpander("ADI EXPANDER", -1, null, null));
-devices.push(new V5AdiPot("ADI POT", -1, "V2", null, null));
-devices.push(new V5AdiAnalogIn("ADI ANALOG IN", -1, null, null));
-devices.push(new V5AdiDigitalIn("ADI DIGITAL IN", -1, null, null));
-devices.push(new V5AdiLineSensor("ADI LINE SENSOR", -1, null, null));
-devices.push(new V5AdiEncoder("ADI ENCODER", -1, false, null, null));
-devices.push(new V5AdiUs("ADI ULTRASONIC", -1, null, null));
-devices.push(new V5AdiLed("ADI LED", -1, 1, null, null));
+
 
 window.onload = setTimeout(function(){
     // HTML elements for adding generic listeners
@@ -970,6 +967,25 @@ window.onload = setTimeout(function(){
     const ADI_ENCODER = document.getElementById("ADI ENCODER");
     const ADI_US = document.getElementById("ADI ULTRASONIC");
     const ADI_LED = document.getElementById("ADI LED");
+
+    devices.push(new V5Motor("11W MOTOR", -1, false, 11, null, MOTOR_BIG, null));
+    devices.push(new V5Motor("5.5W MOTOR", -1, false, 5.5, null, MOTOR_SMALL, null));
+    devices.push(new V5MotorGroup("MOTOR GROUP", -1, false, null, null, MOTOR_GROUP, null));
+    devices.push(new V5RotationSensor("ROTATION SENSOR", 4, false, ROTATION_SENSOR, null));
+    devices.push(new V5Imu("IMU", -1, IMU, null));
+    devices.push(new V5Piston("PISTON", -1, false, PISTON, null));
+    devices.push(new V5OpticalSensor("OPTICAL SENSOR", -1, OPTICAL_SENSOR, null));
+    devices.push(new V5VisionSensor("VISION SENSOR", -1, VISION_SENSOR, null));
+    devices.push(new V5DistanceSensor("DISTANCE SENSOR", -1, DISTANCE_SENSOR, null));
+    devices.push(new V5GpsSensor("GPS SENSOR", -1, 0, 0, GPS_SENSOR, null));
+    devices.push(new V5AdiExpander("ADI EXPANDER", -1, ADI_EXPANDER, null));
+    devices.push(new V5AdiPot("ADI POT", '{-1, \'A\'}', "V2", ADI_POT, null));
+    devices.push(new V5AdiAnalogIn("ADI ANALOG IN", '{-1, \'A\'}', ADI_ANALOG_IN, null));
+    devices.push(new V5AdiDigitalIn("ADI DIGITAL IN", '{-1, \'A\'}', ADI_DIGITAL_IN, null));
+    devices.push(new V5AdiLineSensor("ADI LINE SENSOR", '{-1, \'A\'}', ADI_LINE_SENSOR, null));
+    devices.push(new V5AdiEncoder("ADI ENCODER", '{-1, \'A\'}', false, ADI_ENCODER, null));
+    devices.push(new V5AdiUs("ADI ULTRASONIC", '{-1, \'A\'}', ADI_US, null));
+    devices.push(new V5AdiLed("ADI LED", '{-1, \'A\'}', 1, ADI_LED, null));
 
     //Add event listeners to each device entry
     for(var i = 0; i < deviceRows.length; i++){
