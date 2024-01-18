@@ -26,10 +26,10 @@ table .port-row{
     vertical-align: middle;
     padding: 0;
     margin: 0;
-    height: 100px;
+    height: 84.2857143px;
 }
-table .port_col{
-    width: 100px;
+table .port-col{
+    width: 84.2857143px;
     border:1px transparent;
 }
 td{
