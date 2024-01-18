@@ -1,3 +1,4 @@
+const internal = require("stream");
 
 class Mouse{
     x;
@@ -78,26 +79,73 @@ class V5Device{
         throw new Error("Method not implemented.");
     }
 
+    /**
+     * Gets whether or not the mouse is hovering over the device
+     * 
+     * @return {Boolean} Whether or not the mouse is hovering over the device
+     */
     get hover(){
-        return this.mouse.hover(this); // Yay classes lol
+        return this.mouse.hover(this); 
     }
 
+    /**
+     * Updates the beingDragged variable
+     * 
+     * @param {Mouse} mouse the mouse object
+     * @returns {Boolean} Whether or not the device is being dragged
+     */
     update(mouse){
         if(this.mouse.leftDown && this.hover){
             this.beingDragged = true; // 
         }
     }
 
+    /**
+     * Gets a verbose description of the device
+     * 
+     * @returns {String} Verbose description of the device
+     */
     toString(){
         return this.name + " is a " + this.type + " on port " + this.port.toString();
     }
 
+    /**
+     * Gets the pros code for the device
+     * 
+     * @returns {String} The pros code for the device
+     */
     toPros(){
         throw new Error("Method not implemented.");
     }
 
+    /**
+     * Checks if two devices are the identical
+     * 
+     * @param {V5Device} device the device to compare against
+     * @returns {Boolean} Whether or not the devices are equal
+     */
     equals(device){
         return this.name === device.name && this.port === device.port && this.type === device.type && this.self === device.self;
+    }
+
+    /**
+     * Creates a new V5Device with all instance data copied
+     * 
+     * @returns {V5Device} The new device
+     */
+    #clone(){
+        throw new Error("Method not implemented.");
+    }
+
+    /**
+     * Creates a copy of the demo object in an actual port
+     * 
+     * @param {number | String} _port Port of the device to be copied into existence on the actual robot
+     * @returns {V5Device} The new device
+     */
+    generate(_port){
+        var newDevice = this.#clone();
+        newDevice.port = _port();
     }
 }
 
@@ -120,7 +168,7 @@ class V5Motor extends V5Device{
      */
     constructor(_name, _port, _reversed, _wattage, _rpm = 200, _self, _mouse){
         const type = _wattage.toString() + "W Motor";
-        super(type, _name, _port, _x, _y, _canvas, _self, _mouse);
+        super(type, _name, _port, _self, _mouse);
         this.reversed = _reversed;
         this.wattage = _wattage;
         this.rpm = _rpm;
@@ -139,6 +187,18 @@ class V5Motor extends V5Device{
         + ", " + (this.reversed? "true" : "false")
         + ");\n";
     }
+
+    #clone(){
+        return new V5Motor(this.name, this.port, this.reversed, this.wattage, this.rpm, this.self, this.mouse);
+    }
+
+    generate(_port){
+        var newMotor = this.#clone();
+        newMotor.port = _port;
+        return newMotor;
+    }
+    
+    
 }
 
 class V5MotorGroup extends V5Device{
@@ -178,6 +238,17 @@ class V5MotorGroup extends V5Device{
         str += "});\n";
         return str;
     }
+
+    addMotor(_motor){
+        // Check for duplicate motors
+        for(var i = 0, motor; motor = this.motors[i]; i++){
+            if(motor.equals(_motor)){
+                throw new Error("Cannot add motor " + _motor.name + " to motor group " + this.name + " because it is already in the group");
+            }
+        }
+        this.motors.push(_motor);
+    }
+
 }
 
 class V5RotationSensor extends V5Device{
@@ -822,54 +893,136 @@ class V5Robot{
     }
 }
 
+class DeviceImage{
+    self; // HTML element of the image
+    type; // Type of device
+    selected;
+
+    /**
+     * Constructs and initializes a new DeviceImage
+     * 
+     * @param {String} _type Type of device
+     **/
+    constructor(_type){
+        this.type = _type;
+        this.selected = false;
+    }
+}
 dev1 = new V5Motor("dev1", 1, false, 11, 200, null, null);
 
-// HTML elements for adding generic listeners
-const deviceTable = document.getElementById("device-table");
-const portTable = document.getElementById("ports-table");
-const deviceRows = document.getElementsByClassName("device-row");
-const deviceCols = document.getElementsByClassName("device-col");
-const portRows = document.getElementsByClassName("port-row");
-const portCols = document.getElementsByClassName("port-col");
-const debug = document.getElementById("debug");
-
-// HTML elements for adding specific listeners, initializing v5Devices
-const MOTOR_BIG = document.getElementById("11W MOTOR");
-const MOTOR_SMALL = document.getElementById("5.5W MOTOR");
-const MOTOR_GROUP = document.getElementById("MOTOR GROUP");
-const ROTATION_SENSOR = document.getElementById("ROTATION SENSOR");
-const IMU = document.getElementById("IMU");
-const PISTON = document.getElementById("PISTON");
-const OPTICAL_SENSOR = document.getElementById("OPTICAL SENSOR");
-const VISION_SENSOR = document.getElementById("VISION SENSOR");
-const DISTANCE_SENSOR = document.getElementById("DISTANCE SENSOR");
-const GPS_SENSOR = document.getElementById("GPS SENSOR");
-const ADI_EXPANDER = document.getElementById("ADI EXPANDER");
-const ADI_POT = document.getElementById("ADI POT");
-const ADI_ANALOG_IN = document.getElementById("ADI ANALOG IN");
-const ADI_DIGITAL_IN = document.getElementById("ADI DIGITAL IN");
-const ADI_LINE_SENSOR = document.getElementById("ADI LINE SENSOR");
-const ADI_ENCODER = document.getElementById("ADI ENCODER");
-const ADI_US = document.getElementById("ADI ULTRASONIC");
-const ADI_LED = document.getElementById("ADI LED");
 
 
 
-debug.innerHTML = "doing something!";
+
+
+
 var ports = [];
 for(var i = 0, port; i < 21; i++){
     ports.push(new V5Port(i+1)); // Ports are 1-indexed
 }
 
-window.onload = function(){
+var devices = [V5Device];
+devices.push(new V5Motor("11W MOTOR", -1, false, 11, null, null, null));
+devices.push(new V5Motor("5.5W MOTOR", -1, false, 5.5, null, null, null));
+devices.push(new V5MotorGroup("MOTOR GROUP", -1, false, null, null, null, null));
+devices.push(new V5RotationSensor("ROTATION SENSOR", 4, false, null, null));
+devices.push(new V5Imu("IMU", -1, null, null));
+devices.push(new V5Piston("PISTON", -1, false, null, null));
+devices.push(new V5OpticalSensor("OPTICAL SENSOR", -1, null, null));
+devices.push(new V5VisionSensor("VISION SENSOR", -1, null, null));
+devices.push(new V5DistanceSensor("DISTANCE SENSOR", -1, null, null));
+devices.push(new V5GpsSensor("GPS SENSOR", -1, 0, 0, null, null));
+devices.push(new V5AdiExpander("ADI EXPANDER", -1, null, null));
+devices.push(new V5AdiPot("ADI POT", -1, "V2", null, null));
+devices.push(new V5AdiAnalogIn("ADI ANALOG IN", -1, null, null));
+devices.push(new V5AdiDigitalIn("ADI DIGITAL IN", -1, null, null));
+devices.push(new V5AdiLineSensor("ADI LINE SENSOR", -1, null, null));
+devices.push(new V5AdiEncoder("ADI ENCODER", -1, false, null, null));
+devices.push(new V5AdiUs("ADI ULTRASONIC", -1, null, null));
+devices.push(new V5AdiLed("ADI LED", -1, 1, null, null));
+
+window.onload = setTimeout(function(){
+    // HTML elements for adding generic listeners
+    const deviceTable = document.getElementById("device-table");
+    const portTable = document.getElementById("ports-table");
+    const deviceRows = document.getElementsByClassName("device-row");
+    const deviceCols = document.getElementsByClassName("device-col");
+    const portRows = document.getElementsByClassName("port-row");
+    const portCols = document.getElementsByClassName("port-col");
+    const debug = document.getElementById("debug");
+
+    // HTML elements for adding specific listeners, initializing v5Devices
+    const MOTOR_BIG = document.getElementById("11W MOTOR");
+    const MOTOR_SMALL = document.getElementById("5.5W MOTOR");
+    const MOTOR_GROUP = document.getElementById("MOTOR GROUP");
+    const ROTATION_SENSOR = document.getElementById("ROTATION SENSOR");
+    const IMU = document.getElementById("IMU");
+    const PISTON = document.getElementById("PISTON");
+    const OPTICAL_SENSOR = document.getElementById("OPTICAL SENSOR");
+    const VISION_SENSOR = document.getElementById("VISION SENSOR");
+    const DISTANCE_SENSOR = document.getElementById("DISTANCE SENSOR");
+    const GPS_SENSOR = document.getElementById("GPS SENSOR");
+    const ADI_EXPANDER = document.getElementById("ADI EXPANDER");
+    const ADI_POT = document.getElementById("ADI POT");
+    const ADI_ANALOG_IN = document.getElementById("ADI ANALOG IN");
+    const ADI_DIGITAL_IN = document.getElementById("ADI DIGITAL IN");
+    const ADI_LINE_SENSOR = document.getElementById("ADI LINE SENSOR");
+    const ADI_ENCODER = document.getElementById("ADI ENCODER");
+    const ADI_US = document.getElementById("ADI ULTRASONIC");
+    const ADI_LED = document.getElementById("ADI LED");
+
     //Add event listeners to each device entry
-    for(var i = 0, row; row = deviceRows[i]; i++){
-        for(var j = 0, col; col = deviceCols[i * j + j]; j++){
-            console.log("adding event listener to device entry");
-            col.addEventListener("mousedown", function(){
-                this.style.border = "5px solid red";
-                console.log("mouseover!!!");
-            });
+    for(var i = 0; i < deviceRows.length; i++){
+        
+        var row = deviceRows[i];
+        for(var j = 0; j < 6; j++){
+            var id = (i*6) + j;
+            var col = deviceCols[id]; 
+            devices[id].self = col;
+            col.setAttribute("id", "device-" + id);
+            col.onclick = function(){
+                var myID = parseInt(this.id.split("-")[1]);
+                //set all selected to false
+                console.log("Selecting device " + myID.toString());
+                for(var k = 0, device; device = devices[k]; k++){
+                    device.selected = false;
+                    device.self.style.border = "1px transparent";
+                }
+                devices[myID].selected = true;
+                this.style.border = "1px solid red";
+            };
+            col.onmouseover = function(){
+                var myID = parseInt(this.id.split("-")[1]);
+                if(!devices[myID].selected){
+                    this.style.border = "1px solid blue";
+                }
+            };
+            col.onmouseout = function(){
+                var myID = parseInt(this.id.split("-")[1]);
+                if(!devices[myID].selected){
+                    this.style.border = "1px transparent";
+                }
+            };
         }
     }
-};
+
+    //Add event listeners to each port entry
+    for(var i = 0; i < portRows.length; i++){
+        for(var j = 0; j < 3; j++){
+            var id = (i*3) + j;
+            var col = portCols[id];
+            col.setAttribute("id", "port-" + id);
+            col.onclick = function(){
+                // See if there is a device selected
+                for(var k = 0; k < devices.length; k++){
+                    var myID = parseInt(this.id.split("-")[1]);
+                    var device = devices[k].generate(myID);
+                    if(devices[k].selected){
+                        // If so, add it to this port
+                        var myID = parseInt(this.id.split("-")[1]);
+                    }
+                }
+            };
+        }
+    }
+}, 0);

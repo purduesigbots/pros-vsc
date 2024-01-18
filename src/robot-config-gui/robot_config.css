@@ -16,9 +16,10 @@ table .device-row{
     height: 100px;
 }
 table .device-col{
-
     width: 100px;
+    border:1px transparent;
 }
+
 table .port-row{
 
     text-align: center;
@@ -28,11 +29,9 @@ table .port-row{
     height: 100px;
 }
 table .port_col{
-
     width: 100px;
+    border:1px transparent;
 }
 td{
-    padding: 0px;
-    border: 1px;
-    border-radius: 2px;
+    padding:5px
 }
