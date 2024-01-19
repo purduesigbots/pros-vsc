@@ -264,7 +264,7 @@ export class BaseCommand {
           if (response === "Yes") {
             process.stdin?.write("y\n");
           } else {
-            process.kill();
+            process.stdin?.write("N\n");
           }
         });
       } else if (line.startsWith("Multiple") && prompt) {
