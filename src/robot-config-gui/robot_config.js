@@ -247,6 +247,15 @@ class V5MotorGroup extends V5Device{
         this.motors.push(_motor);
     }
 
+    removeMotor(_motor){
+        for(var i = 0, motor; motor = this.motors[i]; i++){
+            if(motor.equals(_motor)){
+                this.motors.splice(i, 1);
+                return;
+            }
+        }
+    }
+
 }
 
 class V5RotationSensor extends V5Device{
@@ -840,14 +849,17 @@ class V5Port{
     device = null;
     x;
     y;
+    self;
 
     /**
      * Constructs and initializes a new V5Port
      * 
      * @param {Number | String} _port Integer port number, 1-21; or port letter, A-H inclusive, or port pair, e.g. {{1, 'A'}}
+     * @param {HTMLElement} _self HTML element of the port
      **/
-    constructor(_port){
+    constructor(_port, _self){
         this.port = _port;
+        this.self = _self;
     }
 
     /**
@@ -931,12 +943,156 @@ dev1 = new V5Motor("dev1", 1, false, 11, 200, null, null);
 
 
 var ports = [];
-for(var i = 0, port; i < 21; i++){
-    ports.push(new V5Port(i+1)); // Ports are 1-indexed
+
+var devices = [];
+
+function updatePorts(){
+    for(var i = 0, port; port = ports[i]; i++){
+        // Check if this port has a device
+        if(port.device === null){
+            // If not, set the image to empty
+            //port.self.src = "media/Empty_Port.png";
+            port.self.innerHTML = 
+            `
+            <h2>Port ${(i+1).toString()}</h2>
+            `;
+        } else {
+            // If so, set the image to the device's image
+            //port.self.src = port.device.getImgUri();
+            port.self.innerHTML = 
+            `
+            <h2>Port ${(i+1).toString()}</h2>
+            <body>${port.device.name}</body>
+            `;
+        }
+    }
 }
 
-var devices = [V5Device];
-
+function updateOptions(optionsElem){
+    /**
+     * Unique: Motor (11W), Motor Group, GPS, ADI Led, 
+     * Name, Reversed: Motor (5.5W), Rotation Sensor, Piston, ADI Pot, ADI Encoder
+     * Name: IMU, Optical Sensor, Vision Sensor, Distance Sensor, ADI Analog In, ADI Digital In, ADI Line Sensor, ADI Ultrasonic
+     */
+    // Check if a device is selected
+    var selected = false;
+    for(var i = 0, device; device = devices[i]; i++){
+        if(device.selected){
+            selected = true;
+            break;
+        }
+    }
+    // If not, display default options message
+    if(!selected){
+        optionsElem.innerHTML = 
+        `
+        <h1>Options</h1>
+        <p id="Options-Body">
+        Select a device from the table above or an already configured device below to configure its options.
+        </p>
+        `;
+        return;
+    }
+    // If so, display the options for that device
+    var device = devices[i];
+    if(device.type === "11W Motor"){
+        // Parameters present: name, reversed, gearset
+        // Generate (ordered) gearset options
+        var firstGearset;
+        var secondGearset;
+        var thirdGearset;
+        switch(device.gearset){
+            case 100:
+                firstGearset = "100 (Red)";
+                secondGearset = "200 (Green)";
+                thirdGearset = "600 (Blue)";
+                break;
+            case 200:
+                firstGearset = "200 (Green)";
+                secondGearset = "100 (Red)";
+                thirdGearset = "600 (Blue)";
+                break;
+            case 600:
+                firstGearset = "600 (Blue)";
+                secondGearset = "100 (Red)";
+                thirdGearset = "200 (Green)";
+                break;
+            default:
+                throw new Error("Invalid gearset: " + device.gearset);
+        }
+        optionsElem.innerHTML = 
+        `
+        <h1>Options</h1>
+        <input type="text" id="Option_Name" placeholder="${device.name}"
+            <label for="Option_Name">Device Name</label>
+        </input>
+        <input type="checkbox" id="Option_Reversed" placeholder="${device.reversed}"
+            <label for="Option_Reversed">Reversed</label>
+        </input>
+        <label for="Option_Gearset">Gearset</label>
+        <select name="Option_Gearset" id="Option_Gearset">
+            <option value="${firstGearset.split(' ')[0]}">${firstGearset}</option>
+            <option value="${secondGearset.split(' ')[0]}">${secondGearset}</option>
+            <option value="${thirdGearset.split(' ')[0]}">${thirdGearset}</option>
+        `;
+        return;
+    } else if(device.type === "5.5W Motor" || device.type === "ADI Pot" || device.type === "ADI Encoder" || device.type === "Rotation Sensor" || device.type === "Piston"){
+        // Parameters present: name, reversed
+        optionsElem.innerHTML = 
+        `
+        <h1>Options</h1>
+        <input type="text" id="Option_Name" placeholder="${device.name}"
+            <label for="Option_Name">Device Name</label>
+        </input>
+        <input type="checkbox" id="Option_Reversed" placeholder="${device.reversed}"
+            <label for="Option_Reversed">Reversed</label>
+        </input>
+        `;
+    } else if(device.type === "Motor Group"){
+        throw new Error("Motor Group options not yet implemented");
+    } else if(device.type === "IMU" || device.type === "Optical Sensor" || device.type === "Vision Sensor" || device.type === "Distance Sensor" || device.type === "ADI Analog In" || device.type === "ADI Digital In" || device.type === "ADI Line Sensor" || device.type === "ADI Ultrasonic"){
+        // Parameters present: name
+        optionsElem.innerHTML = 
+        `
+        <h1>Options</h1>
+        <input type="text" id="Option_Name" placeholder="${device.name}"
+            <label for="Option_Name">Device Name</label>
+        </input>
+        `;
+    } else if(device.type === "GPS Sensor"){
+        // Parameters present: name, x offset, y offset
+        optionsElem.innerHTML = 
+        `
+        <h1>Options</h1>
+        <input type="text" id="Option_Name" placeholder="${device.name}"
+            <label for="Option_Name">Device Name</label>
+        </input>
+        <input type="number" id="Option_X" placeholder="${device.xOff}"
+            <label for="Option_X">X Offset</label>
+        </input>
+        <input type="number" id="Option_Y" placeholder="${device.yOff}"
+            <label for="Option_Y">Y Offset</label>
+        </input>
+        `;
+    } else if(device.type === "ADI Expander"){
+        throw new Error("ADI Expander options not yet implemented");
+    } else if(device.type === "ADI Led"){
+        // Parameters present: name, length
+        optionsElem.innerHTML = 
+        `
+        <h1>Options</h1>
+        <input type="text" id="Option_Name" placeholder="${device.name}"
+            <label for="Option_Name">Device Name</label>
+        </input>
+        <input type="number" id="Option_Length" placeholder="${device.length}"
+            <label for="Option_Length">Length</label>
+        </input>
+        `;
+    } else {
+        throw new Error("Invalid device type: " + device.type);
+    }
+        
+}
 
 window.onload = setTimeout(function(){
     // HTML elements for adding generic listeners
@@ -947,6 +1103,8 @@ window.onload = setTimeout(function(){
     const portRows = document.getElementsByClassName("port-row");
     const portCols = document.getElementsByClassName("port-col");
     const debug = document.getElementById("debug");
+    const optionsBody = document.getElementById("Options-Body");
+    const options = document.getElementById("Options");
 
     // HTML elements for adding specific listeners, initializing v5Devices
     const MOTOR_BIG = document.getElementById("11W MOTOR");
@@ -968,8 +1126,8 @@ window.onload = setTimeout(function(){
     const ADI_US = document.getElementById("ADI ULTRASONIC");
     const ADI_LED = document.getElementById("ADI LED");
 
-    devices.push(new V5Motor("11W MOTOR", -1, false, 11, null, MOTOR_BIG, null));
-    devices.push(new V5Motor("5.5W MOTOR", -1, false, 5.5, null, MOTOR_SMALL, null));
+    devices.push(new V5Motor("11W MOTOR", -1, false, 11, 200, MOTOR_BIG, null));
+    devices.push(new V5Motor("5.5W MOTOR", -1, false, 5.5, 200, MOTOR_SMALL, null));
     devices.push(new V5MotorGroup("MOTOR GROUP", -1, false, null, null, MOTOR_GROUP, null));
     devices.push(new V5RotationSensor("ROTATION SENSOR", 4, false, ROTATION_SENSOR, null));
     devices.push(new V5Imu("IMU", -1, IMU, null));
@@ -998,7 +1156,16 @@ window.onload = setTimeout(function(){
             col.setAttribute("id", "device-" + id);
             col.onclick = function(){
                 var myID = parseInt(this.id.split("-")[1]);
-                //set all selected to false
+                //Check if already selected
+                if(devices[myID].selected){
+                    //if so, deselect
+                    console.log("Deselecting device " + myID.toString());
+                    devices[myID].selected = false;
+                    this.style.border = "1px transparent";
+                    return;
+                }
+                //Else, select this device and deselect all others
+                //Set all selected to false
                 console.log("Selecting device " + myID.toString());
                 for(var k = 0, device; device = devices[k]; k++){
                     device.selected = false;
@@ -1006,12 +1173,13 @@ window.onload = setTimeout(function(){
                 }
                 devices[myID].selected = true;
                 this.style.border = "1px solid red";
+                updateOptions(options);
             };
             col.onmouseover = function(){
                 var myID = parseInt(this.id.split("-")[1]);
                 if(!devices[myID].selected){
                     this.style.border = "1px solid blue";
-                }
+                } 
             };
             col.onmouseout = function(){
                 var myID = parseInt(this.id.split("-")[1]);
@@ -1023,22 +1191,36 @@ window.onload = setTimeout(function(){
     }
 
     //Add event listeners to each port entry
-    for(var i = 0; i < portRows.length; i++){
-        for(var j = 0; j < 3; j++){
-            var id = (i*3) + j;
-            var col = portCols[id];
-            col.setAttribute("id", "port-" + id);
-            col.onclick = function(){
-                // See if there is a device selected
-                for(var k = 0; k < devices.length; k++){
-                    var myID = parseInt(this.id.split("-")[1]);
-                    var device = devices[k].generate(myID);
-                    if(devices[k].selected){
-                        // If so, add it to this port
-                        var myID = parseInt(this.id.split("-")[1]);
+    console.log("Port Rows Info: " + portRows.length.toString() + " " + portCols.length.toString());
+    for(var i = 0; i < portCols.length; i++){
+        var col = portCols[i];
+        col.setAttribute("id", "port-" + (i + 1));
+        ports.push(new V5Port(i + 1, col));
+        col.onclick = function(){
+            // See if there is a device selected
+            for(var k = 0; k < devices.length; k++){
+                if(devices[k].selected){
+                    // If so, generate such a device for this port
+                    // Deselect the device (unless it is the motor group device)
+                    if(devices[k].type !== "Motor Group"){
+                        devices[k].selected = false;
+                        devices[k].self.style.border = "1px transparent";
                     }
+                    var myID = parseInt(this.id.split("-")[1]);
+                    console.log(" Adding device " + devices[k].name + " to port " + myID.toString());
+                    var device = devices[k].generate(myID);
+                    ports[myID - 1].device = device;
                 }
-            };
-        }
+            }
+            updatePorts();
+            updateOptions(options);
+        };
+        col.onmouseover = function(){
+            this.style.border = "1px solid blue";
+        };
+        col.onmouseout = function(){
+            this.style.border = "1px transparent";
+        };
     }
-}, 0);
+    updatePorts();
+});
