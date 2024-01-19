@@ -20,6 +20,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
         new TreeItem("Upload", undefined, "pros.upload"),
         new TreeItem("Build", undefined, "pros.build"),
         new TreeItem("Clean", undefined, "pros.clean"),
+        new TreeItem("Run", undefined, "pros.run"),
+        new TreeItem("Stop", undefined, "pros.stop"),
         new TreeItem("Integrated Terminal", undefined, "pros.showterminal"),
       ]),
       new TreeItem("V5 Brain", [
