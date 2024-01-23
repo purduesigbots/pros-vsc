@@ -9,7 +9,7 @@ export class Analytics {
     if (
       !vscode.workspace
         .getConfiguration("pros")
-        .get<boolean>("useGoogleAnalytics")
+        .get<boolean>("Enable Analytics")
     ) {
       // don't set the UA visitor if the user has turned off telemetry
       return;

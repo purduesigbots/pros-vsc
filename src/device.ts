@@ -5,6 +5,7 @@ import { prosLogger } from "./extension";
 import { PREFIX } from "./commands/cli-parsing";
 import { StatusBarItem, window, workspace } from "vscode";
 import { BaseCommand } from "./commands";
+import { usb } from "usb";
 
 /* eslint-disable @typescript-eslint/naming-convention */
 export type DeviceInfo = {
@@ -99,6 +100,7 @@ export type PROSDeviceInfo = {
 
 var currentPort = "";
 var portList: PROSDeviceInfo[] = [];
+var suspended = false;
 
 export const getV5ComPorts = (): PROSDeviceInfo[] => {
   return portList;
@@ -106,7 +108,7 @@ export const getV5ComPorts = (): PROSDeviceInfo[] => {
 
 const getV5ComPortsInternal = async (): Promise<PROSDeviceInfo[]> => {
   const { stdout, stderr } = await promisify(child_process.exec)(
-    "pros lsusb --machine-output",
+    `pros lsusb --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`,
     {
       timeout: 5000,
       env: {
@@ -160,12 +162,15 @@ export const getV5DeviceInfo = async (port: string): Promise<V5DeviceInfo> => {
 };
 
 const resolvePort = async (status: StatusBarItem): Promise<void> => {
+  if (suspended) {
+    return;
+  }
   let v5Ports = await getV5ComPortsInternal();
 
   let showNotifications =
     workspace
       .getConfiguration("pros")
-      .get<boolean>("pros.showDeviceConnectNotifications") ?? true;
+      .get<boolean>("pros.show Device Connect Notifications") ?? true;
 
   if (showNotifications) {
     // detect changes in device list
@@ -220,6 +225,14 @@ export const setPort = (port: string): void => {
   currentPort = port;
 };
 
+export const suspend = (): void => {
+  suspended = true;
+};
+
+export const unsuspend = (): void => {
+  suspended = false;
+};
+
 export const getCurrentPort = (): string => {
   return currentPort;
 };
@@ -256,5 +269,11 @@ export const setTeam = async (team: string): Promise<void> => {
 
 export const startPortMonitoring = (status: StatusBarItem): void => {
   status.show();
-  setInterval(resolvePort, 500, status);
+  usb.addListener("attach", () => {
+    resolvePort(status);
+  });
+  usb.addListener("detach", () => {
+    resolvePort(status);
+  });
+  resolvePort(status);
 };

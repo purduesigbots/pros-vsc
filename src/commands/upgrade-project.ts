@@ -39,9 +39,10 @@ export const upgradeProject = async () => {
   //let {newKernel, newOkapi} = await getLatestKernelOkapiVersion(target);
   const upgradeProjectCommandOptions: BaseCommandOptions = {
     command: "pros",
-    args: ["c", "u", ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? [])],
+    args: ["c", "u"],
     message: "Upgrading Project",
     requiresProsProject: true,
+    successMessage: "Project Upgraded Successfully",
   };
 
   const upgradeProjectCommand: BaseCommand = new BaseCommand(
@@ -52,14 +53,17 @@ export const upgradeProject = async () => {
     const { target, curKernel, curOkapi } =
       await getCurrentKernelOkapiVersion();
     const { newKernel, newOkapi } = await getLatestKernelOkapiVersion(target);
-    if (curKernel === newKernel && curOkapi === newOkapi) {
+    if (
+      curKernel === newKernel &&
+      (curOkapi === newOkapi || curOkapi === undefined)
+    ) {
       await vscode.window.showInformationMessage("Project is up to date!");
       return;
     }
 
     await userApproval(
       newKernel === curKernel ? undefined : newKernel,
-      newOkapi === curOkapi ? undefined : newOkapi
+      newOkapi === curOkapi || curOkapi === undefined ? undefined : newOkapi
     );
 
     await upgradeProjectCommand.runCommand();

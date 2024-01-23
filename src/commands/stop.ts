@@ -4,13 +4,10 @@ import { BaseCommand, BaseCommandOptions } from "./base-command";
 export const stop = async () => {
   const stopCommandOptions: BaseCommandOptions = {
     command: "pros",
-    args: [
-      "v5",
-      "stop",
-      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
-    ],
+    args: ["v5", "stop"],
     message: "Stopping Project",
     requiresProsProject: true,
+    successMessage: "Project Stopped Successfully",
   };
 
   const stopCommand: BaseCommand = new BaseCommand(stopCommandOptions);

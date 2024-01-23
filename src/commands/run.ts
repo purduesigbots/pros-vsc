@@ -6,14 +6,10 @@ export const run = async () => {
   const slot = await findSlotFromProjectPros();
   const runCommandOptions: BaseCommandOptions = {
     command: "pros",
-    args: [
-      "v5",
-      "run",
-      slot.toString(),
-      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
-    ],
+    args: ["v5", "run", slot.toString()],
     message: "Running Project",
     requiresProsProject: true,
+    successMessage: "hidden", // I don't think we need an explicit success message here, they'll see if it's running or not on the brain
   };
 
   const runCommand: BaseCommand = new BaseCommand(runCommandOptions);

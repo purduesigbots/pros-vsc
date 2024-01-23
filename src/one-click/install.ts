@@ -19,6 +19,7 @@ import {
 } from "./path";
 import { prosLogger } from "../extension";
 import { BackgroundProgress } from "../logger";
+import * as device from "../device";
 //TOOLCHAIN and CLI_EXEC_PATH are exported and used for running commands.
 export var TOOLCHAIN: string;
 export var CLI_EXEC_PATH: string;
@@ -132,11 +133,11 @@ async function getUrls(
   const customCli =
     vscode.workspace
       .getConfiguration("pros")
-      .get<string>("OneClick: CliDownloadURL") ?? "default";
+      .get<string>("OneClick: CLI Download URL") ?? "default";
   const customToolchain =
     vscode.workspace
       .getConfiguration("pros")
-      .get<string>("OneClick: ToolchainDownloadURL") ?? "default";
+      .get<string>("OneClick: Toolchain Download URL") ?? "default";
   await prosLogger.log("OneClick", `Checking for custom installation URLs`);
   console.log(`Custom URLS: ${customCli} | ${customToolchain}`);
   if (customCli !== "default") {
@@ -180,7 +181,7 @@ async function getUrls(
 
 export async function install(context: vscode.ExtensionContext) {
   const preparingInstall = new BackgroundProgress(
-    "Preparing to install PROS",
+    "Verifying Current PROS Installation",
     false,
     true
   );
@@ -217,6 +218,7 @@ export async function install(context: vscode.ExtensionContext) {
   let vexcomVersion = "1_0_0_23";
 
   if (cliVersion === undefined || toolchainVersion === undefined) {
+    preparingInstall.stop();
     throw new Error("Failed to access version number");
   }
 
@@ -367,7 +369,14 @@ export async function install(context: vscode.ExtensionContext) {
         "OneClick",
         "Toolchain is not working. Installing just the toolchain"
       );
-      promises = [downloadextract(context, downloadToolchain, toolchainName)];
+      promises = [
+        downloadextract(
+          context,
+          downloadToolchain,
+          toolchainName,
+          "PROS Toolchain"
+        ),
+      ];
     } else {
       await prosLogger.log(
         "OneClick",
@@ -393,7 +402,8 @@ export async function install(context: vscode.ExtensionContext) {
     console.log("sent : " + prompttitle);
     preparingInstall.stop();
     if (labelResponse === option1) {
-      targetedPortion = path.join("install", `pros-cli-${system}}`);
+      device.suspend();
+      targetedPortion = path.join("install", `pros-cli-${system}`);
       let deleteDir = path.join(
         context.globalStorageUri.fsPath,
         targetedPortion
@@ -442,6 +452,7 @@ export async function install(context: vscode.ExtensionContext) {
     console.log("sent : " + prompttitle);
     preparingInstall.stop();
     if (labelResponse === "Install Now!") {
+      device.suspend();
       await prosLogger.log("OneClick", "Removing Old CLI and Toolchain");
       console.log("removing old cli and toolchain");
       await removeDirAsync(
@@ -495,13 +506,7 @@ export async function install(context: vscode.ExtensionContext) {
   console.log("Cleanup and Verification");
   await prosLogger.log("OneClick", "Cleaning up after installation");
   await vscode.commands.executeCommand("pros.verify");
-
-  // Do we want to auto disable install on startup? This will remove the auto update portion of the extension right?
-  /*
-  vscode.workspace
-    .getConfiguration("pros")
-    .update("showInstallOnStartup", false);
-    */
+  device.unsuspend();
 }
 
 async function createDirs(storagePath: string) {
@@ -578,7 +583,7 @@ export async function cleanup(
           );
         }
       } catch (err: any) {
-        vscode.window.showInformationMessage("ERROR DURING VERIFICATION");
+        vscode.window.showInformationMessage("FATAL ERROR DURING VERIFICATION");
         prosLogger.log("OneClick", err, "ERROR");
       }
     }
@@ -659,18 +664,14 @@ export async function configurePaths(
   process.env.PATH = `${process.env.PATH}`; // bypass compile errors
   await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   process.env.PATH =
-    `${addQuotes ? `"` : ""}` +
     `${cliExecPath}${PATH_SEP}` +
     `${path.join(toolchainPath, "bin")}${PATH_SEP}` +
     `${vexcomPath}${PATH_SEP}` +
-    `${process.env.PATH.replace(/\"/g, "")}` +
-    `${addQuotes ? `"` : ""}`;
+    `${process.env.PATH.replace(/\"/g, "")}`;
   await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   // Make PROS_TOOCLHAIN variable
   await prosLogger.log("OneClick", "Setting PROS_TOOLCHAIN");
-  process.env.PROS_TOOLCHAIN = `${addQuotes ? `"` : ""}${TOOLCHAIN}${
-    addQuotes ? `"` : ""
-  }`;
+  process.env.PROS_TOOLCHAIN = TOOLCHAIN;
 
   process.env.LC_ALL = "en_US.utf-8";
   if (repeat) {
@@ -822,9 +823,6 @@ export async function installVision(context: vscode.ExtensionContext) {
     );
     return;
   }
-  vscode.workspace
-    .getConfiguration("pros")
-    .update("showInstallOnStartup", false);
 
   vscode.window.showInformationMessage("Vision Utility Installed!");
 }

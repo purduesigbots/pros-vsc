@@ -34,9 +34,9 @@
     "color": "#D6B872",
     "theme": "dark"
   },
-  "version": "0.6.0",
+  "version": "0.7.0",
   "engines": {
-    "vscode": "^1.56.0"
+    "vscode": "^1.82.0"
   },
   "categories": [
     "Other"
@@ -69,6 +69,7 @@
           "contextualTitle": "PROS"
         },
         {
+          "when": "pros.betaFeaturesEnabled",
           "id": "pros.brainView",
           "name": "Brain View",
           "type": "webview",
@@ -118,11 +119,19 @@
       },
       {
         "command": "pros.run",
-        "title": "PROS: Run"
+        "title": "PROS: Run",
+        "icon": {
+          "light": "media/run-tux-white.png",
+          "dark": "media/run-tux-white.png"
+        }
       },
       {
         "command": "pros.stop",
-        "title": "PROS: Stop"
+        "title": "PROS: Stop",
+        "icon": {
+          "light": "media/stop-tux-white.png",
+          "dark": "media/stop-tux-white.png"
+        }
       },
       {
         "command": "pros.clean",
@@ -203,6 +212,10 @@
       {
         "command": "pros.robotname",
         "title": "PROS: Set Robot Name"
+      },
+      {
+        "command": "pros.opendocs",
+        "title": "PROS: Open Docs"
       }
     ],
     "keybindings": [
@@ -237,6 +250,16 @@
         {
           "when": "true",
           "command": "pros.build&upload",
+          "group": "navigation@1"
+        },
+        {
+          "when": "true",
+          "command": "pros.run",
+          "group": "navigation@1"
+        },
+        {
+          "when": "true",
+          "command": "pros.stop",
           "group": "navigation@1"
         }
       ],
@@ -301,7 +324,7 @@
         "displayName": "PROS Project",
         "selector": [
           {
-            "filenamePattern": "*.pros"
+            "filenamePattern": "project.pros"
           }
         ]
       }
@@ -309,42 +332,42 @@
     "configuration": {
       "title": "PROS",
       "properties": {
-        "pros.useGoogleAnalytics": {
+        "pros.Enable Analytics": {
           "type": "boolean",
           "default": true,
           "description": "Send anonymous usage statistics."
         },
-        "pros.showWelcomeOnStartup": {
+        "pros.Show Welcome On Startup": {
           "type": "boolean",
           "default": true,
           "description": "Show welcome page on startup."
         },
-        "pros.showInstallOnStartup": {
+        "pros.Enable Auto Updates": {
           "type": "boolean",
           "default": true,
-          "description": "Prompt for PROS CLI install on startup."
+          "description": "Automatically update the PROS CLI."
         },
-        "pros.showDeviceConnectNotifications": {
+        "pros.show Device Connect Notifications": {
           "type": "boolean",
           "default": true,
           "description": "Show notifications for device connects and disconnects."
         },
-        "pros.useLogger": {
+        "pros.Use Logger": {
           "type": "boolean",
           "default": true,
           "description": "Log PROS Extension events into a log file. Will help people provide better tech support if something goes wrong."
         },
-        "pros.logHistoryLimit": {
+        "pros.Log History Limit": {
           "type": "number",
           "default": 60,
           "description": "The number of days that log files will be kept before being removed."
         },
-        "pros.OneClick: CliDownloadURL": {
+        "pros.OneClick: CLI Download URL": {
           "type": "string",
           "default": "default",
           "description": "URL to download PROS CLI from. SHOULD NOT BE CHANGED BY MOST USERS!"
         },
-        "pros.OneClick: ToolchainDownloadURL": {
+        "pros.OneClick: Toolchain Download URL": {
           "type": "string",
           "default": "default",
           "description": "URL to download PROS Toolchain from. SHOULD NOT BE CHANGED BY MOST USERS!"
@@ -353,6 +376,28 @@
           "type": "boolean",
           "default": false,
           "description": "Enable experimental features. These features are not guaranteed to work and may be removed at any time."
+        },
+        "pros.Integrated Docs Language": {
+          "type": "string",
+          "default": "cpp",
+          "description": "Desired language for Integrated Documentation. Options are 'c' or 'cpp'.",
+          "enum": [
+            "c",
+            "cpp"
+          ]
+        },
+        "pros.Integrated Docs Style": {
+          "type": "string",
+          "default": "beside",
+          "enum": [
+            "beside",
+            "active"
+          ],
+          "enumDescriptions": [
+            "Open the docs beside the active editor",
+            "Open the docs in the active editor"
+          ],
+          "description": "Default style to set position of integrated document viewer"
         }
       }
     }
@@ -371,28 +416,30 @@
     "@types/glob": "^7.1.3",
     "@types/mocha": "^8.0.4",
     "@types/node": "^12.11.7",
-    "@types/vscode": "^1.56.0",
+    "@types/vscode": "^1.82.0",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",
+    "@vscode/vsce": "^2.15.0",
     "eslint": "^7.19.0",
     "glob": "^7.1.6",
-    "mocha": "^8.2.1",
+    "mocha": "^10.2.0",
     "prettier": "^2.7.1",
     "prettier-plugin-sort-json": "^0.0.2",
     "typescript": "^4.1.3",
-    "vsce": "^1.93.0",
     "vscode-test": "^1.5.0"
   },
   "dependencies": {
     "@purduesigbots/pros-cli-middleware": "^2.5.2",
     "@types/semver": "^7.3.6",
     "@types/universal-analytics": "^0.4.4",
-    "axios": "^0.21.1",
-    "node-fetch": "^2.6.5",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "node-fetch": "^2.6.7",
     "seek-bzip": "^2.0.0",
-    "semver": "^7.3.5",
+    "semver": "^7.5.2",
     "tar-fs": "^2.1.1",
-    "universal-analytics": "^0.4.23",
-    "unzipper": "^0.10.11"
+    "universal-analytics": "^0.5.3",
+    "unzipper": "^0.10.11",
+    "usb": "^2.10.0"
   }
 }

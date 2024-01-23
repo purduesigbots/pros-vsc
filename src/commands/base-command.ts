@@ -6,7 +6,7 @@ import {
   getChildProcessPath,
   getChildProcessProsToolchainPath,
 } from "../one-click/path";
-import { getCwdIsPros } from "../workspace";
+import { getProjectFileDir } from "../workspace_utils";
 /*
 
     I realize I missed something quite important in the presentation. It's the idea of synchronous v.s. asynchronous functions.
@@ -31,15 +31,16 @@ import { getCwdIsPros } from "../workspace";
 export type BaseCommandOptions = {
   command: string;
   args: string[];
-  message: string;
+  message: string | undefined;
   requiresProsProject: boolean;
   extraOutput?: boolean;
   successMessage?: string;
+  optionalArgs?: (string | undefined)[];
 };
 export class BaseCommand {
   command: string;
   args: string[];
-  message: string;
+  message: string | undefined;
   successMessage: string | undefined;
   cwd: string;
   requiresProsProject: boolean;
@@ -74,12 +75,21 @@ export class BaseCommand {
 
     this.command = options.command;
     this.args = options.args;
-    this.args.push(...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []));
+    // for each element in optionalArgs, if the element is not undefined, add it to args
+    for (let arg of options.optionalArgs ?? []) {
+      if (arg !== undefined) {
+        this.args.push(arg);
+      }
+    }
+    if (this.command === "pros" && process.env.PROS_VSCODE_FLAGS) {
+      this.args.push(...`${process.env.PROS_VSCODE_FLAGS}`.split(" "));
+    }
     this.message = options.message;
     this.cwd = process.cwd();
     this.requiresProsProject = options.requiresProsProject;
     this.extraOutput = options.extraOutput ? [] : undefined;
     this.successMessage = options.successMessage;
+
     this.progressWindow = new BackgroundProgress(this.message, true, false);
     // As far as implementing this onto each command, there are two ways you can do this.
     // The first way is to do it how I layed it out above, where in each command file we make a json object and then pass it into the constructor.
@@ -90,7 +100,7 @@ export class BaseCommand {
   }
 
   validateProsProject = async (): Promise<boolean> => {
-    const projectDir = await getCwdIsPros();
+    const projectDir = await getProjectFileDir();
     if (projectDir) {
       this.cwd = projectDir.fsPath;
     }
@@ -220,7 +230,7 @@ export class BaseCommand {
   ): Promise<boolean> => {
     const errorRegex: RegExp = /((Error: )|(ERROR )|(ERROR: )|(: error:))(.+)/;
     const yesNoRegex: RegExp = /\[y\/N\]/;
-    const promptRegex: RegExp = /\[[A-Za-z0-9|]+\]/;
+    const promptRegex: RegExp = /\[[\s\S]+\]/;
     // This function will parse the output of the command we ran.
     // Normally, we use the --machine-output flag to get the output in a json format.
     // This makes it easier to parse the output, as everything is categorized into different levels, such as Warning or error.
@@ -244,6 +254,9 @@ export class BaseCommand {
       var prompt = promptRegex.exec(line);
       if (error) {
         errorMsg = line;
+        if (errorMsg.length > 103) {
+          errorMsg = errorMsg.substring(0, 100) + "...";
+        }
         return true;
       } else if (yesNo) {
         // handle confirm dialogs
@@ -251,7 +264,7 @@ export class BaseCommand {
           if (response === "Yes") {
             process.stdin?.write("y\n");
           } else {
-            process.kill();
+            process.stdin?.write("N\n");
           }
         });
       } else if (line.startsWith("Multiple") && prompt) {

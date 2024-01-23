@@ -12,17 +12,15 @@ export class UploadCommand extends BaseCommand {
       args: ["upload", "--machine-output"],
       message: "Uploading Project",
       requiresProsProject: true,
+      successMessage: "Project Uploaded Successfully",
     });
-    if (process.env.PROS_VSCODE_FLAGS) {
-      this.args.push(...`${process.env.PROS_VSCODE_FLAGS}`.split(" "));
-    }
   }
 
   parseOutput = async (
     liveOutput: string[],
     process: ChildProcess
   ): Promise<boolean> => {
-    const promptRegex: RegExp = /\[[A-Za-z0-9|]+\]/;
+    const promptRegex: RegExp = /\[[\s\S]+\]/g;
 
     var errorMsg: string = "";
     var hasError = liveOutput.some((line) => {
@@ -34,6 +32,9 @@ export class UploadCommand extends BaseCommand {
           output.appendLine(jdata.simpleMessage);
           if (jdata.level === "ERROR") {
             errorMsg = jdata.simpleMessage;
+            if (errorMsg.length > 103) {
+              errorMsg = errorMsg.substring(0, 100) + "...";
+            }
             return true;
           }
         } else if (jdata.type === "input/interactive" && jdata.can_confirm) {
@@ -62,19 +63,15 @@ export class UploadCommand extends BaseCommand {
           this.lastProgress = progress;
         }
       } else if (line.startsWith("Multiple") && prompt) {
+        let ports = prompt[0].replace(/[\[\]]/g, "").split(/\|/);
         // only time prompt is used is when there are mutltiple ports
-        window
-          .showWarningMessage(
-            line,
-            ...prompt[0].replace(/[\[\]]/g, "").split(/\|/)
-          )
-          .then((response) => {
-            if (response) {
-              process.stdin?.write(response + "\n");
-            } else {
-              process.kill();
-            }
-          });
+        window.showWarningMessage(line, ...ports).then((response) => {
+          if (response) {
+            process.stdin?.write(response + "\n");
+          } else {
+            process.kill();
+          }
+        });
       }
 
       return false;

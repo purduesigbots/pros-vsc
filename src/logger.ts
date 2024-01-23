@@ -82,7 +82,7 @@ export class Logger {
     let keep =
       (vscode.workspace
         .getConfiguration("pros")
-        .get<number>("logHistoryLimit") ?? 60) * 864e5;
+        .get<number>("Log History Limit") ?? 60) * 864e5;
     let now = Date.now();
 
     let logFiles = await fs.promises.readdir(this.logFolder);
@@ -122,14 +122,14 @@ export class Logger {
 }
 
 export class BackgroundProgress {
-  title: string;
+  title: string | undefined;
   cancellable: boolean;
   end: boolean = false;
   progress: number = 0;
   startedProgress: boolean = false;
   token: vscode.CancellationToken | undefined;
   constructor(
-    title: string,
+    title: string | undefined,
     cancel: boolean = false,
     autostart: boolean = false
   ) {
@@ -141,6 +141,9 @@ export class BackgroundProgress {
   }
 
   async start() {
+    if (this.title === undefined) {
+      return;
+    }
     vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
@@ -161,9 +164,15 @@ export class BackgroundProgress {
   }
 
   stop = async () => {
+    if (this.title === undefined) {
+      return;
+    }
     this.end = true;
   };
   increment = async (amount: number) => {
+    if (this.title === undefined) {
+      return;
+    }
     this.progress += amount;
   };
 }

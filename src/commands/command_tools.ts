@@ -3,6 +3,7 @@ import { gt } from "semver";
 
 import { PREFIX } from "./cli-parsing";
 import { BaseCommand, BaseCommandOptions } from "./base-command";
+import { betaFeaturesEnabled } from "../extension";
 
 export const selectDirectory = async (prompt: string) => {
   const directoryOptions: vscode.OpenDialogOptions = {
@@ -71,13 +72,9 @@ export const selectTarget = async () => {
 export const getCurrentKernelOkapiVersion = async () => {
   const kernelOkapiVersionCommandOptions: BaseCommandOptions = {
     command: "pros",
-    args: [
-      "c",
-      "info-project",
-      "--machine-output",
-      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
-    ],
+    args: ["c", "info-project", "--machine-output"],
     message: "Fetching Project Info",
+    successMessage: "hidden",
     requiresProsProject: true,
     extraOutput: true,
   };
@@ -97,7 +94,7 @@ export const getCurrentKernelOkapiVersion = async () => {
         ).version;
         const curOkapi = jdata.data.project.templates.find(
           (t: any) => t.name === "okapilib"
-        ).version;
+        )?.version;
         return { target, curKernel, curOkapi };
       }
     }
@@ -108,15 +105,9 @@ export const getCurrentKernelOkapiVersion = async () => {
 export const getLatestKernelOkapiVersion = async (target: string) => {
   const latestKernelOkapiVersionCommandOptions: BaseCommandOptions = {
     command: "pros",
-    args: [
-      "c",
-      "q",
-      "--target",
-      target,
-      "--machine-output",
-      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
-    ],
+    args: ["c", "ls-templates", "--target", target, "--machine-output"],
     message: "Getting latest kernel and okapi versions",
+    successMessage: "hidden",
     requiresProsProject: true,
     extraOutput: true,
   };
@@ -151,14 +142,8 @@ export const selectKernelVersion = async (target: string) => {
   // Command to run to fetch all kernel versions
   const kernelVersionCommandOptions: BaseCommandOptions = {
     command: "pros",
-    args: [
-      "c",
-      "ls-templates",
-      "--target",
-      target,
-      "--machine-output",
-      ...(process.env["PROS_VSCODE_FLAGS"]?.split(" ") ?? []),
-    ],
+    args: ["c", "ls-templates", "--target", target, "--machine-output"],
+    optionalArgs: [betaFeaturesEnabled ? "--beta" : undefined],
     message: "Fetching kernel versions",
     requiresProsProject: false,
     extraOutput: true,
