@@ -1,51 +1,14 @@
-class Mouse{
-    x;
-    y;
-    leftDown = false;
-    rightDown = false;
-    middleDown = false;
-    dragging = false;
-    
-    /**
-     * Constructs and initializes a new Mouse
-     **/
-    constructor(){
-        this.x = 0;
-        this.y = 0;
-    }
-
-    update(e){
-        this.x = e.clientX;
-        this.y = e.clientY;
-    }
-
-    update(_x, _y){
-        this.x = _x;
-        this.y = _y;
-    }
-
-    /**
-     * Returns whether or not the mouse is hovering over a V5Device
-     * 
-     * @param {V5Device} v5Device The V5Device to check
-     */
-    hover(v5Device){
-        return !dragging && 
-            (
-                this.x >= v5Device.self.getBoundingClientRect().x && 
-                this.x <= v5Device.self.getBoundingClientRect().x + v5Device.self.clientWidth && 
-                this.y >= v5Device.self.getBoundingClientRect().y && 
-                this.y <= v5Device.self.getBoundingClientRect().y + v5Device.self.clientHeight
-            );
-    }
-}
-
+/**
+ * 
+ * V5 DEVICE PARENT CLASS
+ * 
+ */
 class V5Device{
     type;
     name;
     port;
     self; // the html element of the device
-    mouse; // the mouse object
+    selected = false;
 
     /**
      * Constructs and initializes a new V5Device
@@ -54,9 +17,8 @@ class V5Device{
      * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
      * @param {number | String} _port Integer port number, 1-21, or port letter, A-H inclusive (INCLUDE THE QUOTES, e.g. 'A')
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      */
-    constructor(_type, _name, _port, _self, _mouse){
+    constructor(_type, _name, _port, _self){
         if(this.constructor === V5Device){
              throw new Error("Cannot instantiate abstract class V5Device");
         }
@@ -64,7 +26,6 @@ class V5Device{
         this.name = _name;
         this.port = _port;
         this.self = _self;
-        this.mouse = _mouse;
     }
 
     /**
@@ -75,27 +36,6 @@ class V5Device{
      */
     getImgUri(context){
         throw new Error("Method not implemented.");
-    }
-
-    /**
-     * Gets whether or not the mouse is hovering over the device
-     * 
-     * @return {Boolean} Whether or not the mouse is hovering over the device
-     */
-    get hover(){
-        return this.mouse.hover(this); 
-    }
-
-    /**
-     * Updates the beingDragged variable
-     * 
-     * @param {Mouse} mouse the mouse object
-     * @returns {Boolean} Whether or not the device is being dragged
-     */
-    update(mouse){
-        if(this.mouse.leftDown && this.hover){
-            this.beingDragged = true; // 
-        }
     }
 
     /**
@@ -144,13 +84,18 @@ class V5Device{
     generate(_port){
         var newDevice = this.#clone();
         newDevice.port = _port();
+        return newDevice;
     }
 }
 
+/**
+ * 
+ * V5 DEVICE CLASSES
+ * 
+ */
 class V5Motor extends V5Device{
     reversed = false;
     wattage;
-    port;
     rpm;
     
     /**
@@ -162,11 +107,10 @@ class V5Motor extends V5Device{
      * @param {number} _wattage How many watts the motor is (11W or 5.5W)
      * @param {number} _rpm How many RPM the motor goes at (what cartridge it is) (100, 200, 600)
      * @param {HTMLElement} _self Reference to the HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      */
-    constructor(_name, _port, _reversed, _wattage, _rpm = 200, _self, _mouse){
+    constructor(_name, _port, _reversed, _wattage, _rpm = 200, _self){
         const type = _wattage.toString() + "W Motor";
-        super(type, _name, _port, _self, _mouse);
+        super(type, _name, _port, _self);
         this.reversed = _reversed;
         this.wattage = _wattage;
         this.rpm = _rpm;
@@ -187,13 +131,23 @@ class V5Motor extends V5Device{
     }
 
     #clone(){
-        return new V5Motor(this.name, this.port, this.reversed, this.wattage, this.rpm, this.self, this.mouse);
+        return new V5Motor(this.name, this.port, this.reversed, this.wattage, this.rpm, this.self);
     }
 
     generate(_port){
         var newMotor = this.#clone();
         newMotor.port = _port;
+        // Reset demo object
+        this.port = -1;
+        this.name = newMotor.type;
+        this.reversed = false;
+        this.wattage = 11;
+        this.rpm = 200;
         return newMotor;
+    }
+
+    toString(){
+        return super.toString() + " with " + this.wattage.toString() + "W at " + this.rpm.toString() + " RPM";
     }
     
     
@@ -209,10 +163,9 @@ class V5MotorGroup extends V5Device{
      * @param {Number} _port Device port number, 1-21
      * @param {Array<V5Motor>} _motors the motors in the group
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      */
-    constructor(_name, _port, _motors, _self, _mouse){
-        super("Motor Group", _name, null, _self, _mouse);
+    constructor(_name, _port, _motors, _self){
+        super("Motor Group", _name, null, _self);
         this.motors = _motors;
     }
 
@@ -268,10 +221,9 @@ class V5RotationSensor extends V5Device{
      * @param {Number} _port Device port number, 1-21
      * @param {Boolean} _reversed Whether or not the sensor is reversed
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
-    constructor(_name, _port, _reversed, _self, _mouse){
-        super("Rotation Sensor", _name, _port, _self, _mouse);
+    constructor(_name, _port, _reversed, _self){
+        super("Rotation Sensor", _name, _port, _self);
         this.reversed = _reversed;
     }
 
@@ -287,6 +239,20 @@ class V5RotationSensor extends V5Device{
         + ", " + (this.reversed? "true" : "false")
         + ");\n";
     }
+
+    #clone(){
+        return new V5RotationSensor(this.name, this.port, this.reversed, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = -1;
+        this.name = newSensor.type;
+        this.reversed = false;
+        return newSensor;
+    }
 }
 
 class V5Imu extends V5Device{
@@ -297,10 +263,9 @@ class V5Imu extends V5Device{
      * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
      * @param {Number} _port Device port number, 1-21
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
-    constructor(_name, _port, _self, _mouse){
-        super("IMU", _name, _port, _self, _mouse);
+    constructor(_name, _port, _self){
+        super("IMU", _name, _port, _self);
     }
 
     getImgUri(){
@@ -314,6 +279,19 @@ class V5Imu extends V5Device{
         + this.port.toString()
         + ");\n";
     }
+
+    #clone(){
+        return new V5Imu(this.name, this.port, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = -1;
+        this.name = newSensor.type;
+        return newSensor;
+    }
 }
 
 class V5Piston extends V5Device{
@@ -326,10 +304,9 @@ class V5Piston extends V5Device{
      * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'
      * @param {Boolean} _reversed Whether or not to flip the default state of the piston
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      */
-    constructor(_name, _port, _reversed, _self, _mouse){
-        super("Piston", _name, _port, _self, _mouse);
+    constructor(_name, _port, _reversed, _self){
+        super("Piston", _name, _port, _self);
         this.reversed = _reversed;
     }
 
@@ -345,6 +322,20 @@ class V5Piston extends V5Device{
         + "\', " + (this.reversed? "true" : "false")
         + ");\n";
     }
+
+    #clone(){
+        return new V5Piston(this.name, this.port, this.reversed, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = '{-1, \'A\'}';
+        this.name = newSensor.type;
+        this.reversed = false;
+        return newSensor;
+    }
 }
 
 class V5OpticalSensor extends V5Device{
@@ -355,10 +346,9 @@ class V5OpticalSensor extends V5Device{
      * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
      * @param {Number} _port Device port number, 1-21
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
-    constructor(_name, _port, _self, _mouse){
-        super("Optical Sensor", _name, _port, _self, _mouse);
+    constructor(_name, _port, _self){
+        super("Optical Sensor", _name, _port, _self);
     }
 
     getImgUri(){
@@ -372,6 +362,19 @@ class V5OpticalSensor extends V5Device{
         + this.port.toString()
         + ");\n";
     }
+
+    #clone(){
+        return new V5OpticalSensor(this.name, this.port, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = -1;
+        this.name = newSensor.type;
+        return newSensor;
+    }
 }
 
 class V5VisionSensor extends V5Device{
@@ -383,10 +386,9 @@ class V5VisionSensor extends V5Device{
      * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
      * @param {Number} _port Device port number, 1-21
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
-    constructor(_name, _port, _self, _mouse){
-        super("Vision Sensor", _name, _port, _self, _mouse);
+    constructor(_name, _port, _self){
+        super("Vision Sensor", _name, _port, _self);
     }
 
     getImgUri(){
@@ -400,6 +402,19 @@ class V5VisionSensor extends V5Device{
         + this.port.toString()
         + ");\n";
     }
+
+    #clone(){
+        return new V5VisionSensor(this.name, this.port, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = -1;
+        this.name = newSensor.type;
+        return newSensor;
+    }
 }
 
 class V5DistanceSensor extends V5Device{
@@ -410,10 +425,9 @@ class V5DistanceSensor extends V5Device{
      * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
      * @param {Number} _port Device port number, 1-21
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
-    constructor(_name, _port, _self, _mouse){
-        super("Distance Sensor", _name, _port, _self, _mouse);
+    constructor(_name, _port, _self){
+        super("Distance Sensor", _name, _port, _self);
     }
 
     getImgUri(){
@@ -426,6 +440,19 @@ class V5DistanceSensor extends V5Device{
         + this.name + " ("
         + this.port.toString()
         + ");\n";
+    }
+
+    #clone(){
+        return new V5DistanceSensor(this.name, this.port, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = -1;
+        this.name = newSensor.type;
+        return newSensor;
     }
 }
 
@@ -441,10 +468,9 @@ class V5GpsSensor extends V5Device{
      * @param {Number} _xOff X offset from center of robot
      * @param {Number} _yOff Y offset from center of robot
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
-    constructor(_name, _port, _xOff, _yOff, _self, _mouse){
-        super("GPS Sensor", _name, _port, _self, _mouse);
+    constructor(_name, _port, _xOff, _yOff, _self){
+        super("GPS Sensor", _name, _port, _self);
         this.xOff = _xOff;
         this.yOff = _yOff;
     }
@@ -462,6 +488,21 @@ class V5GpsSensor extends V5Device{
         + ", " + this.yOff.toString()
         + ");\n";
     }
+
+    #clone(){
+        return new V5GpsSensor(this.name, this.port, this.xOff, this.yOff, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = -1;
+        this.name = newSensor.type;
+        this.xOff = 0;
+        this.yOff = 0;
+        return newSensor;
+    }
 }
 
 class V5AdiExpander extends V5Device{
@@ -474,10 +515,9 @@ class V5AdiExpander extends V5Device{
      * @param {Number} _port Device port number, 1-21
      * @param {Array<V5Device>} _devices Array of ADI Devices on this expander
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      */
-    constructor(_name, _port, _devices, _self, _mouse){
-        super("ADI Expander", _name, _port, _self, _mouse);
+    constructor(_name, _port, _devices, _self){
+        super("ADI Expander", _name, _port, _self);
         this.#adiDevices = _devices;
     }
 
@@ -577,10 +617,9 @@ class V5AdiPot extends V5Device{
      * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'
      * @param {String} _version Which version of the potentiometer it is, either "V2" or "EDR"
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
-    constructor(_name, _port, _version, _self, _mouse){
-        super("ADI Potentiometer", _name, _port, _self, _mouse);
+    constructor(_name, _port, _version, _self){
+        super("ADI Potentiometer", _name, _port, _self);
         this.version = _version;
     }
 
@@ -604,6 +643,19 @@ class V5AdiPot extends V5Device{
         + ", pros::E_ADI_POT_" + this.version
         + ");\n";
     }
+
+    #clone(){
+        return new V5AdiPot(this.name, this.port, this.version, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = '{-1, \'A\'}';
+        this.name = newSensor.type;
+        return newSensor;
+    }
 }
 
 class V5AdiAnalogIn extends V5Device{
@@ -614,10 +666,9 @@ class V5AdiAnalogIn extends V5Device{
      * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
      * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
-    constructor(_name, _port, _self, _mouse){
-        super("ADI Analog In", _name, _port, _self, _mouse);
+    constructor(_name, _port, _self){
+        super("ADI Analog In", _name, _port, _self);
     }
 
     getImgUri(){
@@ -631,6 +682,19 @@ class V5AdiAnalogIn extends V5Device{
         + this.port.toString()
         + ");\n";
     }
+
+    #clone(){
+        return new V5AdiAnalogIn(this.name, this.port, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = '{-1, \'A\'}';
+        this.name = newSensor.type;
+        return newSensor;
+    }
 }
 
 class V5AdiDigitalIn extends V5Device{
@@ -641,10 +705,9 @@ class V5AdiDigitalIn extends V5Device{
      * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
      * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
-    constructor(_name, _port, _self, _mouse){
-        super("ADI Digital In", _name, _port, _self, _mouse);
+    constructor(_name, _port, _self){
+        super("ADI Digital In", _name, _port, _self);
     }
 
     getImgUri(){
@@ -658,6 +721,19 @@ class V5AdiDigitalIn extends V5Device{
         + this.port.toString()
         + ");\n";
     }
+
+    #clone(){
+        return new V5AdiDigitalIn(this.name, this.port, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = '{-1, \'A\'}';
+        this.name = newSensor.type;
+        return newSensor;
+    }
 }
 
 class V5AdiLineSensor extends V5Device{
@@ -668,10 +744,9 @@ class V5AdiLineSensor extends V5Device{
      * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
      * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
-    constructor(_name, _port, _self, _mouse){
-        super("ADI Line Sensor", _name, _port, _self, _mouse);
+    constructor(_name, _port, _self){
+        super("ADI Line Sensor", _name, _port, _self);
     }
 
     getImgUri(){
@@ -685,6 +760,19 @@ class V5AdiLineSensor extends V5Device{
         + this.port.toString()
         + ");\n";
     }
+
+    #clone(){
+        return new V5AdiLineSensor(this.name, this.port, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = '{-1, \'A\'}';
+        this.name = newSensor.type;
+        return newSensor;
+    }
 }
 
 class V5AdiEncoder extends V5Device{
@@ -697,9 +785,8 @@ class V5AdiEncoder extends V5Device{
      * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'. Must be an odd letter (A, C, E, G)
      * @param {Boolean} _reversed Whether or not the encoder is reversed
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
-    constructor(_name, _port, _reversed, _self, _mouse){
+    constructor(_name, _port, _reversed, _self){
         //Check if port pair
         var topPort;
         if(_port.charAt(0) === "{"){
@@ -712,7 +799,7 @@ class V5AdiEncoder extends V5Device{
         if(topPort.charAt(0) !== 'A' && topPort.charAt(0) !== 'C' && topPort.charAt(0) !== 'E' && topPort.charAt(0) !== 'G'){
             throw new Error("Invalid ADI Encoder port letter: " + topPort + ". Must be an odd letter (A, C, E, G)");
         }
-        super("ADI Encoder", _name, _port, _self, _mouse);
+        super("ADI Encoder", _name, _port, _self);
         this.reversed = _reversed;
     }
 
@@ -751,6 +838,20 @@ class V5AdiEncoder extends V5Device{
         + (this.reversed? "true" : "false")
         + ");\n";
     }
+
+    #clone(){
+        return new V5AdiEncoder(this.name, this.port, this.reversed, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = '{-1, \'A\'}';
+        this.name = newSensor.type;
+        this.reversed = false;
+        return newSensor;
+    }
 }
 
 class V5AdiUs extends V5Device{
@@ -761,7 +862,6 @@ class V5AdiUs extends V5Device{
      * @param {String} _name Device name e.g. "liftSensor" to be used in pros project code
      * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'. Must be an odd letter (A, C, E, G)
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
     constructor(_name, _port, _self, _mouse){
         //Check if port pair
@@ -776,7 +876,7 @@ class V5AdiUs extends V5Device{
         if(adiPort.charAt(0) !== 'A' && adiPort.charAt(0) !== 'C' && adiPort.charAt(0) !== 'E' && adiPort.charAt(0) !== 'G'){
             throw new Error("Invalid ADI Encoder port letter: " + adiPort + ". Must be an odd letter (A, C, E, G)");
         }
-        super("ADI Ultrasonic", _name, _port, _self, _mouse);
+        super("ADI Ultrasonic", _name, _port, _self);
     }
 
     getImgUri(){
@@ -811,6 +911,19 @@ class V5AdiUs extends V5Device{
         + this.topPort.toString()
         + "\', \'" + bottomPort.toString() + "\');\n";
     }
+
+    #clone(){
+        return new V5AdiUs(this.name, this.port, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = '{-1, \'A\'}';
+        this.name = newSensor.type;
+        return newSensor;
+    }
 }
 
 class V5AdiLed extends V5Device{
@@ -823,10 +936,9 @@ class V5AdiLed extends V5Device{
      * @param {String} _port Device port letter, A-H inclusive. INCLUDE THE QUOTES, e.g. 'A'
      * @param {Number} _length Length of the LED strip in LEDs
      * @param {HTMLElement} _self HTML element of the device
-     * @param {Mouse} _mouse Mouse object
      **/
-    constructor(_name, _port, _length, _self, _mouse){
-        super("ADI LED", _name, _port, _self, _mouse);
+    constructor(_name, _port, _length, _self){
+        super("ADI LED", _name, _port, _self);
         this.length = _length;
     }
 
@@ -842,14 +954,34 @@ class V5AdiLed extends V5Device{
         + ", " + this.length.toString()
         + ");\n";
     }
+
+    #clone(){
+        return new V5AdiLed(this.name, this.port, this.length, this.self);
+    }
+
+    generate(_port){
+        var newSensor = this.#clone();
+        newSensor.port = _port;
+        // Reset demo object
+        this.port = '{-1, \'A\'}';
+        this.name = newSensor.type;
+        this.length = 1;
+        return newSensor;
+    }
 }
 
+/**
+ * 
+ * V5 PORT CLASS
+ * 
+ */
 class V5Port{
     port;
     device = null;
     x;
     y;
     self;
+    isAdi = false;
 
     /**
      * Constructs and initializes a new V5Port
@@ -858,6 +990,29 @@ class V5Port{
      * @param {HTMLElement} _self HTML element of the port
      **/
     constructor(_port, _self){
+        // Validate inputted port
+        if(typeof _port === "string"){
+            this.isAdi = true;
+            // If port pair, get both smart port number and ADI port letter
+            if(_port.charAt(0) === "{"){
+                var smartPort = parseInt(_port.split("{{")[1].split(",")[0].trim());
+                var adiPort = _port.split("\'")[1].charAt(0);
+            } else{
+                // Not a port pair, get only ADI port letter
+                var adiPort = _port.charAt(0);
+            }
+            // Ensure that the ADI port letter is valid (A-H inclusive)
+            if(adiPort.charCodeAt(0) < 65 || adiPort.charCodeAt(0) > 72){
+                throw new Error("Invalid ADI port letter: " + adiPort + ". Must be a letter between A and H inclusive");
+            }
+        } else{
+            // Otherwise _port = smart port number
+            var smartPort = _port;
+        }
+        // Ensure that the smart port number is valid (1-21 inclusive)
+        if(smartPort < 1 || smartPort > 21){
+            throw new Error("Invalid port number: " + smartPort + ". Must be between 1 and 21 inclusive");
+        }
         this.port = _port;
         this.self = _self;
     }
@@ -883,6 +1038,11 @@ class V5Port{
     }
 }
 
+/**
+ * 
+ * V5 ROBOT CLASS
+ * 
+ */
 class V5Robot{
     ports = [V5Device];
 
@@ -919,33 +1079,15 @@ class V5Robot{
     }
 }
 
-class DeviceImage{
-    self; // HTML element of the image
-    type; // Type of device
-    selected;
+/**
+ * 
+ * HELPER FUNCTIONS
+ * 
+ */
 
-    /**
-     * Constructs and initializes a new DeviceImage
-     * 
-     * @param {String} _type Type of device
-     **/
-    constructor(_type){
-        this.type = _type;
-        this.selected = false;
-    }
-}
-dev1 = new V5Motor("dev1", 1, false, 11, 200, null, null);
-
-
-
-
-
-
-
-var ports = [];
-
-var devices = [];
-
+/**
+ * Updates the port elements on page
+ */
 function updatePorts(){
     for(var i = 0, port; port = ports[i]; i++){
         // Check if this port has a device
@@ -968,20 +1110,31 @@ function updatePorts(){
     }
 }
 
+/**
+ * Updates the options section of the page when a device is selected (from device table or any port)
+ * 
+ * @param {HTMLElement} optionsElem The HTML Parent Element of all options input elements
+ */
 function updateOptions(optionsElem){
-    /**
-     * Unique: Motor (11W), Motor Group, GPS, ADI Led, 
-     * Name, Reversed: Motor (5.5W), Rotation Sensor, Piston, ADI Pot, ADI Encoder
-     * Name: IMU, Optical Sensor, Vision Sensor, Distance Sensor, ADI Analog In, ADI Digital In, ADI Line Sensor, ADI Ultrasonic
-     */
-    // Check if a device is selected
+    // Check if a device is selected (from device table or any port)
     var selected = false;
-    for(var i = 0, device; device = devices[i]; i++){
-        if(device.selected){
+    var device = null;
+    for(port of ports){
+        // Since we evaluate nullity first, we can safely call port.device.selected on the right side of the && operator (thanks Prof. Crum)
+        if(port.device !== null && port.device.selected){
             selected = true;
+            device = port.device;
             break;
         }
     }
+    for(dev of devices){
+        if(dev.selected){
+            selected = true;
+            device = dev;
+            break;
+        }
+    }
+
     // If not, display default options message
     if(!selected){
         optionsElem.innerHTML = 
@@ -993,15 +1146,21 @@ function updateOptions(optionsElem){
         `;
         return;
     }
+
     // If so, display the options for that device
-    var device = devices[i];
+     /**
+     * Unique: Motor (11W), Motor Group, GPS, ADI Led, 
+     * Name, Reversed: Motor (5.5W), Rotation Sensor, Piston, ADI Pot, ADI Encoder
+     * Name: IMU, Optical Sensor, Vision Sensor, Distance Sensor, ADI Analog In, ADI Digital In, ADI Line Sensor, ADI Ultrasonic
+     */
     if(device.type === "11W Motor"){
         // Parameters present: name, reversed, gearset
+        let reversed = device.reversed? "checked" : "";
         // Generate (ordered) gearset options
         var firstGearset;
         var secondGearset;
         var thirdGearset;
-        switch(device.gearset){
+        switch(device.rpm){
             case 100:
                 firstGearset = "100 (Red)";
                 secondGearset = "200 (Green)";
@@ -1018,33 +1177,50 @@ function updateOptions(optionsElem){
                 thirdGearset = "200 (Green)";
                 break;
             default:
-                throw new Error("Invalid gearset: " + device.gearset);
+                throw new Error("Invalid gearset: " + device.rpm + "When generating options for the following device: " + device.toString());
         }
         optionsElem.innerHTML = 
         `
         <h1>Options</h1>
-        <input type="text" id="Option_Name" placeholder="${device.name}"
-            <label for="Option_Name">Device Name</label>
+        <input type="text" id="Option_Name" placeholder="${device.name}">
         </input>
-        <input type="checkbox" id="Option_Reversed" placeholder="${device.reversed}"
-            <label for="Option_Reversed">Reversed</label>
+        <input type="checkbox" id="Option_Reversed" ${reversed}>
+        <label for="Option_Reversed">Reversed</label>
         </input>
-        <label for="Option_Gearset">Gearset</label>
         <select name="Option_Gearset" id="Option_Gearset">
+            <label for="Option_Gearset">Gearset</label>
             <option value="${firstGearset.split(' ')[0]}">${firstGearset}</option>
             <option value="${secondGearset.split(' ')[0]}">${secondGearset}</option>
             <option value="${thirdGearset.split(' ')[0]}">${thirdGearset}</option>
+        </select>
         `;
-        return;
+
+        // Add 11W Motor Unique Event Listeners
+        let gearsetSelect = optionsElem.querySelector("#Option_Gearset");
+        gearsetSelect.addEventListener("change", function(){
+            switch(gearsetSelect.value){
+                case "100":
+                    device.rpm = 100;
+                    break;
+                case "200":
+                    device.rpm = 200;
+                    break;
+                case "600":
+                    device.rpm = 600;
+                    break;
+                default:
+                    throw new Error("Invalid gearset: " + gearsetSelect.value + "When generating options for the following device: " + device.toString());
+            }
+        });
     } else if(device.type === "5.5W Motor" || device.type === "ADI Pot" || device.type === "ADI Encoder" || device.type === "Rotation Sensor" || device.type === "Piston"){
         // Parameters present: name, reversed
+        let reversed = device.reversed? "checked" : "";
         optionsElem.innerHTML = 
         `
         <h1>Options</h1>
-        <input type="text" id="Option_Name" placeholder="${device.name}"
-            <label for="Option_Name">Device Name</label>
+        <input type="text" id="Option_Name" placeholder="${device.name}">
         </input>
-        <input type="checkbox" id="Option_Reversed" placeholder="${device.reversed}"
+        <input type="checkbox" id="Option_Reversed" ${reversed}>
             <label for="Option_Reversed">Reversed</label>
         </input>
         `;
@@ -1074,6 +1250,16 @@ function updateOptions(optionsElem){
             <label for="Option_Y">Y Offset</label>
         </input>
         `;
+
+        // Add GPS Sensor Unique Event Listeners
+        let xInput = optionsElem.querySelector("#Option_X");
+        xInput.addEventListener("input", function(){
+            device.xOff = xInput.value;
+        });
+        let yInput = optionsElem.querySelector("#Option_Y");
+        yInput.addEventListener("input", function(){
+            device.yOff = yInput.value;
+        });
     } else if(device.type === "ADI Expander"){
         throw new Error("ADI Expander options not yet implemented");
     } else if(device.type === "ADI Led"){
@@ -1088,12 +1274,80 @@ function updateOptions(optionsElem){
             <label for="Option_Length">Length</label>
         </input>
         `;
+
+        // Add ADI Led Unique Event Listeners
+        let lengthInput = optionsElem.querySelector("#Option_Length");
+        lengthInput.addEventListener("input", function(){
+            device.length = lengthInput.value;
+        });
     } else {
         throw new Error("Invalid device type: " + device.type);
     }
-        
+    
+    // Add event listeners to parameters shared by all devices (name):
+    var nameInput = optionsElem.querySelector("#Option_Name");
+    nameInput.addEventListener("input", function(){
+        device.name = nameInput.value;
+    });
+
+    // Add event listeners to parameters shared by some devices (reversed) if applicable to selected device:
+    if(device.type === "11W Motor" || device.type === "5.5W Motor" || device.type === "ADI Pot" || device.type === "ADI Encoder" || device.type === "Rotation Sensor" || device.type === "Piston"){
+        let reversedInput = optionsElem.querySelector("#Option_Reversed");
+        reversedInput.addEventListener("change", function(){
+            device.reversed = reversedInput.checked;
+        });
+    }
 }
 
+/**
+ * Deselects all devices and ports
+ */
+function deselectAll(){
+    for(var i = 0, device; device = devices[i]; i++){
+        device.selected = false;
+        device.self.style.border = "1px transparent";
+    }
+    for(var i = 0, port; port = ports[i]; i++){
+        // Check if port has a device (not null)
+        if(port.device !== null){
+            port.device.selected = false;
+            port.device.self.style.border = "1px transparent";
+        }
+    }
+
+}
+
+/**
+ * Selects a V5Device. Deselects if already selected. Deselects all others if selecting this device.
+ * 
+ * @param {V5Device} device the device to select
+ */
+function select(device){
+    //Check if already selected
+    if(device.selected){
+        //if so, deselect
+        device.selected = false;
+        device.self.style.border = "1px transparent";
+        return;
+    }
+    //Else, select this device and deselect all others
+    deselectAll();
+    device.selected = true;
+    device.self.style.border = "1px solid red";
+}
+
+/**
+ * 
+ * GLOBAL DATA
+ * 
+ */
+
+//Both of these are filled in window.onload
+var ports = []; // Array of V5Port objects (ports 1-21 (which are indexes 0-20) followed by ADI ports A-H (which are indexes 21-28))
+var devices = []; // Array of demo V5 Device Objects (see V5Device class)
+
+//This initializes everything and adds all event listeners 3
+// (except options stuff which is handled in the updateOptions(optionsElem) function above)
 window.onload = setTimeout(function(){
     // HTML elements for adding generic listeners
     const deviceTable = document.getElementById("device-table");
@@ -1102,6 +1356,7 @@ window.onload = setTimeout(function(){
     const deviceCols = document.getElementsByClassName("device-col");
     const portRows = document.getElementsByClassName("port-row");
     const portCols = document.getElementsByClassName("port-col");
+
     const debug = document.getElementById("debug");
     const optionsBody = document.getElementById("Options-Body");
     const options = document.getElementById("Options");
@@ -1126,24 +1381,24 @@ window.onload = setTimeout(function(){
     const ADI_US = document.getElementById("ADI ULTRASONIC");
     const ADI_LED = document.getElementById("ADI LED");
 
-    devices.push(new V5Motor("11W MOTOR", -1, false, 11, 200, MOTOR_BIG, null));
-    devices.push(new V5Motor("5.5W MOTOR", -1, false, 5.5, 200, MOTOR_SMALL, null));
-    devices.push(new V5MotorGroup("MOTOR GROUP", -1, false, null, null, MOTOR_GROUP, null));
-    devices.push(new V5RotationSensor("ROTATION SENSOR", 4, false, ROTATION_SENSOR, null));
-    devices.push(new V5Imu("IMU", -1, IMU, null));
-    devices.push(new V5Piston("PISTON", -1, false, PISTON, null));
-    devices.push(new V5OpticalSensor("OPTICAL SENSOR", -1, OPTICAL_SENSOR, null));
-    devices.push(new V5VisionSensor("VISION SENSOR", -1, VISION_SENSOR, null));
-    devices.push(new V5DistanceSensor("DISTANCE SENSOR", -1, DISTANCE_SENSOR, null));
-    devices.push(new V5GpsSensor("GPS SENSOR", -1, 0, 0, GPS_SENSOR, null));
-    devices.push(new V5AdiExpander("ADI EXPANDER", -1, ADI_EXPANDER, null));
-    devices.push(new V5AdiPot("ADI POT", '{-1, \'A\'}', "V2", ADI_POT, null));
-    devices.push(new V5AdiAnalogIn("ADI ANALOG IN", '{-1, \'A\'}', ADI_ANALOG_IN, null));
-    devices.push(new V5AdiDigitalIn("ADI DIGITAL IN", '{-1, \'A\'}', ADI_DIGITAL_IN, null));
-    devices.push(new V5AdiLineSensor("ADI LINE SENSOR", '{-1, \'A\'}', ADI_LINE_SENSOR, null));
-    devices.push(new V5AdiEncoder("ADI ENCODER", '{-1, \'A\'}', false, ADI_ENCODER, null));
-    devices.push(new V5AdiUs("ADI ULTRASONIC", '{-1, \'A\'}', ADI_US, null));
-    devices.push(new V5AdiLed("ADI LED", '{-1, \'A\'}', 1, ADI_LED, null));
+    devices.push(new V5Motor("11W MOTOR", -1, false, 11, 200, MOTOR_BIG));
+    devices.push(new V5Motor("5.5W MOTOR", -1, false, 5.5, 200, MOTOR_SMALL));
+    devices.push(new V5MotorGroup("MOTOR GROUP", -1, false, null, null, MOTOR_GROUP));
+    devices.push(new V5RotationSensor("ROTATION SENSOR", 4, false, ROTATION_SENSOR));
+    devices.push(new V5Imu("IMU", -1, IMU));
+    devices.push(new V5Piston("PISTON", '{-1, \'A\'}', false, PISTON));
+    devices.push(new V5OpticalSensor("OPTICAL SENSOR", -1, OPTICAL_SENSOR));
+    devices.push(new V5VisionSensor("VISION SENSOR", -1, VISION_SENSOR));
+    devices.push(new V5DistanceSensor("DISTANCE SENSOR", -1, DISTANCE_SENSOR));
+    devices.push(new V5GpsSensor("GPS SENSOR", -1, 0, 0, GPS_SENSOR));
+    devices.push(new V5AdiExpander("ADI EXPANDER", -1, ADI_EXPANDER));
+    devices.push(new V5AdiPot("ADI POT", '{-1, \'A\'}', "V2", ADI_POT));
+    devices.push(new V5AdiAnalogIn("ADI ANALOG IN", '{-1, \'A\'}', ADI_ANALOG_IN));
+    devices.push(new V5AdiDigitalIn("ADI DIGITAL IN", '{-1, \'A\'}', ADI_DIGITAL_IN));
+    devices.push(new V5AdiLineSensor("ADI LINE SENSOR", '{-1, \'A\'}', ADI_LINE_SENSOR));
+    devices.push(new V5AdiEncoder("ADI ENCODER", '{-1, \'A\'}', false, ADI_ENCODER));
+    devices.push(new V5AdiUs("ADI ULTRASONIC", '{-1, \'A\'}', ADI_US));
+    devices.push(new V5AdiLed("ADI LED", '{-1, \'A\'}', 1, ADI_LED));
 
     //Add event listeners to each device entry
     for(var i = 0; i < deviceRows.length; i++){
@@ -1156,23 +1411,7 @@ window.onload = setTimeout(function(){
             col.setAttribute("id", "device-" + id);
             col.onclick = function(){
                 var myID = parseInt(this.id.split("-")[1]);
-                //Check if already selected
-                if(devices[myID].selected){
-                    //if so, deselect
-                    console.log("Deselecting device " + myID.toString());
-                    devices[myID].selected = false;
-                    this.style.border = "1px transparent";
-                    return;
-                }
-                //Else, select this device and deselect all others
-                //Set all selected to false
-                console.log("Selecting device " + myID.toString());
-                for(var k = 0, device; device = devices[k]; k++){
-                    device.selected = false;
-                    device.self.style.border = "1px transparent";
-                }
-                devices[myID].selected = true;
-                this.style.border = "1px solid red";
+                select(devices[myID]);
                 updateOptions(options);
             };
             col.onmouseover = function(){
@@ -1195,31 +1434,94 @@ window.onload = setTimeout(function(){
     for(var i = 0; i < portCols.length; i++){
         var col = portCols[i];
         col.setAttribute("id", "port-" + (i + 1));
-        ports.push(new V5Port(i + 1, col));
+        // Add port to ports array
+        if(i < 21){
+            // Push smart port 
+            ports.push(new V5Port(i + 1, col));
+        } else{
+            // Push ADI port with just port letter
+            ports.push(new V5Port(String.fromCharCode(i - 21 + 65), col));
+        }
         col.onclick = function(){
-            // See if there is a device selected
+            // See if there is a device selected (triggers device generation)
             for(var k = 0; k < devices.length; k++){
                 if(devices[k].selected){
                     // If so, generate such a device for this port
-                    // Deselect the device (unless it is the motor group device)
-                    if(devices[k].type !== "Motor Group"){
-                        devices[k].selected = false;
-                        devices[k].self.style.border = "1px transparent";
-                    }
+                    // Check if port type is correct
                     var myID = parseInt(this.id.split("-")[1]);
-                    console.log(" Adding device " + devices[k].name + " to port " + myID.toString());
-                    var device = devices[k].generate(myID);
-                    ports[myID - 1].device = device;
+                    let port = ports[myID].port;
+                    if((port.isAdi && devices[k].type.includes("ADI")) || (!port.isAdi && !devices[k].type.includes("ADI"))){
+                        // Deselect the device (unless it is the motor group device)
+                        if(devices[k].type !== "Motor Group"){
+                            deselectAll();
+                        }
+                        console.log(" Adding device " + devices[k].name + " to port " + myID.toString());
+                        var device = devices[k].generate(myID);
+                        device.self = this;
+                        console.log("  Generated device: " + device.toString());
+                        ports[myID - 1].device = device;
+                        // Select this new device if not a part of a motor group
+                        if(device.type !== "Motor Group"){
+                            select(device);
+                            // Update options to reflect this device
+                            updateOptions(options);
+                        }
+                        updatePorts();
+                        return;
+                    } else{
+                        // Mismatched port type + device type
+                        throw new Error("Mismatched port type and device type: " + port.isAdi.toString() + " " + devices[k].type.includes("ADI").toString());
+                        return;
+                    }
                 }
             }
-            updatePorts();
+            var myId = parseInt(this.id.split("-")[1]);
+            var port = ports[myId - 1];
+            // If not, see if there is a device in this port (configure existing device)
+            if(port.device !== null){
+                // If so, select the port
+                select(port.device);
+            } else{
+                // Empty port was clicked, deselect all
+                deselectAll();
+            }
             updateOptions(options);
+            updatePorts();
         };
         col.onmouseover = function(){
-            this.style.border = "1px solid blue";
+            var myID = parseInt(this.id.split("-")[1]);
+            // Ensure this port is not selected
+            if(ports[myID - 1].device !== null && !ports[myID - 1].device.selected){
+                this.style.border = "1px solid blue";
+            } else if(ports[myID - 1].device === null){
+                this.style.border = "1px solid blue";
+            }
+
+            // Don't make blue if this port is a mismatched type for generation
+            // See if there is a device selected (triggers device generation)
+            for(var k = 0; k < devices.length; k++){
+                if(devices[k].selected){
+                    // Check if port type is correct
+                    var myID = parseInt(this.id.split("-")[1]);
+                    let port = ports[myID].port;
+                    if((port.isAdi && devices[k].type.includes("ADI")) || (!port.isAdi && !devices[k].type.includes("ADI"))){
+                        this.style.border = "1px transparent";
+                        return;
+                    } else{
+                        // Mismatched port type + device type
+                        return;
+                    }
+                }
+            }
         };
         col.onmouseout = function(){
-            this.style.border = "1px transparent";
+            var myID = parseInt(this.id.split("-")[1]);
+            // Ensure this port is not selected
+            if(ports[myID - 1].device !== null && !ports[myID - 1].device.selected){
+                this.style.border = "1px transparent";
+            } else if(ports[myID - 1].device === null){
+                this.style.border = "1px transparent";
+            }
         };
     }
     updatePorts();

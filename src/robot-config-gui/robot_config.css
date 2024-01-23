@@ -32,6 +32,22 @@ table .port-col{
     width: 84.2857143px;
     border:1px transparent;
 }
+table .port-adi-col{
+    width: 72.5px;
+    border:1px transparent;
+}
+
+.adi-table .port-row{
+    text-align: center;
+    vertical-align: middle;
+    padding: 0;
+    margin: 0;
+    height: 72.5px;
+}
+.adi-table .port-col{
+    width: 72.5px;
+    border:1px transparent;
+}
 td{
     padding:5px
 }
