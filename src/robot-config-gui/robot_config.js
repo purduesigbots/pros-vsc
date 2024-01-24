@@ -1091,14 +1091,29 @@ class V5Robot{
 function updatePorts(){
     for(var i = 0, port; port = ports[i]; i++){
         // Check if this port has a device
-        if(port.device === null){
+        if(port.device === null && !port.isAdi){
             // If not, set the image to empty
             //port.self.src = "media/Empty_Port.png";
             port.self.innerHTML = 
             `
             <h2>Port ${(i+1).toString()}</h2>
             `;
-        } else {
+        } else if (!port.isAdi){
+            // If so, set the image to the device's image
+            //port.self.src = port.device.getImgUri();
+            port.self.innerHTML = 
+            `
+            <h2>Port ${(i+1).toString()}</h2>
+            <body>${port.device.name}</body>
+            `;
+        } else if(port.device === null && port.isAdi){
+            // If not, set the image to empty
+            //port.self.src = "media/Empty_Port.png";
+            port.self.innerHTML = 
+            `
+            <h2>Port ${(i+1).toString()}</h2>
+            `;
+        } else if (port.isAdi){
             // If so, set the image to the device's image
             //port.self.src = port.device.getImgUri();
             port.self.innerHTML = 
@@ -1450,7 +1465,8 @@ window.onload = setTimeout(function(){
                     // Check if port type is correct
                     var myID = parseInt(this.id.split("-")[1]);
                     let port = ports[myID].port;
-                    if((port.isAdi && devices[k].type.includes("ADI")) || (!port.isAdi && !devices[k].type.includes("ADI"))){
+                    if((port.isAdi && (devices[k].type.includes("ADI") || devices[k].type.includes("Piston"))) 
+                    || (!port.isAdi && (!devices[k].type.includes("ADI") && !devices[k].type.includes("Piston")))){
                         // Deselect the device (unless it is the motor group device)
                         if(devices[k].type !== "Motor Group"){
                             deselectAll();
@@ -1490,8 +1506,9 @@ window.onload = setTimeout(function(){
         };
         col.onmouseover = function(){
             var myID = parseInt(this.id.split("-")[1]);
+            var port = ports[myID - 1];
             // Ensure this port is not selected
-            if(ports[myID - 1].device !== null && !ports[myID - 1].device.selected){
+            if(port.device !== null && !port.device.selected){
                 this.style.border = "1px solid blue";
             } else if(ports[myID - 1].device === null){
                 this.style.border = "1px solid blue";
@@ -1502,13 +1519,13 @@ window.onload = setTimeout(function(){
             for(var k = 0; k < devices.length; k++){
                 if(devices[k].selected){
                     // Check if port type is correct
-                    var myID = parseInt(this.id.split("-")[1]);
-                    let port = ports[myID].port;
-                    if((port.isAdi && devices[k].type.includes("ADI")) || (!port.isAdi && !devices[k].type.includes("ADI"))){
-                        this.style.border = "1px transparent";
+                    if((port.isAdi && (devices[k].type.includes("ADI") || devices[k].type.includes("Piston"))) 
+                    || (!port.isAdi && (!devices[k].type.includes("ADI") && !devices[k].type.includes("Piston")))){
+                        this.style.border = "1px solid blue";
                         return;
                     } else{
                         // Mismatched port type + device type
+                        this.style.border = "1px transparent";
                         return;
                     }
                 }
