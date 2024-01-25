@@ -26,7 +26,7 @@ table .port-row{
     vertical-align: middle;
     padding: 0;
     margin: 0;
-    height: 84.2857143px;
+    height: 100px;
 }
 table .port-col{
     width: 84.2857143px;
@@ -42,7 +42,7 @@ table .port-adi-col{
     vertical-align: middle;
     padding: 0;
     margin: 0;
-    height: 72.5px;
+    height: 100px;
 }
 .adi-table .port-col{
     width: 72.5px;

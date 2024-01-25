@@ -3,10 +3,6 @@
     <script nonce = %%NONCE%%, src="%%SCRIPT_PATH%%"></script>
     <script nonce = %%NONCE-2%%, src="%%SCRIPT_PATH2%%"></script>
     <link rel="stylesheet" href="%%CSS_PATH%%">
-    <head>
-        <title>Robot Config</title>
-        <h1 id="debug">nothing happened yet</h1>
-    </head>
     <body>
         <div id="devices">
             <h1>Devices</h1>
@@ -152,8 +148,8 @@
                     </td>
                 </tr>
             </table>
-            <table id="brain-adi-port-table" class = "adi-table">
-                <tr class = "port-row">
+            <table id="adi-port-table" class = "adi-table">
+                <tr class = "port-row" id = "Brain_ADI">
                     <td class = port-col>
                         <h2>A</h2>
                     </td>
@@ -183,6 +179,12 @@
         </div>
         <div id="Motor Groups">
             <h1>Motor Groups</h1>
+        </div>
+        <div id="Generated PROS">
+            <h1>Generated PROS</h1>
+            <p id="Generated-PROS-Body">
+                The PROS code generated from the configuration above will appear here.
+            </p>
         </div>
     </body>
 </html>

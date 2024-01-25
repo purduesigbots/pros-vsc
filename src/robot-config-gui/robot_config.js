@@ -6,7 +6,7 @@
 class V5Device{
     type;
     name;
-    port;
+    portProtected;
     self; // the html element of the device
     selected = false;
 
@@ -24,8 +24,16 @@ class V5Device{
         }
         this.type = _type;
         this.name = _name;
-        this.port = _port;
+        this.portProtected = _port;
         this.self = _self;
+    }
+
+    get port(){
+        return this.portProtected;
+    }
+
+    set port(_port){
+        this.portProtected = _port;
     }
 
     /**
@@ -44,7 +52,7 @@ class V5Device{
      * @returns {String} Verbose description of the device
      */
     toString(){
-        return this.name + " is a " + this.type + " on port " + this.port.toString();
+        return this.name + " is a " + this.type + " on port " + this.portProtected.toString();
     }
 
     /**
@@ -63,7 +71,7 @@ class V5Device{
      * @returns {Boolean} Whether or not the devices are equal
      */
     equals(device){
-        return this.name === device.name && this.port === device.port && this.type === device.type && this.self === device.self;
+        return this.name === device.name && this.portProtected=== device.port && this.type === device.type && this.self === device.self;
     }
 
     /**
@@ -124,21 +132,21 @@ class V5Motor extends V5Device{
     toPros(){
         return "extern pros::Motor " 
         + this.name + " (" 
-        + this.port.toString() 
+        + this.portProtected.toString() 
         + ", pros::E_MOTOR_GEARSET_" + this.rpm 
         + ", " + (this.reversed? "true" : "false")
         + ");\n";
     }
 
     #clone(){
-        return new V5Motor(this.name, this.port, this.reversed, this.wattage, this.rpm, this.self);
+        return new V5Motor(this.name, this.portProtected, this.reversed, this.wattage, this.rpm, this.self);
     }
 
     generate(_port){
         var newMotor = this.#clone();
         newMotor.port = _port;
         // Reset demo object
-        this.port = -1;
+        this.portProtected= -1;
         this.name = newMotor.type;
         this.reversed = false;
         this.wattage = 11;
@@ -235,7 +243,7 @@ class V5RotationSensor extends V5Device{
     toPros(){
         return "extern pros::RotationSensor "
         + this.name + " ("
-        + this.port.toString()
+        + this.portProtected.toString()
         + ", " + (this.reversed? "true" : "false")
         + ");\n";
     }
@@ -248,7 +256,7 @@ class V5RotationSensor extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = -1;
+        this.portProtected= -1;
         this.name = newSensor.type;
         this.reversed = false;
         return newSensor;
@@ -276,7 +284,7 @@ class V5Imu extends V5Device{
     toPros(){
         return "extern pros::Imu "
         + this.name + " ("
-        + this.port.toString()
+        + this.portProtected.toString()
         + ");\n";
     }
 
@@ -288,7 +296,7 @@ class V5Imu extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = -1;
+        this.portProtected= -1;
         this.name = newSensor.type;
         return newSensor;
     }
@@ -318,7 +326,7 @@ class V5Piston extends V5Device{
     toPros(){
         return "extern pros::ADIDigitalOut "
         + this.name + " (\'"
-        + this.port.toString()
+        + this.portProtected.toString()
         + "\', " + (this.reversed? "true" : "false")
         + ");\n";
     }
@@ -331,7 +339,7 @@ class V5Piston extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = '{-1, \'A\'}';
+        this.portProtected= '{-1, \'A\'}';
         this.name = newSensor.type;
         this.reversed = false;
         return newSensor;
@@ -359,7 +367,7 @@ class V5OpticalSensor extends V5Device{
     toPros(){
         return "extern pros::Optical "
         + this.name + " ("
-        + this.port.toString()
+        + this.portProtected.toString()
         + ");\n";
     }
 
@@ -371,7 +379,7 @@ class V5OpticalSensor extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = -1;
+        this.portProtected= -1;
         this.name = newSensor.type;
         return newSensor;
     }
@@ -399,7 +407,7 @@ class V5VisionSensor extends V5Device{
     toPros(){
         return "extern pros::Vision "
         + this.name + " ("
-        + this.port.toString()
+        + this.portProtected.toString()
         + ");\n";
     }
 
@@ -411,7 +419,7 @@ class V5VisionSensor extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = -1;
+        this.portProtected= -1;
         this.name = newSensor.type;
         return newSensor;
     }
@@ -438,7 +446,7 @@ class V5DistanceSensor extends V5Device{
     toPros(){
         return "extern pros::Distance "
         + this.name + " ("
-        + this.port.toString()
+        + this.portProtected.toString()
         + ");\n";
     }
 
@@ -450,7 +458,7 @@ class V5DistanceSensor extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = -1;
+        this.portProtected= -1;
         this.name = newSensor.type;
         return newSensor;
     }
@@ -483,7 +491,7 @@ class V5GpsSensor extends V5Device{
     toPros(){
         return "extern pros::Gps "
         + this.name + " ("
-        + this.port.toString()
+        + this.portProtected.toString()
         + ", " + this.xOff.toString()
         + ", " + this.yOff.toString()
         + ");\n";
@@ -497,7 +505,7 @@ class V5GpsSensor extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = -1;
+        this.portProtected= -1;
         this.name = newSensor.type;
         this.xOff = 0;
         this.yOff = 0;
@@ -507,6 +515,8 @@ class V5GpsSensor extends V5Device{
 
 class V5AdiExpander extends V5Device{
     #adiDevices = [V5Device];
+    #portsElem = null;
+    firstPortIndex = null;
 
     /**
      * Constructs and initializes a new V5AdiExpander
@@ -525,11 +535,51 @@ class V5AdiExpander extends V5Device{
      * @param {number} _port
      */
     set port(_port){
-        super.port = _port;
+        this.portProtected= _port;
         // Update the port of all the devices in the list
         for(var i = 0, adiDevice; adiDevice = this.#adiDevices[i]; i++){
             this.#updateDevicePort(adiDevice, _port);
         }
+        if(this.#portsElem !== null){
+            this.#portsElem.id = "Expander_ADI_" + _port.toString();
+        }
+    }
+
+    get port(){
+        return this.portProtected;
+    }
+
+    /**
+     * @param {any} _portsElem
+     */
+    set portsElem(_portsElem){
+        this.#portsElem = _portsElem;
+        this.#portsElem.id = "Expander_ADI" + this.portProtected.toString();
+        this.port = this.portProtected; // Trigger port setter logic to update the port pair of all devices in this expander
+        // Update all ports in the list to have proper self references
+        for(var i = 1; i < 9; i++){
+            var elem = _portsElem.querySelector("#port-" + (this.firstPortIndex + i).toString());
+            ports[this.firstPortIndex + i - 1].self = elem;
+            ports[this.firstPortIndex + i - 1].self.onmouseover = function(){
+                portHoverCallback(this);
+            };
+            ports[this.firstPortIndex + i - 1].self.onmouseout = function(){
+                var myID = parseInt(this.id.split("-")[1]);
+                // Ensure this port is not selected
+                if(ports[myID - 1].device !== null && !ports[myID - 1].device.selected){
+                    this.style.border = "1px transparent";
+                } else if(ports[myID - 1].device === null){
+                    this.style.border = "1px transparent";
+                }
+            };
+            ports[this.firstPortIndex + i - 1].self.onclick = function(){
+                portClickCallback(this, document.getElementById("adi-port-table"), document.getElementById("Options"));
+            };
+        }
+    }
+
+    get portsElem(){
+        return this.#portsElem;
     }
 
     #updateDevicePort(_adiDevice, _port){
@@ -553,15 +603,17 @@ class V5AdiExpander extends V5Device{
 
     #sortList(){
         // Sort the list by port letter (ADI Devices have a letter instead of a number for port), A-H inclusive
-        this.#adiDevices.sort(function(a, b){
-            if(a.port < b.port){
-                return -1;
-            } else if(a.port > b.port){
-                return 1;
-            } else {
-                return 0;
-            }
-        });
+        if(this.numDevices() !== 0){
+            this.#adiDevices.sort(function(a, b){
+                if(a.port < b.port){
+                    return -1;
+                } else if(a.port > b.port){
+                    return 1;
+                } else {
+                    return 0;
+                }
+            });
+        }
     }
 
     getAdiDevice(_adiDevice){
@@ -580,30 +632,71 @@ class V5AdiExpander extends V5Device{
         // See if this device is in the list
         for(var i = 0, adiDevice; adiDevice = this.#adiDevices[i]; i++){
             if(adiDevice.equals(_adiDevice)){
-                // If so, remove it
-                this.#adiDevices.splice(i, 1);
+                // If so, delete the device outright and from the list and from ports array
+                // Construct port letter offset (A = 0, B = 1, etc.) 
+                // Needed bc #adiDevices is dynamically sized whereas no entries are ever removed from ports and every available port always exists in ports
+                var portLetterOffset = adiDevice.port.split("\'")[1].charCodeAt(0) - 'A'.charCodeAt(0);
+                ports[this.firstPortIndex + portLetterOffset].device = null; // Clear this port in ports array
+                adiDevice.generate("{-1, \'A\'}"); // Delete the device outright by calling generate with default port without saving the result
+                this.#adiDevices.splice(i, 1); // Remove the device from the expander object's internal (dynamically sized) list
                 return;
             }
         }
     }
 
+    numDevices(){
+        return this.#adiDevices.length === undefined? 0 : this.#adiDevices.length;
+    }
+
     toString(){
         this.#sortList();
         var str = this.name + " is an ADI Expander consisting of:\n\t";
-        for(var i = 0, adiDevice; adiDevice = this.adiDevices[i]; i++){
+        for(var i = 0, adiDevice; adiDevice = this.#adiDevices[i]; i++){
             str += "-" + adiDevice.toString() + "\n\t";
         }
+        var debugStr = this.#portsElem === null? "null" : this.#portsElem.toString();
+        str += "on port " + this.portProtected.toString();
         return str;
     }
 
     toPros(){
         this.#sortList();
         var str = "";
-        for(var i = 0, adiDevice; adiDevice = this.adiDevices[i]; i++){
+        for(var i = 0, adiDevice; adiDevice = this.#adiDevices[i]; i++){
             this.#updateDevicePort(adiDevice, this.port);
             str += adiDevice.toPros();
         }
         return str;
+    }
+
+    #clone(){
+        return new V5AdiExpander(this.name, this.port, this.#adiDevices, this.self);
+    }
+
+    generate(_port){
+        var newExpander = this.#clone();
+        newExpander.port = _port;
+        // Reset demo object
+        this.portProtected= -1;
+        this.name = newExpander.type;
+        for(var i = 0, adiDevice; adiDevice = this.#adiDevices[i]; i++){
+            this.removeAdiDevice(adiDevice); // Safely remove all devices from the demo object
+        }
+        if(_port !== -1){
+            // Not deletion
+            // Need to add 8 ports to the port list
+            newExpander.firstPortIndex = ports.length; // For some reason we need a plus one here - JBH
+            for(var i = 0; i < 8; i++){
+                // Construct port pair
+                var portPair = "{{" + _port.toString() + ", \'" + String.fromCharCode('A'.charCodeAt(0) + i) + "\'}}";
+                var newPort = new V5Port(portPair, null);
+                ports.push(newPort);
+            }
+        }
+        this.#adiDevices = [];
+        this.#portsElem = null;
+        this.firstPortIndex = null;
+        return newExpander;
     }
 }
 
@@ -639,7 +732,7 @@ class V5AdiPot extends V5Device{
     toPros(){
         return "extern pros::ADIPotentiometer "
         + this.name + " ("
-        + this.port.toString()
+        + this.portProtected.toString()
         + ", pros::E_ADI_POT_" + this.version
         + ");\n";
     }
@@ -652,7 +745,7 @@ class V5AdiPot extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = '{-1, \'A\'}';
+        this.portProtected= '{-1, \'A\'}';
         this.name = newSensor.type;
         return newSensor;
     }
@@ -679,7 +772,7 @@ class V5AdiAnalogIn extends V5Device{
     toPros(){
         return "extern pros::ADIAnalogIn "
         + this.name + " ("
-        + this.port.toString()
+        + this.portProtected.toString()
         + ");\n";
     }
 
@@ -691,7 +784,7 @@ class V5AdiAnalogIn extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = '{-1, \'A\'}';
+        this.portProtected= '{-1, \'A\'}';
         this.name = newSensor.type;
         return newSensor;
     }
@@ -718,7 +811,7 @@ class V5AdiDigitalIn extends V5Device{
     toPros(){
         return "extern pros::ADIDigitalIn "
         + this.name + " ("
-        + this.port.toString()
+        + this.portProtected.toString()
         + ");\n";
     }
 
@@ -730,7 +823,7 @@ class V5AdiDigitalIn extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = '{-1, \'A\'}';
+        this.portProtected= '{-1, \'A\'}';
         this.name = newSensor.type;
         return newSensor;
     }
@@ -757,7 +850,7 @@ class V5AdiLineSensor extends V5Device{
     toPros(){
         return "extern pros::ADIAnalogIn"
         + this.name + " ("
-        + this.port.toString()
+        + this.portProtected.toString()
         + ");\n";
     }
 
@@ -769,7 +862,7 @@ class V5AdiLineSensor extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = '{-1, \'A\'}';
+        this.portProtected= '{-1, \'A\'}';
         this.name = newSensor.type;
         return newSensor;
     }
@@ -810,25 +903,25 @@ class V5AdiEncoder extends V5Device{
 
     toPros(){
         // Check if in a port pair
-        if(this.port.charAt(0) === "{"){
+        if(this.portProtected.charAt(0) === "{"){
             // Get the port letter for top port
-            var topPort = this.port.split("\'")[1].trim();
+            var topPort = this.portProtected.split("\'")[1].trim();
             // Lettered bottom port (one letter higher than port)
             var bottomPort = String.fromCharCode(topPort.charCodeAt(0) + 1);
             // Get the numbered port from expander
-            var portNum = this.port.split("{{")[0].substring(0,1); // Get just the number after the port pair
+            var portNum = this.portProtected.split("{{")[0].substring(0,1); // Get just the number after the port pair
             // Generate port tuple (specific to this device)
-            this.port = "{{" + portNum + ", \'" + topPort + "\' , \'" + bottomPort + "\'}}";
+            this.portProtected= "{{" + portNum + ", \'" + topPort + "\' , \'" + bottomPort + "\'}}";
 
             return "extern pros::ADIAnalogIn"
             + this.name + " ("
-            + this.port.toString()
+            + this.portProtected.toString()
             + ", " + (this.reversed? "true" : "false")
             + ");\n";
         }
 
         // Get the port letter for top port
-        var topPort = this.port.split("\'")[1].trim();
+        var topPort = this.portProtected.split("\'")[1].trim();
         // Lettered bottom port (one letter higher than port)
         var bottomPort = String.fromCharCode(topPort.charCodeAt(0) + 1);
         return "extern pros::ADIAnalogIn"
@@ -847,7 +940,7 @@ class V5AdiEncoder extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = '{-1, \'A\'}';
+        this.portProtected= '{-1, \'A\'}';
         this.name = newSensor.type;
         this.reversed = false;
         return newSensor;
@@ -886,24 +979,24 @@ class V5AdiUs extends V5Device{
 
     toPros(){
         // Check if in a port pair
-        if(this.port.charAt(0) === "{"){
+        if(this.portProtected.charAt(0) === "{"){
             // Get the port letter for top port
-            var topPort = this.port.split("\'")[1].trim();
+            var topPort = this.portProtected.split("\'")[1].trim();
             // Lettered bottom port (one letter higher than port)
             var bottomPort = String.fromCharCode(topPort.charCodeAt(0) + 1);
             // Get the numbered port from expander
-            var portNum = this.port.split("{{")[0].substring(0,1); // Get just the number after the port pair
+            var portNum = this.portProtected.split("{{")[0].substring(0,1); // Get just the number after the port pair
             // Generate port tuple (specific to this device)
-            this.port = "{{" + portNum + ", \'" + topPort + "\' , \'" + bottomPort + "\'}}";
+            this.portProtected= "{{" + portNum + ", \'" + topPort + "\' , \'" + bottomPort + "\'}}";
 
             return "extern pros::ADIUltrasonic"
             + this.name + " ("
-            + this.port.toString()
+            + this.portProtected.toString()
             + ");\n";
         }
 
         // Get the port letter for top port
-        var topPort = this.port.split("\'")[1].trim();
+        var topPort = this.portProtected.split("\'")[1].trim();
         // Lettered bottom port (one letter higher than port)
         var bottomPort = String.fromCharCode(topPort.charCodeAt(0) + 1);
         return "extern pros::ADIUltrasonic"
@@ -920,7 +1013,7 @@ class V5AdiUs extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = '{-1, \'A\'}';
+        this.portProtected= '{-1, \'A\'}';
         this.name = newSensor.type;
         return newSensor;
     }
@@ -950,7 +1043,7 @@ class V5AdiLed extends V5Device{
     toPros(){
         return "extern pros::ADILed "
         + this.name + " ("
-        + this.port.toString()
+        + this.portProtected.toString()
         + ", " + this.length.toString()
         + ");\n";
     }
@@ -963,7 +1056,7 @@ class V5AdiLed extends V5Device{
         var newSensor = this.#clone();
         newSensor.port = _port;
         // Reset demo object
-        this.port = '{-1, \'A\'}';
+        this.portProtected= '{-1, \'A\'}';
         this.name = newSensor.type;
         this.length = 1;
         return newSensor;
@@ -1013,7 +1106,7 @@ class V5Port{
         if(smartPort < 1 || smartPort > 21){
             throw new Error("Invalid port number: " + smartPort + ". Must be between 1 and 21 inclusive");
         }
-        this.port = _port;
+        this.port= _port;
         this.self = _self;
     }
 
@@ -1066,14 +1159,30 @@ class V5Robot{
 
     toPros(){
         var str = `
-        /**
-         * THIS FILE WAS GENERATED BY THE PROS VSCODE EXTENSION'S ROBOT CONFIGURATOR
-         * IT CONTAINS PORT CONFIGURATIONS
-         **/
-        
+        /** \n
+         * THIS FILE WAS GENERATED BY THE PROS VSCODE EXTENSION'S ROBOT CONFIGURATOR \n
+         * IT CONTAINS PORT CONFIGURATIONS \n
+         **/ \n
+        \n
         `;
         for(var i = 0, port; port = this.ports[i]; i++){
-            str += port.toPros();
+            str += port.toPros() + "\n";
+        }
+        return str;
+    }
+
+    toHTML(){
+        var str = `
+        /** <br>
+         * THIS FILE WAS GENERATED BY THE PROS VSCODE EXTENSION'S ROBOT CONFIGURATOR <br>
+         * IT CONTAINS PORT CONFIGURATIONS <br>
+         **/ <br>
+         <br>
+        `;
+        for(var i = 0, port; port = this.ports[i]; i++){
+            if(port.device !== null){
+                str += port.toPros() + "<br>";
+            }
         }
         return str;
     }
@@ -1085,10 +1194,23 @@ class V5Robot{
  * 
  */
 
+function updatePROS(robot){
+    // Get the HTML element that contains the PROS code
+    var prosElem = document.getElementById("Generated-PROS-Body");
+    // Update the PROS code
+    if(robot.ports !== null && robot.ports.length !== 0 && robot.toPros().includes("extern")){
+        prosElem.innerHTML = robot.toHTML();
+    } else if(robot.ports.length === 0){
+        prosElem.innerHTML = "The PROS code generated from the configuration above will appear here.";
+    }
+}
+
 /**
  * Updates the port elements on page
+ * 
+ * @param {HTMLElement} adiPortsElem The HTML Parent Element of all ADI port elements
  */
-function updatePorts(){
+function updatePorts(adiPortsElem, robot){
     for(var i = 0, port; port = ports[i]; i++){
         // Check if this port has a device
         if(port.device === null && !port.isAdi){
@@ -1101,28 +1223,121 @@ function updatePorts(){
         } else if (!port.isAdi){
             // If so, set the image to the device's image
             //port.self.src = port.device.getImgUri();
+            
+            // Handle ADI Expander
+            if(port.device.type === "ADI Expander"){
+                // Get the smart port number
+                var smartPort = parseInt(port.port);
+                // Construct the target element id for this expander
+                var rowID = smartPort.toString();
+                // See if the html element already exists
+                var expanderElem = document.getElementById(rowID);
+                if(expanderElem === null && port.device.portsElem === null){
+                    // If not, create it
+                    adiPortsElem.insertAdjacentHTML("beforeend", `
+                        <tr style="height:30px;" id = "Expander_ADI_${rowID}-title">
+                            <td colspan = "8">
+                                <center>
+                                    <h3 style="margin:0px;">${port.device.name.toString()} (Port ${port.device.port})</h3>
+                                </center>
+                            </td>
+                        </tr>
+                        <tr class = "port-row" id = "Expander_ADI_${rowID}">
+                            <td class = port-col id = "port-${port.device.firstPortIndex + 1}">
+                                <h2>A</h2>
+                            </td>
+                            <td class = port-col id = "port-${port.device.firstPortIndex + 2}">
+                                <h2>B</h2>
+                            </td>
+                            <td class = port-col id = "port-${port.device.firstPortIndex + 3}">
+                                <h2>C</h2>
+                            </td>
+                            <td class = port-col id = "port-${port.device.firstPortIndex + 4}">
+                                <h2>D</h2>
+                            </td>
+                            <td class = port-col id = "port-${port.device.firstPortIndex + 5}">
+                                <h2>E</h2>
+                            </td>
+                            <td class = port-col id = "port-${port.device.firstPortIndex + 6}">
+                                <h2>F</h2>
+                            </td>
+                            <td class = port-col id = "port-${port.device.firstPortIndex + 7}">
+                                <h2>G</h2>
+                            </td>
+                            <td class = port-col id = "port-${port.device.firstPortIndex + 8}">
+                                <h2>H</h2>
+                            </td>
+                        </tr>
+                    `);
+                    // Set the expander device's portsElem member to the expander's particular element
+                    expanderElem = adiPortsElem.querySelector("#Expander_ADI_" + rowID.toString());
+                    console.log("Test: " + expanderElem.id);
+                    port.device.portsElem = expanderElem;
+                } else if(expanderElem === null && port.device.portsElem !== null){
+                    // This case is for when the expander is being moved from one port to another
+                    // Use the adiExpander class's port setter fn to automatically repair the integrity of the class
+                    port.device.port = smartPort;
+                }
+            }
             port.self.innerHTML = 
             `
             <h2>Port ${(i+1).toString()}</h2>
             <body>${port.device.name}</body>
             `;
+            // Construct target element id for title row
+            var rowID = "Expander_ADI_" + port.device.port.toString() + "-title";
+            // See if the html element already exists
+            var titleElem = document.getElementById(rowID);
+            if(titleElem !== null){
+                // If so, update the name
+                titleElem.innerHTML = 
+                `
+                <td colspan = "8">
+                    <center>
+                        <h3 style="margin:0px;">${port.device.name.toString()} (Port ${port.device.port})</h3>
+                    </center>
+                </td>
+                `;
+            }
         } else if(port.device === null && port.isAdi){
             // If not, set the image to empty
             //port.self.src = "media/Empty_Port.png";
-            port.self.innerHTML = 
-            `
-            <h2>Port ${(i+1).toString()}</h2>
-            `;
+
+            var adiPort;
+            // Construct adi port letter
+            if(port.port.charAt(0) === "{"){
+                adiPort = port.port.split("\'")[1].trim();
+            } else{
+                adiPort = port.port;
+            }
+
+            // port.self can be null if we are in the midst of initializing a new ADI Expander
+            if(port.self !== null){
+                port.self.innerHTML = 
+                `
+                <h2>${adiPort.charAt(0).toString()}</h2>
+                `;
+            }
         } else if (port.isAdi){
             // If so, set the image to the device's image
             //port.self.src = port.device.getImgUri();
+
+            var adiPort;
+            // Construct adi port letter
+            if(port.port.charAt(0) === "{"){
+                adiPort = port.port.split("\'")[1].trim();
+            } else{
+                adiPort = port.port;
+            }
             port.self.innerHTML = 
             `
-            <h2>Port ${(i+1).toString()}</h2>
+            <h2>Port ${adiPort.charAt(0).toString()}</h2>
             <body>${port.device.name}</body>
             `;
         }
     }
+    robot.ports = ports;
+    updatePROS(robot);
 }
 
 /**
@@ -1130,7 +1345,7 @@ function updatePorts(){
  * 
  * @param {HTMLElement} optionsElem The HTML Parent Element of all options input elements
  */
-function updateOptions(optionsElem){
+function updateOptions(optionsElem, robot){
     // Check if a device is selected (from device table or any port)
     var selected = false;
     var device = null;
@@ -1208,6 +1423,10 @@ function updateOptions(optionsElem){
             <option value="${secondGearset.split(' ')[0]}">${secondGearset}</option>
             <option value="${thirdGearset.split(' ')[0]}">${thirdGearset}</option>
         </select>
+        <input type="button" id="Option_Delete" value="Delete">
+        </input>
+        <input type="button" id="Option_Port" value="Change Port">
+        </input>
         `;
 
         // Add 11W Motor Unique Event Listeners
@@ -1227,7 +1446,7 @@ function updateOptions(optionsElem){
                     throw new Error("Invalid gearset: " + gearsetSelect.value + "When generating options for the following device: " + device.toString());
             }
         });
-    } else if(device.type === "5.5W Motor" || device.type === "ADI Pot" || device.type === "ADI Encoder" || device.type === "Rotation Sensor" || device.type === "Piston"){
+    } else if(device.type === "5.5W Motor" || device.type === "ADI Potentiometer" || device.type === "ADI Encoder" || device.type === "Rotation Sensor" || device.type === "Piston"){
         // Parameters present: name, reversed
         let reversed = device.reversed? "checked" : "";
         optionsElem.innerHTML = 
@@ -1238,16 +1457,23 @@ function updateOptions(optionsElem){
         <input type="checkbox" id="Option_Reversed" ${reversed}>
             <label for="Option_Reversed">Reversed</label>
         </input>
+        <input type="button" id="Option_Delete" value="Delete">
+        </input>
+        <input type="button" id="Option_Port" value="Change Port">
+        </input>
         `;
     } else if(device.type === "Motor Group"){
         throw new Error("Motor Group options not yet implemented");
-    } else if(device.type === "IMU" || device.type === "Optical Sensor" || device.type === "Vision Sensor" || device.type === "Distance Sensor" || device.type === "ADI Analog In" || device.type === "ADI Digital In" || device.type === "ADI Line Sensor" || device.type === "ADI Ultrasonic"){
+    } else if(device.type === "ADI Expander" || device.type === "IMU" || device.type === "Optical Sensor" || device.type === "Vision Sensor" || device.type === "Distance Sensor" || device.type === "ADI Analog In" || device.type === "ADI Digital In" || device.type === "ADI Line Sensor" || device.type === "ADI Ultrasonic"){
         // Parameters present: name
         optionsElem.innerHTML = 
         `
         <h1>Options</h1>
-        <input type="text" id="Option_Name" placeholder="${device.name}"
-            <label for="Option_Name">Device Name</label>
+        <input type="text" id="Option_Name" placeholder="${device.name}">
+        </input>
+        <input type="button" id="Option_Delete" value="Delete">
+        </input>
+        <input type="button" id="Option_Port" value="Change Port">
         </input>
         `;
     } else if(device.type === "GPS Sensor"){
@@ -1255,14 +1481,17 @@ function updateOptions(optionsElem){
         optionsElem.innerHTML = 
         `
         <h1>Options</h1>
-        <input type="text" id="Option_Name" placeholder="${device.name}"
-            <label for="Option_Name">Device Name</label>
+        <input type="text" id="Option_Name" placeholder="${device.name}">
         </input>
         <input type="number" id="Option_X" placeholder="${device.xOff}"
             <label for="Option_X">X Offset</label>
         </input>
         <input type="number" id="Option_Y" placeholder="${device.yOff}"
             <label for="Option_Y">Y Offset</label>
+        </input>
+        <input type="button" id="Option_Delete" value="Delete">
+        </input>
+        <input type="button" id="Option_Port" value="Change Port">
         </input>
         `;
 
@@ -1275,18 +1504,19 @@ function updateOptions(optionsElem){
         yInput.addEventListener("input", function(){
             device.yOff = yInput.value;
         });
-    } else if(device.type === "ADI Expander"){
-        throw new Error("ADI Expander options not yet implemented");
-    } else if(device.type === "ADI Led"){
+    } else if(device.type === "ADI LED"){
         // Parameters present: name, length
         optionsElem.innerHTML = 
         `
         <h1>Options</h1>
-        <input type="text" id="Option_Name" placeholder="${device.name}"
-            <label for="Option_Name">Device Name</label>
+        <input type="text" id="Option_Name" placeholder="${device.name}">
         </input>
         <input type="number" id="Option_Length" placeholder="${device.length}"
             <label for="Option_Length">Length</label>
+        </input>
+        <input type="button" id="Option_Delete" value="Delete">
+        </input>
+        <input type="button" id="Option_Port" value="Change Port">
         </input>
         `;
 
@@ -1299,10 +1529,78 @@ function updateOptions(optionsElem){
         throw new Error("Invalid device type: " + device.type);
     }
     
-    // Add event listeners to parameters shared by all devices (name):
+    // Add event listeners to parameters shared by all devices:
+    // Name
     var nameInput = optionsElem.querySelector("#Option_Name");
     nameInput.addEventListener("input", function(){
         device.name = nameInput.value;
+    });
+
+    // Delete
+    var deleteButton = optionsElem.querySelector("#Option_Delete");
+    deleteButton.addEventListener("click", function(){
+        // Delete device by calling generate() with default port and not saving the result
+        // Has to be separate by ADI vs non ADI vs Motor Group/Expander (separate bc unique html deletion needs to occur)
+        if(device.type === "Piston" || device.type === "ADI Potentiometer" || device.type === "ADI Analog In" || device.type === "ADI Digital In" || device.type === "ADI Line Sensor" || device.type === "ADI Encoder" || device.type === "ADI Ultrasonic" || device.type === "ADI LED"){
+            // Demo object always has smartport # -1
+            // Get the smartport number from the port pair (if it even is a port pair)
+            var smartPort;
+            var portLetter;
+            // If device is in an expander, delete it from that expander. 
+            if(device.port.charAt(0) === "{"){
+                smartPort = parseInt(device.port.split("{{")[1].split(",")[0].trim());
+                // Check if demo object
+                if(smartPort > 0){
+                    // If not, adjust associated expander
+                    // Get the expander device object
+                    var expander = ports[smartPort-1].device;
+                    console.log("Expander info: " + expander.toString());
+                    // Delete the device from the expander
+                    expander.removeAdiDevice(device); //Automatically clears associated port 
+                }
+            } else {
+                portLetter = device.port; // Get the port letter
+                // Clear associated port if not a demo object
+                let portIndex = 20 + portLetter.charCodeAt(0) - 65 + 1; // 21 is the index of the first ADI port in the ports array
+                console.log("Port index: " + portIndex.toString());
+                ports[portIndex].device = null;
+            }
+            // Delete the ADI device outright by calling generate() with default port and not saving the result
+            device.generate('{-1, \'A\'}');
+        } else if(device.type === "Motor Group"){
+            throw new Error("Motor Group options not yet implemented");
+        } else if(device.type === "ADI Expander"){
+            // Delete the expander's row from the table
+            // Construct the target element id for this expander
+            var rowID = "Expander_ADI_" + device.port.toString();
+            // See if the html element already exists
+            console.log("Row ID: " + rowID);
+            var expanderElem = document.getElementById(rowID);
+            if(expanderElem !== null){
+                // If so, delete it and its title element
+                console.log("Deleting expander element: " + expanderElem.id);
+                expanderElem.remove();
+                document.getElementById(rowID + "-title").remove();
+            }
+            // Clear associated smartport
+            if(device.port > 0){
+                ports[device.port - 1].device = null;
+            }
+            // Delete the expander outright by calling generate() with default port and not saving the result
+            device.generate(-1); // Automatically deletes all devices in the expander (clears associated ports too!)
+        } else {
+            // First, clear associated port if not a demo object (demo objects have smartport # -1)
+            if(device.port > 0){
+                ports[device.port - 1].device = null;
+            }
+            // Delete the smartport device outright by calling generate() with default port and not saving the result
+            device.generate(-1);
+        }
+        // Deselect all devices and ports
+        deselectAll();
+        // Update the page
+        updatePorts(document.getElementById("adi-port-table"), robot);
+        updateOptions(optionsElem, robot); // This will display the default options message
     });
 
     // Add event listeners to parameters shared by some devices (reversed) if applicable to selected device:
@@ -1312,6 +1610,7 @@ function updateOptions(optionsElem){
             device.reversed = reversedInput.checked;
         });
     }
+    updatePROS(robot);
 }
 
 /**
@@ -1327,6 +1626,10 @@ function deselectAll(){
         if(port.device !== null){
             port.device.selected = false;
             port.device.self.style.border = "1px transparent";
+        }
+        if(port.self !== null){
+            // Can be null in the midst of generating a new adi expander and its associated 8 new ports
+            port.self.style.border = "1px transparent";
         }
     }
 
@@ -1349,8 +1652,130 @@ function select(device){
     deselectAll();
     device.selected = true;
     device.self.style.border = "1px solid red";
+    console.log("Selected device info: " + device.toString());
 }
 
+/**
+ * Sets the hover color of a port depending on a few factors.
+ * 
+ * @param {HTMLElement} elem The mouseover event's target element
+ */
+function portHoverCallback(elem){
+    var myID = parseInt(elem.id.split("-")[1]);
+    var port = ports[myID - 1];
+    // Ensure this port is not selected
+    if(port.device !== null && !port.device.selected){
+        elem.style.border = "1px solid blue";
+    } else if(ports[myID - 1].device === null){
+        elem.style.border = "1px solid blue";
+    }
+
+    // Don't make blue if this port is a mismatched type for generation
+    // See if there is a device selected (triggers device generation)
+    for(var k = 0; k < devices.length; k++){
+        if(devices[k].selected){
+            // Check if port type is correct
+            if((port.isAdi && (devices[k].type.includes("ADI") || devices[k].type.includes("Piston")) && !devices[k].type.includes("Expander")) 
+            || (!port.isAdi && ((!devices[k].type.includes("ADI") || devices[k].type.includes("Expander")) && !devices[k].type.includes("Piston")))){
+                // Additional check for two-port devices (ADI Encoder, ADI Ultrasonic)
+                if(devices[k].type === "ADI Encoder" || devices[k].type === "ADI Ultrasonic"){
+                    // Get the port letter (could be either port pair or just port letter)
+                    var portLetter;
+                    if(port.port.charAt(0) === "{"){
+                        portLetter = port.port.split("\'")[1].charAt(0);
+                    } else{
+                        portLetter = port.port;
+                    }
+                    // Ensure that the port letter is valid (ODD letter (A, C, E, G))
+                    if(portLetter.charCodeAt(0) % 2 === 0){
+                        elem.style.border = "1px transparent";
+                        return;
+                    }
+                }
+                elem.style.border = "1px solid blue";
+                return;
+            } else{
+                // Mismatched port type + device type
+                elem.style.border = "1px transparent";
+                console.log("Mismatched port type and device type. Port is adi? " + port.isAdi.toString() + " . Device: " + devices[k].type.toString());
+                return;
+            }
+        }
+    }
+}
+
+/**
+ * Sets the highlight color of a port when the mouse leaves it.
+ * 
+ * @param {HTMLElement} elem The mouseout event's target element
+ */
+function portUnhoverCallback(elem){
+    var myID = parseInt(elem.id.split("-")[1]);
+    var port = ports[myID - 1];
+    // Ensure this port is not selected
+    if(port.device !== null && !port.device.selected){
+        elem.style.border = "1px transparent";
+    } else if(ports[myID - 1].device === null){
+        elem.style.border = "1px transparent";
+    }
+}
+
+function portClickCallback(elem, adiTable, options, robot){
+    console.log("Port clicked: " + elem.id);
+            // See if there is a device selected (triggers device generation)
+            for(var k = 0; k < devices.length; k++){
+                if(devices[k].selected){
+                    // If so, generate such a device for this port
+                    // Check if port type is correct
+                    var myID = parseInt(elem.id.split("-")[1]);
+                    let port = ports[myID - 1];
+                    if((port.isAdi && (devices[k].type.includes("ADI") || devices[k].type.includes("Piston")) && !devices[k].type.includes("Expander")) 
+                    || (!port.isAdi && ((!devices[k].type.includes("ADI") || devices[k].type.includes("Expander")) && !devices[k].type.includes("Piston")))){
+                        // Deselect the device (unless it is the motor group device)
+                        if(devices[k].type !== "Motor Group"){
+                            deselectAll();
+                        }
+                        console.log(" Adding device " + devices[k].name + " to port " + port.port.toString());
+                        var device = devices[k].generate(port.port);
+                        device.self = elem;
+                        console.log("  Generated device: " + device.toString());
+                        port.device = device;
+                        // Add to expander (if applicable)
+                        if(port.isAdi && device.port.charAt(0) === "{"){
+                            // Get the smart port number
+                            var smartPort = parseInt(device.port.split("{{")[1].split(",")[0].trim());
+                            // Get the expander object 
+                            var expander = ports[smartPort-1].device;
+                            // Add the device to the expander
+                            expander.addAdiDevice(device);
+                        }
+                        // Select this new device if not a part of a motor group
+                        if(device.type !== "Motor Group"){
+                            select(device);
+                            // Update options to reflect this device
+                            updateOptions(options, robot);
+                        }
+                        updatePorts(adiTable, robot);
+                        return;
+                    } else{
+                        // Mismatched port type + device type
+                        throw new Error("Mismatched port type and device type. Port is adi? " + port.isAdi.toString() + " . Device: " + devices[k].type.toString());
+                    }
+                }
+            }
+            var myId = parseInt(elem.id.split("-")[1]);
+            var port = ports[myId - 1];
+            // If not, see if there is a device in this port (configure existing device)
+            if(port.device !== null){
+                // If so, select the port
+                select(port.device);
+            } else{
+                // Empty port was clicked, deselect all
+                deselectAll();
+            }
+            updateOptions(options, robot);
+            updatePorts(adiTable, robot);
+}
 /**
  * 
  * GLOBAL DATA
@@ -1371,10 +1796,10 @@ window.onload = setTimeout(function(){
     const deviceCols = document.getElementsByClassName("device-col");
     const portRows = document.getElementsByClassName("port-row");
     const portCols = document.getElementsByClassName("port-col");
-
-    const debug = document.getElementById("debug");
+    const adiTable = document.getElementById("adi-port-table");
     const optionsBody = document.getElementById("Options-Body");
     const options = document.getElementById("Options");
+    let robot = new V5Robot();
 
     // HTML elements for adding specific listeners, initializing v5Devices
     const MOTOR_BIG = document.getElementById("11W MOTOR");
@@ -1396,23 +1821,23 @@ window.onload = setTimeout(function(){
     const ADI_US = document.getElementById("ADI ULTRASONIC");
     const ADI_LED = document.getElementById("ADI LED");
 
-    devices.push(new V5Motor("11W MOTOR", -1, false, 11, 200, MOTOR_BIG));
-    devices.push(new V5Motor("5.5W MOTOR", -1, false, 5.5, 200, MOTOR_SMALL));
-    devices.push(new V5MotorGroup("MOTOR GROUP", -1, false, null, null, MOTOR_GROUP));
-    devices.push(new V5RotationSensor("ROTATION SENSOR", 4, false, ROTATION_SENSOR));
+    devices.push(new V5Motor("11W Motor", -1, false, 11, 200, MOTOR_BIG));
+    devices.push(new V5Motor("5.5W Motor", -1, false, 5.5, 200, MOTOR_SMALL));
+    devices.push(new V5MotorGroup("Motor Group", -1, false, null, null, MOTOR_GROUP));
+    devices.push(new V5RotationSensor("Rotation Sensor", 4, false, ROTATION_SENSOR));
     devices.push(new V5Imu("IMU", -1, IMU));
-    devices.push(new V5Piston("PISTON", '{-1, \'A\'}', false, PISTON));
-    devices.push(new V5OpticalSensor("OPTICAL SENSOR", -1, OPTICAL_SENSOR));
-    devices.push(new V5VisionSensor("VISION SENSOR", -1, VISION_SENSOR));
-    devices.push(new V5DistanceSensor("DISTANCE SENSOR", -1, DISTANCE_SENSOR));
-    devices.push(new V5GpsSensor("GPS SENSOR", -1, 0, 0, GPS_SENSOR));
-    devices.push(new V5AdiExpander("ADI EXPANDER", -1, ADI_EXPANDER));
-    devices.push(new V5AdiPot("ADI POT", '{-1, \'A\'}', "V2", ADI_POT));
-    devices.push(new V5AdiAnalogIn("ADI ANALOG IN", '{-1, \'A\'}', ADI_ANALOG_IN));
-    devices.push(new V5AdiDigitalIn("ADI DIGITAL IN", '{-1, \'A\'}', ADI_DIGITAL_IN));
-    devices.push(new V5AdiLineSensor("ADI LINE SENSOR", '{-1, \'A\'}', ADI_LINE_SENSOR));
-    devices.push(new V5AdiEncoder("ADI ENCODER", '{-1, \'A\'}', false, ADI_ENCODER));
-    devices.push(new V5AdiUs("ADI ULTRASONIC", '{-1, \'A\'}', ADI_US));
+    devices.push(new V5Piston("Piston", '{-1, \'A\'}', false, PISTON));
+    devices.push(new V5OpticalSensor("Optical Sensor", -1, OPTICAL_SENSOR));
+    devices.push(new V5VisionSensor("Vision Sensor", -1, VISION_SENSOR));
+    devices.push(new V5DistanceSensor("Distance Sensor", -1, DISTANCE_SENSOR));
+    devices.push(new V5GpsSensor("GPS Sensor", -1, 0, 0, GPS_SENSOR));
+    devices.push(new V5AdiExpander("ADI Expander", -1, [], ADI_EXPANDER));
+    devices.push(new V5AdiPot("ADI Potentiometer", '{-1, \'A\'}', "V2", ADI_POT));
+    devices.push(new V5AdiAnalogIn("ADI Analog In", '{-1, \'A\'}', ADI_ANALOG_IN));
+    devices.push(new V5AdiDigitalIn("ADI Digital In", '{-1, \'A\'}', ADI_DIGITAL_IN));
+    devices.push(new V5AdiLineSensor("ADI Line Sensor", '{-1, \'A\'}', ADI_LINE_SENSOR));
+    devices.push(new V5AdiEncoder("ADI Encoder", '{-1, \'A\'}', false, ADI_ENCODER));
+    devices.push(new V5AdiUs("ADI Ultrasonic", '{-1, \'A\'}', ADI_US));
     devices.push(new V5AdiLed("ADI LED", '{-1, \'A\'}', 1, ADI_LED));
 
     //Add event listeners to each device entry
@@ -1427,7 +1852,7 @@ window.onload = setTimeout(function(){
             col.onclick = function(){
                 var myID = parseInt(this.id.split("-")[1]);
                 select(devices[myID]);
-                updateOptions(options);
+                updateOptions(options, robot);
             };
             col.onmouseover = function(){
                 var myID = parseInt(this.id.split("-")[1]);
@@ -1445,7 +1870,6 @@ window.onload = setTimeout(function(){
     }
 
     //Add event listeners to each port entry
-    console.log("Port Rows Info: " + portRows.length.toString() + " " + portCols.length.toString());
     for(var i = 0; i < portCols.length; i++){
         var col = portCols[i];
         col.setAttribute("id", "port-" + (i + 1));
@@ -1458,78 +1882,10 @@ window.onload = setTimeout(function(){
             ports.push(new V5Port(String.fromCharCode(i - 21 + 65), col));
         }
         col.onclick = function(){
-            // See if there is a device selected (triggers device generation)
-            for(var k = 0; k < devices.length; k++){
-                if(devices[k].selected){
-                    // If so, generate such a device for this port
-                    // Check if port type is correct
-                    var myID = parseInt(this.id.split("-")[1]);
-                    let port = ports[myID].port;
-                    if((port.isAdi && (devices[k].type.includes("ADI") || devices[k].type.includes("Piston"))) 
-                    || (!port.isAdi && (!devices[k].type.includes("ADI") && !devices[k].type.includes("Piston")))){
-                        // Deselect the device (unless it is the motor group device)
-                        if(devices[k].type !== "Motor Group"){
-                            deselectAll();
-                        }
-                        console.log(" Adding device " + devices[k].name + " to port " + myID.toString());
-                        var device = devices[k].generate(myID);
-                        device.self = this;
-                        console.log("  Generated device: " + device.toString());
-                        ports[myID - 1].device = device;
-                        // Select this new device if not a part of a motor group
-                        if(device.type !== "Motor Group"){
-                            select(device);
-                            // Update options to reflect this device
-                            updateOptions(options);
-                        }
-                        updatePorts();
-                        return;
-                    } else{
-                        // Mismatched port type + device type
-                        throw new Error("Mismatched port type and device type: " + port.isAdi.toString() + " " + devices[k].type.includes("ADI").toString());
-                        return;
-                    }
-                }
-            }
-            var myId = parseInt(this.id.split("-")[1]);
-            var port = ports[myId - 1];
-            // If not, see if there is a device in this port (configure existing device)
-            if(port.device !== null){
-                // If so, select the port
-                select(port.device);
-            } else{
-                // Empty port was clicked, deselect all
-                deselectAll();
-            }
-            updateOptions(options);
-            updatePorts();
+            portClickCallback(this, adiTable, options, robot);
         };
         col.onmouseover = function(){
-            var myID = parseInt(this.id.split("-")[1]);
-            var port = ports[myID - 1];
-            // Ensure this port is not selected
-            if(port.device !== null && !port.device.selected){
-                this.style.border = "1px solid blue";
-            } else if(ports[myID - 1].device === null){
-                this.style.border = "1px solid blue";
-            }
-
-            // Don't make blue if this port is a mismatched type for generation
-            // See if there is a device selected (triggers device generation)
-            for(var k = 0; k < devices.length; k++){
-                if(devices[k].selected){
-                    // Check if port type is correct
-                    if((port.isAdi && (devices[k].type.includes("ADI") || devices[k].type.includes("Piston"))) 
-                    || (!port.isAdi && (!devices[k].type.includes("ADI") && !devices[k].type.includes("Piston")))){
-                        this.style.border = "1px solid blue";
-                        return;
-                    } else{
-                        // Mismatched port type + device type
-                        this.style.border = "1px transparent";
-                        return;
-                    }
-                }
-            }
+            portHoverCallback(this);
         };
         col.onmouseout = function(){
             var myID = parseInt(this.id.split("-")[1]);
@@ -1541,5 +1897,6 @@ window.onload = setTimeout(function(){
             }
         };
     }
-    updatePorts();
+    robot.ports = ports;
+    updatePorts(adiTable, robot);
 });
