@@ -61,7 +61,7 @@
       programList.innerHTML = "Programs:<br>";
       deviceInfo.programs.forEach((program) => {
         //programList.innerHTML += `<option value=${program.slot} ${Number(program.slot) === Number(deviceInfo.currentSlot) ? "selected" : ""}>${program.file}</option>`;
-        programList.innerHTML += `Slot ${program.slot}: ${program.file}`;
+        programList.innerHTML += `Slot ${program.slot}: ${program.file}<br>`;
       });
       deviceContainer.innerHTML = "";
       deviceInfo.devices.forEach((device) => {
@@ -85,6 +85,4 @@
       }>${deviceInfo.desc}</option>`;
     });
   }
-
-  setInterval(vscode.postMessage, 3000, { type: "updateDeviceList" });
 })();
