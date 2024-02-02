@@ -248,17 +248,17 @@
     "menus": {
       "editor/title": [
         {
-          "when": "true",
+          "when": "pros.isPROSProject",
           "command": "pros.build&upload",
           "group": "navigation@1"
         },
         {
-          "when": "true",
+          "when": "pros.isPROSProject",
           "command": "pros.run",
           "group": "navigation@1"
         },
         {
-          "when": "true",
+          "when": "pros.isPROSProject",
           "command": "pros.stop",
           "group": "navigation@1"
         }
