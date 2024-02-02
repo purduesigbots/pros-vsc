@@ -432,6 +432,7 @@
     "@purduesigbots/pros-cli-middleware": "^2.5.2",
     "@types/semver": "^7.3.6",
     "@types/universal-analytics": "^0.4.4",
+    "adm-zip": "^0.5.10",
     "axios": "^1.6.0",
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.7",
@@ -439,7 +440,6 @@
     "semver": "^7.5.2",
     "tar-fs": "^2.1.1",
     "universal-analytics": "^0.5.3",
-    "unzipper": "^0.10.11",
     "usb": "^2.10.0"
   }
 }

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { window, ProgressLocation } from "vscode";
 var fetch = require("node-fetch");
-var unzipper = require("unzipper");
+var admzip = require("adm-zip");
 var bunzip = require("seek-bzip");
 var tar = require("tar-fs");
 import * as fs from "fs";
@@ -206,10 +206,9 @@ export async function extract(
         let writePath = path.join(globalPath, "install", storagePath);
 
         // Extract the contents of  the zip file
-        await fs
-          .createReadStream(readPath)
-          .pipe(unzipper.Extract({ path: writePath }))
-          .promise();
+        var zip = new admzip(readPath);
+        zip.extractAllTo(writePath, true);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         await prosLogger.log(
           "OneClick",
           `Extracting ${readPath} to ${writePath}`
