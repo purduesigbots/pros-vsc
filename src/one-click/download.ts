@@ -208,7 +208,6 @@ export async function extract(
         // Extract the contents of  the zip file
         var zip = new admzip(readPath);
         zip.extractAllTo(writePath, true);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
         await prosLogger.log(
           "OneClick",
           `Extracting ${readPath} to ${writePath}`
