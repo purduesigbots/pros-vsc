@@ -417,7 +417,7 @@ export async function install(context: vscode.ExtensionContext) {
         path.join(
           context.globalStorageUri.fsPath,
           "install",
-          "`vex-vexcom-${system}`"
+          `vex-vexcom-${system}`
         ),
         false
       ).catch((e) => {
