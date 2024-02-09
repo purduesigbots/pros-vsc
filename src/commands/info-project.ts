@@ -1,22 +1,39 @@
 import * as vscode from "vscode";
 import { BaseCommand, BaseCommandOptions } from "./base-command";
 import { StringDecoder } from "string_decoder";
+import { PREFIX } from "./cli-parsing";
 
 export const infoProject = async () => {
-  const runCommandOptions: BaseCommandOptions = {
+  const infoProjectCommandOptions: BaseCommandOptions = {
     command: "pros",
-    args: ["c", "info-project"],
-    message: "Getting Project Info...",
+    args: ["c", "info-project", "--machine-output"],
     requiresProsProject: true,
-    successMessage: "hidden", // I don't think we need an explicit success message here, they'll see if it's running or not on the brain
+    extraOutput: true,
+    successMessage: "hidden",
   };
 
-  const runCommand: BaseCommand = new BaseCommand(runCommandOptions);
+  const infoProjectCommand: BaseCommand = new BaseCommand(infoProjectCommandOptions);
 
   try {
-    await runCommand.runCommand();
+    await infoProjectCommand.runCommand();
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);
   }
+
+  var output = "Installed Templates: ";
+  for (let e of infoProjectCommand.extraOutput!) {
+    if (e.startsWith(PREFIX)) {
+      let jdata = JSON.parse(e.substr(PREFIX.length));
+      if (jdata.type === "finalize") {
+        const target = jdata.data.project.target;
+        for(let t of jdata.data.project.templates) {
+          output += `${t.name}: ${t.version}, `;
+        }
+      }
+    }
+  }
+  // Remove trailing comma
+  output = output.slice(0, -2);
+  vscode.window.showInformationMessage(output);
 };
 
