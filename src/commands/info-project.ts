@@ -7,12 +7,15 @@ export const infoProject = async () => {
   const infoProjectCommandOptions: BaseCommandOptions = {
     command: "pros",
     args: ["c", "info-project", "--machine-output"],
+    message: undefined,
     requiresProsProject: true,
     extraOutput: true,
     successMessage: "hidden",
   };
 
-  const infoProjectCommand: BaseCommand = new BaseCommand(infoProjectCommandOptions);
+  const infoProjectCommand: BaseCommand = new BaseCommand(
+    infoProjectCommandOptions
+  );
 
   try {
     await infoProjectCommand.runCommand();
@@ -26,7 +29,7 @@ export const infoProject = async () => {
       let jdata = JSON.parse(e.substr(PREFIX.length));
       if (jdata.type === "finalize") {
         const target = jdata.data.project.target;
-        for(let t of jdata.data.project.templates) {
+        for (let t of jdata.data.project.templates) {
           output += `${t.name}: ${t.version}, `;
         }
       }
@@ -36,4 +39,3 @@ export const infoProject = async () => {
   output = output.slice(0, -2);
   vscode.window.showInformationMessage(output);
 };
-
