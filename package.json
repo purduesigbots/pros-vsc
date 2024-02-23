@@ -162,6 +162,10 @@
         "title": "PROS: Create New PROS Project"
       },
       {
+        "command": "pros.infoProject",
+        "title": "PROS: Project Information"
+      },
+      {
         "command": "pros.welcome",
         "title": "PROS: Welcome"
       },

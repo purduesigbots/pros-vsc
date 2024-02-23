@@ -20,6 +20,7 @@ import {
   stop,
   createNewProject,
   upgradeProject,
+  infoProject,
   upload,
   capture,
   medic,
@@ -227,6 +228,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   setupCommandBlocker("pros.upgrade", upgradeProject);
   setupCommandBlocker("pros.new", createNewProject);
+  setupCommandBlocker("pros.infoProject", infoProject);
 
   // Beta commands (notice the fourth argument is set to true for these)
   setupCommandBlocker("pros.installVision", installVision, context, true);
