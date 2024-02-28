@@ -1491,30 +1491,6 @@ function updateOptions(optionsElem, robot){
     if(device.type === "11W Motor"){
         // Parameters present: name, reversed, gearset
         let reversed = device.reversed? "checked" : "";
-        // Generate (ordered) gearset options
-        var firstGearset;
-        var secondGearset;
-        var thirdGearset;
-        switch(device.rpm){
-            case 100:
-                firstGearset = "100 (Red)";
-                secondGearset = "200 (Green)";
-                thirdGearset = "600 (Blue)";
-                break;
-            case 200:
-                firstGearset = "200 (Green)";
-                secondGearset = "100 (Red)";
-                thirdGearset = "600 (Blue)";
-                break;
-            case 600:
-                firstGearset = "600 (Blue)";
-                secondGearset = "100 (Red)";
-                thirdGearset = "200 (Green)";
-                break;
-            default:
-                throw new Error("Invalid gearset: " + device.rpm + "When generating options for the following device: " + device.toString());
-        }
-         
         optionsElem.innerHTML = 
         `
         <h1>Options</h1>
@@ -1523,39 +1499,13 @@ function updateOptions(optionsElem, robot){
         <input type="checkbox" id="Option_Reversed" ${reversed}>
         <label for="Option_Reversed">Reversed</label>
         </input>
-        <select name="Option_Gearset" id="Option_Gearset">
-            <label for="Option_Gearset">Gearset</label>
-            <option value="${firstGearset.split(' ')[0]}">${firstGearset}</option>
-            <option value="${secondGearset.split(' ')[0]}">${secondGearset}</option>
-            <option value="${thirdGearset.split(' ')[0]}">${thirdGearset}</option>
+        <select name="Option_RPM" id="Option_RPM">
         </select>
         <input type="button" id="Option_Delete" value="Delete">
         </input>
         <input type="button" id="Option_Port" value="Change Port">
         </input>
         `;
-
-        // Add 11W Motor Unique Event Listeners
-        let gearsetSelect = optionsElem.querySelector("#Option_Gearset");
-        gearsetSelect.addEventListener("change", function(){
-            switch(gearsetSelect.value){
-                case "100":
-                    device.rpm = 100;
-                    break;
-                case "200":
-                    device.rpm = 200;
-                    break;
-                case "600":
-                    device.rpm = 600;
-                    break;
-                default:
-                    throw new Error("Invalid gearset: " + gearsetSelect.value + "When generating options for the following device: " + device.toString());
-            }
-
-            // Update the page
-            updatePorts(document.getElementById("adi-port-table"), robot);
-            updateOptions(optionsElem, robot); 
-        });
     } else if(device.type === "5.5W Motor" || device.type === "ADI Potentiometer" || device.type === "ADI Encoder" || device.type === "Rotation Sensor" || device.type === "Piston"){
         // Parameters present: name, reversed
         let reversed = device.reversed? "checked" : "";
@@ -1721,6 +1671,7 @@ function updateOptions(optionsElem, robot){
             option.text = sortedGroups[i];
             groupSelect.appendChild(option);
         }
+        groupSelect.appendChild(document.createElement("option")).text = "Ungroup";
         // Add event listener to group select
         groupSelect.addEventListener("change", function(){
             if(groupSelect.value === -1){
@@ -1873,7 +1824,64 @@ function updateOptions(optionsElem, robot){
         });
     }
 
-    
+    // Add event listener to gearset selector. This had to be placed at the end of the function because javascript is very awful language 
+    // and it simply didn't add the event listener if you copy and paste this code into the if statement above for 11W Motors. 
+    // That's an hour of my life I won't get back. Fuck you javascript!!!!
+    // - JBH 2/28/24
+    if(device.type === "11W Motor"){
+        // Generate (ordered) gearset options
+        var firstGearset;
+        var secondGearset;
+        var thirdGearset;
+        switch(device.rpm){
+            case 100:
+                firstGearset = "100 (Red)";
+                secondGearset = "200 (Green)";
+                thirdGearset = "600 (Blue)";
+                break;
+            case 200:
+                firstGearset = "200 (Green)";
+                secondGearset = "100 (Red)";
+                thirdGearset = "600 (Blue)";
+                break;
+            case 600:
+                firstGearset = "600 (Blue)";
+                secondGearset = "100 (Red)";
+                thirdGearset = "200 (Green)";
+                break;
+            default:
+                throw new Error("Invalid gearset: " + device.rpm + "When generating options for the following device: " + device.toString());
+        }
+
+        var gearsetSelect = optionsElem.querySelector("#Option_RPM");
+        // Add gearset options
+        gearsetSelect.appendChild(new Option(firstGearset, firstGearset.split(" ")[0]));
+        gearsetSelect.appendChild(new Option(secondGearset, secondGearset.split(" ")[0]));
+        gearsetSelect.appendChild(new Option(thirdGearset, thirdGearset.split(" ")[0]));
+
+        // Add event listener to gearset select
+        gearsetSelect.addEventListener("change", function(){
+            console.log("Gearset changed to: " + gearsetSelect.value);
+            
+            // Update the device's gearset
+            switch(gearsetSelect.value){
+                case "100":
+                    device.rpm = 100;
+                    break;
+                case "200":
+                    device.rpm = 200;
+                    break;
+                case "600":
+                    device.rpm = 600;
+                    break;
+                default:
+                    throw new Error("Invalid gearset: " + gearsetSelect.value + "When setting the following device: " + device.toString());
+            }
+            // Update the page
+            updatePorts(document.getElementById("adi-port-table"), robot);
+            updateOptions(optionsElem, robot);
+        });
+    }
 }
 
 function changePorts(device, optionsElem, robot, overwriting = false){
