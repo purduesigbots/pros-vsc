@@ -15,6 +15,7 @@ export const buildUpload = async () => {
     await buildCommand.runCommand();
   } catch (err: any) {
     await window.showErrorMessage(err.message);
+    return;
   }
   await upload();
 };
