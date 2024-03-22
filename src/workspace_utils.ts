@@ -292,12 +292,6 @@ const modifyCCppJson = async (
     json.configurations[0].includePath.push(include);
   }
 
-  // Secibdm setup compile_commands.json filepath
-  json.configurations[0].compileCommands = path.join(
-    dirpath.fsPath,
-    "compile_commands.json"
-  );
-
   // Third, setup cStandard, cppStandard, and intelliSenseMode
   json.configurations[0].cStandard = "gnu11";
   json.configurations[0].cppStandard = "gnu++20";
