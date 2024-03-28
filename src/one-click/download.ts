@@ -96,7 +96,7 @@ export async function extract(
       title: extractName,
       cancellable: true,
     },
-    async (progress, token) => {
+    async (_progress, token) => {
       var read: fs.ReadStream;
       var extract: fs.WriteStream;
       token.onCancellationRequested((token) => {
@@ -213,98 +213,10 @@ export async function extract(
           `Extracting ${readPath} to ${writePath}`
         );
         if (storagePath.includes("pros-toolchain-windows")) {
-          // create tmp folder
           await fs.promises.mkdir(
             path.join(globalPath, "install", "pros-toolchain-windows", "tmp")
           );
-          await prosLogger.log("OneClick", `Creating tmp directory`);
-          // extract contents of gcc-arm-none-eabi-version folder
-
-          const files = await fs.promises.readdir(
-            path.join(globalPath, "install", "pros-toolchain-windows", "usr")
-          );
-          await prosLogger.log(
-            "OneClick",
-            `Finding gcc-arm-none-eabi-version folder`
-          );
-          for await (const dir of files) {
-            if (dir.includes("gcc-arm-none")) {
-              // iterate through each folder in gcc-arm-none-eabi-version
-              const folders = await fs.promises.readdir(
-                path.join(
-                  globalPath,
-                  "install",
-                  "pros-toolchain-windows",
-                  "usr",
-                  dir
-                )
-              );
-              for await (const folder of folders) {
-                if (!folder.includes("arm-none")) {
-                  await prosLogger.log(
-                    "OneClick",
-                    `Extracting ${folder} out of gcc-arm-none-eabi-version directory`
-                  );
-
-                  const subfiles = await fs.promises.readdir(
-                    path.join(
-                      globalPath,
-                      "install",
-                      "pros-toolchain-windows",
-                      "usr",
-                      dir,
-                      folder
-                    )
-                  );
-
-                  // extract everything back 1 level into their respective folder
-                  for await (const subfile of subfiles) {
-                    // The original file path
-                    var originalPath = path.join(
-                      globalPath,
-                      "install",
-                      "pros-toolchain-windows",
-                      "usr",
-                      dir,
-                      folder,
-                      subfile
-                    );
-                    // Path to move the file to
-                    var newPath = path.join(
-                      globalPath,
-                      "install",
-                      "pros-toolchain-windows",
-                      "usr",
-                      folder,
-                      subfile
-                    );
-                    // Move the file
-                    await fs.promises.rename(originalPath, newPath);
-                  }
-                } else {
-                  // move arm-none folder contents into a new directory under usr
-                  var originalPath = path.join(
-                    globalPath,
-                    "install",
-                    "pros-toolchain-windows",
-                    "usr",
-                    dir,
-                    folder
-                  );
-
-                  var newPath = path.join(
-                    globalPath,
-                    "install",
-                    "pros-toolchain-windows",
-                    "usr",
-                    folder
-                  );
-                  await fs.promises.rename(originalPath, newPath);
-                } // file in subfolder
-              } // folder in gcc-arm-none-eabiversion
-            } // if subfolder is gcc-arm-none-eabiversion
-          } // for usr folder's subdirectories
-        } // windows toolchain
+        }
       } // not bz2
     }
   );

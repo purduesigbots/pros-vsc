@@ -3,11 +3,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as os from "os";
 import { downloadextract, chmod } from "./download";
-import {
-  getCurrentVersion,
-  getCurrentReleaseVersion,
-  getInstallPromptTitle,
-} from "./installed";
+import { getCurrentVersion, getCurrentReleaseVersion } from "./installed";
 import * as fs from "fs";
 import { promisify } from "util";
 import * as child_process from "child_process";
@@ -69,7 +65,7 @@ export async function removeDirAsync(directory: string, begin: boolean) {
 }
 
 export async function uninstall(context: vscode.ExtensionContext) {
-  const globalPath = context.globalStorageUri.fsPath;
+  const globalPath = context.globalStorageUri;
   const title = "Are you sure you want to uninstall PROS?";
   const labelResponse = await vscode.window.showInformationMessage(
     title,
@@ -83,11 +79,23 @@ export async function uninstall(context: vscode.ExtensionContext) {
         title: "Uninstalling PROS",
         cancellable: false,
       },
-      async (progress, token) => {
-        let promises: Promise<any>[] = [];
-        promises.push(removeDirAsync(path.join(globalPath, "install"), false));
-        promises.push(removeDirAsync(path.join(globalPath, "download"), false));
-        await Promise.all(promises);
+      async () => {
+        try {
+          await vscode.workspace.fs.delete(
+            vscode.Uri.joinPath(globalPath, "install"),
+            { recursive: true }
+          );
+        } catch (err) {
+          console.error(err);
+        }
+        try {
+          await vscode.workspace.fs.delete(
+            vscode.Uri.joinPath(globalPath, "download"),
+            { recursive: true }
+          );
+        } catch (err) {
+          console.error(err);
+        }
       }
     );
     vscode.window.showInformationMessage("PROS Uninstalled!");
@@ -112,7 +120,7 @@ async function getUrls(
     await prosLogger.log("OneClick", `Windows detected, using Windows URLS`);
     // Set system, path seperator, and downloads to windows version
     downloadCli = `https://github.com/purduesigbots/pros-cli/releases/download/${cliVersion}/pros_cli-${cliVersion}-win-64bit.zip`;
-    downloadToolchain = `https://github.com/purduesigbots/toolchain/releases/download/${toolchainVersion}/pros-toolchain-windows.zip`;
+    downloadToolchain = `https://github.com/purduesigbots/toolchain/releases/download/${toolchainVersion}/pros-toolchain-windows-formatted.zip`;
     downloadVexcom = `https://pros.cs.purdue.edu/v5/_static/releases/vexcom_${vexcomVersion}-win32.zip`;
   } else if (getOperatingSystem() === "macos") {
     await prosLogger.log("OneClick", `MacOS detected, using MacOS URLS`);
@@ -142,7 +150,6 @@ async function getUrls(
   console.log(`Custom URLS: ${customCli} | ${customToolchain}`);
   if (customCli !== "default") {
     try {
-      const cliurl = new URL(customCli);
       downloadCli = customCli === "default" ? downloadCli : customCli;
       await prosLogger.log(
         "OneClick",
@@ -158,7 +165,6 @@ async function getUrls(
 
   if (customToolchain !== "default") {
     try {
-      const toolchainurl = new URL(customToolchain);
       downloadToolchain =
         customToolchain === "default" ? downloadToolchain : customToolchain;
       await prosLogger.log(
@@ -186,13 +192,11 @@ export async function install(context: vscode.ExtensionContext) {
     true
   );
 
-  //preparing.start();
   await prosLogger.log(
     "OneClick",
     "Configuring Environment Variables for PROS"
   );
   await configurePaths(context);
-  const globalPath = context.globalStorageUri.fsPath;
   await prosLogger.log("OneClick", "Fetching Operating System....");
   const system = getOperatingSystem();
 
@@ -238,35 +242,30 @@ export async function install(context: vscode.ExtensionContext) {
     "OneClick",
     `Toolchain Download URL: ${downloadToolchain}`
   );
+  await prosLogger.log("OneClick", `Vexcom Download URL: ${downloadVexcom}`);
 
   // Set the installed file names
   var cliName = `pros-cli-${system}.zip`;
   var vexcomName = `vex-vexcom-${system}.zip`;
-  // Title of prompt depending on user's installed CLI
+  var toolchainName = `pros-toolchain-${
+    system === "windows" ? `${system}.zip` : `${system}.tar.bz2`
+  }`;
+
+  // Verify that the CLI and toolchain are working before prompting user to install.
+  await prosLogger.log("OneClick", "Checking Status of CLI and Toolchain....");
+  // Check if CLI is working, up to date and installed with OneClick
   let [cliExecPath] = getIntegratedTerminalPaths(context);
   const addQuotes =
-    getOperatingSystem() === "macos" && !os.cpus()[0].model.includes("Apple M");
-  var title = await getInstallPromptTitle(
+    system === "macos" && !os.cpus()[0].model.includes("Apple M");
+  let [version, isOneClickInstall] = await getCurrentVersion(
     path.join(
       `${addQuotes ? `"` : ""}${cliExecPath}${addQuotes ? `"` : ""}`,
       "pros"
-    ),
-    releaseVersionNumber ?? 0
+    )
   );
-  // Verify that the CLI and toolchain are working before prompting user to install.
-  await prosLogger.log("OneClick", "Checking Status of CLI and Toolchain....");
-  const cliWorking =
-    (await verifyCli().catch((err) => {
-      console.log(err);
-    })) ?? false;
-  const toolchainWorking =
-    (await verifyToolchain().catch((err) => {
-      console.log(err);
-    })) ?? false;
-  const vexcomWorking =
-    (await verifyVexcom().catch((err) => {
-      console.log(err);
-    })) ?? false;
+  const cliWorking = version !== -1;
+  const toolchainWorking = await verifyToolchain();
+  const vexcomWorking = await verifyVexcom();
 
   //log the result of cli and toolchain working
   await prosLogger.log(
@@ -300,23 +299,27 @@ export async function install(context: vscode.ExtensionContext) {
   console.log("CLI Working: " + cliWorking);
   console.log("Toolchain Working: " + toolchainWorking);
   console.log("Vexcom Working: " + vexcomWorking);
-  // Name of toolchain download depending on system
-  var toolchainName = `pros-toolchain-${
-    system === "windows" ? `${system}.zip` : `${system}.tar.bz2`
-  }`;
 
   // Does the user's CLI have an update or does the user need to install/update
-  const cliUpToDate = title.includes("up to date") ? true : false;
-  console.log("title: " + title);
+  const cliUpToDate = version >= (releaseVersionNumber ?? 0);
   await prosLogger.log(
     "OneClick",
     `${cliUpToDate ? "CLI is up to date" : "CLI is not up to date"}`,
     cliUpToDate ? "INFO" : "WARNING"
   );
+  await prosLogger.log(
+    "OneClick",
+    `${
+      isOneClickInstall
+        ? "CLI is installed with OneClick"
+        : "CLI is not installed with OneClick"
+    }`,
+    "INFO"
+  );
+
   // Last step for this that is unknown is determining if the toolchain is up to date or not.
   // I think that toolchain upates are rare enough where it's not worth the effort to check.
   let promises: Promise<any>[] = [];
-  let targetedPortion: string = "";
 
   console.log(
     "cliUpToDate: " +
@@ -328,177 +331,99 @@ export async function install(context: vscode.ExtensionContext) {
       " | vexcomWorking: " +
       vexcomWorking
   );
+
+  let userResponse = await promptInstall(
+    cliWorking,
+    cliUpToDate,
+    toolchainWorking,
+    vexcomWorking
+  );
+  await preparingInstall.stop();
+
   //if everything works and cli is up to date, do nothing
   if (cliWorking && toolchainWorking && cliUpToDate && vexcomWorking) {
-    // tell the user that everything is up to date
-    vscode.window.showInformationMessage(
-      "CLI and Toolchain currently working and up to date."
-    );
-    console.log("Everything is up to date");
-    preparingInstall.stop();
-    await prosLogger.log(
-      "OneClick",
-      "CLI and Toolchain currently working and up to date. Nothing else must be done"
-    );
     return;
   }
 
-  // if CLI is up to date but toolchain is not working, install just the toolchain
-  else if (cliUpToDate && cliWorking && vexcomWorking && !toolchainWorking) {
-    let prompttitle = "PROS Toolchain is not working. Install now?";
-    console.log(prompttitle);
-    let labelResponse = await vscode.window.showInformationMessage(
-      prompttitle,
-      "Install Now!",
-      "No Thanks."
-    );
-    console.log("sent : " + prompttitle);
-    await preparingInstall.stop();
-    if (labelResponse === "Install Now!") {
-      targetedPortion = path.join("install", `pros-toolchain-${system}`);
-      let deleteDir = path.join(
-        context.globalStorageUri.fsPath,
-        targetedPortion
-      );
-      console.log("removing directory " + deleteDir);
-      await prosLogger.log("OneClick", "removing directory " + deleteDir);
-      await removeDirAsync(deleteDir, false).catch((e) => {
-        console.log(e);
-      });
-      await prosLogger.log(
-        "OneClick",
-        "Toolchain is not working. Installing just the toolchain"
-      );
-      promises = [
-        downloadextract(
-          context,
-          downloadToolchain,
-          toolchainName,
-          "PROS Toolchain"
-        ),
-      ];
-    } else {
-      await prosLogger.log(
-        "OneClick",
-        "Toolchain is not working. User refused prompt to install toolchain"
-      );
-      return;
-    }
-    // if the toolchain is working but the cli is not working or out of date, install just the cli
-  } else if (
-    toolchainWorking &&
-    !(cliWorking && cliUpToDate && vexcomWorking)
-  ) {
-    const prompttitle = `PROS CLI is ${
-      cliWorking ? "out of date. Update" : "not working. Install"
-    } now?`;
-    const option1 = `${cliWorking ? "Update" : "Install"} Now!`;
-    console.log(prompttitle);
-    const labelResponse = await vscode.window.showInformationMessage(
-      prompttitle,
-      option1,
-      "No Thanks."
-    );
-    console.log("sent : " + prompttitle);
-    preparingInstall.stop();
-    if (labelResponse === option1) {
-      device.suspend();
-      targetedPortion = path.join("install", `pros-cli-${system}`);
-      let deleteDir = path.join(
-        context.globalStorageUri.fsPath,
-        targetedPortion
-      );
-      console.log("removing directory " + deleteDir);
-      await prosLogger.log("OneClick", "removing directory " + deleteDir);
-      await removeDirAsync(deleteDir, false).catch((e) => {
-        console.log(e);
-      });
-      await removeDirAsync(
-        path.join(
-          context.globalStorageUri.fsPath,
-          "install",
-          "`vex-vexcom-${system}`"
-        ),
-        false
-      ).catch((e) => {
-        console.log(e);
-      });
-      await prosLogger.log(
-        "OneClick",
-        "CLI is not working. Installing just the CLI"
-      );
-      promises = [
-        downloadextract(context, downloadCli, cliName, "PROS CLI"),
-        downloadextract(context, downloadVexcom, vexcomName, "VEXcom"),
-      ];
-    } else {
-      await prosLogger.log(
-        "OneClick",
-        "CLI is not working. User refused prompt to install CLI"
-      );
-      return;
-    }
-
-    // if neither the cli or toolchain is working
-  } else {
-    const prompttitle =
-      "PROS CLI and Toolchain are out of date or not working. Install now?";
-    console.log(prompttitle);
-    const labelResponse = await vscode.window.showInformationMessage(
-      prompttitle,
-      "Install Now!",
-      "No Thanks."
-    );
-    console.log("sent : " + prompttitle);
-    preparingInstall.stop();
-    if (labelResponse === "Install Now!") {
-      device.suspend();
-      await prosLogger.log("OneClick", "Removing Old CLI and Toolchain");
-      console.log("removing old cli and toolchain");
-      await removeDirAsync(
-        path.join(context.globalStorageUri.fsPath, "install"),
-        false
-      ).catch((e) => {
-        console.log(e);
-      });
-      await removeDirAsync(
-        path.join(context.globalStorageUri.fsPath, "download"),
-        false
-      ).catch((e) => {
-        console.log(e);
-      });
-      await prosLogger.log(
-        "OneClick",
-        "CLI and Toolchain are not working. Installing just the CLI and Toolchain"
-      );
-      console.log("installing just the cli and toolchain");
-      promises = [
-        downloadextract(context, downloadCli, cliName, "PROS CLI"),
-        downloadextract(
-          context,
-          downloadToolchain,
-          toolchainName,
-          "PROS Toolchain"
-        ),
-        downloadextract(context, downloadVexcom, vexcomName, "VEXcom"),
-      ];
-    } else {
-      await prosLogger.log(
-        "OneClick",
-        "CLI and Toolchain are not working. User refused prompt to install CLI and Toolchain"
-      );
-      return;
-    }
+  // if user rejected install prompt, do nothing
+  if (!userResponse) {
+    await prosLogger.log("OneClick", "User refused prompt to install.");
+    return;
   }
 
-  let deleteDir = path.join(context.globalStorageUri.fsPath, targetedPortion);
-  console.log("removing directory " + deleteDir);
+  device.suspend();
+  // if CLI is our of date or not working, install the CLI
+  if (!cliUpToDate || !cliWorking) {
+    let cliDir = vscode.Uri.joinPath(
+      context.globalStorageUri,
+      "install",
+      `pros-cli-${system}`
+    );
+    console.log("removing directory " + cliDir.toString());
+    await prosLogger.log("OneClick", "removing directory " + cliDir.toString());
+    try {
+      await vscode.workspace.fs.delete(cliDir, { recursive: true });
+    } catch (err: any) {
+      await prosLogger.log("OneClick", err, "ERROR");
+      console.error(err);
+    }
+    promises.push(downloadextract(context, downloadCli, cliName, "PROS CLI"));
+  }
+
+  if (!toolchainWorking) {
+    let toolchainDir = vscode.Uri.joinPath(
+      context.globalStorageUri,
+      "install",
+      `pros-toolchain-${system}`
+    );
+    console.log("removing directory " + toolchainDir.toString());
+    await prosLogger.log(
+      "OneClick",
+      "removing directory " + toolchainDir.toString()
+    );
+    try {
+      await vscode.workspace.fs.delete(toolchainDir, { recursive: true });
+    } catch (err: any) {
+      await prosLogger.log("OneClick", err, "ERROR");
+      console.error(err);
+    }
+    promises.push(
+      downloadextract(
+        context,
+        downloadToolchain,
+        toolchainName,
+        "PROS Toolchain"
+      )
+    );
+  }
+
+  if (!vexcomWorking) {
+    let vexcomDir = vscode.Uri.joinPath(
+      context.globalStorageUri,
+      "install",
+      `vex-vexcom-${system}`
+    );
+    console.log("removing directory " + vexcomDir.toString());
+    await prosLogger.log(
+      "OneClick",
+      "removing directory " + vexcomDir.toString()
+    );
+    try {
+      await vscode.workspace.fs.delete(vexcomDir, { recursive: true });
+    } catch (err: any) {
+      await prosLogger.log("OneClick", err, "ERROR");
+      console.error(err);
+    }
+    promises.push(
+      downloadextract(context, downloadVexcom, vexcomName, "Vexcom")
+    );
+  }
 
   //await removeDirAsync(deleteDir, false).catch((e) => {console.log(e);});
   //add install and download directories
   await prosLogger.log("OneClick", "Adding install and download directories");
   console.log("adding install and download directories");
-  const dirs = await createDirs(context.globalStorageUri.fsPath);
+  await createDirs(context.globalStorageUri);
 
   await prosLogger.log("OneClick", "Downloading and extracting files");
   console.log("Beginning Downloads");
@@ -509,13 +434,69 @@ export async function install(context: vscode.ExtensionContext) {
   device.unsuspend();
 }
 
-async function createDirs(storagePath: string) {
+async function promptInstall(
+  cliWorking: boolean,
+  cliUpToDate: boolean,
+  toolchainWorking: boolean,
+  vexcomWorking: boolean
+) {
+  if (cliWorking && cliUpToDate && toolchainWorking && vexcomWorking) {
+    vscode.window.showInformationMessage(
+      "Everything is currently working and up to date."
+    );
+    console.log("Everything is up to date");
+    await prosLogger.log(
+      "OneClick",
+      "Everything is currently working and up to date. Nothing else must be done"
+    );
+    return false;
+  }
+  let installRequired: string[] = [];
+  if (!cliWorking) {
+    installRequired.push("CLI");
+  }
+  if (!toolchainWorking) {
+    installRequired.push("Toolchain");
+  }
+  if (!vexcomWorking) {
+    installRequired.push("Vexcom");
+  }
+  console.log(installRequired.length);
+  let prompttitle: string = "";
+  if (!cliUpToDate && cliWorking) {
+    prompttitle = "PROS CLI is out of date";
+    if (installRequired.length === 0) {
+      prompttitle += ". Update now?";
+    }
+  }
+  if (installRequired.length !== 0) {
+    if (!cliUpToDate && cliWorking) {
+      prompttitle += " and ";
+    }
+    prompttitle += installRequired.join(" and ");
+    prompttitle += `${
+      installRequired.length === 1 ? " is" : " are"
+    } not working. Install now?`;
+  }
+  console.log("Prompting user with: " + prompttitle);
+  const affirmative = `${
+    installRequired.length === 0 ? "Update" : "Install"
+  } now!`;
+  const labelResponse = await vscode.window.showInformationMessage(
+    prompttitle,
+    affirmative,
+    "No Thanks."
+  );
+  return labelResponse === affirmative;
+}
+
+async function createDirs(storagePath: vscode.Uri) {
   // Create the download and install subdirectories
-  const install = path.join(storagePath, "install");
-  const download = path.join(storagePath, "download");
+  const install = vscode.Uri.joinPath(storagePath, "install");
+  const download = vscode.Uri.joinPath(storagePath, "download");
   for (const dir of [install, download]) {
     await prosLogger.log("OneClick", `Recursively creating directory ${dir}`);
-    await fs.promises.mkdir(dir, { recursive: true });
+    await vscode.workspace.fs.createDirectory(dir);
   }
   // Return the two created directories
   return { install: install, download: download };
@@ -533,40 +514,35 @@ export async function cleanup(
     },
     async () => {
       try {
-        const globalPath = context.globalStorageUri.fsPath;
+        const globalPath = context.globalStorageUri;
         await prosLogger.log(
           "OneClick",
           `Removing temporary download directory`
         );
-        await removeDirAsync(path.join(globalPath, "download"), false).catch(
-          (e) => {
-            prosLogger.log("OneClick", e, "ERROR");
-          }
-        );
+        try {
+          await vscode.workspace.fs.delete(
+            vscode.Uri.joinPath(globalPath, "download"),
+            { recursive: true }
+          );
+        } catch (err: any) {
+          await prosLogger.log("OneClick", err, "ERROR");
+          console.error(err);
+        }
 
         await prosLogger.log(
           "OneClick",
           `Verifying that CLI and Toolchain are working`
         );
-        await chmod(globalPath, system);
+        await chmod(globalPath.fsPath, system);
         await prosLogger.log("OneClick", `Configuring environment variables`);
         await configurePaths(context).catch((e) => {
           prosLogger.log("OneClick", e, "ERROR");
         });
 
         // Ensure that toolchain and cli are working
-        let cliSuccess =
-          (await verifyCli().catch((err) => {
-            prosLogger.log("OneClick", err, "ERROR");
-          })) ?? false;
-        let toolchainSuccess =
-          (await verifyToolchain().catch((err) => {
-            prosLogger.log("OneClick", err, "ERROR");
-          })) ?? false;
-        let vexcomSuccess =
-          (await verifyVexcom().catch((err) => {
-            prosLogger.log("OneClick", err, "ERROR");
-          })) ?? false;
+        let cliSuccess = await verifyCli();
+        let toolchainSuccess = await verifyToolchain();
+        let vexcomSuccess = await verifyVexcom();
         if (cliSuccess && toolchainSuccess && vexcomSuccess) {
           vscode.window.showInformationMessage(
             "CLI and Toolchain are working!"
@@ -660,7 +636,6 @@ export async function configurePaths(
   // Prepend CLI and TOOLCHAIN to path
   await prosLogger.log("OneClick", "Appending CLI and TOOLCHAIN to PATH");
   await prosLogger.log("OneClick", `CLI Executable Path: ${cliExecPath}`);
-  await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   process.env.PATH = `${process.env.PATH}`; // bypass compile errors
   await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
   process.env.PATH =
@@ -669,9 +644,14 @@ export async function configurePaths(
     `${vexcomPath}${PATH_SEP}` +
     `${process.env.PATH.replace(/\"/g, "")}`;
   await prosLogger.log("OneClick", process.env.PATH ?? "no PATH", "INFO");
-  // Make PROS_TOOCLHAIN variable
+  // Make PROS_TOOLCHAIN variable
   await prosLogger.log("OneClick", "Setting PROS_TOOLCHAIN");
   process.env.PROS_TOOLCHAIN = TOOLCHAIN;
+  await prosLogger.log(
+    "OneClick",
+    "PROS_TOOLCHAIN: " + process.env.PROS_TOOLCHAIN,
+    "INFO"
+  );
 
   process.env.LC_ALL = "en_US.utf-8";
   if (repeat) {
@@ -682,25 +662,35 @@ export async function configurePaths(
 async function verifyCli() {
   var command = `pros c --help --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
   await prosLogger.log("OneClick", `Verifying CLI with command ${command}`);
-  const { stdout, stderr } = await promisify(child_process.exec)(command, {
-    timeout: 30000,
-    env: {
-      ...process.env,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      PATH: getChildProcessPath(),
-    },
-  });
-  if (stderr) {
-    await prosLogger.log(
-      "OneClick",
-      `CLI verification failed with error ${stderr}`,
-      "error"
+  try {
+    const { stdout, stderr } = await promisify(child_process.exec)(command, {
+      timeout: 30000,
+      env: {
+        ...process.env,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        PATH: getChildProcessPath(),
+      },
+    });
+    if (stderr) {
+      await prosLogger.log(
+        "OneClick",
+        `CLI verification failed with error ${stderr}`,
+        "ERROR"
+      );
+      console.error(stderr);
+    }
+    return stdout.includes(
+      `Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version:`
     );
-    console.log(stderr);
+  } catch (err) {
+    prosLogger.log(
+      "OneClick",
+      `CLI verification failed with error ${err}`,
+      "ERROR"
+    );
+    console.error(err);
+    return false;
   }
-  return stdout.includes(
-    `Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version:`
-  );
 }
 
 async function verifyToolchain() {
@@ -725,47 +715,67 @@ async function verifyToolchain() {
     `Verifying TOOLCHAIN with command ${command}`
   );
 
-  const { stdout, stderr } = await promisify(child_process.exec)(command, {
-    timeout: 5000,
-    env: {
-      ...process.env,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      PATH: getChildProcessPath(),
-    },
-  });
-  if (stderr) {
-    await prosLogger.log(
+  try {
+    const { stdout, stderr } = await promisify(child_process.exec)(command, {
+      timeout: 5000,
+      env: {
+        ...process.env,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        PATH: getChildProcessPath(),
+      },
+    });
+    if (stderr) {
+      await prosLogger.log(
+        "OneClick",
+        `TOOLCHAIN verification failed with error ${stderr}`,
+        "error"
+      );
+      console.error(stderr);
+    }
+    return stdout.replace(".exe", "").startsWith(`arm-none-eabi-g++ (G`);
+  } catch (err) {
+    prosLogger.log(
       "OneClick",
-      `TOOLCHAIN verification failed with error ${stderr}`,
-      "error"
+      `TOOLCHAIN verification failed with error ${err}`,
+      "ERROR"
     );
-    console.log(stderr);
+    console.error(err);
+    return false;
   }
-  return stdout.replace(".exe", "").startsWith(`arm-none-eabi-g++ (G`);
 }
 
 async function verifyVexcom() {
   await prosLogger.log("OneClick", "Verifying VEXCOM");
   var command = "vexcom --version";
 
-  const { stdout, stderr } = await promisify(child_process.exec)(command, {
-    timeout: 5000,
-    env: {
-      ...process.env,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      PATH: getChildProcessPath(),
-    },
-  });
+  try {
+    const { stdout, stderr } = await promisify(child_process.exec)(command, {
+      timeout: 5000,
+      env: {
+        ...process.env,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        PATH: getChildProcessPath(),
+      },
+    });
 
-  if (stderr) {
-    await prosLogger.log(
+    if (stderr) {
+      await prosLogger.log(
+        "OneClick",
+        `VEXCOM verification failed with error ${stderr}`,
+        "error"
+      );
+      console.error(stderr);
+    }
+    return stdout.replace(".exe", "").startsWith("vexcom: version");
+  } catch (err) {
+    prosLogger.log(
       "OneClick",
-      `VEXCOM verification failed with error ${stderr}`,
-      "error"
+      `VEXCOM verification failed with error ${err}`,
+      "ERROR"
     );
-    console.log(stderr);
+    console.error(err);
+    return false;
   }
-  return stdout.replace(".exe", "").startsWith("vexcom: version");
 }
 
 export async function installVision(context: vscode.ExtensionContext) {
@@ -781,7 +791,7 @@ export async function installVision(context: vscode.ExtensionContext) {
   if (system === "windows") {
     console.log("vision utility on windows");
     //add install and download directories
-    const dirs = await createDirs(context.globalStorageUri.fsPath);
+    const dirs = await createDirs(context.globalStorageUri);
 
     const promises = [
       downloadextract(context, windowsVision, visionName, "Vision Utility"),
@@ -796,7 +806,7 @@ export async function installVision(context: vscode.ExtensionContext) {
     );
     return;
     //add install and download directories
-    const dirs = await createDirs(context.globalStorageUri.fsPath);
+    const dirs = await createDirs(context.globalStorageUri);
 
     const promises = [
       downloadextract(context, macosVision, visionName, "Vision Utility"),
@@ -842,7 +852,7 @@ export async function uninstallVision(context: vscode.ExtensionContext) {
         title: "Uninstalling Vision Utility",
         cancellable: false,
       },
-      async (progress, token) => {
+      async () => {
         const removePath = path.join(
           globalPath,
           "install",
