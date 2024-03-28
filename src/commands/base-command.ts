@@ -36,6 +36,7 @@ export type BaseCommandOptions = {
   extraOutput?: boolean;
   successMessage?: string;
   optionalArgs?: (string | undefined)[];
+  errorCallback?: (error: string) => void;
 };
 export class BaseCommand {
   command: string;
@@ -47,6 +48,7 @@ export class BaseCommand {
   exited: boolean = false;
   extraOutput?: string[];
   progressWindow: BackgroundProgress;
+  errorCallback?: (error: string) => void;
 
   constructor(options: BaseCommandOptions) {
     // the constructor is what is called whenever a new instance of the class is created
@@ -89,6 +91,7 @@ export class BaseCommand {
     this.requiresProsProject = options.requiresProsProject;
     this.extraOutput = options.extraOutput ? [] : undefined;
     this.successMessage = options.successMessage;
+    this.errorCallback = options.errorCallback;
 
     this.progressWindow = new BackgroundProgress(this.message, true, false);
     // As far as implementing this onto each command, there are two ways you can do this.
@@ -180,6 +183,9 @@ export class BaseCommand {
     child.stdout.on("data", (data) => {
       this.parseOutput(data.toString().split(/\r?\n/), child).catch((e) => {
         hasError = true;
+        if (this.errorCallback) {
+          this.errorCallback(e);
+        }
         vscode.window.showErrorMessage(e, "View Output").then((response) => {
           if (response) {
             output.show();
@@ -190,6 +196,9 @@ export class BaseCommand {
     child.stderr.on("data", (data) => {
       this.parseOutput(data.toString().split(/\r?\n/), child).catch((e) => {
         hasError = true;
+        if (this.errorCallback) {
+          this.errorCallback(e);
+        }
         vscode.window.showErrorMessage(e, "View Output").then((response) => {
           if (response) {
             output.show();

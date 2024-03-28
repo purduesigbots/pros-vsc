@@ -3,12 +3,16 @@ import { window } from "vscode";
 import { upload } from "./upload";
 
 export const buildUpload = async () => {
+  var buildFailed = false;
   const buildCommandOptions: BaseCommandOptions = {
     command: "pros",
     args: ["make"],
     message: "Building Project",
     requiresProsProject: true,
     successMessage: "hidden",
+    errorCallback: () => {
+      buildFailed = true;
+    },
   };
   const buildCommand: BaseCommand = new BaseCommand(buildCommandOptions);
   try {
@@ -16,5 +20,7 @@ export const buildUpload = async () => {
   } catch (err: any) {
     await window.showErrorMessage(err.message);
   }
-  await upload();
+  if (!buildFailed) {
+    await upload();
+  }
 };
