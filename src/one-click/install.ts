@@ -70,6 +70,7 @@ export async function uninstall(context: vscode.ExtensionContext) {
   const labelResponse = await vscode.window.showInformationMessage(
     title,
     "Uninstall Now!",
+    "Uninstall CLI Only",
     "No Thanks."
   );
   if (labelResponse === "Uninstall Now!") {
@@ -99,6 +100,21 @@ export async function uninstall(context: vscode.ExtensionContext) {
       }
     );
     vscode.window.showInformationMessage("PROS Uninstalled!");
+  } else if (labelResponse === "Uninstall CLI Only") {
+    const cliName = `pros-cli-${getOperatingSystem()}`;
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Uninstalling PROS CLI",
+        cancellable: false,
+      },
+      async () => {
+        await vscode.workspace.fs.delete(
+          vscode.Uri.joinPath(context.globalStorageUri, "install", cliName),
+          { recursive: true }
+        );
+      }
+    );
   }
 }
 
