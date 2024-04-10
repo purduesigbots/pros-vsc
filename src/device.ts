@@ -32,7 +32,7 @@ const deviceTypeMap: Record<number, string> = {
   16: "Optical Sensor",
   17: "Magnet",
   "-128": "Generic Sensor",
-  "-127": "Generic Serial"
+  "-127": "Generic Serial",
 };
 
 export type ProgramInfo = {
