@@ -16,26 +16,24 @@ export type DeviceInfo = {
   boot: string;
 };
 
-export enum DeviceType {
-  Motor = 2,
-  LED = 3,
-  Rotation = 4,
-  WorkcellMotor = 5,
-  Inertial = 6,
-  Distance = 7,
-  Radio = 8,
-  Controller = 9,
-  Brain = 10,
-  Vision = 11,
-  ADI = 12,
-  Partner = 13,
-  Battery = 14,
-  Solenoid = 15,
-  Optical = 16,
-  Magnet = 17,
-  RadioInternal = 22,
-  SerialDevice = -127,
-}
+const deviceTypeMap: Record<number, string> = {
+  2: "11W Motor",
+  3: "LED",
+  4: "Rotation Sensor",
+  5: "5.5W Motor",
+  6: "IMU",
+  7: "Distance Sensor",
+  8: "Radio",
+  9: "Controller",
+  10: "Brain",
+  11: "Vision Sensor",
+  12: "ADI Expander",
+  14: "Battery Sensor",
+  16: "Optical Sensor",
+  17: "Magnet",
+  "-128": "Generic Sensor",
+  "-127": "Generic Serial"
+};
 
 export type ProgramInfo = {
   slot: number;
@@ -70,9 +68,12 @@ export class V5DeviceInfo {
         element.slot = element.slot + 1;
       });
       rawJSON.v5.devices.items.forEach((element: any) => {
+        if (element.port > 21) {
+          return;
+        }
         this.devices.push({
           port: element.port,
-          type: DeviceType[element.type],
+          type: deviceTypeMap[element.type],
           status: element.status,
           version: formatVersion(element.version),
           boot: formatVersion(element.boot),
