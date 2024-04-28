@@ -6,6 +6,7 @@ import { getTemplateCardStyles } from '../views/branchline-frontend/TemplateCard
 import { getTemplateDetailHtml, getTemplateDetailStyles } from '../views/branchline-frontend/TemplateDetail';
 
 let panel: vscode.WebviewPanel | undefined;
+let templatesCache: any[] = [];
 
 // Function to create and show the webview
 export function showBranchlineRegistryWebview(templates: any[]) {
@@ -107,9 +108,24 @@ function showTemplateDetailWebview(templateName: string) {
         </head>
         <body>
           ${templateDetailHtml}
+          <script>
+            const vscode = acquireVsCodeApi();
+
+            function handleBackButtonClick() {
+              vscode.postMessage({ command: 'backButtonClick' });
+            }
+          </script>
         </body>
         </html>
       `;
+
+      panel.webview.onDidReceiveMessage(message => {
+        switch (message.command) {
+          case 'backButtonClick':
+            showBranchlineRegistryWebview(templatesCache);
+            return;
+        }
+      });
     }
   }).catch(error => {
     console.error(`Failed to fetch template versions for ${templateName}: ${error.message}`);
@@ -145,9 +161,24 @@ function runPROSTemplateVersionsCommand(templateName: string): Promise<{ [templa
     child_process.exec(commandString, (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
-        reject(error);
+        console.error(`stderr: ${stderr}`);
+
+        // Check if the error message indicates that the command is not found
+        if (stderr.includes("No such command 'get-branchline-template-versions'")) {
+          // Resolve with a default response or error message
+          resolve({
+            [templateName]: {
+              versions: [],
+              description: "Error: 'get-branchline-template-versions' command not found. Please update or reinstall the PROS CLI."
+            }
+          });
+        } else {
+          reject(error);
+        }
         return;
       }
+
+      console.log(`stdout: ${stdout}`);
 
       try {
         // Extract the JSON part from the output
@@ -157,6 +188,8 @@ function runPROSTemplateVersionsCommand(templateName: string): Promise<{ [templa
         }
         const jsonPart = stdout.substring(jsonStartIndex);
         const jsonOutput = JSON.parse(jsonPart);
+
+        console.log(`JSON output: ${JSON.stringify(jsonOutput, null, 2)}`);
 
         const versions = jsonOutput.versions || [];
         const description = jsonOutput.description || '';
@@ -226,8 +259,6 @@ function runPROSCommand(): Promise<any[]> {
   });
 }
 
-export const templatesPromise = runPROSCommand();
-
 async function fetchTemplateVersions(templates: any[]): Promise<{ [templateName: string]: { versions: any[]; description: string } }> {
   const templatesVersions: { [templateName: string]: { versions: any[]; description: string } } = {};
 
@@ -244,5 +275,10 @@ async function fetchTemplateVersions(templates: any[]): Promise<{ [templateName:
 
   return templatesVersions;
 }
+
+export const templatesPromise = runPROSCommand().then((templates) => {
+  templatesCache = templates; // Store the templates data in the cache
+  return templates;
+});
 
 export const templateVersionsPromise = templatesPromise.then(fetchTemplateVersions);
