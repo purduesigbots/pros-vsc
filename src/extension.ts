@@ -7,6 +7,8 @@ import * as fs from "fs";
 import { opendocs } from "./views/docview";
 import { promisify } from "util";
 import { TreeDataProvider } from "./views/tree-view";
+import { showBranchlineRegistryWebview, templatesPromise } from './commands/branchlineRegistryCommand';
+
 import {
   getWebviewContent,
   fetchCliVersion,
@@ -542,8 +544,24 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(ProsProjectEditorProvider.register(context));
   prosLogger.deleteOldLogs();
-}
 
+  // PROS Branchline Registry command to open the branchline registry view
+
+
+  let disposable = vscode.commands.registerCommand("pros.branchlineRegistry", function () {
+    // Use the templatesPromise to show the webview when the templates are available
+    templatesPromise
+      .then((templates) => {
+        showBranchlineRegistryWebview(templates);
+      })
+      .catch((error) => {
+        vscode.window.showErrorMessage(`Failed to fetch templates: ${error.message}`);
+      });
+  });
+  
+  context.subscriptions.push(disposable);
+ 
+}
 /**
  * EXTENSION DEACTIVATION FUNCTION
  */

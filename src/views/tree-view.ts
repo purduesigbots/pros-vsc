@@ -36,7 +36,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
         new TreeItem("Upgrade Project", undefined, "pros.upgrade"),
         new TreeItem("Create Project", undefined, "pros.new"),
         new TreeItem("Project/Template Info", undefined, "pros.infoProject"),
-        // open branchline will go here in the future
+        new TreeItem("Branchline", undefined, "pros.branchlineRegistry")
       ]),
       new TreeItem("Manage Installations", [
         new TreeButtonMultiSelect("Manage PROS", "pros.manageInstallation", [
