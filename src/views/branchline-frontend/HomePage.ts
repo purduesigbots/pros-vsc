@@ -7,13 +7,19 @@ export function getHomePageHtml(templates: any[], iconUri: vscode.Uri): string {
 
   return `
     <div class="homepage">
-      <div class="banner">
-        <div class="banner-content">
+      <header class="homepage-header">
+        <div class="logo-container">
           <img src="${iconUri}" alt="PROS Logo" class="homepageLogo" />
-          <h1 class="homepageTitle">Branchline</h1>
-          <p class="homepageSubtitle">Discover and install PROS Templates</p>
+          <div>
+            <h1 class="homepageTitle">Branchline</h1>
+            <p class="homepageSubtitle">Discover and install PROS Templates</p>
+          </div>
         </div>
-      </div>
+        <div class="search-container">
+          <input type="text" id="searchBar" placeholder="Search...">
+          <button class="search-btn">Search</button>
+        </div>
+      </header>
       <div class="templateContainer">
         ${templateCardsHtml}
       </div>
@@ -21,83 +27,81 @@ export function getHomePageHtml(templates: any[], iconUri: vscode.Uri): string {
   `;
 }
 
+
 export function getHomePageStyles(): string {
   return `
     <style>
       .homepage {
-        text-align: center;
+        text-align: left;
         background-color: #f0f0f0;
         padding: 50px 0;
         min-height: 100vh;
       }
 
-      .banner {
+      .homepage-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px;
         background-color: #212529;
-        padding: 60px 20px;
-        position: relative;
-        overflow: hidden;
+        color: #ffffff;
       }
 
-      .banner-content {
-        position: relative;
-        z-index: 1;
-      }
-
-      .banner::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #4b6cb7, #212529);
-        opacity: 0.8;
-        z-index: 0;
+      .logo-container {
+        display: flex;
+        align-items: center;
       }
 
       .homepageLogo {
-        width: 120px;
+        width: 100px;
         height: auto;
-        margin-bottom: 30px;
-        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+        margin-right: 15px;
       }
 
       .homepageTitle {
-        font-size: 48px;
+        font-size: 24px;
         font-weight: bold;
-        margin-bottom: 10px;
+        margin: 0;
         color: #ffffff;
-        text-transform: uppercase;
-        letter-spacing: 4px;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
       }
 
       .homepageSubtitle {
-        font-size: 24px;
+        font-size: 16px;
         font-weight: 300;
         color: #ffffff;
         opacity: 0.9;
       }
 
-      .searchBarContainer {
-        position: absolute;
-        right: 25px;
-        bottom: -25px;
+      .search-container {
+        display: flex;
+        align-items: center;
+        position: relative;
       }
 
       #searchBar {
-        padding: 10px 15px;
-        font-size: 1rem;
-        border: none;
-        border-radius: 20px;
+        padding: 10px;
+        font-size: 16px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
         outline: none;
-        width: 240px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s ease;
+        width: 200px;
+        background-color: white;
       }
 
-      #searchBar:focus {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      .search-btn {
+        padding: 10px 20px;
+        margin-left: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4b6cb7;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .search-btn:hover {
+        background-color: #365f9c;
       }
 
       .templateContainer {
