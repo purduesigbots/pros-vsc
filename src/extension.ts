@@ -552,7 +552,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // Use the templatesPromise to show the webview when the templates are available
     templatesPromise
       .then((templates) => {
-        showBranchlineRegistryWebview(templates);
+        showBranchlineRegistryWebview(context, templates);
       })
       .catch((error) => {
         vscode.window.showErrorMessage(`Failed to fetch templates: ${error.message}`);

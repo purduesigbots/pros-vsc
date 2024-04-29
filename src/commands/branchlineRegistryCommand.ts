@@ -4,12 +4,13 @@ import { getHomePageHtml, getHomePageStyles } from '../views/branchline-frontend
 import { getHeaderHtml, getHeaderStyles } from '../views/branchline-frontend/Header';
 import { getTemplateCardStyles } from '../views/branchline-frontend/TemplateCard';
 import { getTemplateDetailHtml, getTemplateDetailStyles } from '../views/branchline-frontend/TemplateDetail';
+import * as path from 'path';
 
 let panel: vscode.WebviewPanel | undefined;
 let templatesCache: any[] = [];
 
 // Function to create and show the webview
-export function showBranchlineRegistryWebview(templates: any[]) {
+export function showBranchlineRegistryWebview(context: vscode.ExtensionContext, templates: any[]) {
   if (panel) {
     panel.dispose();
   }
@@ -23,7 +24,12 @@ export function showBranchlineRegistryWebview(templates: any[]) {
     }
   );
 
-  const homePageHtml = getHomePageHtml(templates);
+  const iconPath = vscode.Uri.file(
+    path.join(context.extensionPath, 'media', 'pros-color-icon.png')
+  );
+  const iconUri = panel.webview.asWebviewUri(iconPath);
+
+  const homePageHtml = getHomePageHtml(templates, iconUri);
   const headerHtml = getHeaderHtml();
   const homePageStyles = getHomePageStyles();
   const headerStyles = getHeaderStyles();
@@ -58,14 +64,14 @@ export function showBranchlineRegistryWebview(templates: any[]) {
     panel.webview.onDidReceiveMessage(message => {
       switch (message.command) {
         case 'showTemplateDetail':
-          showTemplateDetailWebview(message.templateName);
+          showTemplateDetailWebview(context, message.templateName);
           return;
       }
     });
   }
 }
 
-function showTemplateDetailWebview(templateName: string) {
+function showTemplateDetailWebview(context: vscode.ExtensionContext, templateName: string) {
   if (panel) {
     panel.dispose();
   }
@@ -122,7 +128,7 @@ function showTemplateDetailWebview(templateName: string) {
       panel.webview.onDidReceiveMessage(message => {
         switch (message.command) {
           case 'backButtonClick':
-            showBranchlineRegistryWebview(templatesCache);
+            showBranchlineRegistryWebview(context, templatesCache);
             return;
         }
       });

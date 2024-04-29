@@ -1,9 +1,7 @@
-// Header.ts
 export function getHeaderHtml(): string {
   return `
     <header class="header">
-      <img src="https://example.com/Sigbots.png" alt="Branchline Logo" class="headerLogo" />
-      <h1 class="headerTitle"></h1>
+      <span class="notification">Important Updates - New Features Available</span>
     </header>
   `;
 }
@@ -14,36 +12,24 @@ export function getHeaderStyles(): string {
       .header {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        background-color: #282c34;
-        background-image: linear-gradient(to right, #20232a, #282c34);
-        padding: 20px;
+        justify-content: center; /* Aligns content to the center */
+        background-color: #20232a;
+        background-image: linear-gradient(to right, #343a40, #20232a);
+        padding: 5px 20px; /* Reduced padding for a thinner header */
         color: white;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        border-bottom: 2px solid #61dafb;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); /* Slightly less depth to match thinner style */
+        border-bottom: 2px solid #61dafb; /* Thinner border */
       }
-      .headerLogo {
-        width: 100px;
-        margin-right: 20px;
-        transition: transform 0.3s ease;
-      }
-      .headerLogo:hover {
-        transform: scale(1.05);
-        cursor: pointer;
-      }
-      .headerTitle {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin: 0;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-        flex: 1;
-        letter-spacing: 0.05rem;
-        transition: color 0.3s ease;
-      }
-      .headerTitle:hover {
-        color: #61dafb;
-        cursor: pointer;
+      
+      .notification {
+        padding: 8px 10px; /* Slightly smaller padding */
+        background-color: #4caf50;
+        color: white;
+        font-size: 0.95rem;
+        border-radius: 20px;
+        margin: 0; /* Removed extra margin */
       }
     </style>
   `;
 }
+
