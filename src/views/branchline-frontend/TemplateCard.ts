@@ -14,100 +14,49 @@ export function getTemplateCardHtml(template: any): string {
 export function getTemplateCardStyles(): string {
   return `
     <style>
-    /* Container to hold cards with Flexbox for responsive layout */
-    .cardContainer {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around; /* Ensures cards are evenly spaced */
-      align-items: flex-start; /* Aligns cards at the start */
-      gap: 20px; /* Space between cards */
-      padding: 20px; /* Padding around the entire container */
-    }
-    
-    /* Style for individual cards */
-    .templateCard {
-      display: block;
-      border: 2px solid #ccc;
-      padding: 25px;
-      width: calc(100% - 50px); /* Adjusts width considering padding */
-      box-shadow: 0 8px 12px rgba(0, 0, 0, 0.12);
-      text-decoration: none;
-      background-color: #ffffff;
-      border-radius: 12px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      color: #333;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    .templateCard:hover {
-      transform: translateY(-8px) rotate(-2deg); /* Lift and slight rotation */
-      box-shadow: 0 15px 24px rgba(0, 0, 0, 0.18);
-      border-color: #aaa;
-    }
-    
-    /* Style for logos inside the cards */
-    .templateLogo {
-      width: 100px;
-      height: auto;
-      display: block;
-      margin: 0 auto 20px;
-      border-radius: 5px;
-      transition: transform 0.3s ease; /* Smooth transition for hover effect */
-    }
-    
-    .templateCard:hover .templateLogo {
-      transform: scale(1.1); /* Logo grows slightly on card hover */
-    }
-    
-    /* Container for textual information, styled for emphasis */
-    .templateInfo {
-      text-align: center;
-      padding: 15px;
-      background-color: #f9f9f9; /* Slightly off-white for contrast */
-      border-radius: 8px;
-      margin-bottom: 20px;
-      animation: fadeIn 1s ease-out; /* Fade-in animation */
-    }
-    
-    /* Keyframes for fadeIn animation */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    
-    /* Style for the template name */
-    .templateName {
-      color: #382c03;
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin: 10px 0;
-    }
-    
-    /* Style for target information, with italic for differentiation */
-    .templateTarget {
-      color: #370303;
-      font-size: 1.1rem;
-      margin: 10px 0;
-      font-style: italic;
-    }
-    
-    /* Example button style for actions within the card */
-    .button {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #f2f2f2;
-      color: #333;
-      text-align: center;
-      border-radius: 5px;
-      text-decoration: none;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    
-    .button:hover {
-      background-color: #370303; /* Change on hover for visual feedback */
-      color: #ffffff;
-    }
-    
+      .templateCard {
+        background-color: #fff;
+        border: 1px solid #ccc; /* Added a subtle border */
+        border-radius: 10px; /* Smoothed border radius */
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .templateCard:hover {
+        transform: scale(1.03);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+      }
+
+      .templateLogo {
+        width: 100px; /* Increased size for better visibility */
+        height: auto;
+        margin-bottom: 10px;
+      }
+
+      .templateInfo {
+        text-align: center;
+        background-color: #f8f8f8; /* Light grey background for the text area */
+        width: 100%; /* Full width of the card */
+        padding: 8px 0; /* Padding around text */
+        border-radius: 8px; /* Rounded corners inside the card */
+      }
+
+      .templateName {
+        font-size: 1.1rem; /* Slightly larger font size */
+        font-weight: bold;
+        color: #333; /* Darker color for better contrast */
+        margin: 0 0 5px; /* Adjusted margins */
+      }
+
+      .templateTarget {
+        font-size: 0.9rem;
+        color: #666;
+        margin: 0; /* Reduced top margin for tighter design */
       }
     </style>
   `;

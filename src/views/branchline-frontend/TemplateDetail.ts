@@ -37,106 +37,84 @@ export function getTemplateDetailHtml(templateName: string, versions: any[], sel
 
 export function getTemplateDetailStyles(): string {
   return `
-    <style>
-      .templateDetail {
-        background-color: #ffffff;
-        padding: 40px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        max-width: 800px;
-        margin: 40px auto;
-        text-align: left;
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      }
+  <style>
+  .templateDetail {
+    background-color: #f9f9f9; /* A softer shade of white for the background */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    width: auto;
+    margin: 0 auto;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-      .templateDetail h2 {
-        color: #004085;
-        margin-bottom: 20px;
-        font-size: 2.25rem;
-      }
+  .templateHeader {
+    text-align: center;
+    margin-bottom: 20px;
+  }
 
-      .templateDetail select {
-        padding: 12px 15px;
-        margin-bottom: 25px;
-        width: 100%;
-        box-sizing: border-box;
-        border: 1px solid #ced4da;
-        border-radius: 5px;
-        background-color: #f8f9fa;
-        font-size: 1rem;
-      }
+  .templateLogo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 10px;
+  }
 
-      .templateDetail a {
-        display: inline-block;
-        background-color: #007bff;
-        color: white;
-        padding: 12px 20px;
-        border-radius: 5px;
-        text-decoration: none;
-        margin-top: 15px;
-        font-weight: bold;
-        transition: background-color 0.2s ease-in-out;
-      }
+  .templateName {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 15px;
+  }
 
-      .templateDetail a:hover,
-      .templateDetail a:focus {
-        background-color: #0056b3;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      }
+  .versionSelect {
+    width: 200px; /* Set a fixed width for version selector */
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    margin-bottom: 20px; /* Space before the download link */
+  }
 
-      .description {
-        margin-top: 30px;
-        line-height: 1.6;
-        color: #495057;
-      }
+  .downloadButton {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: block;
+    font-weight: bold;
+    margin-top: 10px;
+  }
 
-      .description h1,
-      .description h2,
-      .description h3,
-      .description h4,
-      .description h5,
-      .description h6 {
-        color: #004085;
-        margin-top: 20px;
-        margin-bottom: 10px;
-      }
+  .description {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 5px;
+    line-height: 1.5;
+    color: #555;
+    font-size: 0.95rem;
+    margin-top: 20px;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 
-      .description p {
-        margin-bottom: 1.25em;
-      }
+  .backButton {
+    background-color: #61dafb;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    border: none;
+    box-shadow: none; /* Remove any additional styling to maintain a standard height */
+  }
+</style>
 
-      .description ul,
-      .description ol {
-        padding-left: 40px;
-        margin-bottom: 1.25em;
-      }
-
-      .description a {
-        color: #0056b3;
-        text-decoration: none;
-        border-bottom: 1px dashed #0056b3;
-        transition: border-bottom-color 0.2s ease-in-out;
-      }
-
-      .description a:hover,
-      .description a:focus {
-        border-bottom-color: transparent;
-      }
-
-      .backButton {
-        background-color: #6c757d;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1rem;
-        margin-bottom: 20px;
-      }
-
-      .backButton:hover {
-        background-color: #5a6268;
-      }
-    </style>
   `;
 }
