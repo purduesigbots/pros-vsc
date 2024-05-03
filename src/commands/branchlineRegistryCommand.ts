@@ -5,6 +5,7 @@ import { getHeaderHtml, getHeaderStyles } from '../views/branchline-frontend/Hea
 import { getTemplateCardStyles } from '../views/branchline-frontend/TemplateCard';
 import { getTemplateDetailHtml, getTemplateDetailStyles } from '../views/branchline-frontend/TemplateDetail';
 import * as path from 'path';
+import * as showdown from 'showdown';
 
 let panel: vscode.WebviewPanel | undefined;
 let templatesCache: any[] = [];
@@ -120,6 +121,19 @@ function showTemplateDetailWebview(context: vscode.ExtensionContext, templateNam
             function handleBackButtonClick() {
               vscode.postMessage({ command: 'backButtonClick' });
             }
+
+            function handleVersionChange(version) {
+              vscode.postMessage({ command: 'versionChange', version });
+            }
+
+            window.addEventListener('message', event => {
+              const message = event.data;
+              switch (message.command) {
+                case 'updateDownloadLink':
+                  document.getElementById('downloadLinkContainer').innerHTML = message.downloadLink;
+                  break;
+              }
+            });
           </script>
         </body>
         </html>
@@ -129,6 +143,16 @@ function showTemplateDetailWebview(context: vscode.ExtensionContext, templateNam
         switch (message.command) {
           case 'backButtonClick':
             showBranchlineRegistryWebview(context, templatesCache);
+            return;
+          case 'versionChange':
+            const selectedVersion = message.version;
+            const selectedVersionData = versions.find(v => v.version === selectedVersion);
+            const downloadLink = selectedVersionData && selectedVersionData.metadata && selectedVersionData.metadata.location
+              ? `<a href="${selectedVersionData.metadata.location}" download class="downloadButton">Download</a>`
+              : '';
+            if (panel) {
+              panel.webview.postMessage({ command: 'updateDownloadLink', downloadLink });
+            }
             return;
         }
       });

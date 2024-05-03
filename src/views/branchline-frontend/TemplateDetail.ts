@@ -15,7 +15,6 @@ export function getTemplateDetailHtml(templateName: string, versions: any[], sel
 
   // Create a new Showdown converter instance
   const converter = new showdown.Converter();
-
   // Convert the Markdown description to HTML
   const htmlDescription = converter.makeHtml(description);
 
@@ -30,9 +29,14 @@ export function getTemplateDetailHtml(templateName: string, versions: any[], sel
       <select class="versionSelect" onchange="handleVersionChange(this.value)">
         ${versionOptions}
       </select>
-      ${downloadLink}
+      <div id="downloadLinkContainer">${downloadLink}</div>
       <div class="description">${htmlDescription || dummyText}</div>
     </div>
+    <script>
+      function handleVersionChange(version) {
+        vscode.postMessage({ command: 'versionChange', version });
+      }
+    </script>
   `;
 }
 
