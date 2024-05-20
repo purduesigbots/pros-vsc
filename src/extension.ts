@@ -9,8 +9,7 @@ import { promisify } from "util";
 import { TreeDataProvider } from "./views/tree-view";
 import {
   getWebviewContent,
-  fetchCliVersion,
-  fetchKernelVersionNonCLIDependent,
+  fetchKernelVersionNonCLIDependent
 } from "./views/welcome-view";
 import {
   buildUpload,
@@ -55,6 +54,7 @@ import {
 import { startPortMonitoring } from "./device";
 import { BrainViewProvider } from "./views/brain-view";
 import { populateDocsJSON, debugDocsJson } from "./views/docs-webscrape";
+import { getCurrentReleaseVersion } from "./one-click/installed";
 
 /**
  * COMMAND BLOCKER SECTION
@@ -377,7 +377,7 @@ export async function activate(context: vscode.ExtensionContext) {
       // This gets the kernel version so we can display it on the welcome page
       const newKernel = await fetchKernelVersionNonCLIDependent();
       // This gets the CLI version so we can display it on the welcome page
-      const newCli = await fetchCliVersion();
+      const newCli = await getCurrentReleaseVersion("https://api.github.com/repos/purduesigbots/pros-cli/releases/latest");
 
       // Setup google analytics preference and welcome page display preference
       const useGoogleAnalytics =
