@@ -6,7 +6,7 @@ export const resetConductor = async () => {
     command: "pros",
     args: ["c", "reset"], //--force not needed: Ben's base-commands class auto-handles warning + confirmation.
     message: "Resetting Conductor",
-    requiresProsProject: true,
+    requiresProsProject: false,
     successMessage:
       "Conductor Reset Successfully. Any templates and/or depots previously cached will need to be re-fetched.",
   };
