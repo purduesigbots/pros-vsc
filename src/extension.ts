@@ -30,6 +30,7 @@ import {
   setRobotName,
   runVision,
   getCurrentKernelOkapiVersion,
+  resetConductor,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -229,6 +230,7 @@ export async function activate(context: vscode.ExtensionContext) {
   setupCommandBlocker("pros.upgrade", upgradeProject);
   setupCommandBlocker("pros.new", createNewProject);
   setupCommandBlocker("pros.infoProject", infoProject);
+  setupCommandBlocker("pros.resetConductor", resetConductor);
 
   // Beta commands (notice the fourth argument is set to true for these)
   setupCommandBlocker("pros.installVision", installVision, context, true);

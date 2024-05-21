@@ -36,6 +36,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
         new TreeItem("Upgrade Project", undefined, "pros.upgrade"),
         new TreeItem("Create Project", undefined, "pros.new"),
         new TreeItem("Project/Template Info", undefined, "pros.infoProject"),
+        new TreeItem("Reset Conductor", undefined, "pros.resetConductor"),
         // open branchline will go here in the future
       ]),
       new TreeItem("Manage Installations", [

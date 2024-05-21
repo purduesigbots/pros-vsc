@@ -166,6 +166,10 @@
         "title": "PROS: Project Information"
       },
       {
+        "command": "pros.resetConductor",
+        "title": "PROS: Reset Conductor"
+      },
+      {
         "command": "pros.welcome",
         "title": "PROS: Welcome"
       },
