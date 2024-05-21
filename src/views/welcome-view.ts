@@ -14,40 +14,6 @@ var fetch = require("node-fetch");
  *
  * @returns The kernel library versions
  */
-export const fetchKernelVersion = async (): Promise<string> => {
-  try {
-    const { stdout, stderr } = await promisify(child_process.exec)(
-      `pros c q --target v5 --machine-output`,
-      {
-        env: {
-          ...process.env,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          PATH: getChildProcessPath(),
-        },
-      }
-    );
-
-    let newKernel = "0.0.0";
-
-    for (let e of stdout.split(/\r?\n/)) {
-      if (e.startsWith(PREFIX)) {
-        let jdata = JSON.parse(e.substr(PREFIX.length));
-        if (jdata.type === "finalize") {
-          for (let ver of jdata.data) {
-            if (ver.name === "kernel" && gt(ver.version, newKernel)) {
-              newKernel = ver.version;
-            }
-          }
-        }
-      }
-    }
-
-    return newKernel;
-  } catch (error) {
-    return "0.0.0";
-  }
-};
-
 export const fetchKernelVersionNonCLIDependent = async (): Promise<string> => {
   const response = await fetch(
     "https://api.github.com/repos/purduesigbots/pros/releases/latest"
@@ -58,12 +24,6 @@ export const fetchKernelVersionNonCLIDependent = async (): Promise<string> => {
   }
   var v = (await response.json()).tag_name;
   return v;
-};
-export const fetchCliVersion = async (): Promise<string> => {
-  const response = await axios.get(
-    "https://purduesigbots.github.io/pros-mainline/stable/UpgradeManifestV1.json"
-  );
-  return `${response.data.version.major}.${response.data.version.minor}.${response.data.version.patch}`;
 };
 
 export function getWebviewContent(

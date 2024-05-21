@@ -34,7 +34,7 @@
     "color": "#D6B872",
     "theme": "dark"
   },
-  "version": "0.7.2",
+  "version": "0.7.3",
   "engines": {
     "vscode": "^1.82.0"
   },
@@ -164,6 +164,10 @@
       {
         "command": "pros.infoProject",
         "title": "PROS: Project Information"
+      },
+      {
+        "command": "pros.resetConductor",
+        "title": "PROS: Reset Conductor"
       },
       {
         "command": "pros.welcome",

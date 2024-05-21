@@ -16,3 +16,4 @@ export * from "./set-team-number";
 export * from "./set-robot-name";
 export * from "./runvision";
 export * from "./info-project";
+export * from "./reset-conductor";
