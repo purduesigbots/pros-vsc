@@ -9,7 +9,7 @@ import { promisify } from "util";
 import { TreeDataProvider } from "./views/tree-view";
 import {
   getWebviewContent,
-  fetchKernelVersionNonCLIDependent
+  fetchKernelVersionNonCLIDependent,
 } from "./views/welcome-view";
 import {
   buildUpload,
@@ -377,7 +377,9 @@ export async function activate(context: vscode.ExtensionContext) {
       // This gets the kernel version so we can display it on the welcome page
       const newKernel = await fetchKernelVersionNonCLIDependent();
       // This gets the CLI version so we can display it on the welcome page
-      const newCli = await getCurrentReleaseVersion("https://api.github.com/repos/purduesigbots/pros-cli/releases/latest");
+      const newCli = await getCurrentReleaseVersion(
+        "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
+      );
 
       // Setup google analytics preference and welcome page display preference
       const useGoogleAnalytics =
