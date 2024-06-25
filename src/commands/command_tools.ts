@@ -143,7 +143,7 @@ export const selectKernelVersion = async (target: string) => {
   const kernelVersionCommandOptions: BaseCommandOptions = {
     command: "pros",
     args: ["c", "ls-templates", "--target", target, "--machine-output"],
-    optionalArgs: [betaFeaturesEnabled ? "--beta" : undefined],
+    optionalArgs: betaFeaturesEnabled ? ["--beta"] : [], // Fix: wrap in an array
     message: "Fetching kernel versions",
     requiresProsProject: false,
     extraOutput: true,
