@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { BaseCommand, BaseCommandOptions } from "./base-command";
 import * as path from "path";
 import { getOperatingSystem } from "../one-click/install";
+import { exec } from "child_process";
 
 //run vision command
 const visionCommandOptions: BaseCommandOptions = {
@@ -31,28 +32,30 @@ export const runVision = async (context: vscode.ExtensionContext) => {
       `Vision Utility.exe`
     );
   } else {
+    /*
     vscode.window.showInformationMessage(
       "Vision Utility is currently not supported on MacOS. We are currently working on fixing this."
     );
     return;
-    visionCommandOptions.command = "open";
-    visionCommandOptions.args = [
-      "-a",
+    */
+    visionCommandOptions.command = 
       `"${path.join(
         installPath,
         "install",
         `pros-vision-${os}`,
         "osx64",
-        `Vision Utility.app`
-      )}"`,
-    ];
+        `Vision Utility.app`,
+        "Contents",
+        "MacOS",
+        "nwjs"
+      )}"`;
   }
 
   console.log(visionCommandOptions.command);
 
   const visionCommand: BaseCommand = new BaseCommand(visionCommandOptions);
   try {
-    visionCommand.runCommand();
+    exec(visionCommandOptions.command);
   } catch (err: any) {
     await vscode.window.showErrorMessage(
       "There is an error running Vision Utlity, check if it is installed"

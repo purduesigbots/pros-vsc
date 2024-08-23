@@ -817,10 +817,12 @@ export async function installVision(context: vscode.ExtensionContext) {
     console.log("cleanup time");
     await cleanup(context, system);
   } else if (system === "macos") {
+    /*
     vscode.window.showInformationMessage(
       "Vision Utility is currently not supported on MacOS. We are currently working on fixing this."
     );
     return;
+    */
     //add install and download directories
     const dirs = await createDirs(context.globalStorageUri);
 
