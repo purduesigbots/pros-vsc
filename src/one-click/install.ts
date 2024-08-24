@@ -800,10 +800,10 @@ export async function installVision(context: vscode.ExtensionContext) {
   const windowsVision =
     "https://github.com/purduesigbots/pros-cli/releases/download/3.4.1/vision_030_win32.zip";
   const macosVision =
-    "https://github.com/purduesigbots/pros-cli/releases/download/3.4.1/vision_030_osx64.zip";
+    "https://github.com/purduesigbots/pros-cli/releases/download/3.3.3/vision_030_osx64.zip";
 
   // Set the installed file names
-  var visionName = `pros-vision-${system}.zip`;
+  const visionName = `pros-vision-${system}.zip`;
   if (system === "windows") {
     console.log("vision utility on windows");
     //add install and download directories

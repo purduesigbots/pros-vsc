@@ -10,6 +10,7 @@ import * as path from "path";
 import { promisify } from "util";
 
 import { prosLogger } from "../extension";
+import { execSync } from "child_process";
 
 async function download(
   globalPath: string,
@@ -206,8 +207,12 @@ export async function extract(
         let writePath = path.join(globalPath, "install", storagePath);
 
         // Extract the contents of  the zip file
-        var zip = new admzip(readPath);
-        zip.extractAllTo(writePath, true);
+        if (readPath.includes("pros-vision-macos")) {
+          execSync(`unzip ${readPath.replace(" ", "\\ ")} -d ${writePath.replace(" ", "\\ ")}`);
+        } else {
+          var zip = new admzip(readPath);
+          zip.extractAllTo(writePath, true);
+        }
         await prosLogger.log(
           "OneClick",
           `Extracting ${readPath} to ${writePath}`
