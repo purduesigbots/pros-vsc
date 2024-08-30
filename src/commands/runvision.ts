@@ -1,22 +1,14 @@
 import * as vscode from "vscode";
-import { BaseCommand, BaseCommandOptions } from "./base-command";
 import * as path from "path";
 import { getOperatingSystem } from "../one-click/install";
 import { exec } from "child_process";
-
-//run vision command
-const visionCommandOptions: BaseCommandOptions = {
-  command: "",
-  args: [""],
-  message: "Running Vision Utility",
-  requiresProsProject: false,
-  successMessage: "Vision Utility Started",
-};
+import { BackgroundProgress } from "../logger";
 
 //check if vision is installed and run it
 export const runVision = async (context: vscode.ExtensionContext) => {
   const installPath = context.globalStorageUri.fsPath;
   const os = getOperatingSystem();
+  var visionUtilityPath = "";
 
   if (os === "linux") {
     vscode.window.showErrorMessage("Vision Utility is not supported on Linux");
@@ -24,21 +16,15 @@ export const runVision = async (context: vscode.ExtensionContext) => {
   }
 
   if (os === "windows") {
-    visionCommandOptions.command = path.join(
+    visionUtilityPath = `"${path.join(
       installPath,
       "install",
       `pros-vision-${os}`,
       "win32",
       `Vision Utility.exe`
-    );
+    )}"`;
   } else {
-    /*
-    vscode.window.showInformationMessage(
-      "Vision Utility is currently not supported on MacOS. We are currently working on fixing this."
-    );
-    return;
-    */
-    visionCommandOptions.command = 
+    visionUtilityPath = 
       `"${path.join(
         installPath,
         "install",
@@ -51,11 +37,11 @@ export const runVision = async (context: vscode.ExtensionContext) => {
       )}"`;
   }
 
-  console.log(visionCommandOptions.command);
-
-  const visionCommand: BaseCommand = new BaseCommand(visionCommandOptions);
+  console.log(visionUtilityPath);
   try {
-    exec(visionCommandOptions.command);
+    const progressWindow = new BackgroundProgress("Starting Vision Utility", false, true);
+    exec(visionUtilityPath);
+    progressWindow.stop();
   } catch (err: any) {
     await vscode.window.showErrorMessage(
       "There is an error running Vision Utlity, check if it is installed"
