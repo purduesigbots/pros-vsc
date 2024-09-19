@@ -807,7 +807,14 @@ export async function installVision(context: vscode.ExtensionContext) {
 
   // delete existing vision utility installation, if it exists
   try {
-    vscode.workspace.fs.delete(vscode.Uri.joinPath(context.globalStorageUri, "install", `pros-vision-${system}`), {recursive: true});
+    vscode.workspace.fs.delete(
+      vscode.Uri.joinPath(
+        context.globalStorageUri,
+        "install",
+        `pros-vision-${system}`
+      ),
+      { recursive: true }
+    );
   } catch (err: any) {
     console.error(err);
   }

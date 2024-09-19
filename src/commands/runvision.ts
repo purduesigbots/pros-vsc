@@ -24,22 +24,25 @@ export const runVision = async (context: vscode.ExtensionContext) => {
       `Vision Utility.exe`
     )}"`;
   } else {
-    visionUtilityPath = 
-      `"${path.join(
-        installPath,
-        "install",
-        `pros-vision-${os}`,
-        "osx64",
-        `Vision Utility.app`,
-        "Contents",
-        "MacOS",
-        "nwjs"
-      )}"`;
+    visionUtilityPath = `"${path.join(
+      installPath,
+      "install",
+      `pros-vision-${os}`,
+      "osx64",
+      `Vision Utility.app`,
+      "Contents",
+      "MacOS",
+      "nwjs"
+    )}"`;
   }
 
   console.log(visionUtilityPath);
   try {
-    const progressWindow = new BackgroundProgress("Starting Vision Utility", false, true);
+    const progressWindow = new BackgroundProgress(
+      "Starting Vision Utility",
+      false,
+      true
+    );
     exec(visionUtilityPath);
     progressWindow.stop();
   } catch (err: any) {

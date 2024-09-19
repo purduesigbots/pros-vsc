@@ -208,7 +208,12 @@ export async function extract(
 
         // Extract the contents of  the zip file
         if (readPath.includes("pros-vision-macos")) {
-          execSync(`unzip ${readPath.replace(" ", "\\ ")} -d ${writePath.replace(" ", "\\ ")}`);
+          execSync(
+            `unzip ${readPath.replace(" ", "\\ ")} -d ${writePath.replace(
+              " ",
+              "\\ "
+            )}`
+          );
         } else {
           var zip = new admzip(readPath);
           zip.extractAllTo(writePath, true);
