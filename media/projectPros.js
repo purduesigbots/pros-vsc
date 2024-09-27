@@ -41,7 +41,7 @@
     document.getElementById("icon-uri")
   );
 
-  const iconUriString = iconUri.textContent?.replace(/\s+/g, '');
+  const iconUriString = iconUri.textContent?.replace(/\s+/g, "");
 
   slotSelection.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
