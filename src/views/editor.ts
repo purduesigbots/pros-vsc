@@ -25,6 +25,9 @@ export class ProsProjectEditorProvider
   ): Promise<void> {
     webviewPanel.webview.options = {
       enableScripts: true,
+      localResourceRoots: [
+        vscode.Uri.joinPath(this.context.extensionUri, "media"),
+      ],
     };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
@@ -266,6 +269,11 @@ export class ProsProjectEditorProvider
               </select>
             </div>
           </div>
+        </div>
+        <div style="display: none;" id="icon-uri">
+          ${webview.asWebviewUri(
+            vscode.Uri.joinPath(this.context.extensionUri, "media", "icons")
+          )}
         </div>
 
         <script nonce="${nonce}" src="${scriptUri}"></script>
