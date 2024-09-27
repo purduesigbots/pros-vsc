@@ -37,6 +37,12 @@
     document.getElementById("runafter")
   );
 
+  const iconUri = /** @type {HTMLInputElement} */ (
+    document.getElementById("icon-uri")
+  );
+
+  const iconUriString = iconUri.textContent?.replace(/\s+/g, '');
+
   slotSelection.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
     vscode.postMessage({ type: "setSlot", slot: selector.value });
@@ -80,7 +86,8 @@
   iconSelection.addEventListener("change", (e) => {
     const selector = /** @type {HTMLInputElement} */ (e.target);
     vscode.postMessage({ type: "setIcon", icon: selector.value });
-    iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/icons/${selector.value}.png`;
+    iconPreview.src = `${iconUriString}/${selector.value}.png`;
+    console.log(iconPreview.src);
     iconPreview.onerror = function (event) {
       iconPreview.onerror = null;
       iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${selector.value}.png`;
@@ -125,14 +132,14 @@
     // Current Project Icon
     if (json["py/state"]["upload_options"]?.icon) {
       iconSelection.value = json["py/state"]["upload_options"]["icon"];
-      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/icons/${iconSelection.value}.png`;
+      iconPreview.src = `${iconUriString}/${iconSelection.value}.png`;
       iconPreview.onerror = function (event) {
         iconPreview.onerror = null;
         iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${iconSelection.value}.png`;
       };
     } else {
       iconSelection.value = "pros";
-      iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/develop/media/icons/pros.png`;
+      iconPreview.src = `${iconUriString}/pros.png`;
       iconPreview.onerror = function (event) {
         iconPreview.onerror = null;
         iconPreview.src = `https://raw.githubusercontent.com/purduesigbots/pros-vsc/feature/more-project-settings/media/icons/${iconSelection.value}.png`;
