@@ -185,9 +185,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   //Display pop-up to enable autosave
   if (
-    vscode.workspace
-      .getConfiguration("pros")
-      .get<boolean>("promptautosave")
+    vscode.workspace.getConfiguration("pros").get<boolean>("promptautosave")
   ) {
     vscode.window
       .showInformationMessage(
