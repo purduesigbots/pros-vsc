@@ -183,6 +183,35 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand("pros.welcome");
   }
 
+  //Display pop-up to enable autosave
+  if (
+    vscode.workspace
+      .getConfiguration("pros")
+      .get<boolean>("promptautosave")
+  ) {
+    vscode.window
+      .showInformationMessage(
+        "Would you like to enable autosave for this PROS project?",
+        "Enable Autosave",
+        "Not now",
+        "Never"
+      )
+      .then((selection) => {
+        if (selection === "Enable Autosave") {
+          vscode.workspace
+            .getConfiguration("files")
+            .update("autoSave", "afterDelay", false);
+          vscode.workspace
+            .getConfiguration("pros")
+            .update("promptautosave", false, false);
+        } else if (selection === "Never") {
+          vscode.workspace
+            .getConfiguration("pros")
+            .update("promptautosave", false, false);
+        }
+      });
+  }
+
   // Set up all commands to run with the command blocker (see near the top of this file to understand what it does)
   // Commands with basic/default options:
   setupCommandBlocker("pros.install", install, context);

@@ -406,6 +406,11 @@
             "Open the docs in the active editor"
           ],
           "description": "Default style to set position of integrated document viewer"
+        },
+        "pros.promptautosave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prompt to enable autosave on extension start."
         }
       }
     }
