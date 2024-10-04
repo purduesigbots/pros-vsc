@@ -2,8 +2,8 @@ import * as vscode from "vscode";
 import { window, ProgressLocation } from "vscode";
 var fetch = require("node-fetch");
 var admzip = require("adm-zip");
-var bunzip = require("seek-bzip");
 var tar = require("tar-fs");
+import * as xz from "xz";
 import * as fs from "fs";
 import * as stream from "stream";
 import * as path from "path";
@@ -19,17 +19,17 @@ async function download(
 ) {
   // Check if file type is .tar.bz or .zip
 
-  const bz2 = downloadURL.includes(".bz2");
+  const xz = downloadURL.includes(".xz");
   await prosLogger.log("OneClick", `Downloading ${downloadURL}`);
   await prosLogger.log("OneClick", `Storage Path: ${storagePath}`);
 
   downloadName =
-    "Downloading: " + downloadName ??
+    "Downloading: " + (downloadName ??
     (storagePath.includes("cli")
       ? "PROS CLI"
       : storagePath.includes("toolchain")
       ? "PROS Toolchain"
-      : "VEX Vexcom");
+      : "VEX Vexcom"));
 
   await window.withProgress(
     {
@@ -73,23 +73,23 @@ async function download(
       out.close();
     }
   );
-  return bz2;
+  return xz;
 }
 
 export async function extract(
   globalPath: string,
   storagePath: string,
-  bz2: boolean,
+  xzFile: boolean,
   extractName?: string
 ) {
   await prosLogger.log("OneClick", `Extracting ${storagePath}`);
   extractName =
-    "Installing: " + extractName ??
+    "Installing: " + (extractName ??
     (storagePath.includes("cli")
       ? "PROS CLI"
       : storagePath.includes("toolchain")
       ? "PROS Toolchain"
-      : "VEX Vexcom");
+      : "VEX Vexcom"));
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -106,51 +106,16 @@ export async function extract(
         extract.close();
       });
 
-      if (bz2) {
-        await prosLogger.log(
-          "OneClick",
-          `Reading compressed data from ${storagePath}`
-        );
-        // Read the contents of the bz2 file
-        var compressedData = await fs.promises.readFile(
-          path.join(globalPath, "download", storagePath)
-        );
-
-        // Decrypt the bz2 file contents.
-        let decompressedData;
-        await prosLogger.log("OneClick", `Decompressing ${storagePath}`);
-        try {
-          decompressedData = bunzip.decode(compressedData);
-        } catch (e: any) {
-          console.log(e);
-          await prosLogger.log(
-            "OneClick",
-            `Failed to decompress ${storagePath}`
-          );
-          vscode.window.showErrorMessage(
-            "An error occured while decoding the toolchain"
-          );
-        }
-
-        storagePath = storagePath.replace(".bz2", "");
-        await prosLogger.log(
-          "OneClick",
-          `Writing decompressed data to ${storagePath}`
-        );
-        await fs.promises.writeFile(
-          path.join(globalPath, "download", storagePath),
-          decompressedData
-        );
-        // Write contents of the decrypted bz2 into "sigbots.pros/download/filename.tar"
-
+      if (xzFile) {
         await new Promise(function (resolve, reject) {
           // Create our read stream
           prosLogger.log("OneClick", `Creating read stream for ${storagePath}`);
           read = fs.createReadStream(
             path.join(globalPath, "download", storagePath)
           );
+          var decompress = new xz.Decompressor();
           // Remove tar from the filename
-          storagePath = storagePath.replace(".tar", "");
+          storagePath = storagePath.replace(".tar.xz", "");
           // create our write stream
           prosLogger.log(
             "OneClick",
@@ -158,7 +123,7 @@ export async function extract(
           );
           extract = tar.extract(path.join(globalPath, "install", storagePath));
           // Pipe the read stream into the write stream
-          read.pipe(extract);
+          read.pipe(decompress).pipe(extract);
           // When the write stream ends, resolve the promise
           extract.on("finish", resolve);
           // If there's an error, reject the promise and clean up
@@ -183,7 +148,7 @@ export async function extract(
               path.join(globalPath, "install", file)
             );
             for (const intfile of interfiles) {
-              if (intfile.includes("gcc-arm-none-eabi")) {
+              if (intfile.includes("arm-none-eabi")) {
                 const toBringOut = await fs.promises.readdir(
                   path.join(globalPath, "install", file, intfile)
                 );
@@ -231,14 +196,14 @@ export async function downloadextract(
   name?: string
 ) {
   const globalPath = context.globalStorageUri.fsPath;
-  const bz2 = await download(
+  const xz = await download(
     globalPath,
     downloadURL,
     storagePath,
     name ?? undefined
   );
   console.log("download done");
-  await extract(globalPath, storagePath, bz2, name ?? undefined);
+  await extract(globalPath, storagePath, xz, name ?? undefined);
   console.log(`Finished Installing ${storagePath}`);
   window.showInformationMessage(`Finished Installing ${name ?? ""}`);
   return true;
