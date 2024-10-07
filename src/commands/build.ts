@@ -3,7 +3,6 @@ import { BaseCommand, BaseCommandOptions } from "./base-command";
 import { output } from "../extension";
 
 // TODO: Share prompt on unsaved files functionality with the build and upload command to avoid code duplication
-// TODO: If autosave is enabled, attempt to save all unsaved files in order to prevent edge cases with vscode's autosave.
 // TODO: Improve likelihood of user to find the "Enable Autosave" option
 
 /** Language IDs for C and C++ files */
@@ -21,9 +20,24 @@ async function handleUnsavedFiles(unsavedUris: vscode.Uri[]) {
     vscode.workspace.getConfiguration("files").get<string>("autoSave") !==
     "off";
 
-  // TODO: Move this function outside of the parent function
-  function saveAll() {
-    return Promise.all(unsavedUris.map((uri) => vscode.workspace.save(uri)));
+  // TODO: Move this function outside of the parent function.
+  // TODO: Handle failed saves.
+  /**
+   * Saves all unsaved URIs.
+   * @returns False if any URIs failed to save, true otherwise.
+   */
+  async function saveAll() {
+    return (
+      await Promise.all(unsavedUris.map((uri) => vscode.workspace.save(uri)))
+    ).every((res) => res !== undefined);
+  }
+
+  // If autosave is enabled, assume the user wants to save all unsaved files
+  if (isAutoSaveEnabled) {
+    const wasSuccess = await saveAll();
+    if (wasSuccess) {
+      return false;
+    }
   }
 
   const multipleUnsaved = unsavedUris.length > 1;
