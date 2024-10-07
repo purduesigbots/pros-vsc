@@ -387,11 +387,11 @@ export async function activate(context: vscode.ExtensionContext) {
       const useGoogleAnalytics =
         vscode.workspace
           .getConfiguration("pros")
-          .get<boolean>("useGoogleAnalytics") ?? false;
+          .get<boolean>("Enable Analytics") ?? false;
       const showWelcomeOnStartup =
         vscode.workspace
           .getConfiguration("pros")
-          .get<boolean>("showWelcomeOnStartup") ?? false;
+          .get<boolean>("Show Welcome On Startup") ?? false;
 
       // Set the welcome page's html content
       panel.webview.html = getWebviewContent(
