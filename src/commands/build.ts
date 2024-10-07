@@ -17,6 +17,10 @@ export const build = async () => {
     .getConfiguration("pros")
     .get<boolean>(PROMPT_CONFIG_NAME);
 
+  const isAutoSaveEnabled =
+    vscode.workspace.getConfiguration("files").get<string>("autoSave") !==
+    "off";
+
   /** Unsaved document uris likely belonging to the user's program's source code. */
   const unsavedUris = vscode.workspace.textDocuments
     .filter(
@@ -47,7 +51,7 @@ export const build = async () => {
 
     // TODO: Add a link to some documentation?
     const message = `${problem} This may cause problems with building.`;
-    
+
     // TODO: Move type nonsense outside of the parent function
     // Define the possible user actions
     const basicActions = [
@@ -88,9 +92,11 @@ export const build = async () => {
           await saveAll();
           break;
         case "Enable Autosave":
-          await vscode.commands.executeCommand(
-            "workbench.action.toggleAutoSave"
-          );
+          if (!isAutoSaveEnabled) {
+            await vscode.commands.executeCommand(
+              "workbench.action.toggleAutoSave"
+            );
+          }
           // If user enables autosave, we should also ensure to save all unsaved files
           await saveAll();
           break;
@@ -108,7 +114,9 @@ export const build = async () => {
             );
           break;
         case "More...":
-          const quickPickItems = [
+          const quickPickItems: Array<
+            { label: QuickPickUserAction } & vscode.QuickPickItem
+          > = [
             {
               label: "Save",
               description:
@@ -124,18 +132,18 @@ export const build = async () => {
                 "Continue with build process without saving unsaved files.",
             },
             {
-              label: "Enable Autosave",
-              description:
-                "Continue with build process and enable vscode's autosave feature.",
-            },
-            {
               label: "Don't Show Again",
               description:
                 "Continue with build process and disable this warning in the future.",
             },
-          ] satisfies Array<
-            { label: QuickPickUserAction } & vscode.QuickPickItem
-          >;
+          ];
+          if (!isAutoSaveEnabled) {
+            quickPickItems.push({
+              label: "Enable Autosave",
+              description:
+                "Continue with build process and enable vscode's autosave feature.",
+            });
+          }
           const newAction =
             (
               await vscode.window.showQuickPick(quickPickItems, {
