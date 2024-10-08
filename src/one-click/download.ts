@@ -110,10 +110,15 @@ export async function extract(
         await new Promise(function (resolve, reject) {
           // Create our read stream
           prosLogger.log("OneClick", `Creating read stream for ${storagePath}`);
+          const stats = fs.statSync(path.join(globalPath, "download", storagePath));
+          const totalSize = stats.size;
           read = fs.createReadStream(
             path.join(globalPath, "download", storagePath)
           );
           var decompress = new xz.Decompressor();
+          decompress.on("data", (chunk) => {
+            _progress.report({ increment: (chunk.length * 100) / totalSize});
+          });
           // Remove tar from the filename
           storagePath = storagePath.replace(".tar.xz", "");
           // create our write stream
@@ -121,7 +126,7 @@ export async function extract(
             "OneClick",
             `Extracting ${storagePath} to install folder`
           );
-          extract = tar.extract(path.join(globalPath, "install", storagePath));
+          extract = tar.extract(path.join(globalPath, "download", storagePath));
           // Pipe the read stream into the write stream
           read.pipe(decompress).pipe(extract);
           // When the write stream ends, resolve the promise
@@ -130,7 +135,7 @@ export async function extract(
           read.on("error", () => {
             prosLogger.log("OneClick", `Error occured for ${storagePath}`);
             fs.unlink(
-              path.join(globalPath, "install", storagePath),
+              path.join(globalPath, "download", storagePath),
               (_) => null
             );
             reject();
@@ -138,30 +143,15 @@ export async function extract(
         });
 
         const files = await fs.promises.readdir(
-          path.join(globalPath, "install")
+          path.join(globalPath, "download", storagePath)
         );
 
         for (const file of files) {
-          if (file.includes("toolchain")) {
-            await prosLogger.log("OneClick", `Finding toolchain files to move`);
-            const interfiles = await fs.promises.readdir(
-              path.join(globalPath, "install", file)
+          if (file.includes("arm-none-eabi")) {
+            await fs.promises.rename(
+              path.join(globalPath, "download", storagePath, file),
+              path.join(globalPath, "install", storagePath)
             );
-            for (const intfile of interfiles) {
-              if (intfile.includes("arm-none-eabi")) {
-                const toBringOut = await fs.promises.readdir(
-                  path.join(globalPath, "install", file, intfile)
-                );
-                for (const f of toBringOut) {
-                  await prosLogger.log("OneClick", `Moving ${f} to ${file}`);
-                  await fs.promises.rename(
-                    path.join(globalPath, "install", file, intfile, f),
-                    path.join(globalPath, "install", file, f)
-                  );
-                }
-              }
-            }
-            console.log(path.join(globalPath, "install", storagePath));
           }
         }
       } // if bz2
