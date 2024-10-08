@@ -406,6 +406,11 @@
             "Open the docs in the active editor"
           ],
           "description": "Default style to set position of integrated document viewer"
+        },
+        "pros.Prompt On Unsaved Files": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prompt user if they have unsaved files before building."
         }
       }
     }
