@@ -443,12 +443,12 @@
     "adm-zip": "^0.5.10",
     "axios": "^1.6.0",
     "dotenv": "^16.3.1",
+    "lzma-native": "^8.0.6",
     "node-fetch": "^2.6.7",
     "seek-bzip": "^2.0.0",
     "semver": "^7.5.2",
     "tar-fs": "^2.1.1",
     "universal-analytics": "^0.5.3",
-    "usb": "^2.10.0",
-    "xz": "^2.0.2"
+    "usb": "^2.10.0"
   }
 }

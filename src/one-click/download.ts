@@ -3,7 +3,7 @@ import { window, ProgressLocation } from "vscode";
 var fetch = require("node-fetch");
 var admzip = require("adm-zip");
 var tar = require("tar-fs");
-import * as xz from "xz";
+var lzma = require("lzma-native");
 import * as fs from "fs";
 import * as stream from "stream";
 import * as path from "path";
@@ -115,8 +115,8 @@ export async function extract(
           read = fs.createReadStream(
             path.join(globalPath, "download", storagePath)
           );
-          var decompress = new xz.Decompressor();
-          decompress.on("data", (chunk) => {
+          var decompress = new lzma.createDecompressor();
+          decompress.on("data", (chunk: Buffer | string | any) => {
             _progress.report({ increment: (chunk.length * 100) / totalSize});
           });
           // Remove tar from the filename
