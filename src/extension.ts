@@ -201,7 +201,7 @@ export async function activate(context: vscode.ExtensionContext) {
             .update("autoSave", "afterDelay", false);
           vscode.workspace
             .getConfiguration("pros")
-            .update("promptautosave", false, false);
+            .update("promptAutoSave", false, false);
         } else if (selection === "Never") {
           vscode.workspace
             .getConfiguration("pros")
