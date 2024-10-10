@@ -189,13 +189,14 @@ export async function activate(context: vscode.ExtensionContext) {
   ) {
     vscode.window
       .showInformationMessage(
-        "Would you like to enable autosave for this PROS project?",
-        "Enable Autosave",
+        "Would you like to enable autosave for PROS projects?",
+        "This Project",
+        "All Projects",
         "Not now",
         "Never"
       )
       .then((selection) => {
-        if (selection === "Enable Autosave") {
+        if (selection === "This Project") {
           vscode.workspace
             .getConfiguration("files")
             .update("autoSave", "afterDelay", false);
@@ -206,6 +207,13 @@ export async function activate(context: vscode.ExtensionContext) {
           vscode.workspace
             .getConfiguration("pros")
             .update("promptautosave", false, false);
+        } else if (selection === "All Projects") {
+          vscode.workspace
+            .getConfiguration("files")
+            .update("autoSave", "afterDelay", true);
+          vscode.workspace
+            .getConfiguration("pros")
+            .update("promptautosave", false, true);
         }
       });
   }
