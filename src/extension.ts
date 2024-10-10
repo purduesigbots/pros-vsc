@@ -205,7 +205,7 @@ export async function activate(context: vscode.ExtensionContext) {
         } else if (selection === "Never") {
           vscode.workspace
             .getConfiguration("pros")
-            .update("promptautosave", false, false);
+            .update("promptAutoSave", false, false);
         }
       });
   }
