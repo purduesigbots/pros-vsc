@@ -185,7 +185,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   //Display pop-up to enable autosave
   if (
-    vscode.workspace.getConfiguration("pros").get<boolean>("promptautosave")
+    vscode.workspace.getConfiguration("pros").get<boolean>("promptAutoSave")
   ) {
     vscode.window
       .showInformationMessage(
@@ -202,18 +202,18 @@ export async function activate(context: vscode.ExtensionContext) {
             .update("autoSave", "afterDelay", false);
           vscode.workspace
             .getConfiguration("pros")
-            .update("promptautosave", false, false);
+            .update("promptAutoSave", false, false);
         } else if (selection === "Never") {
           vscode.workspace
             .getConfiguration("pros")
-            .update("promptautosave", false, false);
+            .update("promptAutoSave", false, false);
         } else if (selection === "All Projects") {
           vscode.workspace
             .getConfiguration("files")
             .update("autoSave", "afterDelay", true);
           vscode.workspace
             .getConfiguration("pros")
-            .update("promptautosave", false, true);
+            .update("promptAutoSave", false, true);
         }
       });
   }

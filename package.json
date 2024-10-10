@@ -407,7 +407,7 @@
           ],
           "description": "Default style to set position of integrated document viewer"
         },
-        "pros.promptautosave": {
+        "pros.promptAutoSave": {
           "type": "boolean",
           "default": true,
           "description": "Prompt to enable autosave on extension start."
