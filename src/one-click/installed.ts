@@ -63,7 +63,7 @@ export async function getCurrentVersion(
         `Error fetching PROS CLI version: ${err}`,
         "ERROR"
       );
-      return ["", false];
+      return ["0.0.0", false];
     }
   }
 }
@@ -103,7 +103,7 @@ export async function getToolchainVersion(oneClickPath: string): Promise<[string
         `Error fetching PROS toolchain version: ${err}`,
         "ERROR"
       );
-      return ["", false];
+      return ["0.0.0", false];
     }
   }
 }

@@ -288,8 +288,8 @@ export async function install(context: vscode.ExtensionContext) {
       "arm-none-eabi-g++"
     )
   );
-  const cliWorking = currentCliVersion !== "";
-  const toolchainWorking = currentToolchainVersion !== "";
+  const cliWorking = currentCliVersion !== "0.0.0";
+  const toolchainWorking = currentToolchainVersion !== "0.0.0";
   const vexcomWorking = await verifyVexcom();
 
   //log the result of cli and toolchain working
