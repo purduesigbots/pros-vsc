@@ -24,7 +24,7 @@ export async function getCurrentReleaseVersion(url: string) {
 
 export async function getCurrentVersion(
   oneClickPath: string
-): Promise<[number, boolean]> {
+): Promise<[string, boolean]> {
   try {
     console.log(oneClickPath);
     prosLogger.log(
@@ -41,10 +41,8 @@ export async function getCurrentVersion(
         },
       }
     );
-    const versionint = +stdout
-      .replace("pros, version ", "")
-      .replace(/\./gi, "");
-    return [versionint, true];
+    const version = stdout.replace("pros, version ", "");
+    return [version, true];
   } catch {
     try {
       const { stdout } = await promisify(child_process.exec)(`pros --version`, {
@@ -54,10 +52,8 @@ export async function getCurrentVersion(
           PATH: getChildProcessPath(),
         },
       });
-      const versionint = +stdout
-        .replace("pros, version ", "")
-        .replace(/\./gi, "");
-      return [versionint, false];
+      const version = stdout.replace("pros, version ", "");
+      return [version, false];
     } catch (err) {
       console.log(`Error fetching PROS CLI version: ${err}`);
       prosLogger.log(
@@ -65,7 +61,52 @@ export async function getCurrentVersion(
         `Error fetching PROS CLI version: ${err}`,
         "ERROR"
       );
-      return [-1, false];
+      return ["0.0.0", false];
+    }
+  }
+}
+
+export async function getToolchainVersion(
+  oneClickPath: string
+): Promise<[string, boolean]> {
+  try {
+    console.log(oneClickPath);
+    prosLogger.log(
+      "OneClick",
+      "Executing toolchain with One-Click Install directory: " + oneClickPath
+    );
+    const { stdout } = await promisify(child_process.exec)(
+      `"${oneClickPath}" -dumpversion`,
+      {
+        env: {
+          ...process.env,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          PATH: getChildProcessPath(),
+        },
+      }
+    );
+    return [stdout, true];
+  } catch {
+    try {
+      const { stdout } = await promisify(child_process.exec)(
+        `arm-none-eabi-g++ --version`,
+        {
+          env: {
+            ...process.env,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            PATH: getChildProcessPath(),
+          },
+        }
+      );
+      return [stdout, false];
+    } catch (err) {
+      console.log(`Error fetching PROS toolchain version: ${err}`);
+      prosLogger.log(
+        "OneClick",
+        `Error fetching PROS toolchain version: ${err}`,
+        "ERROR"
+      );
+      return ["0.0.0", false];
     }
   }
 }
