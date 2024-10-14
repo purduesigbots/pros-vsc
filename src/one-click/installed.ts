@@ -41,8 +41,7 @@ export async function getCurrentVersion(
         },
       }
     );
-    const version = stdout
-      .replace("pros, version ", "");
+    const version = stdout.replace("pros, version ", "");
     return [version, true];
   } catch {
     try {
@@ -53,8 +52,7 @@ export async function getCurrentVersion(
           PATH: getChildProcessPath(),
         },
       });
-      const version = stdout
-        .replace("pros, version ", "");
+      const version = stdout.replace("pros, version ", "");
       return [version, false];
     } catch (err) {
       console.log(`Error fetching PROS CLI version: ${err}`);
@@ -68,7 +66,9 @@ export async function getCurrentVersion(
   }
 }
 
-export async function getToolchainVersion(oneClickPath: string): Promise<[string, boolean]> {
+export async function getToolchainVersion(
+  oneClickPath: string
+): Promise<[string, boolean]> {
   try {
     console.log(oneClickPath);
     prosLogger.log(
@@ -88,13 +88,16 @@ export async function getToolchainVersion(oneClickPath: string): Promise<[string
     return [stdout, true];
   } catch {
     try {
-      const { stdout } = await promisify(child_process.exec)(`arm-none-eabi-g++ --version`, {
-        env: {
-          ...process.env,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          PATH: getChildProcessPath(),
-        },
-      });
+      const { stdout } = await promisify(child_process.exec)(
+        `arm-none-eabi-g++ --version`,
+        {
+          env: {
+            ...process.env,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            PATH: getChildProcessPath(),
+          },
+        }
+      );
       return [stdout, false];
     } catch (err) {
       console.log(`Error fetching PROS toolchain version: ${err}`);

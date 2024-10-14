@@ -24,12 +24,13 @@ async function download(
   await prosLogger.log("OneClick", `Storage Path: ${storagePath}`);
 
   downloadName =
-    "Downloading: " + (downloadName ??
-    (storagePath.includes("cli")
-      ? "PROS CLI"
-      : storagePath.includes("toolchain")
-      ? "PROS Toolchain"
-      : "VEX Vexcom"));
+    "Downloading: " +
+    (downloadName ??
+      (storagePath.includes("cli")
+        ? "PROS CLI"
+        : storagePath.includes("toolchain")
+        ? "PROS Toolchain"
+        : "VEX Vexcom"));
 
   await window.withProgress(
     {
@@ -84,12 +85,13 @@ export async function extract(
 ) {
   await prosLogger.log("OneClick", `Extracting ${storagePath}`);
   extractName =
-    "Installing: " + (extractName ??
-    (storagePath.includes("cli")
-      ? "PROS CLI"
-      : storagePath.includes("toolchain")
-      ? "PROS Toolchain"
-      : "VEX Vexcom"));
+    "Installing: " +
+    (extractName ??
+      (storagePath.includes("cli")
+        ? "PROS CLI"
+        : storagePath.includes("toolchain")
+        ? "PROS Toolchain"
+        : "VEX Vexcom"));
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -110,14 +112,16 @@ export async function extract(
         await new Promise(function (resolve, reject) {
           // Create our read stream
           prosLogger.log("OneClick", `Creating read stream for ${storagePath}`);
-          const stats = fs.statSync(path.join(globalPath, "download", storagePath));
+          const stats = fs.statSync(
+            path.join(globalPath, "download", storagePath)
+          );
           const totalSize = stats.size;
           read = fs.createReadStream(
             path.join(globalPath, "download", storagePath)
           );
           var decompress = new lzma.createDecompressor();
           decompress.on("data", (chunk: Buffer | string | any) => {
-            _progress.report({ increment: (chunk.length * 100) / totalSize});
+            _progress.report({ increment: (chunk.length * 100) / totalSize });
           });
           // Remove tar from the filename
           storagePath = storagePath.replace(".tar.xz", "");

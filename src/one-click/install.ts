@@ -3,7 +3,11 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as os from "os";
 import { downloadextract, chmod } from "./download";
-import { getCurrentVersion, getCurrentReleaseVersion, getToolchainVersion } from "./installed";
+import {
+  getCurrentVersion,
+  getCurrentReleaseVersion,
+  getToolchainVersion,
+} from "./installed";
 import * as fs from "fs";
 import { promisify } from "util";
 import * as child_process from "child_process";
@@ -141,7 +145,7 @@ async function getUrls(
     await prosLogger.log("OneClick", `MacOS detected, using MacOS URLS`);
     // Set system, path seperator, and downloads to windows version
     cliArch = "macos-64bit";
-    toolchainArch = (os.arch() === "x64") ? "darwin-x86_64" : "darwin-arm64";
+    toolchainArch = os.arch() === "x64" ? "darwin-x86_64" : "darwin-arm64";
     vexcomArch = "osx";
   } else {
     await prosLogger.log("OneClick", `Linux detected, using Linux URLS`);
@@ -151,7 +155,7 @@ async function getUrls(
   if (operatingSystem === "windows") {
     var downloadToolchain = `https://github.com/purduesigbots/toolchain/releases/download/${toolchainVersion}/pros-toolchain-windows-formatted.zip`;
   } else {
-    let toolchainSemver = semver.parse(toolchainVersion, {loose: true});
+    let toolchainSemver = semver.parse(toolchainVersion, { loose: true });
     toolchainVersion = `${toolchainSemver?.major}.${toolchainSemver?.minor}.rel${toolchainSemver?.patch}`;
     var downloadToolchain = `https://developer.arm.com/-/media/Files/downloads/gnu/${toolchainVersion}/binrel/arm-gnu-toolchain-${toolchainVersion}-${toolchainArch}-arm-none-eabi.tar.xz`;
   }
@@ -281,13 +285,14 @@ export async function install(context: vscode.ExtensionContext) {
       "pros"
     )
   );
-  let [currentToolchainVersion, isToolchainOneClickInstall] = await getToolchainVersion(
-    path.join(
-      `${addQuotes ? `"` : ""}${toolchainExecPath}${addQuotes ? `"` : ""}`,
-      "bin",
-      "arm-none-eabi-g++"
-    )
-  );
+  let [currentToolchainVersion, isToolchainOneClickInstall] =
+    await getToolchainVersion(
+      path.join(
+        `${addQuotes ? `"` : ""}${toolchainExecPath}${addQuotes ? `"` : ""}`,
+        "bin",
+        "arm-none-eabi-g++"
+      )
+    );
   const cliWorking = currentCliVersion !== "0.0.0";
   const toolchainWorking = currentToolchainVersion !== "0.0.0";
   const vexcomWorking = await verifyVexcom();
@@ -326,8 +331,12 @@ export async function install(context: vscode.ExtensionContext) {
   console.log("Vexcom Working: " + vexcomWorking);
 
   // Does the user's CLI have an update or does the user need to install/update
-  const cliUpToDate = cliWorking ? semver.gte(currentCliVersion, cliVersion) : false;
-  const toolchainUpToDate = toolchainWorking ? semver.gte(currentToolchainVersion, toolchainVersion, {loose: true}) : false;
+  const cliUpToDate = cliWorking
+    ? semver.gte(currentCliVersion, cliVersion)
+    : false;
+  const toolchainUpToDate = toolchainWorking
+    ? semver.gte(currentToolchainVersion, toolchainVersion, { loose: true })
+    : false;
   await prosLogger.log(
     "OneClick",
     `${cliUpToDate ? "CLI is up to date" : "CLI is not up to date"}`,
@@ -344,7 +353,11 @@ export async function install(context: vscode.ExtensionContext) {
   );
   await prosLogger.log(
     "OneClick",
-    `${toolchainUpToDate ? "Toolchain is up to date" : "To0lchain is not up to date"}`,
+    `${
+      toolchainUpToDate
+        ? "Toolchain is up to date"
+        : "To0lchain is not up to date"
+    }`,
     toolchainUpToDate ? "INFO" : "WARNING"
   );
   await prosLogger.log(
@@ -375,7 +388,13 @@ export async function install(context: vscode.ExtensionContext) {
   await preparingInstall.stop();
 
   //if everything works and cli is up to date, do nothing
-  if (cliWorking && toolchainWorking && cliUpToDate && toolchainUpToDate && vexcomWorking) {
+  if (
+    cliWorking &&
+    toolchainWorking &&
+    cliUpToDate &&
+    toolchainUpToDate &&
+    vexcomWorking
+  ) {
     return;
   }
 
@@ -475,7 +494,13 @@ async function promptInstall(
   toolchainUpToDate: boolean,
   vexcomWorking: boolean
 ) {
-  if (cliWorking && cliUpToDate && toolchainWorking && toolchainUpToDate && vexcomWorking) {
+  if (
+    cliWorking &&
+    cliUpToDate &&
+    toolchainWorking &&
+    toolchainUpToDate &&
+    vexcomWorking
+  ) {
     vscode.window.showInformationMessage(
       "Everything is currently working and up to date."
     );
@@ -627,8 +652,9 @@ export async function configurePaths(
       "pros"
     )
   );
-  process.env["PROS_VSCODE_FLAGS"] =
-    semver.gte(version, "3.2.4") ? "--no-sentry --no-analytics" : "";
+  process.env["PROS_VSCODE_FLAGS"] = semver.gte(version, "3.2.4")
+    ? "--no-sentry --no-analytics"
+    : "";
   await prosLogger.log(
     "OneClick",
     `CLI is installed through ${
