@@ -800,14 +800,29 @@ export async function installVision(context: vscode.ExtensionContext) {
   const windowsVision =
     "https://github.com/purduesigbots/pros-cli/releases/download/3.4.1/vision_030_win32.zip";
   const macosVision =
-    "https://github.com/purduesigbots/pros-cli/releases/download/3.4.1/vision_030_osx64.zip";
+    "https://github.com/purduesigbots/pros-cli/releases/download/3.3.3/vision_030_osx64.zip";
 
   // Set the installed file names
-  var visionName = `pros-vision-${system}.zip`;
+  const visionName = `pros-vision-${system}.zip`;
+
+  // delete existing vision utility installation, if it exists
+  try {
+    vscode.workspace.fs.delete(
+      vscode.Uri.joinPath(
+        context.globalStorageUri,
+        "install",
+        `pros-vision-${system}`
+      ),
+      { recursive: true }
+    );
+  } catch (err: any) {
+    console.error(err);
+  }
+
   if (system === "windows") {
     console.log("vision utility on windows");
     //add install and download directories
-    const dirs = await createDirs(context.globalStorageUri);
+    await createDirs(context.globalStorageUri);
 
     const promises = [
       downloadextract(context, windowsVision, visionName, "Vision Utility"),
@@ -817,12 +832,8 @@ export async function installVision(context: vscode.ExtensionContext) {
     console.log("cleanup time");
     await cleanup(context, system);
   } else if (system === "macos") {
-    vscode.window.showInformationMessage(
-      "Vision Utility is currently not supported on MacOS. We are currently working on fixing this."
-    );
-    return;
     //add install and download directories
-    const dirs = await createDirs(context.globalStorageUri);
+    await createDirs(context.globalStorageUri);
 
     const promises = [
       downloadextract(context, macosVision, visionName, "Vision Utility"),
