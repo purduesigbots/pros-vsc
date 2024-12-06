@@ -105,7 +105,7 @@
         "command": "pros.build&upload",
         "title": "Build & Upload",
         "icon": {
-          "light": "media/pros-tux-white.png",
+          "light": "media/pros-tux-black.png",
           "dark": "media/pros-tux-white.png"
         }
       },
@@ -121,7 +121,7 @@
         "command": "pros.run",
         "title": "PROS: Run",
         "icon": {
-          "light": "media/run-tux-white.png",
+          "light": "media/run-tux-black.png",
           "dark": "media/run-tux-white.png"
         }
       },
@@ -129,7 +129,7 @@
         "command": "pros.stop",
         "title": "PROS: Stop",
         "icon": {
-          "light": "media/stop-tux-white.png",
+          "light": "media/stop-tux-black.png",
           "dark": "media/stop-tux-white.png"
         }
       },
