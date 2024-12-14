@@ -331,7 +331,7 @@ export async function install(context: vscode.ExtensionContext) {
 
   // Does the user's CLI have an update or does the user need to install/update
   const cliUpToDate = cliWorking
-    ? semver.gte(currentCliVersion, cliVersion)
+    ? semver.gte(semver.coerce(currentCliVersion) ?? "0.0.0", cliVersion)
     : false;
   const toolchainUpToDate = toolchainWorking
     ? semver.gte(currentToolchainVersion, toolchainVersion, { loose: true })
@@ -651,7 +651,7 @@ export async function configurePaths(
       "pros"
     )
   );
-  process.env["PROS_VSCODE_FLAGS"] = semver.gte(version, "3.2.4")
+  process.env["PROS_VSCODE_FLAGS"] = semver.gte(semver.coerce(version) ?? "0.0.0", "3.2.4")
     ? "--no-sentry --no-analytics"
     : "";
   await prosLogger.log(

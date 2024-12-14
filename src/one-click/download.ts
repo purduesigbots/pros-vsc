@@ -3,7 +3,11 @@ import { window, ProgressLocation } from "vscode";
 var fetch = require("node-fetch");
 var admzip = require("adm-zip");
 var tar = require("tar-fs");
-var lzma = require("lzma-native");
+try {
+  var lzma = require("lzma-native");
+} catch (err) {
+  lzma = null;
+}
 import * as fs from "fs";
 import * as stream from "stream";
 import * as path from "path";

@@ -443,7 +443,6 @@
     "adm-zip": "^0.5.10",
     "axios": "^1.7.4",
     "dotenv": "^16.3.1",
-    "lzma-native": "^8.0.6",
     "node-fetch": "^2.6.7",
     "seek-bzip": "^2.0.0",
     "semver": "^7.5.2",
@@ -451,6 +450,7 @@
     "universal-analytics": "^0.5.3"
   },
   "optionalDependencies": {
+    "lzma-native": "^8.0.6",
     "usb": "^2.10.0"
   }
 }
