@@ -5,7 +5,11 @@ import { prosLogger } from "./extension";
 import { PREFIX } from "./commands/cli-parsing";
 import { StatusBarItem, window, workspace } from "vscode";
 import { BaseCommand } from "./commands";
-import { usb } from "usb";
+try {
+  var usb = require("usb").usb;
+} catch (err) {
+  usb = null;
+}
 
 /* eslint-disable @typescript-eslint/naming-convention */
 export type DeviceInfo = {
@@ -269,12 +273,14 @@ export const setTeam = async (team: string): Promise<void> => {
 };
 
 export const startPortMonitoring = (status: StatusBarItem): void => {
-  status.show();
-  usb.addListener("attach", () => {
+  if (usb) {
+    status.show();
+    usb.addListener("attach", () => {
+      resolvePort(status);
+    });
+    usb.addListener("detach", () => {
+      resolvePort(status);
+    });
     resolvePort(status);
-  });
-  usb.addListener("detach", () => {
-    resolvePort(status);
-  });
-  resolvePort(status);
+  }
 };

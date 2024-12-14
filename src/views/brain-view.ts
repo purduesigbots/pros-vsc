@@ -8,7 +8,11 @@ import {
   setTeam,
 } from "../device";
 import { getNonce } from "./nonce";
-import { usb } from "usb";
+try {
+  var usb = require("usb").usb;
+} catch (err) {
+  usb = null;
+}
 
 export class BrainViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "pros.brainView";
@@ -51,16 +55,18 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
           break;
       }
     });
-    usb.addListener("attach", () => {
-      setTimeout(() => {
-        this.updateDeviceList();
-      }, 1000);
-    });
-    usb.addListener("detach", () => {
-      setTimeout(() => {
-        this.updateDeviceList();
-      }, 1000);
-    });
+    if (usb) {
+      usb.addListener("attach", () => {
+        setTimeout(() => {
+          this.updateDeviceList();
+        }, 1000);
+      });
+      usb.addListener("detach", () => {
+        setTimeout(() => {
+          this.updateDeviceList();
+        }, 1000);
+      });
+    }
     this.updateDeviceList();
   }
 
