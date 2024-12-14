@@ -240,7 +240,6 @@ export async function install(context: vscode.ExtensionContext) {
     console.log("Hit the rate limit, please try again after some time.");
     cliVersion = undefined;
   }
-  toolchainVersion = "13.3.1";
   let vexcomVersion = "1_0_0_23";
 
   if (cliVersion === undefined || toolchainVersion === undefined) {
