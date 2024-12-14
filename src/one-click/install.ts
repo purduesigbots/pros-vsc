@@ -651,7 +651,10 @@ export async function configurePaths(
       "pros"
     )
   );
-  process.env["PROS_VSCODE_FLAGS"] = semver.gte(semver.coerce(version) ?? "0.0.0", "3.2.4")
+  process.env["PROS_VSCODE_FLAGS"] = semver.gte(
+    semver.coerce(version) ?? "0.0.0",
+    "3.2.4"
+  )
     ? "--no-sentry --no-analytics"
     : "";
   await prosLogger.log(
