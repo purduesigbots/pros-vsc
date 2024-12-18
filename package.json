@@ -34,7 +34,7 @@
     "color": "#D6B872",
     "theme": "dark"
   },
-  "version": "0.7.3",
+  "version": "0.8.0",
   "engines": {
     "vscode": "^1.82.0"
   },
@@ -105,7 +105,7 @@
         "command": "pros.build&upload",
         "title": "Build & Upload",
         "icon": {
-          "light": "media/pros-tux-white.png",
+          "light": "media/pros-tux-black.png",
           "dark": "media/pros-tux-white.png"
         }
       },
@@ -121,7 +121,7 @@
         "command": "pros.run",
         "title": "PROS: Run",
         "icon": {
-          "light": "media/run-tux-white.png",
+          "light": "media/run-tux-black.png",
           "dark": "media/run-tux-white.png"
         }
       },
@@ -129,7 +129,7 @@
         "command": "pros.stop",
         "title": "PROS: Stop",
         "icon": {
-          "light": "media/stop-tux-white.png",
+          "light": "media/stop-tux-black.png",
           "dark": "media/stop-tux-white.png"
         }
       },
@@ -441,13 +441,16 @@
     "@types/semver": "^7.3.6",
     "@types/universal-analytics": "^0.4.4",
     "adm-zip": "^0.5.10",
-    "axios": "^1.6.0",
+    "axios": "^1.7.4",
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.7",
     "seek-bzip": "^2.0.0",
     "semver": "^7.5.2",
     "tar-fs": "^2.1.1",
-    "universal-analytics": "^0.5.3",
+    "universal-analytics": "^0.5.3"
+  },
+  "optionalDependencies": {
+    "lzma-native": "^8.0.6",
     "usb": "^2.10.0"
   }
 }
