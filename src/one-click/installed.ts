@@ -89,7 +89,7 @@ export async function getToolchainVersion(
   } catch {
     try {
       const { stdout } = await promisify(child_process.exec)(
-        `arm-none-eabi-g++ --version`,
+        `arm-none-eabi-g++ -dumpversion`,
         {
           env: {
             ...process.env,
