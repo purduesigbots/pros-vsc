@@ -334,7 +334,11 @@ export async function install(context: vscode.ExtensionContext) {
     ? semver.gte(semver.coerce(currentCliVersion) ?? "0.0.0", cliVersion)
     : false;
   const toolchainUpToDate = toolchainWorking
-    ? semver.gte(semver.coerce(currentToolchainVersion) ?? "0.0.0", toolchainVersion, { loose: true })
+    ? semver.gte(
+        semver.coerce(currentToolchainVersion) ?? "0.0.0",
+        toolchainVersion,
+        { loose: true }
+      )
     : false;
   await prosLogger.log(
     "OneClick",
