@@ -334,7 +334,7 @@ export async function install(context: vscode.ExtensionContext) {
     ? semver.gte(semver.coerce(currentCliVersion) ?? "0.0.0", cliVersion)
     : false;
   const toolchainUpToDate = toolchainWorking
-    ? semver.gte(currentToolchainVersion, toolchainVersion, { loose: true })
+    ? semver.gte(semver.coerce(currentToolchainVersion) ?? "0.0.0", toolchainVersion, { loose: true })
     : false;
   await prosLogger.log(
     "OneClick",
@@ -355,7 +355,7 @@ export async function install(context: vscode.ExtensionContext) {
     `${
       toolchainUpToDate
         ? "Toolchain is up to date"
-        : "To0lchain is not up to date"
+        : "Toolchain is not up to date"
     }`,
     toolchainUpToDate ? "INFO" : "WARNING"
   );
@@ -651,6 +651,14 @@ export async function configurePaths(
       "pros"
     )
   );
+  let [currentToolchainVersion, isToolchainOneClickInstall] =
+    await getToolchainVersion(
+      path.join(
+        `${addQuotes ? `"` : ""}${toolchainPath}${addQuotes ? `"` : ""}`,
+        "bin",
+        "arm-none-eabi-g++"
+      )
+    );
   process.env["PROS_VSCODE_FLAGS"] = semver.gte(
     semver.coerce(version) ?? "0.0.0",
     "3.2.4"
@@ -662,6 +670,12 @@ export async function configurePaths(
     `CLI is installed through ${
       isOneClickInstall ? "one-click" : "other means"
     } with version ${version}`
+  );
+  await prosLogger.log(
+    "OneClick",
+    `Toolchain is installed through ${
+      isToolchainOneClickInstall ? "one-click" : "other means"
+    } with version ${currentToolchainVersion}`
   );
   console.log(`${isOneClickInstall} | ${version}`);
 
