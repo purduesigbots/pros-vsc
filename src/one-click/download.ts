@@ -114,42 +114,51 @@ export async function extract(
       });
 
       if (xzFile) {
-        await new Promise(function (resolve, reject) {
-          // Create our read stream
-          prosLogger.log("OneClick", `Creating read stream for ${storagePath}`);
-          const stats = fs.statSync(
-            path.join(globalPath, "download", storagePath)
-          );
-          const totalSize = stats.size;
-          read = fs.createReadStream(
-            path.join(globalPath, "download", storagePath)
-          );
-          var decompress = new lzma.createDecompressor();
-          decompress.on("data", (chunk: Buffer | string | any) => {
-            _progress.report({ increment: (chunk.length * 100) / totalSize });
-          });
-          // Remove tar from the filename
-          storagePath = storagePath.replace(".tar.xz", "");
-          // create our write stream
-          prosLogger.log(
-            "OneClick",
-            `Extracting ${storagePath} to install folder`
-          );
-          extract = tar.extract(path.join(globalPath, "download", storagePath));
-          // Pipe the read stream into the write stream
-          read.pipe(decompress).pipe(extract);
-          // When the write stream ends, resolve the promise
-          extract.on("finish", resolve);
-          // If there's an error, reject the promise and clean up
-          read.on("error", () => {
-            prosLogger.log("OneClick", `Error occured for ${storagePath}`);
-            fs.unlink(
-              path.join(globalPath, "download", storagePath),
-              (_) => null
+        let readPath = path.join(globalPath, "download", storagePath);
+
+        if (readPath.includes("macos")) {
+          fs.mkdirSync(readPath.replace(".tar.xz", ""));
+          execSync(`tar -xf "${readPath}" -C "${readPath.replace(".tar.xz", "")}"`);
+        } else {
+          await new Promise(function (resolve, reject) {
+            // Create our read stream
+            prosLogger.log("OneClick", `Creating read stream for ${storagePath}`);
+            const stats = fs.statSync(
+              path.join(globalPath, "download", storagePath)
             );
-            reject();
+            const totalSize = stats.size;
+            read = fs.createReadStream(
+              path.join(globalPath, "download", storagePath)
+            );
+            var decompress = new lzma.createDecompressor();
+            decompress.on("data", (chunk: Buffer | string | any) => {
+              _progress.report({ increment: (chunk.length * 100) / totalSize });
+            });
+            // Remove tar from the filename
+            storagePath = storagePath.replace(".tar.xz", "");
+            // create our write stream
+            prosLogger.log(
+              "OneClick",
+              `Extracting ${storagePath} to install folder`
+            );
+            extract = tar.extract(path.join(globalPath, "download", storagePath));
+            // Pipe the read stream into the write stream
+            read.pipe(decompress).pipe(extract);
+            // When the write stream ends, resolve the promise
+            extract.on("finish", resolve);
+            // If there's an error, reject the promise and clean up
+            read.on("error", () => {
+              prosLogger.log("OneClick", `Error occured for ${storagePath}`);
+              fs.unlink(
+                path.join(globalPath, "download", storagePath),
+                (_) => null
+              );
+              reject();
+            });
           });
-        });
+        }
+
+        storagePath = storagePath.replace(".tar.xz", "");
 
         const files = await fs.promises.readdir(
           path.join(globalPath, "download", storagePath)
