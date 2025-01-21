@@ -118,11 +118,16 @@ export async function extract(
 
         if (readPath.includes("macos")) {
           fs.mkdirSync(readPath.replace(".tar.xz", ""));
-          execSync(`tar -xf "${readPath}" -C "${readPath.replace(".tar.xz", "")}"`);
+          execSync(
+            `tar -xf "${readPath}" -C "${readPath.replace(".tar.xz", "")}"`
+          );
         } else {
           await new Promise(function (resolve, reject) {
             // Create our read stream
-            prosLogger.log("OneClick", `Creating read stream for ${storagePath}`);
+            prosLogger.log(
+              "OneClick",
+              `Creating read stream for ${storagePath}`
+            );
             const stats = fs.statSync(
               path.join(globalPath, "download", storagePath)
             );
@@ -141,7 +146,9 @@ export async function extract(
               "OneClick",
               `Extracting ${storagePath} to install folder`
             );
-            extract = tar.extract(path.join(globalPath, "download", storagePath));
+            extract = tar.extract(
+              path.join(globalPath, "download", storagePath)
+            );
             // Pipe the read stream into the write stream
             read.pipe(decompress).pipe(extract);
             // When the write stream ends, resolve the promise
