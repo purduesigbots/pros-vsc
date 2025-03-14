@@ -748,7 +748,7 @@ export async function configurePaths(
 }
 
 async function verifyCli() {
-  var command = `pros c --help --machine-output ${process.env["PROS_VSCODE_FLAGS"]}`;
+  var command = `pros --version ${process.env["PROS_VSCODE_FLAGS"]}`;
   await prosLogger.log("OneClick", `Verifying CLI with command ${command}`);
   try {
     const { stdout, stderr } = await promisify(child_process.exec)(command, {
@@ -767,8 +767,8 @@ async function verifyCli() {
       );
       console.error(stderr);
     }
-    return stdout.includes(
-      `Uc&42BWAaQ{"type": "log/message", "level": "DEBUG", "message": "DEBUG - pros:callback - CLI Version:`
+    return stdout.startsWith(
+      "pros, version"
     );
   } catch (err) {
     prosLogger.log(
