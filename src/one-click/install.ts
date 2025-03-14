@@ -767,9 +767,7 @@ async function verifyCli() {
       );
       console.error(stderr);
     }
-    return stdout.startsWith(
-      "pros, version"
-    );
+    return stdout.startsWith("pros, version");
   } catch (err) {
     prosLogger.log(
       "OneClick",
