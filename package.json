@@ -441,7 +441,7 @@
     "@types/semver": "^7.3.6",
     "@types/universal-analytics": "^0.4.4",
     "adm-zip": "^0.5.10",
-    "axios": "^1.7.4",
+    "axios": "^1.8.2",
     "dotenv": "^16.3.1",
     "node-fetch": "^2.6.7",
     "seek-bzip": "^2.0.0",
