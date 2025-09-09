@@ -23,6 +23,7 @@ import {
   updateFirmware,
   setTeamNumber,
   setRobotName,
+  version,
 } from "./commands";
 import { ProsProjectEditorProvider } from "./views/editor";
 import { Analytics } from "./ga";
@@ -213,6 +214,11 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("pros.updatefirmware", async () => {
     analytics.sendAction("updatefirmware");
     await updateFirmware();
+  });
+
+  vscode.commands.registerCommand("pros.version", async () => {
+    analytics.sendAction("version");
+    await version();
   });
 
   vscode.commands.registerCommand("pros.welcome", async () => {
