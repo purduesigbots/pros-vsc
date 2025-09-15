@@ -8,7 +8,7 @@ steps:
     displayName: "Install Node.js"
 
   - script: |
-      npm install -g @vscode/vsce
+      npm install -g @vscode/vsce@2.24.0
     displayName: "Instal vsce"
 
   - script: |
