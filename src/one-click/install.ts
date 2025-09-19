@@ -748,7 +748,7 @@ async function verifyToolchain() {
       );
       console.error(stderr);
     }
-    return stdout.replace(".exe", "").startsWith(`arm-none-eabi-g++ (G`);
+    return stdout.replace(".exe", "").startsWith(`arm-none-eabi-g++ (A`);
   } catch (err) {
     prosLogger.log(
       "OneClick",
