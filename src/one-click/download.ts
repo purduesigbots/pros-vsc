@@ -15,6 +15,7 @@ import { promisify } from "util";
 
 import { prosLogger } from "../extension";
 import { execSync } from "child_process";
+import { cpus } from "os";
 
 async function download(
   globalPath: string,
@@ -97,6 +98,12 @@ export async function extract(
         : storagePath.includes("toolchain")
         ? "PROS Toolchain"
         : "VEX Vexcom"));
+  // potential speedups:
+  // xz multithreaded decompression
+  // on mac: tar --use-compress-program="xz -T(N-2)" -xf
+  // on linux: lzma.createCompressor({ threads: n - 2 });
+  // zip doesn't support multithread :(
+  const startTime = Date.now();
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -116,10 +123,10 @@ export async function extract(
       if (xzFile) {
         let readPath = path.join(globalPath, "download", storagePath);
 
-        if (readPath.includes("macos")) {
+        if (true) {
           fs.mkdirSync(readPath.replace(".tar.xz", ""));
           execSync(
-            `tar -xf "${readPath}" -C "${readPath.replace(".tar.xz", "")}"`
+            `tar --use-compress-program="xz -T${cpus().length - 2}" -xf "${readPath}" -C "${readPath.replace(".tar.xz", "")}"`
           );
         } else {
           await new Promise(function (resolve, reject) {
@@ -135,7 +142,7 @@ export async function extract(
             read = fs.createReadStream(
               path.join(globalPath, "download", storagePath)
             );
-            var decompress = new lzma.createDecompressor();
+            var decompress = new lzma.createDecompressor({threads: cpus().length - 2});
             decompress.on("data", (chunk: Buffer | string | any) => {
               _progress.report({ increment: (chunk.length * 100) / totalSize });
             });
@@ -209,7 +216,7 @@ export async function extract(
       } // not bz2
     }
   );
-  console.log("finished extraction for " + storagePath);
+  console.log(`finished extraction for ${storagePath} in ${(Date.now() - startTime) / 1000} seconds`);
   return true;
 }
 
