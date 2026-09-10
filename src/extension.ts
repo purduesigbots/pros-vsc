@@ -129,7 +129,7 @@ export const output = vscode.window.createOutputChannel("PROS Output"); // The o
 export var prosLogger: Logger; // The logger object (imported from logger.ts)
 export const UPLOAD_SUCCESS_MESSAGE = "Project Uploaded Successfully";
 export const codeIsSynced = () =>
-   vscode.commands.executeCommand("setContext", "pros.projectSynced", true);
+  vscode.commands.executeCommand("setContext", "pros.projectSynced", true);
 
 /**
  * EXTENSION ACTIVATION FUNCTION (VERY IMPORTANT)
@@ -174,7 +174,7 @@ export async function activate(context: vscode.ExtensionContext) {
           .getConfiguration("pros")
           .get<boolean>("promptAutoSave") &&
         vscode.workspace.getConfiguration("files").get<string>("autoSave") ===
-          "off"
+        "off"
       ) {
         vscode.window
           .showInformationMessage(
@@ -241,12 +241,12 @@ export async function activate(context: vscode.ExtensionContext) {
   setupCommandBlocker("pros.teamnumber", setTeamNumber);
   setupCommandBlocker("pros.robotname", setRobotName);
 
-  const indicatorSync = async () => {};
+  const indicatorSync = async () => { };
   setupCommandBlocker("pros.syncIndicatorFalse", indicatorSync, undefined, undefined, null);
   setupCommandBlocker("pros.syncIndicatorTrue", indicatorSync, undefined, undefined, null);
 
   const codeIsNotSynced = () =>
-   vscode.commands.executeCommand("setContext", "pros.projectSynced", false);
+    vscode.commands.executeCommand("setContext", "pros.projectSynced", false);
   const watcher = vscode.workspace.createFileSystemWatcher(
     "**/{src,include}/**/*.{c,cc,cpp,h,hpp}"
   );

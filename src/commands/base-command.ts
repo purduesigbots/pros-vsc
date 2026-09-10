@@ -1,6 +1,6 @@
 import * as child_process from "child_process";
 import * as vscode from "vscode";
-import { output, codeIsSynced} from "../extension";
+import { output, codeIsSynced } from "../extension";
 import { BackgroundProgress } from "../logger";
 import {
   getChildProcessPath,
