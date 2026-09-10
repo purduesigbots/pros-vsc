@@ -1,6 +1,6 @@
 import * as child_process from "child_process";
 import * as vscode from "vscode";
-import { output } from "../extension";
+import { output, codeIsSynced} from "../extension";
 import { BackgroundProgress } from "../logger";
 import {
   getChildProcessPath,
@@ -225,6 +225,9 @@ export class BaseCommand {
     }
 
     if (!hasError && !choiceExit) {
+      if (this.successMessage === "Project Cleaned Successfully") {
+        codeIsSynced();
+      }
       vscode.window.showInformationMessage(
         this.successMessage || "Command completed successfully!"
       );

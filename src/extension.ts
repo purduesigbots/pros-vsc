@@ -127,6 +127,9 @@ let analytics: Analytics; // The analytics object
 export var system: string; // The system the extension is running on
 export const output = vscode.window.createOutputChannel("PROS Output"); // The output channel used for PROS commands
 export var prosLogger: Logger; // The logger object (imported from logger.ts)
+export const UPLOAD_SUCCESS_MESSAGE = "Project Uploaded Successfully";
+export const codeIsSynced = () =>
+   vscode.commands.executeCommand("setContext", "pros.projectSynced", true);
 
 /**
  * EXTENSION ACTIVATION FUNCTION (VERY IMPORTANT)
@@ -237,6 +240,21 @@ export async function activate(context: vscode.ExtensionContext) {
   setupCommandBlocker("pros.capture", capture);
   setupCommandBlocker("pros.teamnumber", setTeamNumber);
   setupCommandBlocker("pros.robotname", setRobotName);
+
+  const indicatorSync = async () => {};
+  setupCommandBlocker("pros.syncIndicatorFalse", indicatorSync, undefined, undefined, null);
+  setupCommandBlocker("pros.syncIndicatorTrue", indicatorSync, undefined, undefined, null);
+
+  const codeIsNotSynced = () =>
+   vscode.commands.executeCommand("setContext", "pros.projectSynced", false);
+  const watcher = vscode.workspace.createFileSystemWatcher(
+    "**/{src,include}/**/*.{c,cc,cpp,h,hpp}"
+  );
+  watcher.onDidChange(codeIsNotSynced);
+  watcher.onDidCreate(codeIsNotSynced);
+  watcher.onDidDelete(codeIsNotSynced);
+  context.subscriptions.push(watcher);
+
 
   setupCommandBlocker(
     "pros.opendocs",
