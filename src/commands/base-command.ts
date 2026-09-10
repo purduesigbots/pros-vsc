@@ -225,7 +225,7 @@ export class BaseCommand {
     }
 
     if (!hasError && !choiceExit) {
-      if (this.successMessage === "Project Cleaned Successfully") {
+      if (this.successMessage === "Project Uploaded Successfully") {
         codeIsSynced();
       }
       vscode.window.showInformationMessage(
