@@ -135,7 +135,7 @@
       },
       {
         "command": "pros.syncIndicatorFalse",
-        "title": "Code IS NOT synced to brain",
+        "title": "PROS: Code is not synced to brain",
         "icon": {
           "light": "media/pros_sync_black.png",
           "dark": "media/pros_sync_white.png"
@@ -143,7 +143,7 @@
       },
       {
         "command": "pros.syncIndicatorTrue",
-        "title": "Code IS synced to brain",
+        "title": "PROS: Code is synced to brain",
         "icon": {
           "light": "media/pros_check_black.png",
           "dark": "media/pros_check_white.png"
@@ -277,12 +277,12 @@
           "group": "navigation@1"
         },
         {
-          "when": "pros.isPROSProject && !pros.projectSynced",
+          "when": "pros.isPROSProject && !pros.projectSynced && pros.syncIndicatorEnabled",
           "command": "pros.syncIndicatorFalse",
           "group": "navigation@2"
         },
         {
-          "when": "pros.isPROSProject && pros.projectSynced",
+          "when": "pros.isPROSProject && pros.projectSynced && pros.syncIndicatorEnabled",
           "command": "pros.syncIndicatorTrue",
           "group": "navigation@2"
         },
@@ -445,6 +445,11 @@
           "type": "boolean",
           "default": true,
           "description": "Prompt to enable autosave on extension start."
+        },
+        "pros.syncIndicatorEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enables brain sync status indicator."
         }
       }
     }
