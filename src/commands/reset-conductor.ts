@@ -11,7 +11,7 @@ export const resetConductor = async () => {
       "Conductor Reset Successfully. Any templates and/or depots previously cached will need to be re-fetched.",
   };
   const resetConductorCommand: BaseCommand = new BaseCommand(
-    resetConductorCommandOptions,
+    resetConductorCommandOptions
   );
   try {
     await resetConductorCommand.runCommand();

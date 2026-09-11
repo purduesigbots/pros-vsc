@@ -7,7 +7,7 @@ export async function opendocs(link: string) {
     "PROS Documentation View", // Title of the panel displayed to the user
     currConfig === "beside"
       ? vscode.ViewColumn.Beside
-      : vscode.ViewColumn.Active,
+      : vscode.ViewColumn.Active
 
     //vscode.ViewColumn.Beside, // Editor column to show the new webview panel in.
     // Webview options. More on these later.

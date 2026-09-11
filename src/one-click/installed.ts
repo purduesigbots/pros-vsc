@@ -11,7 +11,7 @@ export async function getCurrentReleaseVersion(url: string) {
   if (!response.ok) {
     console.log(response.url, response.status, response.statusText);
     vscode.window.showErrorMessage(
-      "Could not fetch the current release version",
+      "Could not fetch the current release version"
     );
 
     return 0;
@@ -23,13 +23,13 @@ export async function getCurrentReleaseVersion(url: string) {
 }
 
 export async function getCurrentVersion(
-  oneClickPath: string,
+  oneClickPath: string
 ): Promise<[string, boolean]> {
   try {
     console.log(oneClickPath);
     prosLogger.log(
       "OneClick",
-      "Executing PROS with One-Click Install directory: " + oneClickPath,
+      "Executing PROS with One-Click Install directory: " + oneClickPath
     );
     const { stdout } = await promisify(child_process.exec)(
       `"${oneClickPath}" --version`,
@@ -39,7 +39,7 @@ export async function getCurrentVersion(
           // eslint-disable-next-line @typescript-eslint/naming-convention
           PATH: getChildProcessPath(),
         },
-      },
+      }
     );
     const version = stdout.replace("pros, version ", "");
     return [version, true];
@@ -59,7 +59,7 @@ export async function getCurrentVersion(
       prosLogger.log(
         "OneClick",
         `Error fetching PROS CLI version: ${err}`,
-        "ERROR",
+        "ERROR"
       );
       return ["0.0.0", false];
     }
@@ -67,13 +67,13 @@ export async function getCurrentVersion(
 }
 
 export async function getToolchainVersion(
-  oneClickPath: string,
+  oneClickPath: string
 ): Promise<[string, boolean]> {
   try {
     console.log(oneClickPath);
     prosLogger.log(
       "OneClick",
-      "Executing toolchain with One-Click Install directory: " + oneClickPath,
+      "Executing toolchain with One-Click Install directory: " + oneClickPath
     );
     const { stdout } = await promisify(child_process.exec)(
       `"${oneClickPath}" -dumpversion`,
@@ -83,7 +83,7 @@ export async function getToolchainVersion(
           // eslint-disable-next-line @typescript-eslint/naming-convention
           PATH: getChildProcessPath(),
         },
-      },
+      }
     );
     return [stdout, true];
   } catch {
@@ -96,7 +96,7 @@ export async function getToolchainVersion(
             // eslint-disable-next-line @typescript-eslint/naming-convention
             PATH: getChildProcessPath(),
           },
-        },
+        }
       );
       return [stdout, false];
     } catch (err) {
@@ -104,7 +104,7 @@ export async function getToolchainVersion(
       prosLogger.log(
         "OneClick",
         `Error fetching PROS toolchain version: ${err}`,
-        "ERROR",
+        "ERROR"
       );
       return ["0.0.0", false];
     }

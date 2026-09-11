@@ -8,7 +8,7 @@ import { getOperatingSystem } from "./install";
 // reason the spaces in the paths need to be escaped differently when running
 // outside the integrated terminal.
 export const getIntegratedTerminalPaths = (
-  context: vscode.ExtensionContext,
+  context: vscode.ExtensionContext
 ): [string, string, string] => {
   const globalPath = context.globalStorageUri.fsPath;
   const system = getOperatingSystem();
@@ -22,7 +22,7 @@ export const getIntegratedTerminalPaths = (
     "install",
     `pros-toolchain-${
       system === "windows" ? path.join("windows", "usr") : system
-    }`,
+    }`
   );
 
   let vexcomPath = path.join(globalPath, "install", `vex-vexcom-${system}`);

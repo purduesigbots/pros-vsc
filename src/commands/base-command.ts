@@ -124,7 +124,7 @@ export class BaseCommand {
       let inProsProject = await this.validateProsProject();
       if (!inProsProject) {
         vscode.window.showInformationMessage(
-          "This command can only be run in a PROS project!",
+          "This command can only be run in a PROS project!"
         );
         return;
       }
@@ -229,7 +229,7 @@ export class BaseCommand {
         codeIsSynced();
       }
       vscode.window.showInformationMessage(
-        this.successMessage || "Command completed successfully!",
+        this.successMessage || "Command completed successfully!"
       );
     } else if (choiceExit) {
       vscode.window.showInformationMessage("Command cancelled!");
@@ -238,7 +238,7 @@ export class BaseCommand {
 
   parseOutput = async (
     liveOutput: string[],
-    process: child_process.ChildProcess,
+    process: child_process.ChildProcess
   ): Promise<boolean> => {
     const errorRegex: RegExp = /((Error: )|(ERROR )|(ERROR: )|(: error:))(.+)/;
     const yesNoRegex: RegExp = /\[y\/N\]/;
@@ -284,7 +284,7 @@ export class BaseCommand {
         vscode.window
           .showWarningMessage(
             line,
-            ...prompt[0].replace(/[\[\]]/g, "").split(/\|/),
+            ...prompt[0].replace(/[\[\]]/g, "").split(/\|/)
           )
           .then((response) => {
             if (response) {

@@ -18,7 +18,7 @@ export class UploadCommand extends BaseCommand {
 
   parseOutput = async (
     liveOutput: string[],
-    process: ChildProcess,
+    process: ChildProcess
   ): Promise<boolean> => {
     const promptRegex: RegExp = /\[[\s\S]+\]/g;
 
@@ -44,7 +44,7 @@ export class UploadCommand extends BaseCommand {
             .then((response) => {
               if (response === "Yes") {
                 process.stdin?.write(
-                  `{"uuid": "${jdata.uuid}", "event": "confirm"}\n`,
+                  `{"uuid": "${jdata.uuid}", "event": "confirm"}\n`
                 );
               } else {
                 process.kill();

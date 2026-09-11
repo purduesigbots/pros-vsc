@@ -13,7 +13,7 @@ export const setTeamNumber = async () => {
     successMessage: "Team Number Set Successfully",
   };
   const setTeamNumberCommand: BaseCommand = new BaseCommand(
-    setTeamNumberCommandOptions,
+    setTeamNumberCommandOptions
   );
   try {
     await setTeamNumberCommand.runCommand();

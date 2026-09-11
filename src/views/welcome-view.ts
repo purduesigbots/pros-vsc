@@ -16,7 +16,7 @@ var fetch = require("node-fetch");
  */
 export const fetchKernelVersionNonCLIDependent = async (): Promise<string> => {
   const response = await fetch(
-    "https://api.github.com/repos/purduesigbots/pros/releases/latest",
+    "https://api.github.com/repos/purduesigbots/pros/releases/latest"
   );
   if (!response.ok) {
     console.log(response.url, response.status, response.statusText);
@@ -37,7 +37,7 @@ export function getWebviewContent(
   newCli: string,
   useGoogleAnalytics: boolean,
   showWelcomeOnStartup: boolean,
-  context: vscode.ExtensionContext,
+  context: vscode.ExtensionContext
 ) {
   const nonce = getNonce();
   // install(context);

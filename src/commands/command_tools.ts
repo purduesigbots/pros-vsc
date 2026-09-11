@@ -63,7 +63,7 @@ export const selectTarget = async () => {
   };
   const target = await vscode.window.showQuickPick(
     ["v5", "cortex"],
-    targetOptions,
+    targetOptions
   );
 
   return target;
@@ -80,7 +80,7 @@ export const getCurrentKernelOkapiVersion = async () => {
   };
 
   const kernelOkapiVersionCommand: BaseCommand = new BaseCommand(
-    kernelOkapiVersionCommandOptions,
+    kernelOkapiVersionCommandOptions
   );
   await kernelOkapiVersionCommand.runCommand();
 
@@ -90,10 +90,10 @@ export const getCurrentKernelOkapiVersion = async () => {
       if (jdata.type === "finalize") {
         const target = jdata.data.project.target;
         const curKernel = jdata.data.project.templates.find(
-          (t: any) => t.name === "kernel",
+          (t: any) => t.name === "kernel"
         ).version;
         const curOkapi = jdata.data.project.templates.find(
-          (t: any) => t.name === "okapilib",
+          (t: any) => t.name === "okapilib"
         )?.version;
         return { target, curKernel, curOkapi };
       }
@@ -113,7 +113,7 @@ export const getLatestKernelOkapiVersion = async (target: string) => {
   };
 
   const latestKernelOkapiVersionCommand: BaseCommand = new BaseCommand(
-    latestKernelOkapiVersionCommandOptions,
+    latestKernelOkapiVersionCommandOptions
   );
   await latestKernelOkapiVersionCommand.runCommand();
 
@@ -150,7 +150,7 @@ export const selectKernelVersion = async (target: string) => {
   };
 
   const kernelVersionCommand: BaseCommand = new BaseCommand(
-    kernelVersionCommandOptions,
+    kernelVersionCommandOptions
   );
   await kernelVersionCommand.runCommand();
 

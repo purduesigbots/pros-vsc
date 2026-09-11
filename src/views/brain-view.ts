@@ -21,7 +21,7 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
-    private readonly _disabled: boolean = false,
+    private readonly _disabled: boolean = false
   ) {
     console.log("BrainViewProvider constructor: " + _disabled);
   }
@@ -29,7 +29,7 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
     context: vscode.WebviewViewResolveContext,
-    _token: vscode.CancellationToken,
+    _token: vscode.CancellationToken
   ): void {
     this._view = webviewView;
 
@@ -112,18 +112,18 @@ export class BrainViewProvider implements vscode.WebviewViewProvider {
 
     // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "brainView.js"),
+      vscode.Uri.joinPath(this._extensionUri, "media", "brainView.js")
     );
 
     // Do the same for the stylesheet.
     const styleResetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "reset.css"),
+      vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
     );
     const styleVSCodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"),
+      vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
     );
     const styleMainUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "brainView.css"),
+      vscode.Uri.joinPath(this._extensionUri, "media", "brainView.css")
     );
 
     // Use a nonce to only allow a specific script to be run.

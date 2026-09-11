@@ -40,7 +40,7 @@ const namespaceOnly = [
 //Will currently return duplicate methods and might direct user to wrong class API page
 export function parseJSON(
   keyword: string,
-  namespace: string | undefined = undefined,
+  namespace: string | undefined = undefined
 ) {
   // we need to map the "namespace" that appears in the code to it's actual namespace name in the docs
   // eg "lcd" -> "PROS LLEMU"
@@ -64,7 +64,7 @@ export function parseJSON(
         namespace = "";
       } else {
         apiMembers = apiMembers.filter((m) =>
-          m.name.toLowerCase().replace(/\s/g, "").includes(namespace!),
+          m.name.toLowerCase().replace(/\s/g, "").includes(namespace!)
         );
       }
     }
@@ -143,7 +143,7 @@ export async function populateDocsJSON() {
       //deletes the temporary placeholder motor json in members so it isn't processed.
       prosJson.apis.c.members.shift();
       prosJson.apis.cpp.members.shift();
-    },
+    }
   );
   // Go to class links and scrape functions from each link
   for (var i: number = 0; i < prosJson.apis.cpp.members.length; i += 1) {

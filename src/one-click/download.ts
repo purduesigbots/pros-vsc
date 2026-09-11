@@ -20,7 +20,7 @@ async function download(
   globalPath: string,
   downloadURL: string,
   storagePath: string,
-  downloadName?: string,
+  downloadName?: string
 ) {
   // Check if file type is .tar.bz or .zip
 
@@ -34,8 +34,8 @@ async function download(
       (storagePath.includes("cli")
         ? "PROS CLI"
         : storagePath.includes("toolchain")
-          ? "PROS Toolchain"
-          : "VEX Vexcom"));
+        ? "PROS Toolchain"
+        : "VEX Vexcom"));
 
   await window.withProgress(
     {
@@ -67,7 +67,7 @@ async function download(
       // Write file contents to "sigbots.pros/download/filename.tar.bz2"
       console.log("creating write stream");
       out = fs.createWriteStream(
-        path.join(globalPath, "download", storagePath),
+        path.join(globalPath, "download", storagePath)
       );
       console.log("writing to file");
       await promisify(stream.pipeline)(response.body, out).catch((e) => {
@@ -77,7 +77,7 @@ async function download(
         throw e;
       });
       out.close();
-    },
+    }
   );
   return xz;
 }
@@ -86,7 +86,7 @@ export async function extract(
   globalPath: string,
   storagePath: string,
   xzFile: boolean,
-  extractName?: string,
+  extractName?: string
 ) {
   await prosLogger.log("OneClick", `Extracting ${storagePath}`);
   extractName =
@@ -95,8 +95,8 @@ export async function extract(
       (storagePath.includes("cli")
         ? "PROS CLI"
         : storagePath.includes("toolchain")
-          ? "PROS Toolchain"
-          : "VEX Vexcom"));
+        ? "PROS Toolchain"
+        : "VEX Vexcom"));
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -119,21 +119,21 @@ export async function extract(
         if (readPath.includes("macos")) {
           fs.mkdirSync(readPath.replace(".tar.xz", ""));
           execSync(
-            `tar -xf "${readPath}" -C "${readPath.replace(".tar.xz", "")}"`,
+            `tar -xf "${readPath}" -C "${readPath.replace(".tar.xz", "")}"`
           );
         } else {
           await new Promise(function (resolve, reject) {
             // Create our read stream
             prosLogger.log(
               "OneClick",
-              `Creating read stream for ${storagePath}`,
+              `Creating read stream for ${storagePath}`
             );
             const stats = fs.statSync(
-              path.join(globalPath, "download", storagePath),
+              path.join(globalPath, "download", storagePath)
             );
             const totalSize = stats.size;
             read = fs.createReadStream(
-              path.join(globalPath, "download", storagePath),
+              path.join(globalPath, "download", storagePath)
             );
             var decompress = new lzma.createDecompressor();
             decompress.on("data", (chunk: Buffer | string | any) => {
@@ -144,10 +144,10 @@ export async function extract(
             // create our write stream
             prosLogger.log(
               "OneClick",
-              `Extracting ${storagePath} to install folder`,
+              `Extracting ${storagePath} to install folder`
             );
             extract = tar.extract(
-              path.join(globalPath, "download", storagePath),
+              path.join(globalPath, "download", storagePath)
             );
             // Pipe the read stream into the write stream
             read.pipe(decompress).pipe(extract);
@@ -158,7 +158,7 @@ export async function extract(
               prosLogger.log("OneClick", `Error occured for ${storagePath}`);
               fs.unlink(
                 path.join(globalPath, "download", storagePath),
-                (_) => null,
+                (_) => null
               );
               reject();
             });
@@ -168,14 +168,14 @@ export async function extract(
         storagePath = storagePath.replace(".tar.xz", "");
 
         const files = await fs.promises.readdir(
-          path.join(globalPath, "download", storagePath),
+          path.join(globalPath, "download", storagePath)
         );
 
         for (const file of files) {
           if (file.includes("arm-none-eabi")) {
             await fs.promises.rename(
               path.join(globalPath, "download", storagePath, file),
-              path.join(globalPath, "install", storagePath),
+              path.join(globalPath, "install", storagePath)
             );
           }
         }
@@ -190,8 +190,8 @@ export async function extract(
           execSync(
             `unzip ${readPath.replace(" ", "\\ ")} -d ${writePath.replace(
               " ",
-              "\\ ",
-            )}`,
+              "\\ "
+            )}`
           );
         } else {
           var zip = new admzip(readPath);
@@ -199,15 +199,15 @@ export async function extract(
         }
         await prosLogger.log(
           "OneClick",
-          `Extracting ${readPath} to ${writePath}`,
+          `Extracting ${readPath} to ${writePath}`
         );
         if (storagePath.includes("pros-toolchain-windows")) {
           await fs.promises.mkdir(
-            path.join(globalPath, "install", "pros-toolchain-windows", "tmp"),
+            path.join(globalPath, "install", "pros-toolchain-windows", "tmp")
           );
         }
       } // not bz2
-    },
+    }
   );
   console.log("finished extraction for " + storagePath);
   return true;
@@ -217,14 +217,14 @@ export async function downloadextract(
   context: vscode.ExtensionContext,
   downloadURL: string,
   storagePath: string,
-  name?: string,
+  name?: string
 ) {
   const globalPath = context.globalStorageUri.fsPath;
   const xz = await download(
     globalPath,
     downloadURL,
     storagePath,
-    name ?? undefined,
+    name ?? undefined
   );
   console.log("download done");
   await extract(globalPath, storagePath, xz, name ?? undefined);
@@ -242,24 +242,24 @@ export async function chmod(globalPath: string, system: string) {
   const chmodList = [
     fs.promises.chmod(
       path.join(globalPath, "install", `pros-cli-${system}`, "pros"),
-      0o751,
+      0o751
     ),
     fs.promises.chmod(
       path.join(globalPath, "install", `pros-cli-${system}`, "intercept-c++"),
-      0o751,
+      0o751
     ),
     fs.promises.chmod(
       path.join(globalPath, "install", `pros-cli-${system}`, "intercept-cc"),
-      0o751,
+      0o751
     ),
     fs.promises.chmod(
       path.join(globalPath, "install", `vex-vexcom-${system}`, "vexcom"),
-      0o751,
+      0o751
     ),
   ];
   await prosLogger.log(
     "OneClick",
-    "Changing permissions on pros, intercept-c++, and intercept-cc executables",
+    "Changing permissions on pros, intercept-c++, and intercept-cc executables"
   );
   await Promise.all(chmodList);
 }

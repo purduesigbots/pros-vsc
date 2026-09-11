@@ -13,7 +13,7 @@ export const setRobotName = async () => {
     successMessage: "Robot Name Set Successfully",
   };
   const setRobotNameCommand: BaseCommand = new BaseCommand(
-    setRobotNameCommandOptions,
+    setRobotNameCommandOptions
   );
   try {
     await setRobotNameCommand.runCommand();

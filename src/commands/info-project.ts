@@ -14,7 +14,7 @@ export const infoProject = async () => {
   };
 
   const infoProjectCommand: BaseCommand = new BaseCommand(
-    infoProjectCommandOptions,
+    infoProjectCommandOptions
   );
 
   try {

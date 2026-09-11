@@ -9,7 +9,7 @@ export class ProsProjectEditorProvider
     const provider = new ProsProjectEditorProvider(context);
     const providerRegistration = vscode.window.registerCustomEditorProvider(
       ProsProjectEditorProvider.viewType,
-      provider,
+      provider
     );
     return providerRegistration;
   }
@@ -21,7 +21,7 @@ export class ProsProjectEditorProvider
   public async resolveCustomTextEditor(
     document: vscode.TextDocument,
     webviewPanel: vscode.WebviewPanel,
-    _token: vscode.CancellationToken,
+    _token: vscode.CancellationToken
   ): Promise<void> {
     webviewPanel.webview.options = {
       enableScripts: true,
@@ -51,7 +51,7 @@ export class ProsProjectEditorProvider
         if (e.document.uri.toString() === document.uri.toString()) {
           updateWebview();
         }
-      },
+      }
     );
 
     // Make sure we get rid of the listener when our editor is closed.
@@ -85,16 +85,16 @@ export class ProsProjectEditorProvider
 
   private getHtmlForWebview(webview: vscode.Webview): string {
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "media", "projectPros.js"),
+      vscode.Uri.joinPath(this.context.extensionUri, "media", "projectPros.js")
     );
     const styleResetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "media", "reset.css"),
+      vscode.Uri.joinPath(this.context.extensionUri, "media", "reset.css")
     );
     const styleVSCodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "media", "vscode.css"),
+      vscode.Uri.joinPath(this.context.extensionUri, "media", "vscode.css")
     );
     const icons = fs.readdirSync(
-      vscode.Uri.joinPath(this.context.extensionUri, "media", "icons").fsPath,
+      vscode.Uri.joinPath(this.context.extensionUri, "media", "icons").fsPath
     );
     var usableIcons = [];
     for (var i of icons) {
@@ -198,7 +198,7 @@ export class ProsProjectEditorProvider
             <div class="setting-item-control select-container">
               <select id="slotSelection" class="monaco-select-box monaco-select-box-dropdown-padding setting-control-focus-target" tabindex="-1" title="off" style="background-color: rgb(60, 60, 60); color: rgb(240, 240, 240); border-color: rgb(60, 60, 60);" data-focusable="true">
                 ${[1, 2, 3, 4, 5, 6, 7, 8].map(
-                  (i) => `<option value="${i}">${i}</option>`,
+                  (i) => `<option value="${i}">${i}</option>`
                 )}
               </select>
             </div>
@@ -232,7 +232,7 @@ export class ProsProjectEditorProvider
                     i === "pros"
                       ? i.toUpperCase()
                       : i.charAt(0).toUpperCase() + i.slice(1)
-                  }</option>`,
+                  }</option>`
               )}
               </select>
             </div>
@@ -272,7 +272,7 @@ export class ProsProjectEditorProvider
         </div>
         <div style="display: none;" id="icon-uri">
           ${webview.asWebviewUri(
-            vscode.Uri.joinPath(this.context.extensionUri, "media", "icons"),
+            vscode.Uri.joinPath(this.context.extensionUri, "media", "icons")
           )}
         </div>
 
@@ -334,7 +334,7 @@ export class ProsProjectEditorProvider
       return JSON.parse(text);
     } catch {
       throw new Error(
-        "Could not get document as json. Content is not valid json",
+        "Could not get document as json. Content is not valid json"
       );
     }
   }
@@ -350,7 +350,7 @@ export class ProsProjectEditorProvider
     edit.replace(
       document.uri,
       new vscode.Range(0, 0, document.lineCount, 0),
-      JSON.stringify(json, null, 2),
+      JSON.stringify(json, null, 2)
     );
 
     return vscode.workspace.applyEdit(edit);
