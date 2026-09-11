@@ -249,11 +249,11 @@ export async function activate(context: vscode.ExtensionContext) {
   const watcher = vscode.workspace.createFileSystemWatcher(
     "**/{src,include}/**/*.{c,cc,cpp,h,hpp}"
   );
+  
   watcher.onDidChange(codeIsNotSynced);
   watcher.onDidCreate(codeIsNotSynced);
   watcher.onDidDelete(codeIsNotSynced);
   context.subscriptions.push(watcher);
-
 
   setupCommandBlocker(
     "pros.opendocs",
