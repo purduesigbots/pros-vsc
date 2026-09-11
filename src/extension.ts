@@ -79,7 +79,7 @@ const setupCommandBlocker = async (
   callback: Function, // The callback to run when the command is called
   context?: vscode.ExtensionContext, // The extension context to pass to the callback
   betaFeature?: boolean, // Whether or not the command is a beta feature
-  customAnalytic?: string | null, // The custom analytic to send when the command is called
+  customAnalytic?: string | null // The custom analytic to send when the command is called
 ) => {
   vscode.commands.registerCommand(cmd, async () => {
     if (
@@ -89,7 +89,7 @@ const setupCommandBlocker = async (
         .get("Beta: Enable Experimental Features") // And the user has not enabled beta features
     ) {
       vscode.window.showErrorMessage(
-        "This feature is currently in beta. To enable it, set the 'pros.Beta: Enable Experimental Feature' setting in your workspace settings to true.",
+        "This feature is currently in beta. To enable it, set the 'pros.Beta: Enable Experimental Feature' setting in your workspace settings to true."
       ); // Show an error message asking them to enable beta features to use the requested feature
       return;
     }
@@ -99,7 +99,7 @@ const setupCommandBlocker = async (
     }
     if (customAnalytic !== null) {
       analytics.sendAction(
-        customAnalytic ? customAnalytic : cmd.replace("pros.", ""),
+        customAnalytic ? customAnalytic : cmd.replace("pros.", "")
       ); // Send analytics unless disabled. Default to command name (minus the pros. prefix), if there is a custom analytic provided, use it.
     }
     commandsBlocker[cmd] = true; // Note that the command is going to run in the map
@@ -148,7 +148,7 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.commands.executeCommand(
     "setContext",
     "pros.betaFeaturesEnabled",
-    betaFeaturesEnabled,
+    betaFeaturesEnabled
   );
 
   // Sets up paths for integrated terminal (context is the vscode extension context)
@@ -159,7 +159,7 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand(
       "setContext",
       "pros.isPROSProject",
-      isProsProject,
+      isProsProject
     );
 
     if (isProsProject) {
@@ -173,7 +173,7 @@ export async function activate(context: vscode.ExtensionContext) {
           .getConfiguration("pros")
           .get<boolean>("promptAutoSave") &&
         vscode.workspace.getConfiguration("files").get<string>("autoSave") ===
-          "off"
+        "off"
       ) {
         vscode.window
           .showInformationMessage(
@@ -181,7 +181,7 @@ export async function activate(context: vscode.ExtensionContext) {
             "This Project",
             "All Projects",
             "Not now",
-            "Never",
+            "Never"
           )
           .then((selection) => {
             if (selection === "This Project") {
@@ -211,7 +211,7 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   startPortMonitoring(
-    vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0),
+    vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0)
   );
 
   // Display PROS welcome page if that setting is enabled
@@ -240,16 +240,16 @@ export async function activate(context: vscode.ExtensionContext) {
   setupCommandBlocker("pros.teamnumber", setTeamNumber);
   setupCommandBlocker("pros.robotname", setRobotName);
 
-  const indicatorSync = async () => {};
+  const indicatorSync = async () => { };
   setupCommandBlocker("pros.syncIndicatorFalse", indicatorSync);
   setupCommandBlocker("pros.syncIndicatorTrue", indicatorSync);
 
   const codeIsNotSynced = () =>
     vscode.commands.executeCommand("setContext", "pros.projectSynced", false);
   const watcher = vscode.workspace.createFileSystemWatcher(
-    "**/{src,include}/**/*.{c,cc,cpp,h,hpp}",
+    "**/{src,include}/**/*.{c,cc,cpp,h,hpp}"
   );
-
+  
   watcher.onDidChange(codeIsNotSynced);
   watcher.onDidCreate(codeIsNotSynced);
   watcher.onDidDelete(codeIsNotSynced);
@@ -265,7 +265,7 @@ export async function activate(context: vscode.ExtensionContext) {
       opendocs(currentUrl);
     },
     undefined,
-    true,
+    true
   );
 
   setupCommandBlocker("pros.deleteLogs", () => {
@@ -279,7 +279,7 @@ export async function activate(context: vscode.ExtensionContext) {
     chooseProject,
     undefined,
     undefined,
-    null,
+    null
   );
 
   setupCommandBlocker("pros.upgrade", upgradeProject);
@@ -309,7 +309,7 @@ export async function activate(context: vscode.ExtensionContext) {
     },
     undefined, // This is the context, which is undefined because we don't need it
     undefined, // This is the beta feature flag, which is undefined because this is not a beta feature
-    "serialterminal", // This is the custom analytic, which is "serialterminal" so as to be more specific than "terminal"
+    "serialterminal" // This is the custom analytic, which is "serialterminal" so as to be more specific than "terminal"
   );
 
   // PROS Terminal opener command:
@@ -326,7 +326,7 @@ export async function activate(context: vscode.ExtensionContext) {
         // If there is an error, show an error message
         vscode.window.showErrorMessage(err.message);
       }
-    },
+    }
   );
 
   // if we are using beta
@@ -360,7 +360,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
         const commentCommandUri = vscode.Uri.parse(`command:pros.opendocs`);
         let link = new vscode.MarkdownString(
-          `[Go to PROS Documentation...](${commentCommandUri})`,
+          `[Go to PROS Documentation...](${commentCommandUri})`
         );
         link.isTrusted = true;
 
@@ -386,19 +386,19 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.ViewColumn.One,
         {
           enableScripts: true,
-        },
+        }
       );
 
       // SETUP ALL IMAGES AND STYLESHEETS AND SCRIPTS FOR THE WELCOME PAGE:
 
       // This is the path to the icon for the welcome page
       panel.iconPath = vscode.Uri.file(
-        path.join(context.extensionPath, "media", "pros-color-icon.png"),
+        path.join(context.extensionPath, "media", "pros-color-icon.png")
       );
 
       // This is the path to the stylesheet for the welcome page
       const onDiskPath = vscode.Uri.file(
-        path.join(context.extensionPath, "media", "welcome.css"),
+        path.join(context.extensionPath, "media", "welcome.css")
       );
 
       // Converts the stylesheet path to a URI
@@ -407,37 +407,35 @@ export async function activate(context: vscode.ExtensionContext) {
       // These are the paths to the images for the welcome page
       const imgHeaderPath = panel.webview.asWebviewUri(
         vscode.Uri.file(
-          path.join(context.extensionPath, "media", "pros-horiz-white.png"),
-        ),
+          path.join(context.extensionPath, "media", "pros-horiz-white.png")
+        )
       );
       const imgIconPath = panel.webview.asWebviewUri(
         vscode.Uri.file(
-          path.join(context.extensionPath, "media", "tree-view.png"),
-        ),
+          path.join(context.extensionPath, "media", "tree-view.png")
+        )
       );
       const imgActionPath = panel.webview.asWebviewUri(
         vscode.Uri.file(
-          path.join(context.extensionPath, "media", "quick-action.png"),
-        ),
+          path.join(context.extensionPath, "media", "quick-action.png")
+        )
       );
       const imgProjectProsPath = panel.webview.asWebviewUri(
         vscode.Uri.file(
-          path.join(context.extensionPath, "media", "project-view.png"),
-        ),
+          path.join(context.extensionPath, "media", "project-view.png")
+        )
       );
 
       // This is the path to the javascript file for the welcome page
       const jsPath = panel.webview.asWebviewUri(
-        vscode.Uri.file(
-          path.join(context.extensionPath, "media", "welcome.js"),
-        ),
+        vscode.Uri.file(path.join(context.extensionPath, "media", "welcome.js"))
       );
 
       // This gets the kernel version so we can display it on the welcome page
       const newKernel = await fetchKernelVersionNonCLIDependent();
       // This gets the CLI version so we can display it on the welcome page
       const newCli = await getCurrentReleaseVersion(
-        "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest",
+        "https://api.github.com/repos/purduesigbots/pros-cli/releases/latest"
       );
 
       // Setup google analytics preference and welcome page display preference
@@ -463,7 +461,7 @@ export async function activate(context: vscode.ExtensionContext) {
         newCli,
         useGoogleAnalytics,
         showWelcomeOnStartup,
-        context,
+        context
       );
 
       // This is the message handler for the welcome page
@@ -472,7 +470,7 @@ export async function activate(context: vscode.ExtensionContext) {
           .getConfiguration("pros")
           .update(message.command, message.value, true);
       });
-    }, // End of callback function for welcome page
+    } // End of callback function for welcome page
   ); // End of command registration for welcome page
 
   // TREE VIEW SETUP:
@@ -481,7 +479,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   vscode.window.registerTreeDataProvider(
     "prosTreeview",
-    new TreeDataProvider(), // This is the tree view provider (see tree-view.ts)
+    new TreeDataProvider() // This is the tree view provider (see tree-view.ts)
   );
 
   // Brain viewer stuff
@@ -489,11 +487,11 @@ export async function activate(context: vscode.ExtensionContext) {
     context.extensionUri,
     !vscode.workspace
       .getConfiguration("pros")
-      .get("Beta: Enable Experimental Features"),
+      .get("Beta: Enable Experimental Features")
   );
   vscode.window.registerWebviewViewProvider(
     BrainViewProvider.viewType,
-    brainViewProvider,
+    brainViewProvider
   );
 
   // If user settings say to run pros.install on startup, do so
@@ -518,7 +516,7 @@ export async function activate(context: vscode.ExtensionContext) {
     const workspaceRootUri = vscode.workspace.workspaceFolders[0].uri;
     const compilationDbUri = vscode.Uri.joinPath(
       workspaceRootUri,
-      "compile_commands.json",
+      "compile_commands.json"
     );
     // first check if the cdb exists. if not, attempt to build the project to generate it
     try {
@@ -537,17 +535,17 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // now we know there is a cdb present, we can load it
     const compilationDbData: [
-      { arguments: string[]; directory: string; file: string },
+      { arguments: string[]; directory: string; file: string }
     ] = JSON.parse(
       new TextDecoder().decode(
-        await vscode.workspace.fs.readFile(compilationDbUri),
-      ),
+        await vscode.workspace.fs.readFile(compilationDbUri)
+      )
     );
 
     let compilationDbDirty = false;
 
     const mainArgs = compilationDbData.find(
-      (entry) => entry.file === "src/main.cpp",
+      (entry) => entry.file === "src/main.cpp"
     )?.arguments;
 
     // if for some reason there isn't an entry for main.cpp then i give up
@@ -561,7 +559,7 @@ export async function activate(context: vscode.ExtensionContext) {
         // since the cdb encodes the file as a relative path we have to do the same for the files given to us by the event
         const thisFileRelative = path.relative(
           workspaceRootUri.path,
-          file.path,
+          file.path
         );
 
         // anyway, if there is already an entry for this file somehow, just skip it
@@ -595,8 +593,8 @@ export async function activate(context: vscode.ExtensionContext) {
       await vscode.workspace.fs.writeFile(
         compilationDbUri,
         new TextEncoder().encode(
-          JSON.stringify(compilationDbData, undefined, 4),
-        ),
+          JSON.stringify(compilationDbData, undefined, 4)
+        )
       );
     }
   });
