@@ -21,7 +21,7 @@ export const runVision = async (context: vscode.ExtensionContext) => {
       "install",
       `pros-vision-${os}`,
       "win32",
-      `Vision Utility.exe`
+      `Vision Utility.exe`,
     )}"`;
   } else {
     visionUtilityPath = `"${path.join(
@@ -32,7 +32,7 @@ export const runVision = async (context: vscode.ExtensionContext) => {
       `Vision Utility.app`,
       "Contents",
       "MacOS",
-      "nwjs"
+      "nwjs",
     )}"`;
   }
 
@@ -41,13 +41,13 @@ export const runVision = async (context: vscode.ExtensionContext) => {
     const progressWindow = new BackgroundProgress(
       "Starting Vision Utility",
       false,
-      true
+      true,
     );
     exec(visionUtilityPath);
     progressWindow.stop();
   } catch (err: any) {
     await vscode.window.showErrorMessage(
-      "There is an error running Vision Utlity, check if it is installed"
+      "There is an error running Vision Utlity, check if it is installed",
     );
   }
 };

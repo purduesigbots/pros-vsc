@@ -121,14 +121,14 @@ const getV5ComPortsInternal = async (): Promise<PROSDeviceInfo[]> => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         PATH: getChildProcessPath(),
       },
-    }
+    },
   );
 
   if (stderr) {
     await prosLogger.log(
       "OneClick",
       `pros lsusb failed with error ${stderr}`,
-      "error"
+      "error",
     );
     console.log(stderr);
   }
@@ -159,7 +159,7 @@ export const getV5DeviceInfo = async (port: string): Promise<V5DeviceInfo> => {
     await prosLogger.log(
       "OneClick",
       `VEXCOM failed with error ${stderr}`,
-      "error"
+      "error",
     );
     console.log(stderr);
   }

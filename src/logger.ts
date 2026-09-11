@@ -15,7 +15,7 @@ export class Logger {
     context: vscode.ExtensionContext,
     logfile: string,
     timestampLogfileName: boolean = true,
-    checkSetting: string = "NA"
+    checkSetting: string = "NA",
   ) {
     this.logUri = context.globalStorageUri;
 
@@ -38,7 +38,7 @@ export class Logger {
     category: string,
     message: string,
     level: string = "info",
-    timestamp: boolean = true
+    timestamp: boolean = true,
   ) {
     if (
       !this.ready ||
@@ -115,7 +115,7 @@ export class Logger {
     if (logSelection) {
       vscode.commands.executeCommand(
         "vscode.open",
-        vscode.Uri.file(path.join(this.logFolder, logSelection.label))
+        vscode.Uri.file(path.join(this.logFolder, logSelection.label)),
       );
     }
   }
@@ -131,7 +131,7 @@ export class BackgroundProgress {
   constructor(
     title: string | undefined,
     cancel: boolean = false,
-    autostart: boolean = false
+    autostart: boolean = false,
   ) {
     this.title = title;
     this.cancellable = cancel;
@@ -159,7 +159,7 @@ export class BackgroundProgress {
           }
           await new Promise((resolve) => setTimeout(resolve, 50));
         }
-      }
+      },
     );
   }
 

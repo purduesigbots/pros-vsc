@@ -13,11 +13,11 @@ import { betaFeaturesEnabled } from "../extension";
 
 export const createNewProject = async () => {
   let dir = await selectDirectory(
-    "Select a directory to create the project in"
+    "Select a directory to create the project in",
   );
   if (dir === undefined) {
     vscode.window.showErrorMessage(
-      "No directory selected when creating project"
+      "No directory selected when creating project",
     );
     return;
   }
@@ -57,14 +57,14 @@ export const createNewProject = async () => {
   };
 
   const createProjectCommand: BaseCommand = new BaseCommand(
-    createProjectCommandOptions
+    createProjectCommandOptions,
   );
 
   try {
     await createProjectCommand.runCommand();
     await vscode.commands.executeCommand(
       "vscode.openFolder",
-      vscode.Uri.file(path.join(dir, name))
+      vscode.Uri.file(path.join(dir, name)),
     );
   } catch (err: any) {
     await vscode.window.showErrorMessage(err.message);

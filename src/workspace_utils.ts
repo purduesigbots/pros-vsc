@@ -17,7 +17,7 @@ import { configurePaths } from "./one-click/install";
 export const findFile = async (
   filename: string,
   dir: string,
-  debug: boolean = false
+  debug: boolean = false,
 ): Promise<vscode.Uri | null> => {
   const debugMsg = "While searching for " + filename + " in " + dir + ": ";
 
@@ -44,7 +44,7 @@ export const findFile = async (
     // Ex. "**/src/**/main.cpp" searches for "main.cpp" in any folder named "src" in the workspace, including all folders inside of all folders labeled "src" in the workspace.
     // NOTE: The use of vscode's joinPath is not necesary here, since everything is a web uri so regardless of user OS, it will be a standard forward slash for filepaths.
     var searchResults = await vscode.workspace.findFiles(
-      "**/" + dir + "/**/" + filename
+      "**/" + dir + "/**/" + filename,
     );
   }
 
@@ -103,7 +103,7 @@ export async function findProsProjectFolders(debug: boolean = false) {
     console.log(
       debugMsg +
         " candidate folders found: " +
-        vscode.workspace.workspaceFolders
+        vscode.workspace.workspaceFolders,
     );
   }
 
@@ -119,7 +119,7 @@ export async function findProsProjectFolders(debug: boolean = false) {
         // By using VSCode's stat function (and the uri parsing functions), this code should work regardless
         // of if the workspace is using a physical file system or not.
         const workspaceUri = vscode.Uri.file(
-          path.join(currentDir.fsPath, folder[0])
+          path.join(currentDir.fsPath, folder[0]),
         ); // uri to subfolder
         const uriString = `${workspaceUri.scheme}:${
           workspaceUri.path
@@ -154,7 +154,7 @@ export async function findProsProjectFolders(debug: boolean = false) {
  * @returns A boolean indicating whether or not the current workspace contains a pros project
  */
 export const workspaceContainsProsProject = async (
-  debug: boolean = false
+  debug: boolean = false,
 ): Promise<boolean> => {
   return (await findFile("project.pros", "root", debug)) !== null;
 };
@@ -165,7 +165,7 @@ export const workspaceContainsProsProject = async (
  * @returns A vscode.Uri pointing to the directory containing the project.pros file, or null if no project.pros file found
  */
 export const getProjectFileDir = async (
-  debug: boolean = false
+  debug: boolean = false,
 ): Promise<vscode.Uri | null> => {
   let fullUri = await findFile("project.pros", "root", debug); // get uri of project.pros file
   if (fullUri === null) {
@@ -184,11 +184,11 @@ export const getProjectFileDir = async (
  * @returns A reference to the PROS terminal
  */
 export const getProsTerminal = async (
-  context: vscode.ExtensionContext
+  context: vscode.ExtensionContext,
 ): Promise<vscode.Terminal> => {
   // First, check if one or more terminals labeled "PROS Terminal" already exist.
   const prosTerminals = vscode.window.terminals.filter(
-    (t) => t.name === "PROS Terminal"
+    (t) => t.name === "PROS Terminal",
   ); // Get all terminals named "PROS Terminal"
 
   if (prosTerminals.length > 1) {
@@ -236,7 +236,7 @@ export async function chooseProject() {
   // If no pros projects found, warn user and return
   if (array.length === 0) {
     vscode.window.showInformationMessage(
-      "No PROS Projects found in current directory!"
+      "No PROS Projects found in current directory!",
     );
     return;
   }
@@ -267,8 +267,8 @@ export async function chooseProject() {
   await vscode.commands.executeCommand(
     "vscode.openFolder",
     vscode.Uri.file(
-      path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, target.label)
-    )
+      path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, target.label),
+    ),
   );
 }
 
@@ -284,7 +284,7 @@ const modifyCCppJson = async (
   dirpath: vscode.Uri,
   json: any,
   os: string,
-  debug: boolean = false
+  debug: boolean = false,
 ) => {
   // First, check if json configurations setting contains include section, if not, add it
   let include = path.join(dirpath.fsPath, "include");
@@ -315,7 +315,7 @@ const modifyCCppJson = async (
     json.configurations[0].compilerPath = path.join(
       toolchain.replace(/"/g, ""),
       "bin",
-      "arm-none-eabi-g++"
+      "arm-none-eabi-g++",
     );
   }
 
@@ -329,13 +329,13 @@ const modifyCCppJson = async (
   // Eighth, write/overwrite the file
   await promisify(fs.writeFile)(
     path.join(dirpath.fsPath, ".vscode", "c_cpp_properties.json"),
-    JSON.stringify(json, null, 2)
+    JSON.stringify(json, null, 2),
   );
 
   if (debug) {
     // Log message if in debug mode
     console.log(
-      "While checking on the c_cpp_properties.json file: c_cpp_properties.json file succesfully updated."
+      "While checking on the c_cpp_properties.json file: c_cpp_properties.json file succesfully updated.",
     );
   }
 };
@@ -367,7 +367,7 @@ export const generateCCppFiles = async (debug: boolean = false) => {
   const cCppPropertiesUri = vscode.Uri.joinPath(
     workspaceRootUri,
     ".vscode",
-    "c_cpp_properties.json"
+    "c_cpp_properties.json",
   ); // uri to c_cpp_properties.json file
   const os = getOperatingSystem(); // get user's OS
   let json; // json object to be populated shortly
@@ -378,7 +378,7 @@ export const generateCCppFiles = async (debug: boolean = false) => {
     let response = await vscode.workspace.fs.stat(cCppPropertiesUri);
     let filedata = await promisify(fs.readFile)(
       cCppPropertiesUri.fsPath,
-      "utf8"
+      "utf8",
     ); // read the file
     if (debug) {
       // Log message if in debug mode

@@ -9,7 +9,7 @@ import {
 
 const userApproval = async (
   kernel: string | undefined,
-  okapi: string | undefined
+  okapi: string | undefined,
 ) => {
   // Ask for user confirmation before upgrading kernal and/or okapi version
   let title;
@@ -27,7 +27,7 @@ const userApproval = async (
       canPickMany: false,
       title: title,
       ignoreFocusOut: true,
-    }
+    },
   );
   if (output === undefined || output.label === "no") {
     throw new Error();
@@ -46,7 +46,7 @@ export const upgradeProject = async () => {
   };
 
   const upgradeProjectCommand: BaseCommand = new BaseCommand(
-    upgradeProjectCommandOptions
+    upgradeProjectCommandOptions,
   );
 
   try {
@@ -63,7 +63,7 @@ export const upgradeProject = async () => {
 
     await userApproval(
       newKernel === curKernel ? undefined : newKernel,
-      newOkapi === curOkapi || curOkapi === undefined ? undefined : newOkapi
+      newOkapi === curOkapi || curOkapi === undefined ? undefined : newOkapi,
     );
 
     await upgradeProjectCommand.runCommand();
