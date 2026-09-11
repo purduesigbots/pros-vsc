@@ -277,12 +277,12 @@
           "group": "navigation@1"
         },
         {
-          "when": "pros.isPROSProject && !pros.projectSynced && pros.syncIndicatorEnabled",
+          "when": "pros.isPROSProject && !pros.projectSynced && config.pros.syncIndicatorEnabled",
           "command": "pros.syncIndicatorFalse",
           "group": "navigation@2"
         },
         {
-          "when": "pros.isPROSProject && pros.projectSynced && pros.syncIndicatorEnabled",
+          "when": "pros.isPROSProject && pros.projectSynced && config.pros.syncIndicatorEnabled",
           "command": "pros.syncIndicatorTrue",
           "group": "navigation@2"
         },
