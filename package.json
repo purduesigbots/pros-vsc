@@ -134,6 +134,22 @@
         }
       },
       {
+        "command": "pros.syncIndicatorFalse",
+        "title": "PROS: Code is not synced to brain",
+        "icon": {
+          "light": "media/pros_sync_black.png",
+          "dark": "media/pros_sync_white.png"
+        }
+      },
+      {
+        "command": "pros.syncIndicatorTrue",
+        "title": "PROS: Code is synced to brain",
+        "icon": {
+          "light": "media/pros_check_black.png",
+          "dark": "media/pros_check_white.png"
+        }
+      },
+      {
         "command": "pros.clean",
         "title": "PROS: Clean"
       },
@@ -261,14 +277,24 @@
           "group": "navigation@1"
         },
         {
+          "when": "pros.isPROSProject && !pros.projectSynced && config.pros.syncIndicatorEnabled",
+          "command": "pros.syncIndicatorFalse",
+          "group": "navigation@2"
+        },
+        {
+          "when": "pros.isPROSProject && pros.projectSynced && config.pros.syncIndicatorEnabled",
+          "command": "pros.syncIndicatorTrue",
+          "group": "navigation@2"
+        },
+        {
           "when": "pros.isPROSProject",
           "command": "pros.run",
-          "group": "navigation@1"
+          "group": "navigation@3"
         },
         {
           "when": "pros.isPROSProject",
           "command": "pros.stop",
-          "group": "navigation@1"
+          "group": "navigation@4"
         }
       ],
       "editor/context": [
@@ -323,6 +349,14 @@
         {
           "when": "true",
           "command": "pros.selectProject"
+        },
+        {
+          "when": "false",
+          "command": "pros.syncIndicatorFalse"
+        },
+        {
+          "when": "false",
+          "command": "pros.syncIndicatorTrue"
         }
       ]
     },
@@ -411,6 +445,11 @@
           "type": "boolean",
           "default": true,
           "description": "Prompt to enable autosave on extension start."
+        },
+        "pros.syncIndicatorEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enables brain sync status indicator."
         }
       }
     }
