@@ -121,9 +121,7 @@ export async function findProsProjectFolders(debug: boolean = false) {
         const workspaceUri = vscode.Uri.file(
           path.join(currentDir.fsPath, folder[0]),
         ); // uri to subfolder
-        const uriString = `${workspaceUri.scheme}:${
-          workspaceUri.path
-        }/${"project.pros"}`; // uri path to project.pros file in subfolder (candidate)
+        const uriString = `${workspaceUri.scheme}:${workspaceUri.path}/${"project.pros"}`; // uri path to project.pros file in subfolder (candidate)
         const uri = vscode.Uri.parse(uriString);
 
         // Check if candidate path actually leads to a project.pros file

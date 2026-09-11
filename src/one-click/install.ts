@@ -910,7 +910,7 @@ export async function installVision(context: vscode.ExtensionContext) {
     ];
 
     await Promise.all(promises);
-    (await fs.promises.chmod(
+    await fs.promises.chmod(
       `${path.join(
         globalPath,
         "install",
@@ -923,7 +923,7 @@ export async function installVision(context: vscode.ExtensionContext) {
       )}`,
       0o751,
     ),
-      await cleanup(context, system));
+      await cleanup(context, system);
   } else if (system === "linux") {
     vscode.window.showInformationMessage(
       "Vision Utility is not supported on Linux",
