@@ -173,7 +173,7 @@ export async function activate(context: vscode.ExtensionContext) {
           .getConfiguration("pros")
           .get<boolean>("promptAutoSave") &&
         vscode.workspace.getConfiguration("files").get<string>("autoSave") ===
-          "off"
+        "off"
       ) {
         vscode.window
           .showInformationMessage(
